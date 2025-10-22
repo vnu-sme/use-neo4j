@@ -65,7 +65,6 @@ public final class Main {
 		System.setOut(USEWriter.getInstance().getOut());
 		// set System.err to the OldUSEWriter to protocol the output.
 		System.setErr(USEWriter.getInstance().getErr());
-
 		// read and set global options, setup application properties
 		Options.processArgs(args);
 		if (Options.doGUI) {
@@ -86,6 +85,7 @@ public final class Main {
 		if (Options.doPLUGIN) {
 			// create URL from plugin directory
 			Path pluginDirURL = Options.pluginDir;
+			pluginDirURL = Path.of("/Users/audreycolar/use/use-assembly/src/main/resources/plugins/officalVersion");
 			Log.verbose("Plugin path: [" + pluginDirURL + "]");
 			Class<?> mainPluginRuntimeClass = null;
 			try {
