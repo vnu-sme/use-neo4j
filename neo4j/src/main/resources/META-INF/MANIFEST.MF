@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Plugin-Name: RtlPlugin
+Plugin-Name: Neo4jPlugin
 Plugin-Version: 1.0
-Main-Class: org.uet.dse.rtlplus.Main
-Plugin-Publisher: Duc-Hanh Dang, Khoa-Hai Nguyen, Xuan-Loi Vu, Nguyen-Hoang Pham
+Main-Class: com.chikacow.Neo4jMain
+Plugin-Publisher: Chi-Kien Cao

@@ -1,0 +1,167 @@
+
+
+model Employee2HRSystem
+
+
+class EmployeeRegister
+end
+
+class Department
+attributes
+    deptId: String
+    name: String
+    budget: Real
+end
+
+composition DepartmentRegistration between
+    EmployeeRegister [0..1]
+    Department [*] role departments
+end
+
+class EmployeeRole
+end
+
+class Employee
+attributes
+    empId: String
+    firstName: String
+    lastName: String
+    email: String
+    hireDate: String
+end
+
+composition EmployeeAssignment between
+    Department [0..1] role department
+    Employee [*] role employees
+end
+
+composition Manager between
+    Department [0..1] role managedDept
+    Employee [0..1] role manager
+end
+
+composition TeamLead between
+    Department [0..1] role deptTeam
+    Employee [0..1] role teamLead
+end
+
+composition TeamMembers between
+    Department [0..1] role deptMembers
+    Employee [*] role teamMembers
+end
+
+
+class HRRegister
+end
+
+abstract class HRPerson
+attributes
+    hrId: String
+    fullName: String
+    email: String
+    hireDate: String
+end
+
+composition HRRegistration between
+    HRRegister [0..1]
+    HRPerson [*] role persons
+end
+
+class HREmployee < HRPerson
+end
+
+class HRManager < HRPerson
+end
+
+class HRTeamLead < HRPerson
+end
+
+
+class ER2HR
+end
+
+class D2HD
+end
+
+class E2HE
+end
+
+class M2HM
+end
+
+class TL2HTL
+end
+
+class TM2HTM
+end
+
+-- =====================================================
+-- CORRESPONDENCE ASSOCIATIONS
+-- =====================================================
+
+-- Register Correspondence
+association ER2HR_EmployeeRegister between
+  EmployeeRegister[1] role er
+  ER2HR[0..1] role er2hr
+end
+
+association ER2HR_HRRegister between
+  HRRegister[1] role hr
+  ER2HR[0..1] role er2hr
+end
+
+-- Department Correspondence
+association D2HD_Department between
+  Department[1] role d
+  D2HD[0..1] role d2hd
+end
+
+association D2HD_HRDepartment between
+  HREmployee[1] role hd
+  D2HD[0..1] role d2hd
+end
+
+-- Employee Correspondence
+association E2HE_Employee between
+  Employee[1] role e
+  E2HE[0..1] role e2he
+end
+
+association E2HE_HREmployee between
+  HREmployee[1] role he
+  E2HE[0..1] role e2he
+end
+
+-- Manager Correspondence
+association M2HM_Employee between
+  Employee[1] role m
+  M2HM[0..1] role m2hm
+end
+
+association M2HM_HRManager between
+  HRManager[1] role hm
+  M2HM[0..1] role m2hm
+end
+
+-- TeamLead Correspondence
+association TL2HTL_Employee between
+  Employee[1] role tl
+  TL2HTL[0..1] role tl2htl
+end
+
+association TL2HTL_HRTeamLead between
+  HRTeamLead[1] role htl
+  TL2HTL[0..1] role tl2htl
+end
+
+-- TeamMember Correspondence
+association TM2HTM_Employee between
+  Employee[1] role tm
+  TM2HTM[*] role tm2htm
+end
+
+association TM2HTM_HREmployee between
+  HREmployee[1] role htm
+  TM2HTM[0..1] role tm2htm
+end
+

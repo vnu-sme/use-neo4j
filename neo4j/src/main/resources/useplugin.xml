@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?use version="3.0.0"?>
+<plugin name="Neo4jPlugin" version="0.1">
+    <actions>
+        <!-- TÍNH NĂNG 1: Mở giao diện kết nối -->
+        <action label="Open Neo4j Connection"
+                icon="images/rtl.png"
+                class="com.chikacow.action.ActionOpenNeo4j"
+                tooltip="Open Neo4j Database Connection"
+                menu="Neo4j Plugin"
+                menuitem="Open Connection Dialog"
+                toolbaritem="Neo4j Connect"
+                id="com.chikacow.action.ActionOpenNeo4j">
+        </action>
+
+        <action label="Neo4j Query Console"
+                icon="images/rtl.png"
+                class="com.chikacow.action.ActionOpenQueryConsole"
+                tooltip="Run Cypher Queries directly"
+                menu="Neo4j Plugin"
+                menuitem="Query Console"
+                id="com.chikacow.action.ActionOpenQueryConsole">
+        </action>
+
+        <action label="Connection Status"
+                icon="images/rtl.png"
+                class="com.chikacow.action.ActionOpenStatus"
+                tooltip="View connection details and database statistics"
+                menu="Neo4j Plugin"
+                menuitem="Connection Status"
+                id="com.chikacow.action.ActionOpenStatus">
+        </action>
+        <action label="testing"
+                icon="images/rtl.png"
+                class="com.chikacow.action.ActionDev"
+                tooltip="View connection details and database statistics"
+                menu="Neo4j Plugin"
+                menuitem="Dev test"
+                id="com.chikacow.action.ActionDev">
+        </action>
+
+        <action label="Sync Options"
+                icon="images/rtl.png"
+                class="com.chikacow.action.ActionSyncOptions"
+                tooltip="Select synchronization options"
+                menu="Neo4j Plugin"
+                menuitem="Sync Manager"
+                id="com.chikacow.action.ActionSyncOptions">
+        </action>
+        <action label="Import from Neo4j"
+                icon="images/rtl.png"
+                class="com.chikacow.action.ActionImportFromNeo4j"
+                tooltip="Reconstruct Model and Data from Neo4j Database"
+                menu="Neo4j Plugin"
+                menuitem="Import Manager"
+                id="com.chikacow.action.ActionImportFromNeo4j">
+        </action>
+        <action label="Check Sync Status"
+                icon="images/rtl.png"
+                class="com.chikacow.action.ActionCheckSync"
+                tooltip="Compare data between USE and Neo4j"
+                menu="Neo4j Plugin"
+                menuitem="Sync Status Dashboard"
+                id="com.chikacow.action.ActionCheckSync">
+        </action>
+    </actions>
+</plugin>

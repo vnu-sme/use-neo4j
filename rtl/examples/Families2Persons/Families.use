@@ -8,7 +8,7 @@ attributes
 	name: String
 end
 
-composition FamilyRegistration between
+association FamilyRegistration between
 	FamilyRegister [0..1]
 	Family [*] role families
 end
