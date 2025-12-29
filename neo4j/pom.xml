@@ -6,16 +6,12 @@
         <groupId>org.tzi.use</groupId>
         <version>7.1.0</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
     <artifactId>neo4j</artifactId>
-    <version>7.1.0</version>
+    <modelVersion>4.0.0</modelVersion>
 
-    <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+
+
     <dependencies>
         <dependency>
             <groupId>org.neo4j.driver</groupId>
@@ -34,14 +30,44 @@
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.tzi.use</groupId>
+            <artifactId>use-core</artifactId>
+            <version>7.1.1</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
+        <sourceDirectory>src/main/java</sourceDirectory>
+
         <plugins>
+
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <release>17</release>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.2</version>
+
+                <configuration>
+                    <archive>
+                        <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
+
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
+                <version>3.5.1</version>
+
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -49,7 +75,19 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <!-- QUAN TRỌNG: Loại bỏ chữ ký số để file JAR chạy được -->
+
+                            <!-- Không tạo dependency-reduced-pom -->
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+
+                            <!-- Giữ nguyên tên JAR -->
+                            <shadedArtifactAttached>false</shadedArtifactAttached>
+
+                            <!-- Merge ServiceLoader nếu có -->
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
+
+                            <!-- Xoá chữ ký số gây lỗi -->
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
@@ -60,6 +98,7 @@
                                     </excludes>
                                 </filter>
                             </filters>
+
                         </configuration>
                     </execution>
                 </executions>

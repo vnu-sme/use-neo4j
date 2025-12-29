@@ -2,66 +2,74 @@
 <?use version="3.0.0"?>
 <plugin name="Neo4jPlugin" version="0.1">
     <actions>
-        <!-- TÍNH NĂNG 1: Mở giao diện kết nối -->
+        <action label="Check Sync Status"
+                icon="images/rtl.png"
+                class="org.uet.dse.neo4j.actions.TestAction"
+                tooltip="Compare datfdfda between USE and Neo4j"
+                menu="Neo4j Plugfdfin"
+                menuitem="Sync Stfdfdatus Dashboard"
+                id="org.uet.dse.neo4j.actions.TestAction">
+        </action>
+
         <action label="Open Neo4j Connection"
                 icon="images/rtl.png"
-                class="com.chikacow.action.ActionOpenNeo4j"
+                class="org.uet.dse.neo4j.actions.ActionOpenNeo4j"
                 tooltip="Open Neo4j Database Connection"
                 menu="Neo4j Plugin"
                 menuitem="Open Connection Dialog"
                 toolbaritem="Neo4j Connect"
-                id="com.chikacow.action.ActionOpenNeo4j">
+                id="org.uet.dse.neo4j.actions.ActionOpenNeo4j">
         </action>
 
         <action label="Neo4j Query Console"
                 icon="images/rtl.png"
-                class="com.chikacow.action.ActionOpenQueryConsole"
+                class="org.uet.dse.neo4j.actions.ActionOpenQueryConsole"
                 tooltip="Run Cypher Queries directly"
                 menu="Neo4j Plugin"
                 menuitem="Query Console"
-                id="com.chikacow.action.ActionOpenQueryConsole">
+                id="org.uet.dse.neo4j.actions.ActionOpenQueryConsole">
         </action>
 
         <action label="Connection Status"
                 icon="images/rtl.png"
-                class="com.chikacow.action.ActionOpenStatus"
+                class="org.uet.dse.neo4j.actions.ActionOpenStatus"
                 tooltip="View connection details and database statistics"
                 menu="Neo4j Plugin"
                 menuitem="Connection Status"
-                id="com.chikacow.action.ActionOpenStatus">
+                id="org.uet.dse.neo4j.actions.ActionOpenStatus">
         </action>
         <action label="testing"
                 icon="images/rtl.png"
-                class="com.chikacow.action.ActionDev"
+                class="org.uet.dse.neo4j.actions.ActionDev"
                 tooltip="View connection details and database statistics"
                 menu="Neo4j Plugin"
                 menuitem="Dev test"
-                id="com.chikacow.action.ActionDev">
+                id="org.uet.dse.neo4j.actions.ActionDev">
         </action>
 
         <action label="Sync Options"
                 icon="images/rtl.png"
-                class="com.chikacow.action.ActionSyncOptions"
+                class="org.uet.dse.neo4j.actions.ActionSyncOptions"
                 tooltip="Select synchronization options"
                 menu="Neo4j Plugin"
                 menuitem="Sync Manager"
-                id="com.chikacow.action.ActionSyncOptions">
+                id="org.uet.dse.neo4j.actions.ActionSyncOptions">
         </action>
         <action label="Import from Neo4j"
                 icon="images/rtl.png"
-                class="com.chikacow.action.ActionImportFromNeo4j"
+                class="org.uet.dse.neo4j.actions.ActionImportFromNeo4j"
                 tooltip="Reconstruct Model and Data from Neo4j Database"
                 menu="Neo4j Plugin"
                 menuitem="Import Manager"
-                id="com.chikacow.action.ActionImportFromNeo4j">
+                id="org.uet.dse.neo4j.actions.ActionImportFromNeo4j">
         </action>
         <action label="Check Sync Status"
                 icon="images/rtl.png"
-                class="com.chikacow.action.ActionCheckSync"
+                class="org.uet.dse.neo4j.actions.ActionCheckSync"
                 tooltip="Compare data between USE and Neo4j"
                 menu="Neo4j Plugin"
                 menuitem="Sync Status Dashboard"
-                id="com.chikacow.action.ActionCheckSync">
+                id="org.uet.dse.neo4j.actions.ActionCheckSync">
         </action>
     </actions>
 </plugin>

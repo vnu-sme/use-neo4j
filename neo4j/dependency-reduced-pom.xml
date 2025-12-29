@@ -20,11 +20,6 @@
               <goal>shade</goal>
             </goals>
             <configuration>
-              <transformers>
-                <transformer>
-                  <mainClass>com.chikacow.Main</mainClass>
-                </transformer>
-              </transformers>
               <filters>
                 <filter>
                   <artifact>*:*</artifact>
