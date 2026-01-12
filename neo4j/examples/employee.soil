@@ -1,0 +1,6 @@
+!create Tom:Student
+!create CSU:University
+!insert (Tom, CSU) into WorksFor
+!openter CSU fires(Tom)
+!delete (Tom, CSU) from WorksFor
+!opexit

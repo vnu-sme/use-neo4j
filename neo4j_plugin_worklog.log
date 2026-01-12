@@ -1,0 +1,579 @@
+[2026-01-11 17:05:08] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: neo4j]
+[2026-01-11 17:05:12] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: neo4j
+[2026-01-11 17:05:12] ACTION: SESSION_CREATE | DETAILS: New session created with key: B8CA1BD9
+[2026-01-11 17:05:12] ACTION: CONNECTION_SUCCESS | DETAILS: DB: neo4j | Key: B8CA1BD9 | Ver: unknown
+[2026-01-11 20:23:27] ACTION: CONNECTION_ERROR | DETAILS: Không thể tạo Database mới. Lỗi quyền hạn hoặc kết nối: Could not create database 'uml_db_176813779'. Database name 'uml_db_176813779' contains illegal characters. Use simple ascii characters, numbers, dots and dashes.
+[2026-01-11 20:23:53] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-11 20:23:53] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-11 20:23:54] ACTION: SESSION_CREATE | DETAILS: New session created with key: DC6E2D61
+[2026-01-11 20:23:54] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: DC6E2D61 | Ver: unknown
+[2026-01-11 20:36:03] ACTION: SYNC_BACKWARD | DETAILS: Model updated from Neo4j
+[2026-01-11 21:02:49] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-11 21:02:49] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-11 21:02:49] ACTION: SESSION_CREATE | DETAILS: New session created with key: B0B9A49C
+[2026-01-11 21:02:49] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: B0B9A49C | Ver: unknown
+[2026-01-11 21:07:24] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-11 21:07:25] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-11 21:07:25] ACTION: SESSION_CREATE | DETAILS: New session created with key: BC012D73
+[2026-01-11 21:07:25] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: BC012D73 | Ver: unknown
+[2026-01-11 21:23:27] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-11 21:23:27] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-11 21:23:27] ACTION: SESSION_CREATE | DETAILS: New session created with key: 1F438F08
+[2026-01-11 21:23:27] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 1F438F08 | Ver: unknown
+[2026-01-11 21:23:55] ACTION: STATUS_CHANGE | DETAILS: Set to INACTIVE
+[2026-01-11 21:23:55] ACTION: STATUS_UPDATE | DETAILS: User set to INACTIVE
+[2026-01-11 21:23:56] ACTION: STATUS_CHANGE | DETAILS: Set to ACTIVE
+[2026-01-11 21:23:56] ACTION: STATUS_UPDATE | DETAILS: User set to ACTIVE
+[2026-01-11 21:30:08] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-11 21:30:08] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-11 21:30:08] ACTION: SESSION_CREATE | DETAILS: New session created with key: FD6A703E
+[2026-01-11 21:30:08] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: FD6A703E | Ver: unknown
+[2026-01-11 21:33:36] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-11 21:33:36] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-11 21:33:36] ACTION: SESSION_CREATE | DETAILS: New session created with key: 74EA4B8F
+[2026-01-11 21:33:36] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 74EA4B8F | Ver: unknown
+[2026-01-11 21:34:18] ACTION: PUSH_START | DETAILS: User neo4j [Key: 74EA4B8F] (audreycolar) initiated sync for model: Employee
+[2026-01-11 21:34:21] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 21:34:21] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-11 21:34:21] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 21:34:21] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 74EA4B8F] (audreycolar)
+[2026-01-11 21:40:35] ACTION: PUSH_START | DETAILS: User neo4j [Key: 74EA4B8F] (audreycolar) initiated sync for model: Employee
+[2026-01-11 21:40:35] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 21:40:35] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-11 21:40:35] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 21:40:35] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 74EA4B8F] (audreycolar)
+[2026-01-11 21:51:46] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-11 21:51:47] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-11 21:51:47] ACTION: SESSION_CREATE | DETAILS: New session created with key: 9178D611
+[2026-01-11 21:51:47] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 9178D611 | Ver: unknown
+[2026-01-11 21:52:06] ACTION: PUSH_START | DETAILS: User neo4j [Key: 9178D611] (audreycolar) initiated sync for model: Employee
+[2026-01-11 21:52:07] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 21:52:07] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-11 21:52:07] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 21:52:07] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 9178D611] (audreycolar)
+[2026-01-11 21:55:56] ACTION: PUSH_START | DETAILS: User neo4j [Key: 9178D611] (audreycolar) initiated sync for model: Employee
+[2026-01-11 21:55:56] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 21:55:56] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-11 21:55:56] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 21:55:56] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 9178D611] (audreycolar)
+[2026-01-11 21:56:27] ACTION: PUSH_START | DETAILS: User neo4j [Key: 9178D611] (audreycolar) initiated sync for model: Employee
+[2026-01-11 21:56:27] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 21:56:27] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-11 21:56:27] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 21:56:27] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 9178D611] (audreycolar)
+[2026-01-11 21:57:04] ACTION: PUSH_START | DETAILS: User neo4j [Key: 9178D611] (audreycolar) initiated sync for model: Employee
+[2026-01-11 21:57:04] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 21:57:04] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-11 21:57:04] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 21:57:04] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 9178D611] (audreycolar)
+[2026-01-11 22:00:01] ACTION: PUSH_START | DETAILS: User neo4j [Key: 9178D611] (audreycolar) initiated sync for model: Employee
+[2026-01-11 22:02:57] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 22:02:57] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-11 22:02:57] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 22:02:57] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 9178D611] (audreycolar)
+[2026-01-11 22:05:58] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-11 22:05:58] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-11 22:05:58] ACTION: SESSION_CREATE | DETAILS: New session created with key: B60CE64E
+[2026-01-11 22:05:58] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: B60CE64E | Ver: unknown
+[2026-01-11 22:06:23] ACTION: INCONSISTENCY | DETAILS: Class EmployeeRole remains in USE but is absent in DB.
+[2026-01-11 22:06:23] ACTION: INCONSISTENCY | DETAILS: Class HRManager remains in USE but is absent in DB.
+[2026-01-11 22:06:23] ACTION: INCONSISTENCY | DETAILS: Class HRPerson remains in USE but is absent in DB.
+[2026-01-11 22:06:23] ACTION: INCONSISTENCY | DETAILS: Class TM2HTM remains in USE but is absent in DB.
+[2026-01-11 22:06:23] ACTION: INCONSISTENCY | DETAILS: Class HRRegister remains in USE but is absent in DB.
+[2026-01-11 22:06:23] ACTION: INCONSISTENCY | DETAILS: Class HREmployee remains in USE but is absent in DB.
+[2026-01-11 22:06:23] ACTION: INCONSISTENCY | DETAILS: Class M2HM remains in USE but is absent in DB.
+[2026-01-11 22:06:23] ACTION: INCONSISTENCY | DETAILS: Class E2HE remains in USE but is absent in DB.
+[2026-01-11 22:06:23] ACTION: INCONSISTENCY | DETAILS: Class EmployeeRegister remains in USE but is absent in DB.
+[2026-01-11 22:06:23] ACTION: INCONSISTENCY | DETAILS: Class Department remains in USE but is absent in DB.
+[2026-01-11 22:06:23] ACTION: INCONSISTENCY | DETAILS: Class Employee remains in USE but is absent in DB.
+[2026-01-11 22:06:23] ACTION: INCONSISTENCY | DETAILS: Class D2HD remains in USE but is absent in DB.
+[2026-01-11 22:06:23] ACTION: INCONSISTENCY | DETAILS: Class HRTeamLead remains in USE but is absent in DB.
+[2026-01-11 22:06:23] ACTION: INCONSISTENCY | DETAILS: Class TL2HTL remains in USE but is absent in DB.
+[2026-01-11 22:06:23] ACTION: INCONSISTENCY | DETAILS: Class ER2HR remains in USE but is absent in DB.
+[2026-01-11 22:06:23] ACTION: MODEL_UPDATE | DETAILS: Created class in USE: Professor
+[2026-01-11 22:06:23] ACTION: MODEL_UPDATE | DETAILS: Created class in USE: University
+[2026-01-11 22:06:23] ACTION: MODEL_UPDATE | DETAILS: Created class in USE: Student
+[2026-01-11 22:06:23] ACTION: MODEL_UPDATE | DETAILS: Created class in USE: Person
+[2026-01-11 22:12:39] ACTION: INCONSISTENCY | DETAILS: Class EmployeeRole remains in USE but is absent in DB.
+[2026-01-11 22:12:39] ACTION: INCONSISTENCY | DETAILS: Class HRManager remains in USE but is absent in DB.
+[2026-01-11 22:12:39] ACTION: INCONSISTENCY | DETAILS: Class HRPerson remains in USE but is absent in DB.
+[2026-01-11 22:12:39] ACTION: INCONSISTENCY | DETAILS: Class TM2HTM remains in USE but is absent in DB.
+[2026-01-11 22:12:39] ACTION: INCONSISTENCY | DETAILS: Class HRRegister remains in USE but is absent in DB.
+[2026-01-11 22:12:39] ACTION: INCONSISTENCY | DETAILS: Class HREmployee remains in USE but is absent in DB.
+[2026-01-11 22:12:39] ACTION: INCONSISTENCY | DETAILS: Class M2HM remains in USE but is absent in DB.
+[2026-01-11 22:12:39] ACTION: INCONSISTENCY | DETAILS: Class E2HE remains in USE but is absent in DB.
+[2026-01-11 22:12:39] ACTION: INCONSISTENCY | DETAILS: Class EmployeeRegister remains in USE but is absent in DB.
+[2026-01-11 22:12:39] ACTION: INCONSISTENCY | DETAILS: Class Department remains in USE but is absent in DB.
+[2026-01-11 22:12:39] ACTION: INCONSISTENCY | DETAILS: Class Employee remains in USE but is absent in DB.
+[2026-01-11 22:12:39] ACTION: INCONSISTENCY | DETAILS: Class D2HD remains in USE but is absent in DB.
+[2026-01-11 22:12:39] ACTION: INCONSISTENCY | DETAILS: Class HRTeamLead remains in USE but is absent in DB.
+[2026-01-11 22:12:39] ACTION: INCONSISTENCY | DETAILS: Class TL2HTL remains in USE but is absent in DB.
+[2026-01-11 22:12:39] ACTION: INCONSISTENCY | DETAILS: Class ER2HR remains in USE but is absent in DB.
+[2026-01-11 22:22:47] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-11 22:22:47] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-11 22:22:47] ACTION: SESSION_CREATE | DETAILS: New session created with key: 38E86138
+[2026-01-11 22:22:47] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 38E86138 | Ver: unknown
+[2026-01-11 22:23:08] ACTION: PUSH_START | DETAILS: User neo4j [Key: 38E86138] (audreycolar) initiated sync for model: Employee
+[2026-01-11 22:23:10] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 22:23:10] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-11 22:23:10] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 22:23:10] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 38E86138] (audreycolar)
+[2026-01-11 22:23:37] ACTION: PUSH_START | DETAILS: User neo4j [Key: 38E86138] (audreycolar) initiated sync for model: Employee
+[2026-01-11 22:23:37] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 22:23:37] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-11 22:23:37] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 22:23:37] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 38E86138] (audreycolar)
+[2026-01-11 22:23:44] ACTION: PUSH_START | DETAILS: User neo4j [Key: 38E86138] (audreycolar) initiated sync for model: Employee
+[2026-01-11 22:23:44] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 22:23:44] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-11 22:23:45] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 22:23:45] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 38E86138] (audreycolar)
+[2026-01-11 22:23:55] ACTION: PUSH_START | DETAILS: User neo4j [Key: 38E86138] (audreycolar) initiated sync for model: Employee
+[2026-01-11 22:23:55] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 22:23:55] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-11 22:23:55] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 22:23:55] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 38E86138] (audreycolar)
+[2026-01-11 22:25:37] ACTION: PUSH_START | DETAILS: User neo4j [Key: 38E86138] (audreycolar) initiated sync for model: Employee
+[2026-01-11 22:25:38] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 22:25:38] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-11 22:25:38] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 22:25:38] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 38E86138] (audreycolar)
+[2026-01-11 22:25:45] ACTION: PUSH_START | DETAILS: User neo4j [Key: 38E86138] (audreycolar) initiated sync for model: Employee
+[2026-01-11 22:25:45] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 22:25:45] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-11 22:25:45] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-11 22:25:45] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 38E86138] (audreycolar)
+[2026-01-11 22:30:15] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-11 22:30:15] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-11 22:30:15] ACTION: SESSION_CREATE | DETAILS: New session created with key: 414E0EA3
+[2026-01-11 22:30:15] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 414E0EA3 | Ver: unknown
+[2026-01-11 22:30:37] ACTION: INCONSISTENCY | DETAILS: Class EmployeeRole remains in USE but is absent in DB.
+[2026-01-11 22:30:37] ACTION: INCONSISTENCY | DETAILS: Class HRManager remains in USE but is absent in DB.
+[2026-01-11 22:30:37] ACTION: INCONSISTENCY | DETAILS: Class HRPerson remains in USE but is absent in DB.
+[2026-01-11 22:30:37] ACTION: INCONSISTENCY | DETAILS: Class TM2HTM remains in USE but is absent in DB.
+[2026-01-11 22:30:37] ACTION: INCONSISTENCY | DETAILS: Class HRRegister remains in USE but is absent in DB.
+[2026-01-11 22:30:37] ACTION: INCONSISTENCY | DETAILS: Class HREmployee remains in USE but is absent in DB.
+[2026-01-11 22:30:37] ACTION: INCONSISTENCY | DETAILS: Class M2HM remains in USE but is absent in DB.
+[2026-01-11 22:30:37] ACTION: INCONSISTENCY | DETAILS: Class E2HE remains in USE but is absent in DB.
+[2026-01-11 22:30:37] ACTION: INCONSISTENCY | DETAILS: Class EmployeeRegister remains in USE but is absent in DB.
+[2026-01-11 22:30:37] ACTION: INCONSISTENCY | DETAILS: Class Department remains in USE but is absent in DB.
+[2026-01-11 22:30:37] ACTION: INCONSISTENCY | DETAILS: Class Employee remains in USE but is absent in DB.
+[2026-01-11 22:30:37] ACTION: INCONSISTENCY | DETAILS: Class D2HD remains in USE but is absent in DB.
+[2026-01-11 22:30:37] ACTION: INCONSISTENCY | DETAILS: Class HRTeamLead remains in USE but is absent in DB.
+[2026-01-11 22:30:37] ACTION: INCONSISTENCY | DETAILS: Class TL2HTL remains in USE but is absent in DB.
+[2026-01-11 22:30:37] ACTION: INCONSISTENCY | DETAILS: Class ER2HR remains in USE but is absent in DB.
+[2026-01-11 22:30:37] ACTION: MODEL_UPDATE | DETAILS: Created class in USE: Professor
+[2026-01-11 22:30:37] ACTION: MODEL_UPDATE | DETAILS: Created class in USE: University
+[2026-01-11 22:30:37] ACTION: MODEL_UPDATE | DETAILS: Created class in USE: Student
+[2026-01-11 22:30:37] ACTION: MODEL_UPDATE | DETAILS: Created class in USE: Person
+[2026-01-11 22:30:37] ACTION: MODEL_UPDATE | DETAILS: Linked inheritance: Professor -> Person
+[2026-01-11 22:30:37] ACTION: MODEL_UPDATE | DETAILS: Linked inheritance: Student -> Person
+[2026-01-11 22:44:53] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-11 22:44:53] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-11 22:44:53] ACTION: SESSION_CREATE | DETAILS: New session created with key: 963A02F6
+[2026-01-11 22:44:53] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 963A02F6 | Ver: unknown
+[2026-01-11 22:45:34] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-11 22:45:35] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-11 22:45:35] ACTION: SESSION_CREATE | DETAILS: New session created with key: 280BE25C
+[2026-01-11 22:45:35] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 280BE25C | Ver: unknown
+[2026-01-11 22:47:12] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-11 22:47:15] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-11 22:47:15] ACTION: SESSION_CREATE | DETAILS: New session created with key: 8F8183E0
+[2026-01-11 22:47:15] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 8F8183E0 | Ver: unknown
+[2026-01-11 23:28:26] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-11 23:28:26] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-11 23:28:26] ACTION: SESSION_CREATE | DETAILS: New session created with key: 56D5768A
+[2026-01-11 23:28:26] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 56D5768A | Ver: unknown
+[2026-01-11 23:28:33] ACTION: WIPE | DETAILS: Deep cleaning USE Model...
+[2026-01-11 23:28:33] ACTION: WIPE | DETAILS: Model is now completely sterile.
+[2026-01-11 23:33:56] ACTION: WIPE | DETAILS: Deep cleaning USE Model...
+[2026-01-11 23:33:56] ACTION: WIPE | DETAILS: Model is now completely sterile.
+[2026-01-11 23:34:08] ACTION: WIPE | DETAILS: Deep cleaning USE Model...
+[2026-01-11 23:34:08] ACTION: WIPE | DETAILS: Model is now completely sterile.
+[2026-01-11 23:34:23] ACTION: WIPE | DETAILS: Deep cleaning USE Model...
+[2026-01-11 23:34:23] ACTION: WIPE | DETAILS: Model is now completely sterile.
+[2026-01-11 23:34:51] ACTION: WIPE | DETAILS: Deep cleaning USE Model...
+[2026-01-11 23:34:51] ACTION: WIPE | DETAILS: Model is now completely sterile.
+[2026-01-11 23:35:24] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-11 23:35:24] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-11 23:35:24] ACTION: SESSION_CREATE | DETAILS: New session created with key: 53356FC0
+[2026-01-11 23:35:24] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 53356FC0 | Ver: unknown
+[2026-01-11 23:35:30] ACTION: WIPE | DETAILS: Deep cleaning USE Model...
+[2026-01-11 23:35:30] ACTION: WIPE | DETAILS: Model is now completely sterile.
+[2026-01-11 23:35:39] ACTION: WIPE | DETAILS: Deep cleaning USE Model...
+[2026-01-11 23:35:39] ACTION: WIPE | DETAILS: Model is now completely sterile.
+[2026-01-11 23:35:46] ACTION: WIPE | DETAILS: Deep cleaning USE Model...
+[2026-01-11 23:35:46] ACTION: WIPE | DETAILS: Model is now completely sterile.
+[2026-01-11 23:36:32] ACTION: WIPE | DETAILS: Deep cleaning USE Model...
+[2026-01-11 23:36:32] ACTION: WIPE | DETAILS: Model is now completely sterile.
+[2026-01-11 23:37:47] ACTION: WIPE | DETAILS: Deep cleaning USE Model...
+[2026-01-11 23:37:47] ACTION: WIPE | DETAILS: Model is now completely sterile.
+[2026-01-11 23:43:12] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-11 23:43:12] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-11 23:43:12] ACTION: SESSION_CREATE | DETAILS: New session created with key: F8BAD548
+[2026-01-11 23:43:12] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: F8BAD548 | Ver: unknown
+[2026-01-11 23:43:22] ACTION: WIPE | DETAILS: Deep cleaning USE Model...
+[2026-01-11 23:43:22] ACTION: WIPE | DETAILS: Model is now completely sterile.
+[2026-01-11 23:43:36] ACTION: WIPE | DETAILS: Deep cleaning USE Model...
+[2026-01-11 23:43:36] ACTION: WIPE | DETAILS: Model is now completely sterile.
+[2026-01-12 00:07:39] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 00:07:39] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 00:07:39] ACTION: SESSION_CREATE | DETAILS: New session created with key: EA2284DB
+[2026-01-12 00:07:39] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: EA2284DB | Ver: unknown
+[2026-01-12 00:07:47] ACTION: WIPE | DETAILS: Deep cleaning USE Model...
+[2026-01-12 00:07:47] ACTION: WIPE | DETAILS: Model is now completely sterile.
+[2026-01-12 00:07:58] ACTION: WIPE | DETAILS: Deep cleaning USE Model...
+[2026-01-12 00:07:58] ACTION: WIPE | DETAILS: Model is now completely sterile.
+[2026-01-12 00:10:06] ACTION: WIPE | DETAILS: Deep cleaning USE Model...
+[2026-01-12 00:10:06] ACTION: WIPE | DETAILS: Model is now completely sterile.
+[2026-01-12 00:16:20] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 00:16:20] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 00:16:20] ACTION: SESSION_CREATE | DETAILS: New session created with key: 9C501269
+[2026-01-12 00:16:20] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 9C501269 | Ver: unknown
+[2026-01-12 00:16:34] ACTION: WIPE | DETAILS: Deep cleaning USE Model...
+[2026-01-12 00:16:34] ACTION: WIPE | DETAILS: Model is now completely sterile.
+[2026-01-12 00:49:17] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 00:49:17] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 00:49:17] ACTION: SESSION_CREATE | DETAILS: New session created with key: 83AA35E0
+[2026-01-12 00:49:17] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 83AA35E0 | Ver: unknown
+[2026-01-12 00:49:23] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 01:13:31] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 01:13:32] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 01:13:32] ACTION: SESSION_CREATE | DETAILS: New session created with key: CCA71235
+[2026-01-12 01:13:32] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: CCA71235 | Ver: unknown
+[2026-01-12 01:18:33] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 01:18:33] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 01:18:33] ACTION: SESSION_CREATE | DETAILS: New session created with key: 592C9DB4
+[2026-01-12 01:18:33] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 592C9DB4 | Ver: unknown
+[2026-01-12 01:18:58] ACTION: PUSH_START | DETAILS: User neo4j [Key: 592C9DB4] (audreycolar) initiated sync for model: Employee
+[2026-01-12 01:19:00] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 01:19:00] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-12 01:19:00] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 01:19:00] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 592C9DB4] (audreycolar)
+[2026-01-12 09:07:43] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 09:07:45] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 09:07:45] ACTION: SESSION_CREATE | DETAILS: New session created with key: E65CDB15
+[2026-01-12 09:07:46] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: E65CDB15 | Ver: unknown
+[2026-01-12 09:09:12] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 09:09:12] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 09:09:12] ACTION: SESSION_CREATE | DETAILS: New session created with key: 0275C2E3
+[2026-01-12 09:09:12] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 0275C2E3 | Ver: unknown
+[2026-01-12 09:15:26] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 09:15:26] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 09:15:26] ACTION: SESSION_CREATE | DETAILS: New session created with key: 9ED0F043
+[2026-01-12 09:15:26] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 9ED0F043 | Ver: unknown
+[2026-01-12 09:33:35] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 09:33:35] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 09:33:35] ACTION: SESSION_CREATE | DETAILS: New session created with key: 2007F427
+[2026-01-12 09:33:35] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 2007F427 | Ver: unknown
+[2026-01-12 09:36:08] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 09:36:09] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 09:36:09] ACTION: SESSION_CREATE | DETAILS: New session created with key: 335331FF
+[2026-01-12 09:36:09] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 335331FF | Ver: unknown
+[2026-01-12 09:36:14] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 09:39:23] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 09:39:24] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 09:39:24] ACTION: SESSION_CREATE | DETAILS: New session created with key: 2F41F565
+[2026-01-12 09:39:24] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 2F41F565 | Ver: unknown
+[2026-01-12 09:39:32] ACTION: PUSH_START | DETAILS: User neo4j [Key: 2F41F565] (audreycolar) initiated sync for model: Employee
+[2026-01-12 09:39:35] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 09:39:35] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-12 09:39:35] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 09:39:35] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 2F41F565] (audreycolar)
+[2026-01-12 09:40:03] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 09:41:23] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 09:42:02] ACTION: CLEANUP | DETAILS: Executed C1 strategy for: [Professor, University, Student, Person]
+[2026-01-12 09:42:02] ACTION: PUSH_START | DETAILS: User neo4j [Key: 2F41F565] (audreycolar) initiated sync for model: Employee2HRSystem
+[2026-01-12 09:42:06] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -1513864340
+[2026-01-12 09:42:06] ACTION: PUSH_SUCCESS | DETAILS: Model Employee2HRSystem is now synchronized.
+[2026-01-12 09:42:06] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -1513864340
+[2026-01-12 09:42:06] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 2F41F565] (audreycolar)
+[2026-01-12 09:42:32] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: TL2HTL_HRTeamLead
+[2026-01-12 09:42:32] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: HRRegistration
+[2026-01-12 09:42:32] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: ER2HR_HRRegister
+[2026-01-12 09:42:32] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: E2HE_Employee
+[2026-01-12 09:42:32] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: M2HM_Employee
+[2026-01-12 09:42:32] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: TL2HTL_Employee
+[2026-01-12 09:42:32] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: TM2HTM_Employee
+[2026-01-12 09:42:32] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: EmployeeAssignment
+[2026-01-12 09:42:32] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: Manager
+[2026-01-12 09:42:32] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: TeamLead
+[2026-01-12 09:42:32] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: TeamMembers
+[2026-01-12 09:42:32] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: D2HD_Department
+[2026-01-12 09:42:32] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: ER2HR_EmployeeRegister
+[2026-01-12 09:42:32] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: DepartmentRegistration
+[2026-01-12 09:42:32] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: E2HE_HREmployee
+[2026-01-12 09:42:32] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: D2HD_HRDepartment
+[2026-01-12 09:42:32] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: TM2HTM_HREmployee
+[2026-01-12 09:42:32] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: M2HM_HRManager
+[2026-01-12 10:38:00] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 10:38:01] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 10:38:01] ACTION: SESSION_CREATE | DETAILS: New session created with key: 5412096C
+[2026-01-12 10:38:01] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 5412096C | Ver: unknown
+[2026-01-12 10:38:10] ACTION: SYNC_FORWARD_ERROR | DETAILS: Invalid input '(': expected ',', 'ORDER BY', 'CALL', 'CREATE', 'LOAD CSV', 'DELETE', 'DETACH', 'FINISH', 'FOREACH', 'INSERT', 'LIMIT', 'MATCH', 'MERGE', 'NODETACH', 'OFFSET', 'OPTIONAL', 'REMOVE', 'RETURN', 'SET', 'SKIP', 'UNION', 'UNWIND', 'USE', 'WITH' or <EOF> (line 1, column 917 (offset: 916))
+"MATCH (c:MetaNode) WHERE c.name IN ['NodeConcreteClass', 'NodeAbstractClass', 'NodeAssociationClass'] MATCH (inst)-[:InstanceOf]->(c) OPTIONAL MATCH (inst)-[:HasAttribute]->(a) OPTIONAL MATCH (a)-[:ReferenceType]->(aRef) OPTIONAL MATCH (inst)-[:HasOperation]->(o) OPTIONAL MATCH (o)-[:ReferenceReturnType]->(retRef) OPTIONAL MATCH (o)-[:HasParam]->(p) OPTIONAL MATCH (p)-[:ReferenceType]->(pRef) OPTIONAL MATCH (inst)-[:HasInvariant]->(inv) OPTIONAL MATCH (o)-[:HasPreCondition]->(pre) OPTIONAL MATCH (o)-[:HasPostCondition]->(post) RETURN inst.name as className, labels(inst)[0] as classType, collect(DISTINCT {name: a.attrName, type: a.type, idx: a.index, ref: aRef.name}) as attrs, collect(DISTINCT {name: o.opName, ret: o.returnType, isColl: o.isReturnCollection, retRef: retRef.name}) as ops, collect(DISTINCT {op: o.opName, pName: p.paramName, pType: p.type, pOrder: p.order, pRef: pRef.name}) as paramscollect(DISTINCT {name: inv.invName, expr: inv.expression, exist: inv.isExistential, idx: inv.index}) as invariants, collect(DISTINCT {op: o.opName, name: pre.condName, expr: pre.expression, idx: pre.index}) as preConds, collect(DISTINCT {op: o.opName, name: post.condName, expr: post.expression, idx: post.index}) as postConds"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ^
+[2026-01-12 10:40:50] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 10:40:50] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 10:40:50] ACTION: SESSION_CREATE | DETAILS: New session created with key: EB45B3A9
+[2026-01-12 10:40:50] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: EB45B3A9 | Ver: unknown
+[2026-01-12 10:41:30] ACTION: CLEANUP | DETAILS: Executed C1 strategy for: [EmployeeRole, HRManager, HRPerson, TM2HTM, HRRegister, HREmployee, M2HM, E2HE, EmployeeRegister, Department, Employee, D2HD, HRTeamLead, TL2HTL, ER2HR]
+[2026-01-12 10:41:30] ACTION: PUSH_START | DETAILS: User neo4j [Key: EB45B3A9] (audreycolar) initiated sync for model: Employee
+[2026-01-12 10:41:31] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 10:41:31] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-12 10:41:31] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 10:41:31] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: EB45B3A9] (audreycolar)
+[2026-01-12 10:45:28] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 10:45:29] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 10:45:29] ACTION: SESSION_CREATE | DETAILS: New session created with key: D8262960
+[2026-01-12 10:45:29] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: D8262960 | Ver: unknown
+[2026-01-12 10:45:43] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 10:45:53] ACTION: PUSH_START | DETAILS: User neo4j [Key: D8262960] (audreycolar) initiated sync for model: Employee
+[2026-01-12 10:45:53] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 10:45:53] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-12 10:45:53] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 10:45:53] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: D8262960] (audreycolar)
+[2026-01-12 10:59:06] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 10:59:06] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 10:59:06] ACTION: SESSION_CREATE | DETAILS: New session created with key: CEB2ADDD
+[2026-01-12 10:59:06] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: CEB2ADDD | Ver: unknown
+[2026-01-12 10:59:14] ACTION: PUSH_START | DETAILS: User neo4j [Key: CEB2ADDD] (audreycolar) initiated sync for model: Employee
+[2026-01-12 10:59:14] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 10:59:14] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-12 10:59:14] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 10:59:14] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: CEB2ADDD] (audreycolar)
+[2026-01-12 11:08:16] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 11:08:16] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 11:08:16] ACTION: SESSION_CREATE | DETAILS: New session created with key: 958E5670
+[2026-01-12 11:08:16] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 958E5670 | Ver: unknown
+[2026-01-12 11:08:25] ACTION: PUSH_START | DETAILS: User neo4j [Key: 958E5670] (audreycolar) initiated sync for model: Employee
+[2026-01-12 11:08:26] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 11:08:26] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-12 11:08:26] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 11:08:26] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 958E5670] (audreycolar)
+[2026-01-12 12:00:01] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 12:00:01] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 12:00:01] ACTION: SESSION_CREATE | DETAILS: New session created with key: 52331520
+[2026-01-12 12:00:01] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 52331520 | Ver: unknown
+[2026-01-12 12:00:12] ACTION: PUSH_START | DETAILS: User neo4j [Key: 52331520] (audreycolar) initiated sync for model: Employee
+[2026-01-12 12:00:13] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 12:00:13] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-12 12:00:13] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 12:00:13] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 52331520] (audreycolar)
+[2026-01-12 12:01:56] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 12:11:56] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 12:11:56] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 12:11:56] ACTION: SESSION_CREATE | DETAILS: New session created with key: FBB878E6
+[2026-01-12 12:11:56] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: FBB878E6 | Ver: unknown
+[2026-01-12 12:12:05] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 12:12:33] ACTION: PUSH_START | DETAILS: User neo4j [Key: FBB878E6] (audreycolar) initiated sync for model: Employee
+[2026-01-12 12:12:35] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 12:12:35] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-12 12:12:35] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 12:12:35] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: FBB878E6] (audreycolar)
+[2026-01-12 12:12:45] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 12:36:56] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 12:36:56] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 12:36:56] ACTION: SESSION_CREATE | DETAILS: New session created with key: BEFA8BD1
+[2026-01-12 12:36:57] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: BEFA8BD1 | Ver: unknown
+[2026-01-12 12:37:01] ACTION: PUSH_START | DETAILS: User neo4j [Key: BEFA8BD1] (audreycolar) initiated sync for model: Employee
+[2026-01-12 12:37:02] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 12:37:02] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-12 12:37:02] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 12:37:02] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: BEFA8BD1] (audreycolar)
+[2026-01-12 12:37:06] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 12:37:06] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 12:37:06] ACTION: PULL_INV | DETAILS: Compiled: Professor::HigherSalaryThanStudent
+[2026-01-12 12:37:49] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 12:37:49] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 12:37:49] ACTION: SESSION_CREATE | DETAILS: New session created with key: DF1562A4
+[2026-01-12 12:37:49] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: DF1562A4 | Ver: unknown
+[2026-01-12 12:37:52] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 12:37:52] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 12:37:52] ACTION: PULL_INV | DETAILS: Compiled: Professor::HigherSalaryThanStudent
+[2026-01-12 12:38:29] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 12:38:32] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 12:38:32] ACTION: PULL_INV | DETAILS: Compiled: Professor::HigherSalaryThanStudent
+[2026-01-12 12:39:17] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 12:39:34] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 12:41:57] ACTION: PULL_INV | DETAILS: Compiled: Professor::HigherSalaryThanStudent
+[2026-01-12 12:43:45] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 12:43:50] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 12:43:59] ACTION: PULL_INV | DETAILS: Compiled: Professor::HigherSalaryThanStudent
+[2026-01-12 14:03:28] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 14:03:28] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 14:03:28] ACTION: SESSION_CREATE | DETAILS: New session created with key: 282A8553
+[2026-01-12 14:03:29] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 282A8553 | Ver: unknown
+[2026-01-12 14:05:23] ACTION: PUSH_START | DETAILS: User neo4j [Key: 282A8553] (audreycolar) initiated sync for model: Employee
+[2026-01-12 14:05:26] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 14:05:26] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-12 14:05:26] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 14:05:26] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 282A8553] (audreycolar)
+[2026-01-12 14:05:52] ACTION: PUSH_START | DETAILS: User neo4j [Key: 282A8553] (audreycolar) initiated sync for model: Employee
+[2026-01-12 14:05:53] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 14:05:53] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-12 14:05:53] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 14:05:53] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 282A8553] (audreycolar)
+[2026-01-12 14:06:09] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 14:06:09] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 14:06:34] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 14:06:34] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 14:06:43] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 14:06:43] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 14:06:59] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 14:06:59] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 14:09:34] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 14:09:34] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 14:10:52] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 14:10:52] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 14:16:36] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 14:16:36] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 14:16:36] ACTION: SESSION_CREATE | DETAILS: New session created with key: 0B407023
+[2026-01-12 14:16:36] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 0B407023 | Ver: unknown
+[2026-01-12 14:16:55] ACTION: PUSH_START | DETAILS: User neo4j [Key: 0B407023] (audreycolar) initiated sync for model: Employee
+[2026-01-12 14:16:56] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 14:16:56] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-12 14:16:56] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 14:16:56] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 0B407023] (audreycolar)
+[2026-01-12 14:17:01] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 14:17:01] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 14:17:13] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 14:17:13] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 14:18:15] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 14:18:15] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 14:19:01] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 14:19:01] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 14:22:46] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 14:22:47] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 14:38:59] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 14:38:59] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 14:38:59] ACTION: SESSION_CREATE | DETAILS: New session created with key: CBF2BC03
+[2026-01-12 14:38:59] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: CBF2BC03 | Ver: unknown
+[2026-01-12 14:39:34] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 14:39:34] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 14:39:50] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 14:39:50] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 14:45:42] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 14:45:42] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 14:45:42] ACTION: SESSION_CREATE | DETAILS: New session created with key: 5B689C2A
+[2026-01-12 14:45:42] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 5B689C2A | Ver: unknown
+[2026-01-12 14:45:54] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 14:45:54] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 15:13:17] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 15:13:17] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 15:24:47] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 15:25:15] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 15:25:16] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 15:25:16] ACTION: SESSION_CREATE | DETAILS: New session created with key: D5C48037
+[2026-01-12 15:25:16] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: D5C48037 | Ver: unknown
+[2026-01-12 15:25:31] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 15:25:31] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 15:50:20] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 15:50:20] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 15:50:20] ACTION: SESSION_CREATE | DETAILS: New session created with key: 0FE13F8B
+[2026-01-12 15:50:20] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 0FE13F8B | Ver: unknown
+[2026-01-12 15:50:42] ACTION: SYNC_FORWARD_ERROR | DETAILS: Variable `inv` not defined (line 1, column 1639 (offset: 1638))
+"MATCH (meta:MetaNode) WHERE meta.name IN ['NodeConcreteClass', 'NodeAbstractClass', 'NodeAssociationClass'] MATCH (inst)-[:InstanceOf]->(meta) WITH inst, labels(inst)[0] as classType OPTIONAL MATCH (inst)-[:HasAttribute]->(a) OPTIONAL MATCH (a)-[r1]->(aRef) WHERE type(r1) = 'ReferenceType' WITH inst, classType, collect(DISTINCT {name: a.attrName, type: a.type, idx: a.index, ref: aRef.name}) as attrs OPTIONAL MATCH (inst)-[:HasInvariant]->(inv) WITH inst, classType, attrs, collect(DISTINCT {invName: inv.invName, ocl: inv.expression, exist: inv.isExistential, idx: inv.index}) as invariants OPTIONAL MATCH (inst)-[:HasOperation]->(o) OPTIONAL MATCH (o)-[r2]->(retRef) WHERE type(r2) = 'ReferenceReturnType' OPTIONAL MATCH (o)-[:HasParam]->(p) OPTIONAL MATCH (p)-[r3]->(pRef) WHERE type(r3) = 'ReferenceType' WITH inst, classType, attrs, invariants, o, retRef, collect(DISTINCT {pName: p.paramName, pType: p.type, pOrder: p.order, pRef: pRef.name}) as opParams OPTIONAL MATCH (o)-[:HasPreCondition]->(pre) WITH inst, classType, attrs, invariants, o, retRef, opParams, collect(DISTINCT {name: pre.condName, expr: pre.expression, idx: pre.index}) as opPres OPTIONAL MATCH (o)-[:HasPostCondition]->(post) WITH inst, classType, attrs, invariants, o, retRef, opParams, opPres, collect(DISTINCT {name: post.condName, expr: post.expression, idx: post.index}) as opPosts WITH inst, classType, attrs, invariants, collect(DISTINCT {name: o.opName, ret: o.returnType, isColl: o.isReturnCollection, retRef: retRef.name, params: opParams, pre: opPres, post: opPosts}) as ops RETURN inst.name as className, classType, attrs, collect(DISTINCT {name: inv.invName, expr: inv.expression, exist: inv.isExistential, idx: inv.index}) as invariants, collect(DISTINCT {name: o.opName, ret: o.returnType, isColl: o.isReturnCollection, retRef: retRef.name, params: opParams, pre: opPres, post: opPosts}) as ops"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       ^
+[2026-01-12 15:52:05] ACTION: SYNC_FORWARD_ERROR | DETAILS: Variable `inv` not defined (line 1, column 1639 (offset: 1638))
+"MATCH (meta:MetaNode) WHERE meta.name IN ['NodeConcreteClass', 'NodeAbstractClass', 'NodeAssociationClass'] MATCH (inst)-[:InstanceOf]->(meta) WITH inst, labels(inst)[0] as classType OPTIONAL MATCH (inst)-[:HasAttribute]->(a) OPTIONAL MATCH (a)-[r1]->(aRef) WHERE type(r1) = 'ReferenceType' WITH inst, classType, collect(DISTINCT {name: a.attrName, type: a.type, idx: a.index, ref: aRef.name}) as attrs OPTIONAL MATCH (inst)-[:HasInvariant]->(inv) WITH inst, classType, attrs, collect(DISTINCT {invName: inv.invName, ocl: inv.expression, exist: inv.isExistential, idx: inv.index}) as invariants OPTIONAL MATCH (inst)-[:HasOperation]->(o) OPTIONAL MATCH (o)-[r2]->(retRef) WHERE type(r2) = 'ReferenceReturnType' OPTIONAL MATCH (o)-[:HasParam]->(p) OPTIONAL MATCH (p)-[r3]->(pRef) WHERE type(r3) = 'ReferenceType' WITH inst, classType, attrs, invariants, o, retRef, collect(DISTINCT {pName: p.paramName, pType: p.type, pOrder: p.order, pRef: pRef.name}) as opParams OPTIONAL MATCH (o)-[:HasPreCondition]->(pre) WITH inst, classType, attrs, invariants, o, retRef, opParams, collect(DISTINCT {name: pre.condName, expr: pre.expression, idx: pre.index}) as opPres OPTIONAL MATCH (o)-[:HasPostCondition]->(post) WITH inst, classType, attrs, invariants, o, retRef, opParams, opPres, collect(DISTINCT {name: post.condName, expr: post.expression, idx: post.index}) as opPosts WITH inst, classType, attrs, invariants, collect(DISTINCT {name: o.opName, ret: o.returnType, isColl: o.isReturnCollection, retRef: retRef.name, params: opParams, pre: opPres, post: opPosts}) as ops RETURN inst.name as className, classType, attrs, collect(DISTINCT {name: inv.invName, expr: inv.expression, exist: inv.isExistential, idx: inv.index}) as invariants, collect(DISTINCT {name: o.opName, ret: o.returnType, isColl: o.isReturnCollection, retRef: retRef.name, params: opParams, pre: opPres, post: opPosts}) as ops"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       ^
+[2026-01-12 15:53:39] ACTION: SYNC_FORWARD_ERROR | DETAILS: Variable `inv` not defined (line 1, column 1639 (offset: 1638))
+"MATCH (meta:MetaNode) WHERE meta.name IN ['NodeConcreteClass', 'NodeAbstractClass', 'NodeAssociationClass'] MATCH (inst)-[:InstanceOf]->(meta) WITH inst, labels(inst)[0] as classType OPTIONAL MATCH (inst)-[:HasAttribute]->(a) OPTIONAL MATCH (a)-[r1]->(aRef) WHERE type(r1) = 'ReferenceType' WITH inst, classType, collect(DISTINCT {name: a.attrName, type: a.type, idx: a.index, ref: aRef.name}) as attrs OPTIONAL MATCH (inst)-[:HasInvariant]->(inv) WITH inst, classType, attrs, collect(DISTINCT {invName: inv.invName, ocl: inv.expression, exist: inv.isExistential, idx: inv.index}) as invariants OPTIONAL MATCH (inst)-[:HasOperation]->(o) OPTIONAL MATCH (o)-[r2]->(retRef) WHERE type(r2) = 'ReferenceReturnType' OPTIONAL MATCH (o)-[:HasParam]->(p) OPTIONAL MATCH (p)-[r3]->(pRef) WHERE type(r3) = 'ReferenceType' WITH inst, classType, attrs, invariants, o, retRef, collect(DISTINCT {pName: p.paramName, pType: p.type, pOrder: p.order, pRef: pRef.name}) as opParams OPTIONAL MATCH (o)-[:HasPreCondition]->(pre) WITH inst, classType, attrs, invariants, o, retRef, opParams, collect(DISTINCT {name: pre.condName, expr: pre.expression, idx: pre.index}) as opPres OPTIONAL MATCH (o)-[:HasPostCondition]->(post) WITH inst, classType, attrs, invariants, o, retRef, opParams, opPres, collect(DISTINCT {name: post.condName, expr: post.expression, idx: post.index}) as opPosts WITH inst, classType, attrs, invariants, collect(DISTINCT {name: o.opName, ret: o.returnType, isColl: o.isReturnCollection, retRef: retRef.name, params: opParams, pre: opPres, post: opPosts}) as ops RETURN inst.name as className, classType, attrs, collect(DISTINCT {name: inv.invName, expr: inv.expression, exist: inv.isExistential, idx: inv.index}) as invariants, collect(DISTINCT {name: o.opName, ret: o.returnType, isColl: o.isReturnCollection, retRef: retRef.name, params: opParams, pre: opPres, post: opPosts}) as ops"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       ^
+[2026-01-12 16:01:13] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 16:01:13] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 16:01:13] ACTION: SESSION_CREATE | DETAILS: New session created with key: EE34305C
+[2026-01-12 16:01:14] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: EE34305C | Ver: unknown
+[2026-01-12 16:01:46] ACTION: PUSH_START | DETAILS: User neo4j [Key: EE34305C] (audreycolar) initiated sync for model: Employee
+[2026-01-12 16:01:48] ACTION: PUSH_ERROR | DETAILS: Failed to push model: Cannot merge the following node because of null property value for 'name': (:ClassInvariant {name: null})
+[2026-01-12 16:01:48] ACTION: SYNC_FORWARD_ERROR | DETAILS: Cannot merge the following node because of null property value for 'name': (:ClassInvariant {name: null})
+[2026-01-12 16:11:24] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 16:11:24] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 16:11:24] ACTION: SESSION_CREATE | DETAILS: New session created with key: 220DB1BB
+[2026-01-12 16:11:24] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 220DB1BB | Ver: unknown
+[2026-01-12 16:11:36] ACTION: PUSH_START | DETAILS: User neo4j [Key: 220DB1BB] (audreycolar) initiated sync for model: Employee
+[2026-01-12 16:11:39] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 16:11:39] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-12 16:11:39] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 16:11:39] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 220DB1BB] (audreycolar)
+[2026-01-12 16:11:52] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 16:11:52] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 16:23:03] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 16:23:03] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 16:36:13] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 16:36:14] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 16:36:14] ACTION: SESSION_CREATE | DETAILS: New session created with key: DEE5F379
+[2026-01-12 16:36:14] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: DEE5F379 | Ver: unknown
+[2026-01-12 16:36:24] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 16:36:24] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 16:36:41] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 16:36:41] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 17:05:15] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml]
+[2026-01-12 17:05:15] ACTION: CONNECTION_ERROR | DETAILS: Database does not exist. Database name: 'uml'.
+[2026-01-12 17:05:20] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 17:05:20] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 17:05:20] ACTION: SESSION_CREATE | DETAILS: New session created with key: 05808742
+[2026-01-12 17:05:20] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 05808742 | Ver: unknown
+[2026-01-12 17:05:26] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 17:05:26] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 17:05:53] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 17:05:53] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 17:09:46] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 17:09:46] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 17:11:50] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 17:11:51] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 17:11:51] ACTION: SESSION_CREATE | DETAILS: New session created with key: D8AAF5B7
+[2026-01-12 17:11:52] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: D8AAF5B7 | Ver: unknown
+[2026-01-12 17:12:21] ACTION: PUSH_START | DETAILS: User neo4j [Key: D8AAF5B7] (audreycolar) initiated sync for model: Employee
+[2026-01-12 17:12:26] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 17:12:26] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-12 17:12:26] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 17:12:26] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: D8AAF5B7] (audreycolar)
+[2026-01-12 17:12:42] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 17:12:42] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 17:13:21] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 17:13:21] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 17:15:34] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 17:15:34] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 17:15:34] ACTION: SESSION_CREATE | DETAILS: New session created with key: E46EBFE1
+[2026-01-12 17:15:34] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: E46EBFE1 | Ver: unknown
+[2026-01-12 17:15:39] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 17:15:39] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 17:16:04] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 17:16:04] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 17:32:10] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 17:32:11] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 17:32:11] ACTION: SESSION_CREATE | DETAILS: New session created with key: 014A1B15
+[2026-01-12 17:32:11] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 014A1B15 | Ver: unknown
+[2026-01-12 17:32:17] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 17:32:17] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 17:36:09] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 17:36:09] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 17:36:09] ACTION: SESSION_CREATE | DETAILS: New session created with key: 9B7B8BC3
+[2026-01-12 17:36:09] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 9B7B8BC3 | Ver: unknown
+[2026-01-12 17:36:14] ACTION: PULL_OP | DETAILS: Defined: University::fires
+[2026-01-12 17:36:14] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 17:40:49] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 17:40:49] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 17:40:49] ACTION: SESSION_CREATE | DETAILS: New session created with key: 3D6AF662
+[2026-01-12 17:40:49] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 3D6AF662 | Ver: unknown
+[2026-01-12 17:40:54] ACTION: PULL_OP | DETAILS: Defined signature: University::fires
+[2026-01-12 17:40:54] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 17:57:29] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 17:57:29] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 17:57:29] ACTION: SESSION_CREATE | DETAILS: New session created with key: 8815A9CC
+[2026-01-12 17:57:29] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 8815A9CC | Ver: unknown
+[2026-01-12 18:01:12] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-12 18:01:12] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-12 18:01:12] ACTION: SESSION_CREATE | DETAILS: New session created with key: 26873750
+[2026-01-12 18:01:12] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 26873750 | Ver: unknown
+[2026-01-12 18:02:02] ACTION: PUSH_START | DETAILS: User neo4j [Key: 26873750] (audreycolar) initiated sync for model: Employee
+[2026-01-12 18:02:03] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 18:02:03] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-12 18:02:03] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 761007609
+[2026-01-12 18:02:03] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 26873750] (audreycolar)
+[2026-01-12 18:02:13] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-01-12 18:02:13] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-12 18:02:13] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-01-12 18:02:13] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost

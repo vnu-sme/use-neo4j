@@ -1,0 +1,37 @@
+model Employee
+
+class Person
+attributes
+    name : String
+    age : Integer
+    salary : Real
+end
+
+class University
+attributes
+    name : String
+    location : String
+operations
+    fires(p:Person)
+    pre firePre: self.employee->includes(p)
+    post firePost: self.employee->excludes(p)
+end
+
+class Student < Person
+end
+
+class Professor < Person
+end
+
+-- association
+
+association WorksFor between
+    Person[*] role employee
+    University[0..1] role employer
+end
+
+constraints
+
+context Professor
+inv HigherSalaryThanStudent:
+Student.allInstances()->forAll(s:Student|s.salary < self.salary)

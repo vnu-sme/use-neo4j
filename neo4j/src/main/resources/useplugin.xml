@@ -2,74 +2,63 @@
 <?use version="3.0.0"?>
 <plugin name="Neo4jPlugin" version="0.1">
     <actions>
-        <action label="Check Sync Status"
+        <action label="Open connection"
                 icon="images/rtl.png"
-                class="org.uet.dse.neo4j.actions.TestAction"
-                tooltip="Compare datfdfda between USE and Neo4j"
-                menu="Neo4j Plugfdfin"
-                menuitem="Sync Stfdfdatus Dashboard"
-                id="org.uet.dse.neo4j.actions.TestAction">
+                class="org.uet.dse.neo4j.action_phase2.ActionOpenNeo4j"
+                tooltip="Compare between USE and Neo4j"
+                menu="Neo4j Plugin phase 2"
+                menuitem="Open connection"
+                id="org.uet.dse.neo4j.action_phase2.ActionOpenNeo4j">
+        </action>
+        <action label="Open dashboard"
+                icon="images/rtl.png"
+                class="org.uet.dse.neo4j.action_phase2.ActionOpenDashboard"
+                tooltip="Compare between USE and Neo4j"
+                menu="Neo4j Plugin phase 2"
+                menuitem="Open dashboard"
+                id="org.uet.dse.neo4j.action_phase2.ActionOpenDashboard">
+        </action>
+        <action label="OpenSetting"
+                icon="images/rtl.png"
+                class="org.uet.dse.neo4j.action_phase2.ActionOpenSettings"
+                tooltip="Compare between USE and Neo4j"
+                menu="Neo4j Plugin phase 2"
+                menuitem="OpenSetting"
+                id="org.uet.dse.neo4j.action_phase2.ActionOpenSettings">
+        </action>
+        <action label="Sync model forward"
+                icon="images/rtl.png"
+                class="org.uet.dse.neo4j.action_phase2.ActionSyncModelForward"
+                tooltip="Compare between USE and Neo4j"
+                menu="Neo4j Plugin phase 2"
+                menuitem="Sync model forward"
+                id="org.uet.dse.neo4j.action_phase2.ActionSyncModelForward">
+        </action>
+        <action label="Sync model backward"
+                icon="images/rtl.png"
+                class="org.uet.dse.neo4j.action_phase2.ActionSyncModelBackward"
+                tooltip="Compare between USE and Neo4j"
+                menu="Neo4j Plugin phase 2"
+                menuitem="Sync model backward"
+                id="org.uet.dse.neo4j.action_phase2.ActionSyncModelBackward">
+        </action>
+        <action label="Sync object forward"
+                icon="images/rtl.png"
+                class="org.uet.dse.neo4j.action_phase2.ActionSyncObjectForward"
+                tooltip="Compare between USE and Neo4j"
+                menu="Neo4j Plugin phase 2"
+                menuitem="Sync object forward"
+                id="org.uet.dse.neo4j.action_phase2.ActionSyncObjectForward">
+        </action>
+        <action label="Sync object backward"
+                icon="images/rtl.png"
+                class="org.uet.dse.neo4j.action_phase2.ActionSyncObjectBackward"
+                tooltip="Compare between USE and Neo4j"
+                menu="Neo4j Plugin phase 2"
+                menuitem="Sync object backward"
+                id="org.uet.dse.neo4j.action_phase2.ActionSyncObjectBackward">
         </action>
 
-        <action label="Open Neo4j Connection"
-                icon="images/rtl.png"
-                class="org.uet.dse.neo4j.actions.ActionOpenNeo4j"
-                tooltip="Open Neo4j Database Connection"
-                menu="Neo4j Plugin"
-                menuitem="Open Connection Dialog"
-                toolbaritem="Neo4j Connect"
-                id="org.uet.dse.neo4j.actions.ActionOpenNeo4j">
-        </action>
 
-        <action label="Neo4j Query Console"
-                icon="images/rtl.png"
-                class="org.uet.dse.neo4j.actions.ActionOpenQueryConsole"
-                tooltip="Run Cypher Queries directly"
-                menu="Neo4j Plugin"
-                menuitem="Query Console"
-                id="org.uet.dse.neo4j.actions.ActionOpenQueryConsole">
-        </action>
-
-        <action label="Connection Status"
-                icon="images/rtl.png"
-                class="org.uet.dse.neo4j.actions.ActionOpenStatus"
-                tooltip="View connection details and database statistics"
-                menu="Neo4j Plugin"
-                menuitem="Connection Status"
-                id="org.uet.dse.neo4j.actions.ActionOpenStatus">
-        </action>
-        <action label="testing"
-                icon="images/rtl.png"
-                class="org.uet.dse.neo4j.actions.ActionDev"
-                tooltip="View connection details and database statistics"
-                menu="Neo4j Plugin"
-                menuitem="Dev test"
-                id="org.uet.dse.neo4j.actions.ActionDev">
-        </action>
-
-        <action label="Sync Options"
-                icon="images/rtl.png"
-                class="org.uet.dse.neo4j.actions.ActionSyncOptions"
-                tooltip="Select synchronization options"
-                menu="Neo4j Plugin"
-                menuitem="Sync Manager"
-                id="org.uet.dse.neo4j.actions.ActionSyncOptions">
-        </action>
-        <action label="Import from Neo4j"
-                icon="images/rtl.png"
-                class="org.uet.dse.neo4j.actions.ActionImportFromNeo4j"
-                tooltip="Reconstruct Model and Data from Neo4j Database"
-                menu="Neo4j Plugin"
-                menuitem="Import Manager"
-                id="org.uet.dse.neo4j.actions.ActionImportFromNeo4j">
-        </action>
-        <action label="Check Sync Status"
-                icon="images/rtl.png"
-                class="org.uet.dse.neo4j.actions.ActionCheckSync"
-                tooltip="Compare data between USE and Neo4j"
-                menu="Neo4j Plugin"
-                menuitem="Sync Status Dashboard"
-                id="org.uet.dse.neo4j.actions.ActionCheckSync">
-        </action>
     </actions>
 </plugin>

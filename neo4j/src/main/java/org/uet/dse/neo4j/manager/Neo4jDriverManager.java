@@ -1,132 +1,164 @@
 package org.uet.dse.neo4j.manager;
 
 import org.neo4j.driver.*;
+import org.uet.dse.neo4j.phase2.SessionManager;
+import org.uet.dse.neo4j.phase2.WorkLogManager;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class Neo4jDriverManager implements AutoCloseable {
     private static Neo4jDriverManager instance;
     private final Driver driver;
-    private String activeDatabase;
+    private final String uri;
+    private final String user;
+    private final String activeDatabase;
+    private final boolean deleteOnExit;
 
-    private boolean deleteOnExit = false; // Cờ đánh dấu có xóa DB khi tắt không
+    private SessionManager sessionManager;
 
-
-    // Constructor giữ nguyên
-    private Neo4jDriverManager(String uri, String user, String password) {
-        // Cấu hình driver để không bị treo nếu mạng lag
-        Config config = Config.builder()
-                .withConnectionTimeout(30, TimeUnit.SECONDS)
-                .build();
-        driver = GraphDatabase.driver(uri, AuthTokens.basic(user, password), config);
-    }
-
-    private Neo4jDriverManager(String uri, String user, String password, String database) {
-        Config config = Config.builder()
-                .withConnectionTimeout(30, TimeUnit.SECONDS)
-                .build();
-        driver = GraphDatabase.driver(uri, AuthTokens.basic(user, password), config);
-        this.activeDatabase = (database == null || database.isEmpty()) ? "neo4j" : database;
-    }
-
+    // Constructor private để ép buộc khởi tạo qua phương thức static connect
     private Neo4jDriverManager(String uri, String user, String password, String database, boolean deleteOnExit) {
-        Config config = Config.builder()
-                .withConnectionTimeout(30, TimeUnit.SECONDS)
-                .build();
-        driver = GraphDatabase.driver(uri, AuthTokens.basic(user, password), config);
+        this.uri = uri;
+        this.user = user;
         this.activeDatabase = (database == null || database.isEmpty()) ? "neo4j" : database;
         this.deleteOnExit = deleteOnExit;
+
+        Config config = Config.builder()
+                .withConnectionTimeout(30, TimeUnit.SECONDS)
+                .withMaxConnectionPoolSize(50)
+                .build();
+
+        this.driver = GraphDatabase.driver(uri, AuthTokens.basic(user, password), config);
+
     }
 
-    // Giữ nguyên getInstance cũ (cho code cũ dùng)
-    public static Neo4jDriverManager getInstance(String uri, String user, String password) {
-        if (instance == null) {
-            synchronized (Neo4jDriverManager.class) {
-                if (instance == null) {
-                    instance = new Neo4jDriverManager(uri, user, password);
-                }
-            }
-        }
-        return instance;
-    }
-
-    // --- THÊM MỚI: Hàm này dùng cho GUI để ép buộc kết nối lại ---
-    public static void connect(String uri, String user, String password, String database, boolean createNew, boolean deleteOnExit) {
-        // 1. Đóng kết nối cũ
+    /**
+     * Phương thức chính để thiết lập kết nối.
+     * Xử lý cả việc tạo database mới thông qua database 'system'.
+     */
+    public static synchronized void connect(String uri, String user, String password, String database, boolean createNew, boolean deleteOnExit) throws Exception {
+        // 1. Đóng instance cũ nếu đang tồn tại
         if (instance != null) {
             instance.close();
             instance = null;
         }
 
-        // 2. Nếu yêu cầu tạo mới, phải kết nối vào 'system' để tạo DB trước
-        if (createNew) {
-            // Tạo driver tạm thời để kết nối vào system
-            try (Driver tempDriver = GraphDatabase.driver(uri, AuthTokens.basic(user, password))) {
-                try (Session sysSession = tempDriver.session(SessionConfig.forDatabase("system"))) {
+        // 2. Nếu yêu cầu tạo mới DB, phải can thiệp qua database 'system'
+        if (createNew && !database.equalsIgnoreCase("neo4j") && !database.equalsIgnoreCase("system")) {
+            try (Driver adminDriver = GraphDatabase.driver(uri, AuthTokens.basic(user, password))) {
+                try (Session sysSession = adminDriver.session(SessionConfig.forDatabase("system"))) {
                     sysSession.executeWrite(tx -> {
-                        // Tạo database mới (IF NOT EXISTS để tránh lỗi nếu đã có)
-                        tx.run("CREATE DATABASE `" + database + "` IF NOT EXISTS");
+                        tx.run("CREATE DATABASE `" + database + "` IF NOT EXISTS WAIT");
                         return null;
                     });
                 }
             } catch (Exception e) {
-                throw new RuntimeException("Không thể tạo database mới. Hãy chắc chắn bạn dùng user admin (neo4j). Lỗi: " + e.getMessage());
+                throw new Exception("Không thể tạo Database mới. Lỗi quyền hạn hoặc kết nối: " + e.getMessage());
             }
         }
 
-        // 3. Khởi tạo Manager chính thức kết nối vào database đích
+        // 3. Khởi tạo instance chính thức
         instance = new Neo4jDriverManager(uri, user, password, database, deleteOnExit);
-        instance.driver.verifyConnectivity();
-    }
 
-    public Session openSession() {
-        return driver.session(SessionConfig.forDatabase(activeDatabase));
-    }
-    public String getActiveDatabase() {
-        return activeDatabase;
+        // Kiểm tra kết nối ngay lập tức
+        instance.driver.verifyConnectivity();
+        WorkLogManager.getInstance().log("CONNECTION", "Connected to " + uri + " [DB: " + database + "]");
     }
 
     public static Neo4jDriverManager getInstance() {
         return instance;
     }
+
+    /**
+     * Mở session làm việc với database đã chọn
+     */
+    public Session openSession() {
+        return driver.session(SessionConfig.forDatabase(activeDatabase));
+    }
+
     public boolean isConnected() {
-        // 1. Nếu driver chưa được khởi tạo -> Chắc chắn chưa kết nối
-        if (driver == null) {
+        try {
+            if (driver != null) {
+                driver.verifyConnectivity();
+                return true;
+            }
+        } catch (Exception e) {
             return false;
         }
+        return false;
+    }
 
-        // 2. Thử ping tới server
-        try {
-            driver.verifyConnectivity();
-            return true;
+    /**
+     * Lấy các thông số thống kê của Database (Metadata)
+     */
+    public Map<String, Object> getDatabaseStats() {
+        Map<String, Object> stats = new HashMap<>();
+        if (!isConnected()) return stats;
+
+        try (Session session = openSession()) {
+            // 1. Lấy Version của Neo4j
+            Result resVer = session.run("CALL dbms.components() YIELD versions RETURN versions[0] AS version");
+            if (resVer.hasNext()) stats.put("version", resVer.single().get("version").asString());
+
+            // 2. Thống kê số lượng Node và Edge hiện có
+            Result resCount = session.run("MATCH (n) WITH count(n) as nodes MATCH ()-[r]->() RETURN nodes, count(r) as edges");
+            if (resCount.hasNext()) {
+                org.neo4j.driver.Record rec = resCount.single();
+                stats.put("nodeCount", rec.get("nodes").asLong());
+                stats.put("edgeCount", rec.get("edges").asLong());
+            }
         } catch (Exception e) {
-            // Nếu có lỗi (timeout, rớt mạng...) -> Trả về false
-            return false;
+            stats.put("error", e.getMessage());
+        }
+        return stats;
+    }
+
+    // --- Getter & Setter cho SessionManager (Quản lý Collaboration Key) ---
+    public void setSessionManager(SessionManager sm) {
+        this.sessionManager = sm;
+    }
+
+    public SessionManager getSessionManager() {
+        return sessionManager;
+    }
+
+    public String getActiveDatabase() {
+        return activeDatabase;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    /**
+     * Đóng driver và thực hiện cleanup (Xóa DB nếu cờ deleteOnExit được bật)
+     */
+    @Override
+    public void close() throws Exception {
+        if (driver != null) {
+            if (deleteOnExit && !activeDatabase.equals("neo4j") && !activeDatabase.equals("system")) {
+                WorkLogManager.getInstance().log("CLEANUP", "Deleting temporary database: " + activeDatabase);
+                try (Session sysSession = driver.session(SessionConfig.forDatabase("system"))) {
+                    sysSession.executeWrite(tx -> {
+                        tx.run("STOP DATABASE `" + activeDatabase + "` WAIT");
+                        tx.run("DROP DATABASE `" + activeDatabase + "` WAIT");
+                        return null;
+                    });
+                } catch (Exception e) {
+                    System.err.println("Cleanup error: " + e.getMessage());
+                }
+            }
+            driver.close();
         }
     }
 
     public Driver getDriver() {
         return driver;
-    }
-
-    @Override
-    public void close() {
-        if (driver != null) {
-            // Logic xóa Database trước khi đóng driver
-            if (deleteOnExit && activeDatabase != null && !activeDatabase.equals("neo4j") && !activeDatabase.equals("system")) {
-                try (Session sysSession = driver.session(SessionConfig.forDatabase("system"))) {
-                    sysSession.executeWrite(tx -> {
-                        // STOP database trước khi DROP
-                        tx.run("STOP DATABASE `" + activeDatabase + "`");
-                        tx.run("DROP DATABASE `" + activeDatabase + "` IF EXISTS");
-                        return null;
-                    });
-                    System.out.println("Neo4j Manager: Đã xóa database [" + activeDatabase + "] theo yêu cầu.");
-                } catch (Exception e) {
-                    System.err.println("Lỗi khi xóa database: " + e.getMessage());
-                }
-            }
-            driver.close();
-        }
     }
 }
