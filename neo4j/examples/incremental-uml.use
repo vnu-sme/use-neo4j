@@ -9,12 +9,39 @@ end
 
 class Linh
 attributes
-    name : String
+    namei : String
     age : String
     female: String
 end
 
-association Ny between
-    Kien[1] role husbando
+class Meokk
+attributes
+    namei : String
+    age : String
+    female: String
+end
+
+class Meme
+attributes
+    namei : String
+    age : String
+    female: String
+end
+
+composition Family between
+    Kien[1] role husband
     Linh[1] role wife
 end
+
+association Ny between
+    Kien[1] role boyfriend
+    Linh[1] role girlfriend
+end
+
+aggregation Lover between
+    Linh[1] role female
+    Kien[1] role male
+
+end
+
+

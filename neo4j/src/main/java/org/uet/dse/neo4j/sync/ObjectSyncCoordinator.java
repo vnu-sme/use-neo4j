@@ -595,4 +595,26 @@ public class ObjectSyncCoordinator {
         });
         return os;
     }
+
+    // Trong lớp ObjectSyncCoordinator
+    public void syncObjectsForwardRealtime() {
+        String user = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
+
+        // Thử lấy lock, nếu bận thì bỏ qua (Real-time ko đợi)
+        LockManager.LockResult lock = LockManager.acquireLock(user);
+        if (!lock.success) return;
+
+        try {
+            if (!isModelInSync()) return; // Chỉ sync object nếu model đã khớp
+
+            ObjectDiff diff = compareObjects(getJavaObjectSnapshot(), getNeo4jObjectSnapshot());
+
+            if (diff.hasDifference()) {
+                // Thực thi push (Hàm này đã bao gồm logic xóa neo4jOnlyObjects và push javaOnly)
+                executePush(diff);
+            }
+        } finally {
+            LockManager.releaseLock();
+        }
+    }
 }

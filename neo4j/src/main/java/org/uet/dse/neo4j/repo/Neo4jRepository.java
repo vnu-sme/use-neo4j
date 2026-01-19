@@ -58,36 +58,51 @@ public class Neo4jRepository {
     public void createAssociationEdge(MAssociation assoc) {
         if (assoc.associationEnds().size() < 2) return;
 
-        MAssociationEnd source = assoc.associationEnds().get(0);
-        MAssociationEnd target = assoc.associationEnds().get(1);
+        MAssociationEnd end1 = assoc.associationEnds().get(0);
+        MAssociationEnd end2 = assoc.associationEnds().get(1);
 
+        // Mặc định: end1 là Source, end2 là Target
+        MAssociationEnd whole = end1;
+        MAssociationEnd part = end2;
         String edgeLabel = "AssociateWith";
-        int kind = target.aggregationKind();
-        if (kind == 2) edgeLabel = "ComposeOf";
-        else if (kind == 1) edgeLabel = "Aggregates";
+
+        // LOGIC XÁC ĐỊNH HƯỚNG (Whole -> Part)
+        // Nếu đầu 1 (end1) mang tính chất tập hợp -> Nó là Part, vậy đầu 2 là Whole
+        if (end1.aggregationKind() > 0) {
+            whole = end2;
+            part = end1;
+            edgeLabel = (end1.aggregationKind() == 2) ? "ComposeOf" : "Aggregates";
+        }
+        // Nếu đầu 2 (end2) mang tính chất tập hợp -> Nó là Part, vậy đầu 1 là Whole
+        else if (end2.aggregationKind() > 0) {
+            whole = end1;
+            part = end2;
+            edgeLabel = (end2.aggregationKind() == 2) ? "ComposeOf" : "Aggregates";
+        }
 
         String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
         try (Session session = driver.session(SessionConfig.forDatabase(dbName))) {
+
+            // 1. Dọn dẹp: Xóa mọi cạnh cũ của Association này (tránh bị 2 mũi tên ngược chiều khi đổi thiết kế)
+            session.run("MATCH ()-[r {associationName: $name}]-() DELETE r",
+                    Values.parameters("name", assoc.name()));
+
+            // 2. Tạo cạnh theo đúng hướng Whole -> Part
             String cypher = String.format(
                     "MATCH (s {name: $sName}), (t {name: $tName}) " +
                             "MERGE (s)-[r:%s {associationName: $assocName}]->(t) " +
-                            "SET r.sourceClassName = $sName, " +
-                            "    r.sourceClassrole = $sRole, " +
-                            "    r.sourceMultiplicity = $sMult, " + // LƯU ĐẦU SOURCE
-                            "    r.targetClassName = $tName, " +
-                            "    r.targerClassrole = $tRole, " +
-                            "    r.targetMultiplicity = $tMult",    // LƯU ĐẦU TARGET
-                    edgeLabel
-            );
+                            "SET r.sourceClassName = $sName, r.sourceClassrole = $sRole, r.sourceMultiplicity = $sMult, " +
+                            "    r.targetClassName = $tName, r.targerClassrole = $tRole, r.targetMultiplicity = $tMult",
+                    edgeLabel);
 
             session.run(cypher, Values.parameters(
                     "assocName", assoc.name(),
-                    "sName", source.cls().name(),
-                    "sRole", source.name(),
-                    "sMult", source.multiplicity().toString(), // Dùng hàm toString() của MMultiplicity
-                    "tName", target.cls().name(),
-                    "tRole", target.name(),
-                    "tMult", target.multiplicity().toString()  // Dùng hàm toString() của MMultiplicity
+                    "sName", whole.cls().name(),
+                    "sRole", whole.name(),
+                    "sMult", whole.multiplicity().toString(),
+                    "tName", part.cls().name(),
+                    "tRole", part.name(),
+                    "tMult", part.multiplicity().toString()
             ));
         }
     }
@@ -291,4 +306,5 @@ public class Neo4jRepository {
             ));
         }
     }
+
 }

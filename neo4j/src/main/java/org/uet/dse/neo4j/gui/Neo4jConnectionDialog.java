@@ -6,6 +6,7 @@ import org.uet.dse.neo4j.config.Neo4jDefaultConnectionConfig;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.phase2.SessionManager;
 import org.uet.dse.neo4j.phase2.WorkLogManager;
+import org.uet.dse.neo4j.realtime.Neo4jRealTimeService;
 import org.uet.dse.neo4j.repo.Neo4jRepository;
 
 import javax.swing.*;
@@ -198,6 +199,14 @@ public class Neo4jConnectionDialog extends JDialog {
 
 			//set static object
 			Neo4jDriverManager.getInstance().setSessionManager(sm);
+
+
+			// ============================================================
+			// CHỖ CẦN THÊM: KÍCH HOẠT REAL-TIME SERVICE
+			// ============================================================
+			Neo4jRealTimeService.start(this.useSession);
+			// ============================================================
+
 
 
 			Map<String, Object> stats = Neo4jDriverManager.getInstance().getDatabaseStats();

@@ -111,6 +111,7 @@ public class ClassState {
                 Objects.equals(this.enumLiterals, other.enumLiterals); // So sánh các giá trị Enum; // So sánh thêm Post
     }
 
+
     // --- Inner Class đại diện cho tham số ---
     public static class OpParam {
         String name;
