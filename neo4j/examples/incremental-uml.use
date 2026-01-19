@@ -1,0 +1,20 @@
+model Incremental
+
+class Kien
+attributes
+    name : String
+    age : String
+    male: String
+end
+
+class Linh
+attributes
+    name : String
+    age : String
+    female: String
+end
+
+association Ny between
+    Kien[1] role husbando
+    Linh[1] role wife
+end

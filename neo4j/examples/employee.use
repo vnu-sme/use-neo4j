@@ -1,10 +1,16 @@
 model Employee
 
+
+enum Gender { Male, Female, Other }
+enum ContractType { FullTime, PartTime, Intern, Consultant }
+
 class Person
 attributes
     name : String
     age : Integer
     salary : Real
+    sex : Gender
+    uni: University
 end
 
 class University
@@ -29,6 +35,18 @@ association WorksFor between
     Person[*] role employee
     University[0..1] role employer
 end
+
+associationclass Employment
+  between
+    Person[*] role source
+    University[0..1] role target
+attributes
+    startDate : String
+    position : String
+    contractType : ContractType
+
+end
+
 
 constraints
 

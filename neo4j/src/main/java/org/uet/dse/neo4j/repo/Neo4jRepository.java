@@ -5,6 +5,7 @@ import org.neo4j.driver.Session;
 import org.neo4j.driver.SessionConfig;
 import org.neo4j.driver.Values;
 import org.tzi.use.uml.mm.MAssociation;
+import org.tzi.use.uml.mm.MAssociationClass;
 import org.tzi.use.uml.mm.MAssociationEnd;
 import org.tzi.use.uml.mm.MClassifier;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
@@ -228,5 +229,66 @@ public class Neo4jRepository {
         return 0L;
     }
 
+    // Đặc tả 18: Edge HasAssociationClass
+    public void createAssociationClassStructure(MAssociationClass ac) {
+        MAssociationEnd sourceEnd = ac.associationEnds().get(0);
+        MAssociationEnd targetEnd = ac.associationEnds().get(1);
 
+        String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
+        try (Session session = driver.session(SessionConfig.forDatabase(dbName))) {
+            // TRUY VẤN THÔNG QUA TẦNG METAMODEL (InstanceOf)
+            String cypher =
+                    // 1. Tìm Node thực thể và MetaNode tương ứng của nó
+                    "MATCH (a {name: $srcName})-[:InstanceOf]->(metaA:MetaNode) " +
+                            "MATCH (b {name: $tgtName})-[:InstanceOf]->(metaB:MetaNode) " +
+                            "MATCH (ac {name: $acName})-[:InstanceOf]->(metaAC:MetaNode) " +
+
+                            // 2. Kiểm tra logic: a và b phải là Class, ac phải là AssociationClass
+                            "WHERE metaA.name IN ['NodeConcreteClass', 'NodeAbstractClass', 'NodeAssociationClass'] " +
+                            "AND metaB.name IN ['NodeConcreteClass', 'NodeAbstractClass', 'NodeAssociationClass'] " +
+                            "AND metaAC.name = 'NodeAssociationClass' " +
+
+                            // 3. MERGE các quan hệ M1
+                            "MERGE (a)-[s:sourceAssoClass]->(ac) " +
+                            "SET s.role = $sRole, s.multiplicity = $sMult, s.index = 0 " +
+
+                            "MERGE (ac)-[t:targetAssoClass]->(b) " +
+                            "SET t.role = $tRole, t.multiplicity = $tMult, t.index = 1 " +
+
+                            // 4. Cạnh HasAssociationClass (Class nguồn -> AC)
+                            "MERGE (a)-[:HasAssociationClass]->(ac) " +
+                            "MERGE (b)-[:HasAssociationClass]->(ac) ";
+
+            session.run(cypher, Values.parameters(
+                    "srcName", sourceEnd.cls().name(),
+                    "tgtName", targetEnd.cls().name(),
+                    "acName", ac.name(),
+                    "sRole", sourceEnd.name(),
+                    "sMult", sourceEnd.multiplicity().toString(),
+                    "tRole", targetEnd.name(),
+                    "tMult", targetEnd.multiplicity().toString()
+            ));
+        }
+    }
+
+    /**
+     * Tạo Node thực thể Enumeration và nối InstanceOf tới MetaNode
+     */
+    public void upsertEnumeration(String enumName, List<String> literals) {
+        String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
+        try (org.neo4j.driver.Session session = driver.session(org.neo4j.driver.SessionConfig.forDatabase(dbName))) {
+            // Sử dụng nhãn động là tên của Enum (ví dụ :Gender)
+            // Dùng nháy ngược `` để an toàn với tên có ký tự đặc biệt
+            String cypher = String.format(
+                    "MATCH (meta:MetaNode {name: 'NodeEnumeration'}) " +
+                            "MERGE (e:`%s` {name: $name}) " +
+                            "SET e.value = $values " +
+                            "MERGE (e)-[:InstanceOf]->(meta)", enumName);
+
+            session.run(cypher, org.neo4j.driver.Values.parameters(
+                    "name", enumName,
+                    "values", literals
+            ));
+        }
+    }
 }

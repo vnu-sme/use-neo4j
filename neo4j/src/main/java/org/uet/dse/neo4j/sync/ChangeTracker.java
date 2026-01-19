@@ -48,8 +48,8 @@ public class ChangeTracker {
         scheduler.scheduleAtFixedRate(() -> {
             try {
                 if (Neo4jDriverManager.getInstance().isConnected()) {
-                    SyncCoordinator mc = new SyncCoordinator(session);
-                    SyncObjectCoordinator oc = new SyncObjectCoordinator(session.system());
+                    ModelSyncCoordinator mc = new ModelSyncCoordinator(session);
+                    ObjectSyncCoordinator oc = new ObjectSyncCoordinator(session.system());
 
                     // Lấy tóm tắt nhanh
                     String modelSum = mc.getQuickSummary();

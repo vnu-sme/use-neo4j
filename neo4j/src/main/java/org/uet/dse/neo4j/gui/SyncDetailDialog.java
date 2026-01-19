@@ -1,13 +1,11 @@
 package org.uet.dse.neo4j.gui;
 
-import org.tzi.use.api.UseModelApi;
 import org.tzi.use.uml.mm.MClass;
 import org.uet.dse.neo4j.phase2.Neo4jUmlBridge;
-import org.uet.dse.neo4j.phase2.WorkLogManager;
 import org.uet.dse.neo4j.sync.ModelDiff;
 import org.uet.dse.neo4j.sync.ObjectDiff;
-import org.uet.dse.neo4j.sync.SyncCoordinator;
-import org.uet.dse.neo4j.sync.SyncObjectCoordinator;
+import org.uet.dse.neo4j.sync.ModelSyncCoordinator;
+import org.uet.dse.neo4j.sync.ObjectSyncCoordinator;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,10 +18,10 @@ public class SyncDetailDialog extends JDialog {
     private JList<CheckListItem> list;
     private DefaultListModel<CheckListItem> listModel;
 
-    private final SyncObjectCoordinator objCoord;
-    private final SyncCoordinator modelCoord;
+    private final ObjectSyncCoordinator objCoord;
+    private final ModelSyncCoordinator modelCoord;
 
-    public SyncDetailDialog(String type, SyncCoordinator modelCoord, SyncObjectCoordinator objCoord) {
+    public SyncDetailDialog(String type, ModelSyncCoordinator modelCoord, ObjectSyncCoordinator objCoord) {
         this.setTitle("Deep Sync Check: " + type + " Level");
         this.setSize(650, 550);
         this.setLayout(new BorderLayout(10, 10));

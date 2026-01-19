@@ -4,6 +4,7 @@ import org.tzi.use.uml.ocl.type.CollectionType;
 import org.tzi.use.uml.ocl.type.Type;
 import org.tzi.use.uml.ocl.type.Type.VoidHandling;
 import java.util.List;
+import java.util.Map;
 
 public class UmlTypeTranslator {
 
@@ -79,5 +80,32 @@ public class UmlTypeTranslator {
             case "Boolean": return "Boolean";
             default:       return dbType; // Trả về tên Class/Enum nguyên bản
         }
+    }
+
+    /**
+     * MỚI: Tái tạo chuỗi OCL Type đầy đủ (xử lý cả Collection)
+     * @param props Map thuộc tính của Attribute/Param lấy từ Neo4j
+     */
+    public static String reconstructFullTypeString(Map<String, Object> props) {
+        Object typeObj = props.get("type");
+        if (typeObj == null) return "String";
+
+        String umlBase = toUmlTypeString(typeObj.toString());
+        if (umlBase == null) return null;
+
+        // Ở bước trên ta đã put vào Map với key "isCollection"
+        Object isCollObj = props.get("isCollection");
+        boolean isColl = false;
+        if (isCollObj != null) {
+            isColl = (Boolean) isCollObj;
+        }
+
+        if (isColl) {
+            // Mặc định là Set nếu không có collectionType
+            String collKind = (String) props.getOrDefault("collectionType", "Set");
+            return String.format("%s(%s)", collKind, umlBase);
+        }
+
+        return umlBase;
     }
 }

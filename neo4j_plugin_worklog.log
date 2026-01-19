@@ -577,3 +577,510 @@
 [2026-01-12 18:02:13] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
 [2026-01-12 18:02:13] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
 [2026-01-12 18:02:13] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-01-18 21:51:22] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-18 21:51:25] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-18 21:51:25] ACTION: SESSION_CREATE | DETAILS: New session created with key: EEBF5084
+[2026-01-18 21:51:25] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: EEBF5084 | Ver: unknown
+[2026-01-18 21:51:42] ACTION: PUSH_START | DETAILS: User neo4j [Key: EEBF5084] (audreycolar) initiated sync for model: Employee
+[2026-01-18 21:51:44] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 21:51:44] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-18 21:51:44] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 21:51:44] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: EEBF5084] (audreycolar)
+[2026-01-18 21:53:42] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-01-18 21:53:42] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-18 21:53:42] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-01-18 21:53:42] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-01-18 21:57:49] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-18 21:57:49] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-18 21:57:49] ACTION: SESSION_CREATE | DETAILS: New session created with key: 92F9CF80
+[2026-01-18 21:57:49] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 92F9CF80 | Ver: unknown
+[2026-01-18 21:58:03] ACTION: PUSH_START | DETAILS: User neo4j [Key: 92F9CF80] (audreycolar) initiated sync for model: Employee
+[2026-01-18 21:58:05] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 21:58:05] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-18 21:58:05] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 21:58:05] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 92F9CF80] (audreycolar)
+[2026-01-18 22:15:18] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-18 22:15:18] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-18 22:15:18] ACTION: SESSION_CREATE | DETAILS: New session created with key: 29C45380
+[2026-01-18 22:15:18] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 29C45380 | Ver: unknown
+[2026-01-18 22:15:29] ACTION: PUSH_START | DETAILS: User neo4j [Key: 29C45380] (audreycolar) initiated sync for model: Employee
+[2026-01-18 22:15:30] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 22:15:30] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-18 22:15:30] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 22:15:30] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 29C45380] (audreycolar)
+[2026-01-18 22:16:08] ACTION: PUSH_START | DETAILS: User neo4j [Key: 29C45380] (audreycolar) initiated sync for model: Employee
+[2026-01-18 22:16:09] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 22:16:09] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-18 22:16:10] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 22:16:10] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 29C45380] (audreycolar)
+[2026-01-18 22:18:45] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-18 22:18:45] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-18 22:18:45] ACTION: SESSION_CREATE | DETAILS: New session created with key: 4B1FC225
+[2026-01-18 22:18:45] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 4B1FC225 | Ver: unknown
+[2026-01-18 22:18:53] ACTION: PUSH_START | DETAILS: User neo4j [Key: 4B1FC225] (audreycolar) initiated sync for model: Employee
+[2026-01-18 22:18:54] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 22:18:54] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-18 22:18:54] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 22:18:54] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 4B1FC225] (audreycolar)
+[2026-01-18 22:26:53] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-18 22:26:53] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-18 22:26:53] ACTION: SESSION_CREATE | DETAILS: New session created with key: 5FAAEDC4
+[2026-01-18 22:26:53] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 5FAAEDC4 | Ver: unknown
+[2026-01-18 22:27:04] ACTION: PUSH_START | DETAILS: User neo4j [Key: 5FAAEDC4] (audreycolar) initiated sync for model: Employee
+[2026-01-18 22:27:05] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 22:27:05] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-18 22:27:05] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 22:27:05] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 5FAAEDC4] (audreycolar)
+[2026-01-18 22:27:31] ACTION: PUSH_START | DETAILS: User neo4j [Key: 5FAAEDC4] (audreycolar) initiated sync for model: Employee
+[2026-01-18 22:27:32] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 22:27:32] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-18 22:27:32] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 22:27:32] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 5FAAEDC4] (audreycolar)
+[2026-01-18 22:36:44] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-18 22:36:45] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-18 22:36:45] ACTION: SESSION_CREATE | DETAILS: New session created with key: 93679E0A
+[2026-01-18 22:36:45] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 93679E0A | Ver: unknown
+[2026-01-18 22:37:16] ACTION: PUSH_START | DETAILS: User neo4j [Key: 93679E0A] (audreycolar) initiated sync for model: Employee
+[2026-01-18 22:37:17] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 22:37:17] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-18 22:37:17] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 22:37:17] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 93679E0A] (audreycolar)
+[2026-01-18 22:40:16] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-18 22:40:16] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-18 22:40:16] ACTION: SESSION_CREATE | DETAILS: New session created with key: A26CD99B
+[2026-01-18 22:40:16] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: A26CD99B | Ver: unknown
+[2026-01-18 22:40:23] ACTION: PUSH_START | DETAILS: User neo4j [Key: A26CD99B] (audreycolar) initiated sync for model: Employee
+[2026-01-18 22:40:25] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 22:40:25] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-18 22:40:25] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 22:40:25] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: A26CD99B] (audreycolar)
+[2026-01-18 22:41:56] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-18 22:41:56] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-18 22:41:56] ACTION: SESSION_CREATE | DETAILS: New session created with key: 8F1B7709
+[2026-01-18 22:41:56] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 8F1B7709 | Ver: unknown
+[2026-01-18 22:42:31] ACTION: PUSH_START | DETAILS: User neo4j [Key: 8F1B7709] (audreycolar) initiated sync for model: Employee
+[2026-01-18 22:43:24] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 22:43:24] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-18 22:43:24] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 22:43:24] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 8F1B7709] (audreycolar)
+[2026-01-18 22:43:58] ACTION: PUSH_START | DETAILS: User neo4j [Key: 8F1B7709] (audreycolar) initiated sync for model: Employee
+[2026-01-18 22:45:59] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 22:45:59] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-18 22:45:59] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 22:45:59] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 8F1B7709] (audreycolar)
+[2026-01-18 22:50:38] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-18 22:50:38] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-18 22:50:39] ACTION: SESSION_CREATE | DETAILS: New session created with key: BAA8BA06
+[2026-01-18 22:50:39] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: BAA8BA06 | Ver: unknown
+[2026-01-18 22:51:18] ACTION: PUSH_START | DETAILS: User neo4j [Key: BAA8BA06] (audreycolar) initiated sync for model: Employee
+[2026-01-18 22:58:02] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-18 22:58:02] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-18 22:58:02] ACTION: SESSION_CREATE | DETAILS: New session created with key: 1A92B659
+[2026-01-18 22:58:02] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 1A92B659 | Ver: unknown
+[2026-01-18 22:58:19] ACTION: PUSH_START | DETAILS: User neo4j [Key: 1A92B659] (audreycolar) initiated sync for model: Employee
+[2026-01-18 23:07:05] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-18 23:07:05] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-18 23:07:05] ACTION: SESSION_CREATE | DETAILS: New session created with key: BAD2C644
+[2026-01-18 23:07:05] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: BAD2C644 | Ver: unknown
+[2026-01-18 23:07:12] ACTION: PUSH_START | DETAILS: User neo4j [Key: BAD2C644] (audreycolar) initiated sync for model: Employee
+[2026-01-18 23:07:14] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 23:07:14] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-18 23:07:14] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 23:07:14] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: BAD2C644] (audreycolar)
+[2026-01-18 23:09:28] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-18 23:09:28] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-18 23:09:28] ACTION: SESSION_CREATE | DETAILS: New session created with key: 09A4778B
+[2026-01-18 23:09:28] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 09A4778B | Ver: unknown
+[2026-01-18 23:09:36] ACTION: PUSH_START | DETAILS: User neo4j [Key: 09A4778B] (audreycolar) initiated sync for model: Employee
+[2026-01-18 23:09:38] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 23:09:38] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-18 23:09:38] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 104021071
+[2026-01-18 23:09:38] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 09A4778B] (audreycolar)
+[2026-01-18 23:14:38] ACTION: PUSH_START | DETAILS: User neo4j [Key: 09A4778B] (audreycolar) initiated sync for model: Employee
+[2026-01-18 23:14:40] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-18 23:14:40] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-18 23:14:40] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-18 23:14:40] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 09A4778B] (audreycolar)
+[2026-01-19 00:34:37] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-19 00:34:38] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-19 00:34:38] ACTION: SESSION_CREATE | DETAILS: New session created with key: FA1562A3
+[2026-01-19 00:34:38] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: FA1562A3 | Ver: unknown
+[2026-01-19 00:34:47] ACTION: PUSH_START | DETAILS: User neo4j [Key: FA1562A3] (audreycolar) initiated sync for model: Employee
+[2026-01-19 00:34:49] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 00:34:49] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-19 00:34:49] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 00:34:49] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: FA1562A3] (audreycolar)
+[2026-01-19 00:44:13] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-19 00:44:13] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-19 00:44:13] ACTION: SESSION_CREATE | DETAILS: New session created with key: FD5893B6
+[2026-01-19 00:44:13] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: FD5893B6 | Ver: unknown
+[2026-01-19 00:44:37] ACTION: PUSH_START | DETAILS: User neo4j [Key: FD5893B6] (audreycolar) initiated sync for model: Employee
+[2026-01-19 00:44:38] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 00:44:38] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-19 00:44:38] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 00:44:38] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: FD5893B6] (audreycolar)
+[2026-01-19 01:10:07] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-19 01:10:08] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-19 01:10:08] ACTION: SESSION_CREATE | DETAILS: New session created with key: 588AC503
+[2026-01-19 01:10:08] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 588AC503 | Ver: unknown
+[2026-01-19 01:10:16] ACTION: SYNC_FORWARD_ERROR | DETAILS: Variable `enumValues` not defined (line 1, column 1855 (offset: 1854))
+"MATCH (meta:MetaNode) WHERE meta.name IN ['NodeConcreteClass', 'NodeAbstractClass', 'NodeAssociationClass'] MATCH (inst)-[:InstanceOf]->(meta) WITH inst, meta, labels(inst)[0] as classType OPTIONAL MATCH (inst) WHERE meta.name = 'NodeEnumeration' WITH inst, meta, classType, inst.value as enumValues OPTIONAL MATCH (inst)-[:HasAttribute]->(a) OPTIONAL MATCH (a)-[r1]->(aRef) WHERE type(r1) = 'ReferenceType' WITH inst, meta, classType, collect(DISTINCT {name: a.attrName, type: a.type, idx: a.index, ref: aRef.name}) as attrs OPTIONAL MATCH (inst)-[:HasInvariant]->(inv) WITH inst, meta, classType, attrs, collect(DISTINCT {name: inv.invName, expr: inv.expression, exist: inv.isExistential}) as invariants OPTIONAL MATCH (src)-[s:sourceAssoClass]->(inst) OPTIONAL MATCH (inst)-[t:targetAssoClass]->(tgt) WITH inst, meta, classType, attrs, invariants, {name: src.name, role: s.role, mult: s.multiplicity} as acSrc, {name: tgt.name, role: t.role, mult: t.multiplicity} as acTgt OPTIONAL MATCH (inst)-[:HasOperation]->(o) OPTIONAL MATCH (o)-[:HasParam]->(p) OPTIONAL MATCH (p)-[r2]->(pRef) WHERE type(r2) = 'ReferenceType' OPTIONAL MATCH (o)-[r3]->(retRef) WHERE type(r3) = 'ReferenceReturnType' OPTIONAL MATCH (o)-[:HasPreCondition]->(pre) OPTIONAL MATCH (o)-[:HasPostCondition]->(post) WITH inst, meta, classType, attrs, invariants, acSrc, acTgt, o, retRef, collect(DISTINCT {pName: p.pName, pType: p.type, pOrder: p.order, pRef: pRef.name}) as opParams, collect(DISTINCT {name: pre.condName, expr: pre.expression}) as opPres, collect(DISTINCT {name: post.condName, expr: post.expression}) as opPosts WITH inst, meta, classType, attrs, invariants, acSrc, acTgt, collect(DISTINCT {name: o.opName, ret: o.returnType, retRef: retRef.name, params: opParams, pre: opPres, post: opPosts}) as ops RETURN inst.name as className, meta.name as metaName, classType, enumValues, attrs, invariants, ops, acSrc, acTgt"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ^
+[2026-01-19 01:12:10] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-19 01:12:10] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-19 01:12:10] ACTION: SESSION_CREATE | DETAILS: New session created with key: D88A25D1
+[2026-01-19 01:12:10] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: D88A25D1 | Ver: unknown
+[2026-01-19 01:12:41] ACTION: PUSH_START | DETAILS: User neo4j [Key: D88A25D1] (audreycolar) initiated sync for model: Employee
+[2026-01-19 01:12:41] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 01:12:42] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 01:12:43] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 01:12:43] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-19 01:12:43] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 01:12:43] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: D88A25D1] (audreycolar)
+[2026-01-19 01:23:20] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-19 01:23:20] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-19 01:23:20] ACTION: SESSION_CREATE | DETAILS: New session created with key: A207F27D
+[2026-01-19 01:23:21] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: A207F27D | Ver: unknown
+[2026-01-19 01:23:30] ACTION: PUSH_START | DETAILS: User neo4j [Key: A207F27D] (audreycolar) initiated sync for model: Employee
+[2026-01-19 01:23:31] ACTION: PUSH_ERROR | DETAILS: Failed to push model: Invalid input 'name': expected '(', 'ALL' or 'ANY' (line 1, column 59 (offset: 58))
+"MATCH (meta:MetaNode {name: 'NodeEnumeration'}) MERGE (e:$name {name: $name}) SET e.value = $values MERGE (e)-[:InstanceOf]->(meta)"
+                                                           ^
+[2026-01-19 01:23:31] ACTION: SYNC_FORWARD_ERROR | DETAILS: Invalid input 'name': expected '(', 'ALL' or 'ANY' (line 1, column 59 (offset: 58))
+"MATCH (meta:MetaNode {name: 'NodeEnumeration'}) MERGE (e:$name {name: $name}) SET e.value = $values MERGE (e)-[:InstanceOf]->(meta)"
+                                                           ^
+[2026-01-19 01:23:43] ACTION: PUSH_START | DETAILS: User neo4j [Key: A207F27D] (audreycolar) initiated sync for model: Employee
+[2026-01-19 01:23:43] ACTION: PUSH_ERROR | DETAILS: Failed to push model: Invalid input 'name': expected '(', 'ALL' or 'ANY' (line 1, column 59 (offset: 58))
+"MATCH (meta:MetaNode {name: 'NodeEnumeration'}) MERGE (e:$name {name: $name}) SET e.value = $values MERGE (e)-[:InstanceOf]->(meta)"
+                                                           ^
+[2026-01-19 01:23:43] ACTION: SYNC_FORWARD_ERROR | DETAILS: Invalid input 'name': expected '(', 'ALL' or 'ANY' (line 1, column 59 (offset: 58))
+"MATCH (meta:MetaNode {name: 'NodeEnumeration'}) MERGE (e:$name {name: $name}) SET e.value = $values MERGE (e)-[:InstanceOf]->(meta)"
+                                                           ^
+[2026-01-19 01:26:40] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-19 01:26:41] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-19 01:26:41] ACTION: SESSION_CREATE | DETAILS: New session created with key: 8C676407
+[2026-01-19 01:26:41] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 8C676407 | Ver: unknown
+[2026-01-19 01:27:04] ACTION: PUSH_START | DETAILS: User neo4j [Key: 8C676407] (audreycolar) initiated sync for model: Employee
+[2026-01-19 01:27:05] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 01:27:05] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 01:27:06] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 01:27:06] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-19 01:27:06] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 01:27:06] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 8C676407] (audreycolar)
+[2026-01-19 12:21:46] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-19 12:21:47] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-19 12:21:47] ACTION: SESSION_CREATE | DETAILS: New session created with key: DFE77AB7
+[2026-01-19 12:21:47] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: DFE77AB7 | Ver: unknown
+[2026-01-19 12:21:55] ACTION: PUSH_START | DETAILS: User neo4j [Key: DFE77AB7] (audreycolar) initiated sync for model: Employee
+[2026-01-19 12:21:55] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 12:21:55] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 12:22:06] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 12:22:06] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-19 12:22:06] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 12:22:06] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: DFE77AB7] (audreycolar)
+[2026-01-19 12:40:27] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-19 12:40:27] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-19 12:40:28] ACTION: SESSION_CREATE | DETAILS: New session created with key: 65640188
+[2026-01-19 12:40:28] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 65640188 | Ver: unknown
+[2026-01-19 12:40:38] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-01-19 12:40:38] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-19 12:40:42] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-01-19 12:40:42] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-01-19 12:41:00] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-01-19 12:41:00] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-19 12:41:00] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-01-19 12:41:00] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-01-19 12:43:45] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-19 12:43:45] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-19 12:43:45] ACTION: SESSION_CREATE | DETAILS: New session created with key: CAD0F383
+[2026-01-19 12:43:45] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: CAD0F383 | Ver: unknown
+[2026-01-19 12:58:28] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-19 12:58:28] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-19 12:58:28] ACTION: SESSION_CREATE | DETAILS: New session created with key: 168B4F85
+[2026-01-19 12:58:28] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 168B4F85 | Ver: unknown
+[2026-01-19 12:58:46] ACTION: PUSH_START | DETAILS: User neo4j [Key: 168B4F85] (audreycolar) initiated sync for model: Employee
+[2026-01-19 12:58:46] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 12:58:46] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 12:58:48] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 12:58:48] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-19 12:58:48] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 12:58:48] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 168B4F85] (audreycolar)
+[2026-01-19 12:58:52] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-01-19 12:58:52] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-19 12:58:52] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-01-19 12:58:52] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-01-19 12:59:40] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-01-19 12:59:40] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-19 12:59:40] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-01-19 12:59:40] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-01-19 13:19:19] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-19 13:19:19] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-19 13:19:19] ACTION: SESSION_CREATE | DETAILS: New session created with key: 2AC8816A
+[2026-01-19 13:19:19] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 2AC8816A | Ver: unknown
+[2026-01-19 13:19:31] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: ContractType
+[2026-01-19 13:19:31] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: Gender
+[2026-01-19 13:19:31] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-01-19 13:19:31] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-19 13:19:31] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-01-19 13:19:31] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-01-19 13:19:58] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: ContractType
+[2026-01-19 13:19:58] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: Gender
+[2026-01-19 13:19:58] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-01-19 13:19:58] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-19 13:19:58] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-01-19 13:19:58] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-01-19 13:20:47] ACTION: PUSH_START | DETAILS: User neo4j [Key: 2AC8816A] (audreycolar) initiated sync for model: Employee
+[2026-01-19 13:20:47] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 13:20:47] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 13:20:49] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1636264693
+[2026-01-19 13:20:49] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-19 13:20:49] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1636264693
+[2026-01-19 13:20:49] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 2AC8816A] (audreycolar)
+[2026-01-19 13:21:32] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: ContractType
+[2026-01-19 13:21:32] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: Gender
+[2026-01-19 13:21:32] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-01-19 13:21:32] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-19 13:21:32] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-01-19 13:21:32] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-01-19 13:29:09] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-19 13:29:09] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-19 13:29:09] ACTION: SESSION_CREATE | DETAILS: New session created with key: B45BD0D1
+[2026-01-19 13:29:09] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: B45BD0D1 | Ver: unknown
+[2026-01-19 13:29:16] ACTION: PUSH_START | DETAILS: User neo4j [Key: B45BD0D1] (audreycolar) initiated sync for model: Employee
+[2026-01-19 13:29:16] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 13:29:16] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 13:29:17] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 13:29:17] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-19 13:29:17] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 13:29:17] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: B45BD0D1] (audreycolar)
+[2026-01-19 13:29:22] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: ContractType
+[2026-01-19 13:29:22] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: Gender
+[2026-01-19 13:29:22] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-01-19 13:29:22] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-19 13:29:22] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-01-19 13:29:22] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-01-19 13:29:41] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: ContractType
+[2026-01-19 13:29:41] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: Gender
+[2026-01-19 13:29:41] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-01-19 13:29:41] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-19 13:29:41] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-01-19 13:29:41] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-01-19 13:30:01] ACTION: PUSH_START | DETAILS: User neo4j [Key: B45BD0D1] (audreycolar) initiated sync for model: Employee
+[2026-01-19 13:30:01] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 13:30:01] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 13:30:01] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 13:30:01] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-19 13:30:01] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 13:30:01] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: B45BD0D1] (audreycolar)
+[2026-01-19 13:30:18] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: ContractType
+[2026-01-19 13:30:18] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: Gender
+[2026-01-19 13:30:18] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-01-19 13:30:18] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-19 13:30:18] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-01-19 13:30:18] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-01-19 13:30:32] ACTION: PUSH_START | DETAILS: User neo4j [Key: B45BD0D1] (audreycolar) initiated sync for model: Employee
+[2026-01-19 13:30:32] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 13:30:32] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 13:30:33] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 13:30:33] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-19 13:30:33] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 13:30:33] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: B45BD0D1] (audreycolar)
+[2026-01-19 13:31:25] ACTION: PUSH_START | DETAILS: User neo4j [Key: B45BD0D1] (audreycolar) initiated sync for model: Employee
+[2026-01-19 13:31:25] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 13:31:25] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 13:31:25] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 13:31:25] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-19 13:31:25] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 13:31:25] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: B45BD0D1] (audreycolar)
+[2026-01-19 13:31:31] ACTION: CLEANUP | DETAILS: Executed C1 strategy for: [ContractType, Gender]
+[2026-01-19 13:31:31] ACTION: PUSH_START | DETAILS: User neo4j [Key: B45BD0D1] (audreycolar) initiated sync for model: Employee
+[2026-01-19 13:31:31] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 13:31:31] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 13:31:31] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 13:31:31] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-19 13:31:31] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 13:31:31] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: B45BD0D1] (audreycolar)
+[2026-01-19 13:31:36] ACTION: CLEANUP | DETAILS: Executed C1 strategy for: [ContractType, Gender]
+[2026-01-19 13:31:36] ACTION: PUSH_START | DETAILS: User neo4j [Key: B45BD0D1] (audreycolar) initiated sync for model: Employee
+[2026-01-19 13:31:37] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 13:31:37] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 13:31:37] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 13:31:37] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-19 13:31:37] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 13:31:37] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: B45BD0D1] (audreycolar)
+[2026-01-19 13:38:42] ACTION: PUSH_START | DETAILS: User neo4j [Key: B45BD0D1] (audreycolar) initiated sync for model: Employee
+[2026-01-19 13:38:43] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 13:38:43] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 13:38:43] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 13:38:43] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-19 13:38:43] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 13:38:43] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: B45BD0D1] (audreycolar)
+[2026-01-19 13:46:10] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-19 13:46:10] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-19 13:46:10] ACTION: SESSION_CREATE | DETAILS: New session created with key: 29E40486
+[2026-01-19 13:46:10] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 29E40486 | Ver: unknown
+[2026-01-19 13:46:18] ACTION: PUSH_START | DETAILS: User neo4j [Key: 29E40486] (audreycolar) initiated sync for model: Employee
+[2026-01-19 13:46:18] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 13:46:18] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 13:46:20] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 13:46:20] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-19 13:46:20] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 13:46:20] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 29E40486] (audreycolar)
+[2026-01-19 13:46:23] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: ContractType
+[2026-01-19 13:46:23] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: Gender
+[2026-01-19 13:46:23] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-01-19 13:46:23] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-19 13:46:23] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-01-19 13:46:23] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-01-19 13:46:30] ACTION: PUSH_START | DETAILS: User neo4j [Key: 29E40486] (audreycolar) initiated sync for model: Employee
+[2026-01-19 13:46:30] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 13:46:30] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 13:46:30] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 13:46:30] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-19 13:46:30] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 13:46:30] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 29E40486] (audreycolar)
+[2026-01-19 13:46:38] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: ContractType
+[2026-01-19 13:46:38] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: Gender
+[2026-01-19 13:46:38] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-01-19 13:46:38] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-19 13:46:38] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-01-19 13:46:38] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-01-19 17:32:02] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-19 17:32:03] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-19 17:32:03] ACTION: SESSION_CREATE | DETAILS: New session created with key: 197DB84D
+[2026-01-19 17:32:03] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 197DB84D | Ver: unknown
+[2026-01-19 17:32:14] ACTION: PUSH_START | DETAILS: User neo4j [Key: 197DB84D] (audreycolar) initiated sync for model: Employee
+[2026-01-19 17:32:14] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 17:32:14] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 17:32:16] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 17:32:16] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-19 17:32:16] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -158586036
+[2026-01-19 17:32:16] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 197DB84D] (audreycolar)
+[2026-01-19 17:32:32] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: ContractType
+[2026-01-19 17:32:32] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: Gender
+[2026-01-19 17:32:32] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-01-19 17:32:32] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-19 17:32:32] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-01-19 17:32:32] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-01-19 17:45:31] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-19 17:45:32] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-19 17:45:32] ACTION: SESSION_CREATE | DETAILS: New session created with key: 48F198DA
+[2026-01-19 17:45:32] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 48F198DA | Ver: unknown
+[2026-01-19 17:45:55] ACTION: PUSH_START | DETAILS: User neo4j [Key: 48F198DA] (audreycolar) initiated sync for model: Incremental
+[2026-01-19 17:45:55] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 17:45:55] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-01-19 17:45:55] ACTION: PUSH_SUCCESS | DETAILS: Model Incremental is now synchronized.
+[2026-01-19 17:45:55] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-01-19 17:45:55] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 48F198DA] (audreycolar)
+[2026-01-19 17:47:06] ACTION: PUSH_START | DETAILS: User neo4j [Key: 48F198DA] (audreycolar) initiated sync for model: Incremental
+[2026-01-19 17:47:06] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 17:47:06] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 17:47:06] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-01-19 17:47:06] ACTION: PUSH_SUCCESS | DETAILS: Model Incremental is now synchronized.
+[2026-01-19 17:47:06] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-01-19 17:47:06] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 48F198DA] (audreycolar)
+[2026-01-19 17:48:05] ACTION: CLEANUP | DETAILS: Executed C1 strategy for: [ContractType]
+[2026-01-19 17:48:05] ACTION: PUSH_START | DETAILS: User neo4j [Key: 48F198DA] (audreycolar) initiated sync for model: Incremental
+[2026-01-19 17:48:05] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 17:48:05] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-01-19 17:48:05] ACTION: PUSH_SUCCESS | DETAILS: Model Incremental is now synchronized.
+[2026-01-19 17:48:05] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-01-19 17:48:05] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 48F198DA] (audreycolar)
+[2026-01-19 17:49:04] ACTION: PUSH_START | DETAILS: User neo4j [Key: 48F198DA] (audreycolar) initiated sync for model: Incremental
+[2026-01-19 17:49:04] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 17:49:04] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-01-19 17:49:04] ACTION: PUSH_SUCCESS | DETAILS: Model Incremental is now synchronized.
+[2026-01-19 17:49:04] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-01-19 17:49:04] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 48F198DA] (audreycolar)
+[2026-01-19 17:49:27] ACTION: PUSH_START | DETAILS: User neo4j [Key: 48F198DA] (audreycolar) initiated sync for model: Incremental
+[2026-01-19 17:49:27] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 17:49:27] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 17:49:27] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-01-19 17:49:27] ACTION: PUSH_SUCCESS | DETAILS: Model Incremental is now synchronized.
+[2026-01-19 17:49:27] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-01-19 17:49:27] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 48F198DA] (audreycolar)
+[2026-01-19 17:49:44] ACTION: PUSH_START | DETAILS: User neo4j [Key: 48F198DA] (audreycolar) initiated sync for model: Incremental
+[2026-01-19 17:49:44] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 17:49:44] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 17:49:44] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-01-19 17:49:44] ACTION: PUSH_SUCCESS | DETAILS: Model Incremental is now synchronized.
+[2026-01-19 17:49:44] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-01-19 17:49:44] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 48F198DA] (audreycolar)
+[2026-01-19 17:50:06] ACTION: PUSH_START | DETAILS: User neo4j [Key: 48F198DA] (audreycolar) initiated sync for model: Incremental
+[2026-01-19 17:50:06] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 17:50:06] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 17:50:06] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-01-19 17:50:06] ACTION: PUSH_SUCCESS | DETAILS: Model Incremental is now synchronized.
+[2026-01-19 17:50:06] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-01-19 17:50:06] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 48F198DA] (audreycolar)
+[2026-01-19 17:50:27] ACTION: PUSH_START | DETAILS: User neo4j [Key: 48F198DA] (audreycolar) initiated sync for model: Incremental
+[2026-01-19 17:50:27] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 17:50:27] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 17:50:27] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-01-19 17:50:27] ACTION: PUSH_SUCCESS | DETAILS: Model Incremental is now synchronized.
+[2026-01-19 17:50:27] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-01-19 17:50:27] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 48F198DA] (audreycolar)
+[2026-01-19 17:50:46] ACTION: PUSH_START | DETAILS: User neo4j [Key: 48F198DA] (audreycolar) initiated sync for model: Incremental
+[2026-01-19 17:50:46] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 17:50:46] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 17:50:46] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-01-19 17:50:46] ACTION: PUSH_SUCCESS | DETAILS: Model Incremental is now synchronized.
+[2026-01-19 17:50:46] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-01-19 17:50:46] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 48F198DA] (audreycolar)
+[2026-01-19 18:20:07] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-19 18:20:07] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-19 18:20:07] ACTION: SESSION_CREATE | DETAILS: New session created with key: 966393F5
+[2026-01-19 18:20:07] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 966393F5 | Ver: unknown
+[2026-01-19 18:20:20] ACTION: PUSH_START | DETAILS: User neo4j [Key: 966393F5] (audreycolar) initiated sync for model: Employee
+[2026-01-19 18:20:20] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 18:20:20] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 18:20:22] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 2112460567
+[2026-01-19 18:20:22] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-19 18:20:22] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 2112460567
+[2026-01-19 18:20:22] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 966393F5] (audreycolar)
+[2026-01-19 18:20:55] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: ContractType
+[2026-01-19 18:20:55] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: Gender
+[2026-01-19 18:20:55] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-01-19 18:20:55] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-19 18:20:55] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-01-19 18:20:55] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-01-19 18:43:56] ACTION: PUSH_START | DETAILS: User neo4j [Key: 966393F5] (audreycolar) initiated sync for model: Incremental
+[2026-01-19 18:43:57] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 898999057
+[2026-01-19 18:43:57] ACTION: PUSH_SUCCESS | DETAILS: Model Incremental is now synchronized.
+[2026-01-19 18:43:57] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 898999057
+[2026-01-19 18:43:57] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 966393F5] (audreycolar)
+[2026-01-19 18:44:46] ACTION: PUSH_START | DETAILS: User neo4j [Key: 966393F5] (audreycolar) initiated sync for model: Incremental
+[2026-01-19 18:44:46] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 898999057
+[2026-01-19 18:44:46] ACTION: PUSH_SUCCESS | DETAILS: Model Incremental is now synchronized.
+[2026-01-19 18:44:46] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 898999057
+[2026-01-19 18:44:46] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 966393F5] (audreycolar)
+[2026-01-19 18:45:15] ACTION: PUSH_START | DETAILS: User neo4j [Key: 966393F5] (audreycolar) initiated sync for model: Incremental
+[2026-01-19 18:45:15] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 898999057
+[2026-01-19 18:45:15] ACTION: PUSH_SUCCESS | DETAILS: Model Incremental is now synchronized.
+[2026-01-19 18:45:15] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 898999057
+[2026-01-19 18:45:15] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 966393F5] (audreycolar)
+[2026-01-19 18:45:47] ACTION: PUSH_START | DETAILS: User neo4j [Key: 966393F5] (audreycolar) initiated sync for model: Incremental
+[2026-01-19 18:45:47] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 898999057
+[2026-01-19 18:45:47] ACTION: PUSH_SUCCESS | DETAILS: Model Incremental is now synchronized.
+[2026-01-19 18:45:47] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 898999057
+[2026-01-19 18:45:47] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 966393F5] (audreycolar)
+[2026-01-19 18:46:08] ACTION: PUSH_START | DETAILS: User neo4j [Key: 966393F5] (audreycolar) initiated sync for model: Incremental
+[2026-01-19 18:46:08] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 898999057
+[2026-01-19 18:46:08] ACTION: PUSH_SUCCESS | DETAILS: Model Incremental is now synchronized.
+[2026-01-19 18:46:08] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 898999057
+[2026-01-19 18:46:08] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 966393F5] (audreycolar)
+[2026-01-19 18:46:32] ACTION: PUSH_START | DETAILS: User neo4j [Key: 966393F5] (audreycolar) initiated sync for model: Incremental
+[2026-01-19 18:46:32] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 898999057
+[2026-01-19 18:46:32] ACTION: PUSH_SUCCESS | DETAILS: Model Incremental is now synchronized.
+[2026-01-19 18:46:32] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 898999057
+[2026-01-19 18:46:32] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 966393F5] (audreycolar)
+[2026-01-19 18:54:15] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: Family
+[2026-01-19 18:54:15] ACTION: PULL_ASSOC_ERROR | DETAILS: Lover -> Association creation failed
+[2026-01-19 18:54:15] ACTION: PULL_ASSOC_ERROR | DETAILS: Ny -> Association creation failed
+[2026-01-19 19:09:14] ACTION: CLEANUP | DETAILS: Executed C1 strategy for: [Linh, Kien]
+[2026-01-19 19:09:14] ACTION: PUSH_START | DETAILS: User neo4j [Key: 966393F5] (audreycolar) initiated sync for model: Employee
+[2026-01-19 19:09:14] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-19 19:09:15] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-19 19:09:18] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 2112460567
+[2026-01-19 19:09:18] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-19 19:09:18] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 2112460567
+[2026-01-19 19:09:18] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 966393F5] (audreycolar)

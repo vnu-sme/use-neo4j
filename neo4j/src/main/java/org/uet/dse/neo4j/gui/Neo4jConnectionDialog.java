@@ -2,7 +2,7 @@ package org.uet.dse.neo4j.gui;
 
 import org.tzi.use.gui.main.MainWindow;
 import org.tzi.use.main.Session;
-import org.uet.dse.neo4j.Neo4jConfig;
+import org.uet.dse.neo4j.config.Neo4jDefaultConnectionConfig;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.phase2.SessionManager;
 import org.uet.dse.neo4j.phase2.WorkLogManager;
@@ -48,15 +48,15 @@ public class Neo4jConnectionDialog extends JDialog {
 		pnlConn.setBorder(BorderFactory.createTitledBorder("Server Connection"));
 
 		pnlConn.add(new JLabel("URI Server:"));
-		txtUri = new JTextField(Neo4jConfig.uri, 20);
+		txtUri = new JTextField(Neo4jDefaultConnectionConfig.uri, 20);
 		pnlConn.add(txtUri);
 
 		pnlConn.add(new JLabel("Username:"));
-		txtUser = new JTextField(Neo4jConfig.user, 20);
+		txtUser = new JTextField(Neo4jDefaultConnectionConfig.user, 20);
 		pnlConn.add(txtUser);
 
 		pnlConn.add(new JLabel("Password:"));
-		txtPass = new JPasswordField(Neo4jConfig.password, 20);
+		txtPass = new JPasswordField(Neo4jDefaultConnectionConfig.password, 20);
 		pnlConn.add(txtPass);
 		content.add(pnlConn);
 
@@ -79,7 +79,7 @@ public class Neo4jConnectionDialog extends JDialog {
 
 		JPanel pnlDbName = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		pnlDbName.add(new JLabel("DB Name: "));
-		txtDatabase = new JTextField(Neo4jConfig.database, 12);
+		txtDatabase = new JTextField(Neo4jDefaultConnectionConfig.database, 12);
 		pnlDbName.add(txtDatabase);
 
 		chkDeleteOnExit = new JCheckBox("Delete DB on Exit");
@@ -172,17 +172,16 @@ public class Neo4jConnectionDialog extends JDialog {
 		try {
 			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-			// 1. Thực hiện kết nối Driver
+			//connect to driver
 			Neo4jDriverManager.connect(uri, user, pass, dbName, createNew, deleteOnExit);
 
-			// MỚI: Khởi tạo metamodel ngay sau khi kết nối thành công
+			// init metamodel schema structure
 			Neo4jRepository repo = new Neo4jRepository();
 			repo.initializeMetamodel();
 
 			WorkLogManager.getInstance().log("SCHEMA_INIT", "Metamodel nodes initialized for DB: " + dbName);
 
-
-			// 2. Xử lý Session Manager
+			//manage session to work among user from different USE instances
 			SessionManager sm = new SessionManager();
 			String finalKey;
 			if (rbNewSession.isSelected()) {
@@ -197,20 +196,19 @@ public class Neo4jConnectionDialog extends JDialog {
 				sm.joinSession(finalKey);
 			}
 
-			// Lưu SessionManager vào Driver
+			//set static object
 			Neo4jDriverManager.getInstance().setSessionManager(sm);
 
-			// 3. Log lại thao tác vào file (Append-only)
+
 			Map<String, Object> stats = Neo4jDriverManager.getInstance().getDatabaseStats();
 			String logDetail = String.format("DB: %s | Key: %s | Ver: %s",
 					dbName, finalKey, stats.getOrDefault("version", "unknown"));
 			WorkLogManager.getInstance().log("CONNECTION_SUCCESS", logDetail);
 
-			// 4. Mở Dashboard View
+			// open dashboard biew
 			Neo4jDashboardView dashboard = Neo4jDashboardView.getInstance(mainWindow, useSession);
 			dashboard.refreshData();
 			dashboard.setVisible(true);
-
 			JOptionPane.showMessageDialog(this, "Connected successfully!\nSession Key: " + finalKey);
 
 			this.dispose();

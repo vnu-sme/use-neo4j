@@ -1,8 +1,8 @@
 package org.uet.dse.neo4j.gui;
 
 import org.tzi.use.main.Session;
-import org.uet.dse.neo4j.sync.SyncCoordinator;
-import org.uet.dse.neo4j.sync.SyncObjectCoordinator;
+import org.uet.dse.neo4j.sync.ModelSyncCoordinator;
+import org.uet.dse.neo4j.sync.ObjectSyncCoordinator;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,14 +10,14 @@ import java.awt.*;
 public class SyncStatusDashboard extends JPanel {
     private JLabel lblModelStatus, lblObjectStatus;
     private JButton btnModelDetail, btnObjectDetail;
-    private final SyncCoordinator modelCoordinator;
-    private final SyncObjectCoordinator objectCoordinator;
+    private final ModelSyncCoordinator modelCoordinator;
+    private final ObjectSyncCoordinator objectCoordinator;
 
     public SyncStatusDashboard(Session session) {
         // Khởi tạo các bộ điều phối
         // Bây giờ constructor 1 tham số đã tồn tại nên sẽ không lỗi
-        this.modelCoordinator = new SyncCoordinator(session);
-        this.objectCoordinator = new SyncObjectCoordinator(session.system());
+        this.modelCoordinator = new ModelSyncCoordinator(session);
+        this.objectCoordinator = new ObjectSyncCoordinator(session.system());
 
         this.setLayout(new GridLayout(2, 1, 10, 10));
 

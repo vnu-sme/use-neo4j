@@ -3,9 +3,7 @@ package org.uet.dse.neo4j.phase2;
 import org.tzi.use.api.UseModelApi;
 import org.tzi.use.graph.DirectedGraph;
 import org.tzi.use.uml.mm.*;
-import org.tzi.use.uml.ocl.expr.VarDecl;
 import org.tzi.use.uml.ocl.type.CollectionType;
-import org.tzi.use.uml.ocl.type.EnumType;
 import org.tzi.use.uml.ocl.type.Type;
 import org.tzi.use.uml.ocl.type.Type.VoidHandling;
 import org.neo4j.driver.Session;
@@ -15,8 +13,7 @@ import org.tzi.use.uml.sys.MObject;
 import org.tzi.use.uml.sys.MSystemState;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.repo.Neo4jRepository;
-import org.uet.dse.neo4j.sync.ChangeTracker;
-import org.uet.dse.neo4j.sync.SyncObjectCoordinator;
+import org.uet.dse.neo4j.sync.ObjectSyncCoordinator;
 import org.uet.dse.neo4j.sync.UmlTypeTranslator;
 
 import java.util.*;
@@ -42,33 +39,28 @@ public class Neo4jUmlBridge {
     public void pushModelToNeo4j() {
         MModel model = modelApi.getModel();
 
-        // 1. Lấy thông tin người dùng đầy đủ cho Versioning và Log
         String currentUser = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
 
         logger.log("PUSH_START", "User " + currentUser + " initiated sync for model: " + model.name());
 
         try (Session session = Neo4jDriverManager.getInstance().openSession()) {
 
-            // 2. KHỞI TẠO METAMODEL (M2 Layer)
-            // Đảm bảo các node NodeConcreteClass, NodeAttribute... luôn tồn tại
+            //assure existence of meta-nodes
             repo.initializeMetamodel();
 
-            // 3. Nodes: Enumerations
-            for (EnumType e : model.enumTypes()) {
-                createEnumNode(session, e);
+            //enums
+            for (org.tzi.use.uml.ocl.type.EnumType e : model.enumTypes()) {
+                repo.upsertEnumeration(e.name(), e.getLiterals());
+                logger.log("PUSH_ENUM", "Pushed enumeration: " + e.name());
             }
 
-            // 4. Nodes: Classes (Concrete, Abstract, AssociationClass)
-            // Mỗi Class tạo ra sẽ nối InstanceOf tới MetaNode tương ứng
+            // Concrete, Abstract, AssociationClass
+            // include InstanceOf egde connection
             for (MClass cls : model.classes()) {
-                if (cls instanceof MAssociationClass) {
-                    createAssociationClassNode(session, (MAssociationClass) cls);
-                } else {
-                    createClassNode(session, cls);
-                }
+                createClassNode(session, cls);
             }
 
-            // 5. Edges: Extends (Kế thừa)
+            //extends
             DirectedGraph<MClassifier, MGeneralization> genGraph = model.generalizationGraph();
             Iterator<MGeneralization> edgeIterator = genGraph.edgeIterator();
             while (edgeIterator.hasNext()) {
@@ -76,33 +68,27 @@ public class Neo4jUmlBridge {
                 createExtendsEdge(session, gen.child(), gen.parent());
             }
 
-            // 6. Nodes & Edges: Attributes, Operations, Params
-            // Mỗi Attr/Op tạo ra sẽ nối InstanceOf tới NodeAttribute/NodeOperation
+            //Attributes, Operations, Params
+            //include InstanceOf to NodeAttribute/NodeOperation
             for (MClass cls : model.classes()) {
                 mapAttributes(session, cls);
                 mapOperations(session, cls);
-
-                // --- THÊM 2 DÒNG NÀY ĐỂ PUSH RÀNG BUỘC ---
-                mapInvariants(session, cls); // Đẩy Invariant
-                mapOperationConstraints(session, cls); // Đẩy Pre/Post
+                mapInvariants(session, cls);
+                mapOperationConstraintsForAllOperationsInClass(session, cls);
             }
 
-            // 7. Edges: Associations (Binary & AssociationClass Link)
+            //Associations (Binary & AssociationClass Link)
             for (MAssociation assoc : model.associations()) {
-                if (!(assoc instanceof MAssociationClass)) {
-
-                    // GỌI HÀM CỦA REPOSITORY TẠI ĐÂY:
-                    // Hàm này đã được sửa để lưu cả sourceMultiplicity và targetMultiplicity
-                    repo.createAssociationEdge(assoc);
-
+                if (assoc instanceof MAssociationClass) {
+                    //Star Schema (A -> AC -> B)
+                    //sourceAssoClass, targetAssoClass, HasAssociationClass
+                    repo.createAssociationClassStructure((MAssociationClass) assoc);
                 } else {
-                    // Đặc tả 18: Nối AssociationClass tới các Class tham gia
-                    createAssociationClassLink(session, (MAssociationClass) assoc);
+                    // normal association association, composition, aggregation
+                    repo.createAssociationEdge(assoc);
                 }
             }
 
-            // 8. CẬP NHẬT VERSION (Trình theo dõi thay đổi)
-            // Đánh dấu Database vừa được thay đổi bởi currentUser vào lúc này
             updateModelVersion(session, currentUser);
 
             logger.log("PUSH_SUCCESS", "Model " + model.name() + " is now synchronized.");
@@ -116,26 +102,18 @@ public class Neo4jUmlBridge {
     /**
      * Cập nhật Node phiên bản để ChangeTracker của những người dùng khác có thể nhận biết
      */
-
-
     public void updateModelVersion(org.neo4j.driver.Session session, String user) {
-        // 1. Lấy Model hiện tại từ modelApi
         org.tzi.use.uml.mm.MModel model = modelApi.getModel();
-        String modelName = model.name(); // Lấy tên thực tế (ví dụ: "EmployeeSystem")
 
-        // 2. Tính toán dấu vân tay (Hash) của Model
-        // Hàm này bạn đã định nghĩa ở phần trước để quét qua toàn bộ Class/Attr/Op
-        long modelHash = SyncObjectCoordinator.calculateModelHash(model);
+        String modelName = model.name();
 
-        // 3. Lấy thời gian hiện tại
+        long modelHash = ObjectSyncCoordinator.calculateModelHash(model);
         long ts = System.currentTimeMillis();
 
-        // 4. Cypher: Lưu đồng thời User, Timestamp và ModelHash
         // ModelHash này sẽ được SyncObjectCoordinator dùng để so sánh trước khi Push Object
         String cypher = "MERGE (v:ModelVersion {id: 'CURRENT'}) " +
                 "SET v.timestamp = timestamp(), v.user = $user, " +
                 "    v.modelHash = $hash, v.modelName = $name";
-
         session.run(cypher, Values.parameters("user", user, "hash", modelHash, "name", modelName));
 
         // 5. Cập nhật tracker local để máy mình không tự báo "Database Updated"
@@ -144,23 +122,14 @@ public class Neo4jUmlBridge {
         logger.log("VERSION_UPDATE", "Model version updated. Hash: " + modelHash);
     }
 
-    private void createEnumNode(Session session, EnumType e) {
-        String cypher = "MERGE (n:Enumeration {name: $name}) SET n.value = $values";
-        session.run(cypher, Values.parameters("name", e.name(), "values", e.getLiterals()));
-    }
-
-
     private void createAssociationClassNode(Session session, MAssociationClass ac) {
         String cypher = "MERGE (n:AssociationClass {name: $name})";
         session.run(cypher, Values.parameters("name", ac.name()));
-
-        // AssociationClass cũng là Class nên cần map Attr/Op (được gọi ở vòng lặp classes())
     }
-
 
     private void mapOperations(Session session, MClass cls) {
         for (MOperation op : cls.operations()) {
-            // Chỉ xử lý các operation được khai báo trực tiếp tại Class này (tránh kế thừa)
+            // only resolve operation in this. class to avoid inheritance
             if (op.cls().equals(cls)) {
                 Map<String, Object> rInfo = parseType(op.resultType());
                 String opId = cls.name() + "_" + op.name();
@@ -172,38 +141,38 @@ public class Neo4jUmlBridge {
                 props.put("isReturnCollection", rInfo.get("isCollection"));
                 props.put("isAbstract", cls.isAbstract());
 
-                // 1. Tạo Node Operation và nối với Class
+                //create node operation
                 repo.createInstanceNode("NodeOperation", "Operation", props);
                 repo.createStructuralEdge(cls.name(), opId, "HasOperation");
 
-                // 2. Xử lý cạnh ReferenceReturnType (Đặc tả 17)
+                //referenceReturnType
                 TypeMapper.handleTypeReference(repo, opId, op.resultType(), true);
 
-                // 3. XỬ LÝ PARAMETERS
+                //parameters
                 int order = 1;
                 for (org.tzi.use.uml.ocl.expr.VarDecl param : op.paramList()) {
                     Map<String, Object> pInfo = parseType(param.type());
-                    // ID duy nhất cho tham số
+                    //unique id for each param
                     String paramId = opId + "_p_" + param.name();
 
                     Map<String, Object> pProps = new HashMap<>();
                     pProps.put("name", paramId);
-                    pProps.put("pName", param.name()); // DÙNG 'pName' ĐỂ KHỚP VỚI LOGIC PULL
+                    pProps.put("pName", param.name());
                     pProps.put("type", pInfo.get("type"));
-                    pProps.put("pOrder", order++);     // DÙNG 'pOrder' ĐỂ TRÁNH LỖI ÉP KIỂU
+                    pProps.put("pOrder", order++);
                     pProps.put("isCollection", pInfo.get("isCollection"));
                     pProps.put("collectionType", pInfo.get("collType"));
 
-                    // Tạo Node Param và nối với Operation (Đặc tả 15)
+                    //node param creation
                     repo.createInstanceNode("NodeParam", "Param", pProps);
                     repo.createStructuralEdge(opId, paramId, "HasParam");
 
-                    // Xử lý cạnh ReferenceType cho Parameter (Đặc tả 16)
+                    //referenceType for param
                     TypeMapper.handleTypeReference(repo, paramId, param.type(), false);
                 }
 
-                // 4. QUAN TRỌNG: Gọi nạp ràng buộc OCL ngay sau khi Op và Params đã lên DB
-                mapOperationConstraints(session, op, opId);
+                //* Gọi nạp ràng buộc OCL ngay sau khi Op và Params đã lên DB
+                mapOperationConstraintsForOneOperation(session, op, opId);
             }
         }
     }
@@ -289,9 +258,8 @@ public class Neo4jUmlBridge {
     }
 
     private void mapAttributes(Session session, MClass cls) {
-        // SỬA: Thay allAttributes() bằng attributes() để chỉ lấy thuộc tính khai báo tại Class này
+        //use attributes() instead of allAttributes() to take only the attribute at this class
         for (MAttribute attr : cls.attributes()) {
-            // Hoặc dùng: if (attr.owner().equals(cls)) { ... }
             Map<String, Object> tInfo = parseType(attr.type());
             String instanceId = cls.name() + "_" + attr.name();
 
@@ -309,6 +277,78 @@ public class Neo4jUmlBridge {
             repo.createInstanceNode("NodeAttribute", "Attribute", props);
             repo.createStructuralEdge(cls.name(), instanceId, "HasAttribute");
             TypeMapper.handleTypeReference(repo, instanceId, attr.type(), false);
+        }
+    }
+    /**
+     * Ánh xạ Class Invariants (Đặc tả 1 & 6)
+     */
+    private void mapInvariants(Session session, MClass cls) {
+        int index = 0;
+        for (MClassInvariant inv : modelApi.getModel().classInvariants(cls)) {
+            String displayName = (inv.name() == null || inv.name().isEmpty()) ? "unnamed" : inv.name();
+
+            //non null
+            String invInstanceId = cls.name() + "_inv_" + index;
+
+            Map<String, Object> props = new HashMap<>();
+            props.put("name", invInstanceId);         // unique key when merge
+            props.put("invName", displayName);        // Tên thực tế
+            props.put("expression", inv.bodyExpression().toString());
+            props.put("isExistential", inv.isExistential());
+            props.put("index", index);
+
+            //node creation
+            repo.createInstanceNode("NodeClassInvariant", "ClassInvariant", props);
+            repo.createStructuralEdge(cls.name(), invInstanceId, "HasInvariant");
+
+            index++;
+        }
+    }
+
+    /**
+     * Ánh xạ Pre/Post Conditions (Đặc tả 2, 3, 4, 5)
+     */
+    /**
+     * Ánh xạ các ràng buộc Pre/Post Conditions của một Operation xuống Neo4j
+     */
+    private void mapOperationConstraintsForOneOperation(Session session, MOperation op, String opId) {
+        //pre
+        int preIdx = 0;
+        for (MPrePostCondition pre : op.preConditions()) {
+            String preId = opId + "_pre_" + preIdx;
+            Map<String, Object> props = new HashMap<>();
+            props.put("name", preId);      //unique key for merge (M0)
+            props.put("condName", pre.name());     //display name
+            props.put("expression", pre.expression().toString());  //plain ocl
+            props.put("index", preIdx++);
+            repo.createInstanceNode("NodePreCondition", "PreCondition", props);
+            repo.createStructuralEdge(opId, preId, "HasPreCondition");
+        }
+
+        //post
+        int postIdx = 0;
+        for (MPrePostCondition post : op.postConditions()) {
+            String postId = opId + "_post_" + postIdx;
+            Map<String, Object> props = new HashMap<>();
+            props.put("name", postId);
+            props.put("condName", post.name());
+            props.put("expression", post.expression().toString());
+            props.put("index", postIdx++);
+            repo.createInstanceNode("NodePostCondition", "PostCondition", props);
+            repo.createStructuralEdge(opId, postId, "HasPostCondition");
+        }
+    }
+
+    /**
+     * Ánh xạ toàn bộ Tiền/Hậu điều kiện của tất cả Operation trong một Class
+     */
+    private void mapOperationConstraintsForAllOperationsInClass(Session session, MClass cls) {
+        for (MOperation op : cls.operations()) {
+            if (op.cls().equals(cls)) {
+                //must: id of operation node == id created in mapOperations()
+                String opId = cls.name() + "_" + op.name();
+                mapOperationConstraintsForOneOperation(session, op, opId);
+            }
         }
     }
 
@@ -370,7 +410,7 @@ public class Neo4jUmlBridge {
             session.run(cypher, org.neo4j.driver.Values.parameters("ts", ts));
 
             // Đồng bộ luôn local timestamp để Dashboard chuyển sang màu xanh
-            SyncObjectCoordinator.updateLocalSyncTimestamp(ts);
+            ObjectSyncCoordinator.updateLocalSyncTimestamp(ts);
         }
     }
 
@@ -421,117 +461,4 @@ public class Neo4jUmlBridge {
         }
     }
 
-    /**
-     * Ánh xạ Class Invariants (Đặc tả 1 & 6)
-     */
-    private void mapInvariants(Session session, MClass cls) {
-        int index = 0;
-        for (MClassInvariant inv : modelApi.getModel().classInvariants(cls)) {
-            // 1. Xử lý tên hiển thị: Nếu trống thì đặt là 'unnamed'
-            String displayName = (inv.name() == null || inv.name().isEmpty()) ? "unnamed" : inv.name();
-
-            // 2. Tạo ID duy nhất (Khóa chính name trên Neo4j): Class_inv_Index
-            // ID này tuyệt đối không được null
-            String invInstanceId = cls.name() + "_inv_" + index;
-
-            Map<String, Object> props = new HashMap<>();
-            props.put("name", invInstanceId);         // Khóa định danh cho MERGE
-            props.put("invName", displayName);        // Tên thực tế
-            props.put("expression", inv.bodyExpression().toString());
-            props.put("isExistential", inv.isExistential());
-            props.put("index", index);
-
-            // Gọi repo để tạo node
-            repo.createInstanceNode("NodeClassInvariant", "ClassInvariant", props);
-            repo.createStructuralEdge(cls.name(), invInstanceId, "HasInvariant");
-
-            index++;
-        }
-    }
-
-    /**
-     * Ánh xạ Pre/Post Conditions (Đặc tả 2, 3, 4, 5)
-     */
-    /**
-     * Ánh xạ các ràng buộc Pre/Post Conditions của một Operation xuống Neo4j
-     */
-    private void mapOperationConstraints(Session session, MOperation op, String opId) {
-        // A. Pre-conditions
-        int preIdx = 0;
-        for (MPrePostCondition pre : op.preConditions()) {
-            String preId = opId + "_pre_" + preIdx;
-            Map<String, Object> props = new HashMap<>();
-            props.put("name", preId);
-            props.put("condName", pre.name());
-            props.put("expression", pre.expression().toString());
-            props.put("index", preIdx++);
-            repo.createInstanceNode("NodePreCondition", "PreCondition", props);
-            repo.createStructuralEdge(opId, preId, "HasPreCondition");
-        }
-        ///
-        int postIdx = 0;
-        for (MPrePostCondition post : op.postConditions()) {
-            String postId = opId + "_post_" + postIdx;
-            Map<String, Object> props = new HashMap<>();
-            props.put("name", postId);
-            props.put("condName", post.name());
-            props.put("expression", post.expression().toString());
-            props.put("index", postIdx++);
-            repo.createInstanceNode("NodePostCondition", "PostCondition", props);
-            repo.createStructuralEdge(opId, postId, "HasPostCondition");
-        }
-    }
-
-    /**
-     * Ánh xạ toàn bộ Tiền/Hậu điều kiện của tất cả Operation trong một Class
-     */
-    private void mapOperationConstraints(Session session, MClass cls) {
-        // Chỉ xử lý các operation được khai báo trực tiếp tại Class này (tránh dư thừa dữ liệu)
-        for (MOperation op : cls.operations()) {
-            if (op.cls().equals(cls)) {
-                // ID của operation node (Phải khớp với ID đã tạo trong hàm mapOperations)
-                String opId = cls.name() + "_" + op.name();
-
-                // --- 1. Xử lý danh sách TIỀN ĐIỀU KIỆN (PreConditions) ---
-                int preIdx = 0;
-                for (MPrePostCondition pre : op.preConditions()) {
-                    // Tạo ID duy nhất: ClassName_OpName_pre_Index
-                    String preInstanceId = opId + "_pre_" + preIdx;
-
-                    Map<String, Object> props = new HashMap<>();
-                    props.put("name", preInstanceId);      // Khóa chính (M1 Instance ID)
-                    props.put("condName", pre.name());    // Tên hiển thị (ví dụ: 'firePre')
-                    props.put("expression", pre.expression().toString()); // Body OCL nguyên bản
-                    props.put("index", preIdx);           // Thứ tự xuất hiện
-
-                    // Tạo Node thực thể PreCondition nối InstanceOf -> NodePreCondition (M2)
-                    repo.createInstanceNode("NodePreCondition", "PreCondition", props);
-
-                    // Nối Operation tới PreCondition (Đặc tả cạnh 4)
-                    repo.createStructuralEdge(opId, preInstanceId, "HasPreCondition");
-                    preIdx++;
-                }
-
-                // --- 2. Xử lý danh sách HẬU ĐIỀU KIỆN (PostConditions) ---
-                int postIdx = 0;
-                for (MPrePostCondition post : op.postConditions()) {
-                    // Tạo ID duy nhất: ClassName_OpName_post_Index
-                    String postInstanceId = opId + "_post_" + postIdx;
-
-                    Map<String, Object> props = new HashMap<>();
-                    props.put("name", postInstanceId);
-                    props.put("condName", post.name());
-                    props.put("expression", post.expression().toString());
-                    props.put("index", postIdx);
-
-                    // Tạo Node thực thể PostCondition nối InstanceOf -> NodePostCondition (M2)
-                    repo.createInstanceNode("NodePostCondition", "PostCondition", props);
-
-                    // Nối Operation tới PostCondition (Đặc tả cạnh 5)
-                    repo.createStructuralEdge(opId, postInstanceId, "HasPostCondition");
-                    postIdx++;
-                }
-            }
-        }
-    }
 }

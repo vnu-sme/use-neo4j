@@ -4,6 +4,20 @@ import java.util.*;
 
 public class ClassState {
 
+    // --- Thuộc tính cơ bản ---
+    private String name;
+    private String type;
+    private Set<String> parents = new HashSet<>();
+    private Map<String, Map<String, Object>> attributes = new HashMap<>();
+    private Map<String, Map<String, Object>> operations = new HashMap<>();
+
+    // --- Thuộc tính ràng buộc (Constraints) ---
+    private List<Map<String, Object>> invariants = new ArrayList<>();
+    private Map<String, List<Map<String, Object>>> preConditions = new HashMap<>();
+    private Map<String, List<Map<String, Object>>> postConditions = new HashMap<>();
+
+    // --- Thuộc tính tham số (Parameters) ---
+    private Map<String, List<OpParam>> opParams = new HashMap<>();
     public Map<String, List<Map<String, Object>>> getPreConditions() {
         return preConditions;
     }
@@ -27,21 +41,6 @@ public class ClassState {
     public void setOpParams(Map<String, List<OpParam>> opParams) {
         this.opParams = opParams;
     }
-
-    // --- Thuộc tính cơ bản ---
-    private String name;
-    private String type;
-    private Set<String> parents = new HashSet<>();
-    private Map<String, Map<String, Object>> attributes = new HashMap<>();
-    private Map<String, Map<String, Object>> operations = new HashMap<>();
-
-    // --- Thuộc tính ràng buộc (Constraints) ---
-    private List<Map<String, Object>> invariants = new ArrayList<>();
-    private Map<String, List<Map<String, Object>>> preConditions = new HashMap<>();
-    private Map<String, List<Map<String, Object>>> postConditions = new HashMap<>();
-
-    // --- Thuộc tính tham số (Parameters) ---
-    private Map<String, List<OpParam>> opParams = new HashMap<>();
 
     // --- Getters & Setters ---
     public String getName() { return name; }
@@ -108,7 +107,8 @@ public class ClassState {
                 Objects.equals(this.operations, other.operations) &&
                 Objects.equals(this.invariants, other.invariants) &&
                 Objects.equals(this.preConditions, other.preConditions) && // So sánh thêm Pre
-                Objects.equals(this.postConditions, other.postConditions); // So sánh thêm Post
+                Objects.equals(this.postConditions, other.postConditions) &&
+                Objects.equals(this.enumLiterals, other.enumLiterals); // So sánh các giá trị Enum; // So sánh thêm Post
     }
 
     // --- Inner Class đại diện cho tham số ---
@@ -141,4 +141,27 @@ public class ClassState {
             return Objects.hash(name, type, order);
         }
     }
+
+    private String metaNodeName; // Lưu 'NodeConcreteClass', 'NodeAbstractClass' hoặc 'NodeAssociationClass'
+    private Map<String, Object> acSourceInfo = new HashMap<>();
+    private Map<String, Object> acTargetInfo = new HashMap<>();
+
+    public String getMetaNodeName() { return metaNodeName; }
+    public void setMetaNodeName(String name) { this.metaNodeName = name; }
+
+    public void setAcSource(String name, String role, String mult) {
+        acSourceInfo.put("name", name); acSourceInfo.put("role", role); acSourceInfo.put("mult", mult);
+    }
+    public void setAcTarget(String name, String role, String mult) {
+        acTargetInfo.put("name", name); acTargetInfo.put("role", role); acTargetInfo.put("mult", mult);
+    }
+    public Map<String, Object> getAcSource() { return acSourceInfo; }
+    public Map<String, Object> getAcTarget() { return acTargetInfo; }
+
+    // Trong lớp ClassState.java
+    private List<String> enumLiterals = new ArrayList<>();
+
+    public List<String> getEnumLiterals() { return enumLiterals; }
+    public void setEnumLiterals(List<String> literals) { this.enumLiterals = literals; }
+
 }

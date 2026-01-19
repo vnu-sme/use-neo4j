@@ -17,7 +17,6 @@ import org.tzi.use.util.NullPrintWriter;
 import org.uet.dse.neo4j.model.ClassState;
 import org.uet.dse.neo4j.phase2.Neo4jUmlBridge;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
-import org.uet.dse.neo4j.phase2.TypeMapper;
 import org.uet.dse.neo4j.phase2.WorkLogManager;
 
 import javax.swing.*;
@@ -26,7 +25,7 @@ import java.io.PrintWriter;
 import java.util.*;
 import java.util.List;
 
-public class SyncCoordinator {
+public class ModelSyncCoordinator {
     private final Session useSession; // Thay vì chỉ giữ MModel, hãy giữ cả Session
     private final MModel useModel;
 
@@ -34,7 +33,7 @@ public class SyncCoordinator {
     private final UseModelApi modelApi;
     private final Neo4jUmlBridge bridge;
 
-    public SyncCoordinator(Session session, MainWindow mainWindow, MModel useModel, UseModelApi modelApi, Neo4jUmlBridge bridge) {
+    public ModelSyncCoordinator(Session session, MainWindow mainWindow, MModel useModel, UseModelApi modelApi, Neo4jUmlBridge bridge) {
         this.useSession = session;
         this.mainWindow = mainWindow;
         this.useModel = useModel;
@@ -42,7 +41,7 @@ public class SyncCoordinator {
         this.bridge = bridge;
     }
 
-    public SyncCoordinator(Session session, MainWindow mainWindow) {
+    public ModelSyncCoordinator(Session session, MainWindow mainWindow) {
         this.useSession = session;
         this.mainWindow = mainWindow;
         this.useModel = session.system().model();
@@ -50,7 +49,7 @@ public class SyncCoordinator {
         this.bridge = new Neo4jUmlBridge(this.modelApi);
     }
 
-    public SyncCoordinator(Session session) {
+    public ModelSyncCoordinator(Session session) {
         this.useSession = session;
         this.mainWindow = null;
         this.useModel = session.system().model();
@@ -72,6 +71,66 @@ public class SyncCoordinator {
     }
 
 
+
+    public void syncForward() {
+        //get user identification
+        String userIdentifier = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
+
+        //lock db while working
+        LockManager.LockResult lock = LockManager.acquireLock(userIdentifier);
+        if (!lock.success) {
+            JOptionPane.showMessageDialog(null,
+                    "Database is currently LOCKED by:\n" + lock.owner +
+                            "\nPlease wait until they finish or the lock expires.",
+                    "Sync Blocked", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().openSession()) {
+            ModelDiff diff = compareWithNeo4j();
+
+            if (diff.hasDifference()) {
+                // 4. Hiển thị Pop-up thống kê cho chiều XUÔI (Java -> DB)
+                JTextArea textArea = new JTextArea(diff.generateForwardReport());
+                textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+                textArea.setEditable(false);
+                JScrollPane scrollPane = new JScrollPane(textArea);
+                scrollPane.setPreferredSize(new Dimension(600, 450));
+
+                int res = JOptionPane.showConfirmDialog(null, scrollPane,
+                        "Push Model to Neo4j - Review Changes", JOptionPane.OK_CANCEL_OPTION);
+
+                if (res != JOptionPane.OK_OPTION) {
+                    WorkLogManager.getInstance().log("SYNC_CANCEL", "User cancelled sync after reviewing diff.");
+                    return;
+                }
+
+                //delete strategy
+                if (!diff.neo4jOnlyClasses.isEmpty()) {
+                    handleDeletionStrategy(diff.neo4jOnlyClasses);
+                }
+            }
+
+
+            //overwrite and add stuff that is in USE but not neo4j
+            bridge.pushModelToNeo4j();
+
+            // 7. Cập nhật ModelVersion (Hash + Timestamp + User)
+            // Đây là bước quan trọng để "mở khóa" cho tầng Object Sync
+            bridge.updateModelVersion(session, userIdentifier);
+
+            WorkLogManager.getInstance().log("SYNC_FORWARD_SUCCESS", "Model pushed by: " + userIdentifier);
+            JOptionPane.showMessageDialog(null, "Synchronization to Neo4j completed successfully!");
+
+        } catch (Exception e) {
+            WorkLogManager.getInstance().log("SYNC_FORWARD_ERROR", e.getMessage());
+            JOptionPane.showMessageDialog(null, "Sync failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        } finally {
+            // 8. Giải phóng Ticket Lock
+            LockManager.releaseLock();
+        }
+    }
 
 
     /**
@@ -109,20 +168,6 @@ public class SyncCoordinator {
         return diff;
     }
 
-    private void compareAttributesDeep(String clsName, ClassState useCls, ClassState n4jCls, ModelDiff diff) {
-        List<String> javaOnly = new ArrayList<>();
-        List<String> neo4jOnly = new ArrayList<>();
-
-        for (String a : useCls.getAttributes().keySet()) {
-            if (!n4jCls.getAttributes().containsKey(a)) javaOnly.add(a);
-        }
-        for (String a : n4jCls.getAttributes().keySet()) {
-            if (!useCls.getAttributes().containsKey(a)) neo4jOnly.add(a);
-        }
-
-        if (!javaOnly.isEmpty()) diff.javaOnlyAttributes.put(clsName, javaOnly);
-        if (!neo4jOnly.isEmpty()) diff.neo4jOnlyAttributes.put(clsName, neo4jOnly);
-    }
     private Map<String, ClassState> getModelSnapshotFromNeo4j() {
         Map<String, ClassState> stateMap = new HashMap<>();
         String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
@@ -130,57 +175,103 @@ public class SyncCoordinator {
         try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().getDriver().session(SessionConfig.forDatabase(dbName))) {
 
             String cypher =
-                    "MATCH (meta:MetaNode) WHERE meta.name IN ['NodeConcreteClass', 'NodeAbstractClass', 'NodeAssociationClass'] " +
+                    // get class & enums
+                    "MATCH (meta:MetaNode) WHERE meta.name IN ['NodeConcreteClass', 'NodeAbstractClass', 'NodeAssociationClass', 'NodeEnumeration'] " +
                             "MATCH (inst)-[:InstanceOf]->(meta) " +
-                            "WITH inst, labels(inst)[0] as classType " +
+                            "WITH inst, meta, labels(inst)[0] as classType " +
 
-                            // 1. Lấy Attributes
+                            //attribute
                             "OPTIONAL MATCH (inst)-[:HasAttribute]->(a) " +
                             "OPTIONAL MATCH (a)-[r1]->(aRef) WHERE type(r1) = 'ReferenceType' " +
-                            "WITH inst, classType, collect(DISTINCT {name: a.attrName, type: a.type, idx: a.index, ref: aRef.name}) as attrs " +
+                            "WITH inst, meta, classType, collect(DISTINCT {name: a.attrName, type: a.type, idx: a.index, ref: aRef.name, sCollection: a.isCollection, collectionType: a.collectionType}) as attrs " +
 
-                            // 2. Lấy Invariants
+                            //invariants
                             "OPTIONAL MATCH (inst)-[:HasInvariant]->(inv) " +
-                            "WITH inst, classType, attrs, collect(DISTINCT {name: inv.invName, expr: inv.expression, exist: inv.isExistential}) as invariants " +
+                            "WITH inst, meta, classType, attrs, collect(DISTINCT {name: inv.invName, expr: inv.expression, exist: inv.isExistential}) as invariants " +
 
-                            // 3. Xử lý Operations và con của nó
+                            //association class
+                            "OPTIONAL MATCH (src)-[s:sourceAssoClass]->(inst) " +
+                            "OPTIONAL MATCH (inst)-[t:targetAssoClass]->(tgt) " +
+                            "WITH inst, meta, classType, attrs, invariants, " +
+                            "{name: src.name, role: s.role, mult: s.multiplicity} as acSrc, " +
+                            "{name: tgt.name, role: t.role, mult: t.multiplicity} as acTgt " +
+
+                            //operation & param & pre-post
                             "OPTIONAL MATCH (inst)-[:HasOperation]->(o) " +
-                            "OPTIONAL MATCH (o)-[r2]->(retRef) WHERE type(r2) = 'ReferenceReturnType' " +
-
                             "OPTIONAL MATCH (o)-[:HasParam]->(p) " +
-                            "OPTIONAL MATCH (p)-[r3]->(pRef) WHERE type(r3) = 'ReferenceType' " +
-                            "WITH inst, classType, attrs, invariants, o, retRef, " +
-                            "collect(DISTINCT {pName: p.pName, pType: p.type, pOrder: p.pOrder, pRef: pRef.name}) as opParams " +
-
+                            "OPTIONAL MATCH (p)-[r2]->(pRef) WHERE type(r2) = 'ReferenceType' " +
+                            "OPTIONAL MATCH (o)-[r3]->(retRef) WHERE type(r3) = 'ReferenceReturnType' " +
                             "OPTIONAL MATCH (o)-[:HasPreCondition]->(pre) " +
-                            "WITH inst, classType, attrs, invariants, o, retRef, opParams, " +
-                            "collect(DISTINCT {name: pre.condName, expr: pre.expression}) as opPres " +
-
                             "OPTIONAL MATCH (o)-[:HasPostCondition]->(post) " +
-                            "WITH inst, classType, attrs, invariants, o, retRef, opParams, opPres, " +
+
+                            "WITH inst, meta, classType, attrs, invariants, acSrc, acTgt, o, retRef, " +
+                            "collect(DISTINCT {pName: p.pName, pType: p.type, pOrder: p.order, pRef: pRef.name}) as opParams, " +
+                            "collect(DISTINCT {name: pre.condName, expr: pre.expression}) as opPres, " +
                             "collect(DISTINCT {name: post.condName, expr: post.expression}) as opPosts " +
 
-                            "WITH inst, classType, attrs, invariants, " +
+                            "WITH inst, meta, classType, attrs, invariants, acSrc, acTgt, " +
                             "collect(DISTINCT {name: o.opName, ret: o.returnType, retRef: retRef.name, params: opParams, pre: opPres, post: opPosts}) as ops " +
 
-                            "RETURN inst.name as className, classType, attrs, invariants, ops";
-
+                            "RETURN inst.name as className, meta.name as metaName, classType, inst.value as enumValues, attrs, invariants, ops, acSrc, acTgt";
             Result result = session.run(cypher);
 
             while (result.hasNext()) {
                 org.neo4j.driver.Record row = result.next();
+
                 ClassState cls = new ClassState();
                 cls.setName(row.get("className").asString());
                 cls.setType(row.get("classType").asString());
+                cls.setMetaNodeName(row.get("metaName").asString());
 
-                // --- A. XỬ LÝ ATTRIBUTES (Null-Safe) ---
+                if ("NodeEnumeration".equals(cls.getMetaNodeName())) {
+                    Value enumVals = row.get("enumValues");
+                    if (!enumVals.isNull()) {
+                        cls.setEnumLiterals(enumVals.asList(Value::asString));
+                    }
+                }
+
+                if ("NodeAssociationClass".equals(cls.getMetaNodeName())) {
+                    Value src = row.get("acSrc");
+                    Value tgt = row.get("acTgt");
+                    if (!src.get("name").isNull())
+                        cls.setAcSource(src.get("name").asString(), src.get("role").asString(), src.get("mult").asString());
+                    if (!tgt.get("name").isNull())
+                        cls.setAcTarget(tgt.get("name").asString(), tgt.get("role").asString(), tgt.get("mult").asString());
+                }
+
                 Value attrsVal = row.get("attrs");
                 if (!attrsVal.isNull()) {
                     for (Value aVal : attrsVal.asList(v -> v)) {
+                        // Kiểm tra node rỗng (Tránh lỗi do OPTIONAL MATCH không khớp)
                         if (aVal.get("name").isNull()) continue;
-                        Map<String, Object> props = new HashMap<>(aVal.asMap());
-                        if ("Object".equals(props.get("type"))) props.put("type", props.get("ref"));
-                        cls.getAttributes().put((String)props.get("name"), props);
+
+                        Map<String, Object> props = new HashMap<>();
+
+                        // Tên thực tế của thuộc tính (ví dụ: 'age', 'sex')
+                        String attrName = aVal.get("name").asString();
+                        props.put("attrName", attrName);
+
+                        // Dùng làm ID duy nhất trong Map
+                        props.put("name", attrName);
+
+                        // Xử lý kiểu dữ liệu (Kiểm tra Object Reference)
+                        String rawType = aVal.get("type").asString("String");
+                        if ("Object".equals(rawType)) {
+                            // Nếu là Object, lấy tên Class/Enum đích từ trường 'ref'
+                            props.put("type", aVal.get("ref").asString("String"));
+                        } else {
+                            props.put("type", rawType);
+                        }
+
+                        // Thứ tự hiển thị
+                        props.put("index", aVal.get("idx").asInt(0));
+
+                        // Thông tin tập hợp (Dùng đúng key sCollection từ Cypher)
+                        props.put("isCollection", aVal.get("sCollection").asBoolean(false));
+                        props.put("collectionType", aVal.get("collectionType").asString("Set"));
+
+                        // Đưa vào danh sách thuộc tính của ClassState
+                        cls.getAttributes().put(attrName, props);
                     }
                 }
 
@@ -236,6 +327,7 @@ public class SyncCoordinator {
                         }
                     }
                 }
+
                 stateMap.put(cls.getName(), cls);
             }
 
@@ -247,26 +339,62 @@ public class SyncCoordinator {
                     stateMap.get(r.get("child").asString()).getParents().add(r.get("parent").asString());
                 }
             }
+
+
         }
         return stateMap;
     }
+
+
     /**
      * Chuyển đổi USE MModel sang ClassState để so sánh
      */
     private Map<String, ClassState> getModelSnapshotFromUSE() {
         Map<String, ClassState> stateMap = new HashMap<>();
+
+        // ============================================================
+        // PHẦN 1: QUÉT TẤT CẢ CLASSES (CONCRETE, ABSTRACT, ASSOC-CLASS)
+        // ============================================================
         for (MClass mCls : useModel.classes()) {
             ClassState cls = new ClassState();
             cls.setName(mCls.name());
-            cls.setType(mCls instanceof MAssociationClass ? "AssociationClass" :
-                    (mCls.isAbstract() ? "AbstractClass" : "ConcreteClass"));
+
+            // Gán MetaNodeName chuẩn (Để so sánh và nạp M2)
+            String metaName = "NodeConcreteClass";
+            if (mCls instanceof MAssociationClass) metaName = "NodeAssociationClass";
+            else if (mCls.isAbstract()) metaName = "NodeAbstractClass";
+            cls.setMetaNodeName(metaName);
 
             // 1. Map Attributes
+            // Trong vòng lặp map Attributes của getModelSnapshotFromUSE
             for (MAttribute attr : mCls.attributes()) {
                 Map<String, Object> props = new HashMap<>();
                 props.put("attrName", attr.name());
                 props.put("type", UmlTypeTranslator.toDatabaseType(attr.type()));
                 props.put("index", attr.getPositionInModel());
+
+                // SỬA LỖI Ở ĐÂY: Sử dụng interface Type để kiểm tra
+                org.tzi.use.uml.ocl.type.Type type = attr.type();
+                boolean isColl = type.isKindOfCollection(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID);
+                props.put("isCollection", isColl);
+
+                if (isColl) {
+                    // Xác định loại tập hợp dựa trên các hàm isKindOf...
+                    if (type.isKindOfSet(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID)) {
+                        props.put("collectionType", "Set");
+                    } else if (type.isKindOfOrderedSet(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID)) {
+                        props.put("collectionType", "OrderedSet");
+                    } else if (type.isKindOfSequence(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID)) {
+                        props.put("collectionType", "Sequence");
+                    } else if (type.isKindOfBag(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID)) {
+                        props.put("collectionType", "Bag");
+                    } else {
+                        props.put("collectionType", "Set"); // Default
+                    }
+                } else {
+                    props.put("collectionType", "None");
+                }
+
                 cls.getAttributes().put(attr.name(), props);
             }
 
@@ -274,6 +402,11 @@ public class SyncCoordinator {
             for (MOperation op : mCls.operations()) {
                 Map<String, Object> opProps = new HashMap<>();
                 opProps.put("returnType", UmlTypeTranslator.toDatabaseType(op.resultType()));
+
+                // Thêm check collection cho Return Type
+                boolean retColl = op.resultType() != null && op.resultType().isKindOfCollection(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID);
+                opProps.put("isReturnCollection", retColl);
+
                 cls.getOperations().put(op.name(), opProps);
 
                 // Map Params
@@ -282,7 +415,7 @@ public class SyncCoordinator {
                     cls.addOperationParam(op.name(), p.name(), UmlTypeTranslator.toDatabaseType(p.type()), pIdx++);
                 }
 
-                // Map Pre/Post (Để so sánh)
+                // Map Pre/Post Conditions
                 for (MPrePostCondition pre : op.preConditions()) {
                     Map<String, Object> pc = new HashMap<>();
                     pc.put("name", pre.name());
@@ -306,10 +439,46 @@ public class SyncCoordinator {
                 cls.addInvariant(invMap);
             }
 
+            // 4. Map Kế thừa và AssociationClass info
             mCls.parents().forEach(p -> cls.getParents().add(p.name()));
+
+            if (mCls instanceof MAssociationClass) {
+                MAssociationClass ac = (MAssociationClass) mCls;
+                cls.setAcSource(ac.associationEnds().get(0).cls().name(), ac.associationEnds().get(0).name(), ac.associationEnds().get(0).multiplicity().toString());
+                cls.setAcTarget(ac.associationEnds().get(1).cls().name(), ac.associationEnds().get(1).name(), ac.associationEnds().get(1).multiplicity().toString());
+            }
+
             stateMap.put(cls.getName(), cls);
         }
+
+        // ============================================================
+        // PHẦN 2: QUÉT TẤT CẢ ENUMERATIONS (SỬA LỖI POPUP CỦA BẠN)
+        // ============================================================
+        for (org.tzi.use.uml.ocl.type.EnumType e : useModel.enumTypes()) {
+            ClassState enumCls = new ClassState();
+            enumCls.setName(e.name());
+            enumCls.setMetaNodeName("NodeEnumeration");
+            enumCls.setEnumLiterals(e.getLiterals());
+
+            stateMap.put(enumCls.getName(), enumCls);
+        }
+
         return stateMap;
+    }
+
+    private void compareAttributesDeep(String clsName, ClassState useCls, ClassState n4jCls, ModelDiff diff) {
+        List<String> javaOnly = new ArrayList<>();
+        List<String> neo4jOnly = new ArrayList<>();
+
+        for (String a : useCls.getAttributes().keySet()) {
+            if (!n4jCls.getAttributes().containsKey(a)) javaOnly.add(a);
+        }
+        for (String a : n4jCls.getAttributes().keySet()) {
+            if (!useCls.getAttributes().containsKey(a)) neo4jOnly.add(a);
+        }
+
+        if (!javaOnly.isEmpty()) diff.javaOnlyAttributes.put(clsName, javaOnly);
+        if (!neo4jOnly.isEmpty()) diff.neo4jOnlyAttributes.put(clsName, neo4jOnly);
     }
 
     private void handleCriticalDeletion(List<String> deletedClasses) {
@@ -337,7 +506,6 @@ public class SyncCoordinator {
      * Quy trình Sync Ngược: Neo4j -> Java
      */
     public void syncBackward() {
-        // Lấy định danh người dùng để Lock
         String user = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
         LockManager.LockResult lock = LockManager.acquireLock(user);
         if (!lock.success) {
@@ -347,25 +515,23 @@ public class SyncCoordinator {
 
         SwingUtilities.invokeLater(() -> {
             try {
-                // 1. Lấy snapshot toàn diện từ DB (Đã bao gồm Attr, Op, Param, RefType)
                 Map<String, ClassState> dbSnapshot = getModelSnapshotFromNeo4j();
                 if (dbSnapshot.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "No model found in Database.");
                     return;
                 }
 
-                // 2. ĐẶC TẢ 1: Lấy tên Model thực tế từ DB
                 String actualModelName = getModelNameFromDb(); // Hàm này đọc từ node ModelVersion
 
                 // 3. QUAN TRỌNG: Đóng các view đang mở để tránh NullPointer khi xóa data cũ
                 // Đã thảo luận: GUI của USE liên kết cứng với đối tượng trong bộ nhớ, phải đóng trước khi Replace
                 //mainWindow.closeAllViews();
 
-                // 4. TẠO MODEL MỚI với tên chính xác
+                //create new model
                 ModelFactory factory = new ModelFactory();
                 MModel newModel = factory.createModel(actualModelName);
 
-                // 5. NẠP DỮ LIỆU: Gọi hàm nạp (đổi tên từ rebuild thành applyChangesFromSnapshot cho chuẩn)
+                //map data to USE layer
                 // Hàm này chứa 5 bước: Class -> Attr (Index) -> Op (Ref) -> Gen -> Assoc
                 applyChangesFromSnapshot(newModel, dbSnapshot);
 
@@ -373,8 +539,7 @@ public class SyncCoordinator {
                 MSystem newSystem = new MSystem(newModel);
                 useSession.setSystem(newSystem);
 
-                // 7. CẬP NHẬT GIAO DIỆN
-                // Dùng .update() thay vì .updateUI() để tool USE nạp lại cấu trúc cây thư mục
+                //update & reload folder structure
                 mainWindow.getModelBrowser().updateUI();
                // mainWindow.showModelStatus();
                 mainWindow.logWriter().println("Neo4j Sync: Model '" + actualModelName + "' successfully pulled.");
@@ -500,9 +665,7 @@ public class SyncCoordinator {
 
             WorkLogManager.getInstance().log("WIPE", "Model is now completely sterile.");
     }
-    /**
-     * Xây dựng lại Model dựa trên Snapshot (Đảm bảo thứ tự Index và Link)
-     */
+
     /**
      * Xây dựng toàn bộ cấu trúc Model vào một đối tượng MModel mục tiêu
      * @param targetModel Đối tượng model mới tinh (thường dùng cho chiến lược REPLACE)
@@ -511,22 +674,62 @@ public class SyncCoordinator {
     private void applyChangesFromSnapshot(MModel targetModel, Map<String, ClassState> dbSnapshot) throws Exception {
         org.tzi.use.api.UseModelApi tempApi = new org.tzi.use.api.UseModelApi(targetModel);
 
-        // BƯỚC 1 & 2: Classes và Attributes (Sửa lỗi ép kiểu Index)
+        //enums must be loaded first
         for (ClassState dbCls : dbSnapshot.values()) {
-            tempApi.createClass(dbCls.getName(), dbCls.getType().equals("NodeAbstractClass"));
+            if ("NodeEnumeration".equals(dbCls.getMetaNodeName())) {
+                List<String> literals = dbCls.getEnumLiterals();
+                if (literals != null && !literals.isEmpty()) {
+                    tempApi.createEnumeration(dbCls.getName(), literals);
+                    WorkLogManager.getInstance().log("PULL_ENUM", "Successfully created Enum: " + dbCls.getName());
+                }
+            }
+        }
+
+        //create concrete and abstract class first
+        for (ClassState dbCls : dbSnapshot.values()) {
+            if (!"NodeAssociationClass".equals(dbCls.getMetaNodeName()) && !"NodeEnumeration".equals(dbCls.getMetaNodeName())) {
+                tempApi.createClass(dbCls.getName(), "NodeAbstractClass".equals(dbCls.getMetaNodeName()));
+            }
+        }
+
+        //create association class
+        for (ClassState dbCls : dbSnapshot.values()) {
+            if ("NodeAssociationClass".equals(dbCls.getMetaNodeName())) {
+                Map<String, Object> src = dbCls.getAcSource();
+                Map<String, Object> tgt = dbCls.getAcTarget();
+
+                tempApi.createAssociationClass(
+                        dbCls.getName(), false,
+                        (String)src.get("name"), (String)src.get("role"), (String)src.get("mult"), 0,
+                        (String)tgt.get("name"), (String)tgt.get("role"), (String)tgt.get("mult"), 0
+                );
+            }
+        }
+
+        //all types are ready -> map attributes
+        for (ClassState dbCls : dbSnapshot.values()) {
+            // Enum không có thuộc tính, bỏ qua để tránh lỗi
+            if ("NodeEnumeration".equals(dbCls.getMetaNodeName())) continue;
 
             List<Map<String, Object>> attrList = new ArrayList<>(dbCls.getAttributes().values());
-            // Fix Long to Integer cast cho index
             attrList.sort(Comparator.comparingInt(a -> ((Number) a.getOrDefault("index", 0)).intValue()));
 
             for (Map<String, Object> aProps : attrList) {
-                String attrName = (String) aProps.get("name");
-                String umlType = UmlTypeTranslator.toUmlTypeString((String) aProps.get("type"));
-                tempApi.createAttribute(dbCls.getName(), attrName, umlType);
+                String attrName = (String) aProps.get("attrName");
+                // Hàm này sẽ trả về đúng chuỗi "ContractType"
+                String umlTypeString = UmlTypeTranslator.reconstructFullTypeString(aProps);
+
+                try {
+                    // Lúc này tempApi.getType("ContractType") sẽ thành công!
+                    tempApi.createAttribute(dbCls.getName(), attrName, umlTypeString);
+                } catch (Exception e) {
+                    System.err.println("Still failing at attribute: " + attrName + " Type: " + umlTypeString);
+                }
             }
         }
-        // BƯỚC 3: Nạp OPERATIONS (Xử lý lỗi Void, Tham số và Ngữ cảnh OCL)
-        // BƯỚC 3: Nạp OPERATIONS (Signature & Parameters)
+
+
+        //operations mappings
         for (ClassState dbCls : dbSnapshot.values()) {
             String className = dbCls.getName();
 
@@ -535,11 +738,11 @@ public class SyncCoordinator {
                 Map<String, Object> opProps = opEntry.getValue();
 
                 try {
-                    // 1. Xử lý kiểu trả về
+                    //handle return type
                     String rawRetType = (String) opProps.get("returnType");
                     String umlRetType = UmlTypeTranslator.toUmlTypeString(rawRetType);
 
-                    // 2. Xử lý danh sách tham số (Lấy từ dữ liệu lồng nhau đã nạp ở trên)
+                    //handle parameter list
                     List<ClassState.OpParam> paramList = dbCls.getOpParamsSorted(opName);
                     String[][] parameterArray = new String[paramList.size()][2];
 
@@ -559,8 +762,6 @@ public class SyncCoordinator {
                         System.out.println("DEBUG: Rebuilding Op [" + opName + "] with param [" + pName + ":" + pType + "]");
                     }
 
-                    // 3. Gọi API của USE tạo Signature hoàn chỉnh
-                    // Sau dòng này, đối tượng MOperation trong bộ nhớ Java đã biết biến 'p' là gì
                     tempApi.createOperation(className, opName, parameterArray, umlRetType);
 
                     WorkLogManager.getInstance().log("PULL_OP", "Created Signature: " + className + "::" + opName);
@@ -573,7 +774,7 @@ public class SyncCoordinator {
             }
         }
 
-        // BƯỚC 4: Thiết lập quan hệ Kế thừa (Extends)
+        //handle extends association
         for (ClassState dbCls : dbSnapshot.values()) {
             MClass child = targetModel.getClass(dbCls.getName());
             for (String pName : dbCls.getParents()) {
@@ -688,73 +889,11 @@ public class SyncCoordinator {
 
     public boolean isQuickSyncCheck() {
         try {
-            long localHash = SyncObjectCoordinator.calculateModelHash(useModel);
-            long remoteHash = SyncObjectCoordinator.getRemoteModelHash(); // Lấy từ node ModelVersion
+            long localHash = ObjectSyncCoordinator.calculateModelHash(useModel);
+            long remoteHash = ObjectSyncCoordinator.getRemoteModelHash(); // Lấy từ node ModelVersion
             return localHash == remoteHash;
         } catch (Exception e) {
             return false;
-        }
-    }
-
-    public void syncForward() {
-        // 1. Lấy định danh người dùng đầy đủ (Tài khoản + Key + Tên máy)
-        String userIdentifier = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
-
-        // 2. Lock DB (Ticket Mechanism) - Trả về LockResult chứa owner nếu thất bại
-        LockManager.LockResult lock = LockManager.acquireLock(userIdentifier);
-        if (!lock.success) {
-            JOptionPane.showMessageDialog(null,
-                    "Database is currently LOCKED by:\n" + lock.owner +
-                            "\nPlease wait until they finish or the lock expires.",
-                    "Sync Blocked", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().openSession()) {
-            // 3. So sánh Snapshot giữa Java và Neo4j (Neutral Comparison)
-            ModelDiff diff = compareWithNeo4j();
-
-            if (diff.hasDifference()) {
-                // 4. Hiển thị Pop-up thống kê cho chiều XUÔI (Java -> DB)
-                JTextArea textArea = new JTextArea(diff.generateForwardReport());
-                textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
-                textArea.setEditable(false);
-                JScrollPane scrollPane = new JScrollPane(textArea);
-                scrollPane.setPreferredSize(new Dimension(600, 450));
-
-                int res = JOptionPane.showConfirmDialog(null, scrollPane,
-                        "Push Model to Neo4j - Review Changes", JOptionPane.OK_CANCEL_OPTION);
-
-                if (res != JOptionPane.OK_OPTION) {
-                    WorkLogManager.getInstance().log("SYNC_CANCEL", "User cancelled sync after reviewing diff.");
-                    return;
-                }
-
-                // 5. Xử lý chiến lược xóa (Nếu DB đang thừa so với Java)
-                // Những Class chỉ có ở Neo4j (neo4jOnlyClasses) sẽ bị xóa khỏi DB
-                if (!diff.neo4jOnlyClasses.isEmpty()) {
-                    handleDeletionStrategy(diff.neo4jOnlyClasses);
-                }
-            }
-
-            // 6. Thực thi ghi đè/bổ sung cấu trúc UML xuống Neo4j
-            // bridge.pushModelToNeo4j đã bao gồm lệnh MERGE và InstanceOf
-            bridge.pushModelToNeo4j();
-
-            // 7. Cập nhật ModelVersion (Hash + Timestamp + User)
-            // Đây là bước quan trọng để "mở khóa" cho tầng Object Sync
-            bridge.updateModelVersion(session, userIdentifier);
-
-            WorkLogManager.getInstance().log("SYNC_FORWARD_SUCCESS", "Model pushed by: " + userIdentifier);
-            JOptionPane.showMessageDialog(null, "Synchronization to Neo4j completed successfully!");
-
-        } catch (Exception e) {
-            WorkLogManager.getInstance().log("SYNC_FORWARD_ERROR", e.getMessage());
-            JOptionPane.showMessageDialog(null, "Sync failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-        } finally {
-            // 8. Giải phóng Ticket Lock
-            LockManager.releaseLock();
         }
     }
 

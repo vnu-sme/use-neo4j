@@ -6,8 +6,8 @@ import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.phase2.SessionManager;
 import org.uet.dse.neo4j.phase2.WorkLogManager;
 import org.uet.dse.neo4j.sync.ChangeTracker;
-import org.uet.dse.neo4j.sync.SyncCoordinator;
-import org.uet.dse.neo4j.sync.SyncObjectCoordinator;
+import org.uet.dse.neo4j.sync.ModelSyncCoordinator;
+import org.uet.dse.neo4j.sync.ObjectSyncCoordinator;
 
 import javax.swing.*;
 import java.awt.*;
@@ -113,10 +113,10 @@ public class Neo4jDashboardView extends JDialog {
         JButton btnPullObject = new JButton("Pull Objects (DB -> Java)");
 
         // Liên kết các bộ điều phối
-        btnPushModel.addActionListener(e -> new SyncCoordinator(session).syncForward());
-        btnPullModel.addActionListener(e -> new SyncCoordinator(session).syncBackward());
-        btnPushObject.addActionListener(e -> new SyncObjectCoordinator(session.system()).syncObjectsForward(true));
-        btnPullObject.addActionListener(e -> new SyncObjectCoordinator(session.system()).syncObjectsBackward(true));
+        btnPushModel.addActionListener(e -> new ModelSyncCoordinator(session).syncForward());
+        btnPullModel.addActionListener(e -> new ModelSyncCoordinator(session).syncBackward());
+        btnPushObject.addActionListener(e -> new ObjectSyncCoordinator(session.system()).syncObjectsForward(true));
+        btnPullObject.addActionListener(e -> new ObjectSyncCoordinator(session.system()).syncObjectsBackward(true));
 
         pnlButtons.add(btnPushModel); pnlButtons.add(btnPullModel);
         pnlButtons.add(btnPushObject); pnlButtons.add(btnPullObject);
@@ -173,8 +173,8 @@ public class Neo4jDashboardView extends JDialog {
         lblModelStatus.setFont(new Font("SansSerif", Font.BOLD, 12));
         JButton btnModelInspect = new JButton("Inspect & Selective Sync");
         btnModelInspect.addActionListener(e -> new SyncDetailDialog("Model",
-                new SyncCoordinator(session),
-                new SyncObjectCoordinator(session.system())).setVisible(true));
+                new ModelSyncCoordinator(session),
+                new ObjectSyncCoordinator(session.system())).setVisible(true));
 
         pnlModel.add(lblModelStatus, BorderLayout.CENTER);
         pnlModel.add(btnModelInspect, BorderLayout.EAST);
@@ -185,8 +185,8 @@ public class Neo4jDashboardView extends JDialog {
         lblObjectStatus.setFont(new Font("SansSerif", Font.BOLD, 12));
         JButton btnObjectInspect = new JButton("Inspect & Selective Sync");
         btnObjectInspect.addActionListener(e -> new SyncDetailDialog("Object",
-                new SyncCoordinator(session),
-                new SyncObjectCoordinator(session.system())).setVisible(true));
+                new ModelSyncCoordinator(session),
+                new ObjectSyncCoordinator(session.system())).setVisible(true));
 
         pnlObject.add(lblObjectStatus, BorderLayout.CENTER);
         pnlObject.add(btnObjectInspect, BorderLayout.EAST);

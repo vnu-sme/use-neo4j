@@ -15,13 +15,13 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
-public class SyncObjectCoordinator {
+public class ObjectSyncCoordinator {
     private static long lastLocalObjectSyncTimestamp = 0;
     private final MSystem system;
     private final Neo4jRepository repo;
     private final UseSystemApi systemApi;
 
-    public SyncObjectCoordinator(MSystem system) {
+    public ObjectSyncCoordinator(MSystem system) {
         this.system = system;
         // Sử dụng UseSystemApi để thao tác với Object State của USE
         this.systemApi = UseSystemApi.create(system, true);
