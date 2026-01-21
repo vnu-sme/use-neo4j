@@ -822,9 +822,9 @@ public class ModelSyncCoordinator {
         org.tzi.use.api.UseModelApi tempApi = new org.tzi.use.api.UseModelApi(targetModel);
         for (ClassState dbCls : dbSnapshot.values()) {
             for (Map<String, Object> invProps : dbCls.getInvariants()) {
-                String invName = (String) invProps.get("name"); // Key từ Cypher
-                String oclBody = (String) invProps.get("expr"); // Key từ Cypher
-                boolean isExist = (boolean) invProps.get("exist"); // Key từ Cypher
+                String invName = (String) invProps.get("name");
+                String oclBody = (String) invProps.get("expr");
+                boolean isExist = (boolean) invProps.get("exist");
 
                 try {
                     if (oclBody != null) {
@@ -925,31 +925,24 @@ public class ModelSyncCoordinator {
                         "\nChoosing C1 will permanently REMOVE their objects and all internal members (Attrs, Ops, OCL).",
                 "Data Integrity Strategy", 0, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
 
-        if (choice == 0) { // CHIẾN LƯỢC C1: XÓA SÂU TRIỆT ĐỂ
+        if (choice == 0) {
             try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().openSession()) {
                 for (String label : classesToRemoveFromDb) {
 
-                    // 1. Xóa toàn bộ thực thể Object (M0 Layer) có nhãn này
                     session.run("MATCH (n:`" + label + "`) DETACH DELETE n");
 
-                    // 2. TRUY QUÉT VÀ XÓA SÂU METADATA (M1 Layer)
-                    // Câu lệnh này tìm Class và toàn bộ "cây" thành phần của nó
                     String deepDeleteCypher =
-                            // 1. Tìm đúng node Class/Enum dựa trên quan hệ InstanceOf tới MetaNode (Y hệt query snapshot)
                             "MATCH (meta:MetaNode) WHERE meta.name IN ['NodeConcreteClass', 'NodeAbstractClass', 'NodeAssociationClass', 'NodeEnumeration'] " +
                                     "MATCH (c {name: $name})-[:InstanceOf]->(meta) " +
 
-                                    // 2. Tìm tất cả các thành phần phụ thuộc (Attributes, Operations, Invariants)
                                     "OPTIONAL MATCH (c)-[:HasAttribute]->(a) " +
                                     "OPTIONAL MATCH (c)-[:HasInvariant]->(inv) " +
                                     "OPTIONAL MATCH (c)-[:HasOperation]->(o) " +
 
-                                    // 3. Tìm các thành phần con của Operation (Params, Pre, Post)
                                     "OPTIONAL MATCH (o)-[:HasParam]->(p) " +
                                     "OPTIONAL MATCH (o)-[:HasPreCondition]->(pre) " +
                                     "OPTIONAL MATCH (o)-[:HasPostCondition]->(post) " +
 
-                                    // 4. GOM TẤT CẢ VÀO DANH SÁCH (Tránh lỗi Cartesian Product làm sót Node)
                                     "WITH c, " +
                                     "collect(DISTINCT a) as attrs, " +
                                     "collect(DISTINCT inv) as invs, " +
@@ -958,18 +951,16 @@ public class ModelSyncCoordinator {
                                     "collect(DISTINCT pre) as pres, " +
                                     "collect(DISTINCT post) as posts " +
 
-                                    // 5. THỰC THI XÓA LẦN LƯỢT (Dùng FOREACH để xử lý danh sách an toàn)
                                     "FOREACH (x IN attrs | DETACH DELETE x) " +
                                     "FOREACH (x IN invs | DETACH DELETE x) " +
                                     "FOREACH (x IN params | DETACH DELETE x) " +
                                     "FOREACH (x IN pres | DETACH DELETE x) " +
                                     "FOREACH (x IN posts | DETACH DELETE x) " +
-                                    "FOREACH (x IN ops | DETACH DELETE x) " + // Xóa Operation sau khi đã dọn con của nó
-                                    "DETACH DELETE c"; // Cuối cùng xóa chính Class đó
+                                    "FOREACH (x IN ops | DETACH DELETE x) " +
+                                    "DETACH DELETE c";
 
                     session.run(deepDeleteCypher, org.neo4j.driver.Values.parameters("name", label));
 
-                    // 3. Dọn dẹp Association liên quan (Xóa link nếu tên trùng hoặc AC bị xóa)
                     session.run("MATCH ()-[r {associationName: $name}]-() DELETE r",
                             org.neo4j.driver.Values.parameters("name", label));
 
@@ -982,7 +973,6 @@ public class ModelSyncCoordinator {
         }
     }
 
-    // Trong lớp SyncCoordinator.java (Tầng Model)
     public String getQuickSummary() {
         try {
             if (isQuickSyncCheck()) { // Check ModelHash
@@ -1010,7 +1000,6 @@ public class ModelSyncCoordinator {
         try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().getDriver().session(SessionConfig.forDatabase(dbName))) {
 
             Map<String, ClassState> stateMap = new HashMap<>();
-            // --- PHẦN 1: QUÉT CLASSES & ENUMS (Giữ nguyên logic xử lý ClassState của bạn) ---
             String cypher =
                     // get class & enums
                     "MATCH (meta:MetaNode) WHERE meta.name IN ['NodeConcreteClass', 'NodeAbstractClass', 'NodeAssociationClass', 'NodeEnumeration'] " +
@@ -1112,7 +1101,7 @@ public class ModelSyncCoordinator {
                     }
                 }
 
-                // --- B. XỬ LÝ INVARIANTS (Null-Safe) ---
+                //invariant null-safe
                 Value invsVal = row.get("invariants");
                 if (!invsVal.isNull()) {
                     for (Value invVal : invsVal.asList(v -> v)) {
@@ -1123,7 +1112,7 @@ public class ModelSyncCoordinator {
                     }
                 }
 
-                // --- C. XỬ LÝ OPERATIONS (Null-Safe & Nested Null-Safe) ---
+                //operations null safe
                 Value opsVal = row.get("ops");
                 if (!opsVal.isNull()) {
                     for (Value oVal : opsVal.asList(v -> v)) {
@@ -1136,7 +1125,7 @@ public class ModelSyncCoordinator {
                         opProps.put("returnType", finalRet);
                         cls.getOperations().put(opName, opProps);
 
-                        // C.1 Params
+                        // params
                         Value paramsVal = oVal.get("params");
                         if (!paramsVal.isNull()) {
                             for (Value pVal : paramsVal.asList(v -> v)) {
@@ -1147,7 +1136,7 @@ public class ModelSyncCoordinator {
                             }
                         }
 
-                        // C.2 Pre-Conditions
+                        //pre-cond
                         Value preVal = oVal.get("pre");
                         if (!preVal.isNull()) {
                             for (Value p : preVal.asList(v -> v)) {
@@ -1155,7 +1144,7 @@ public class ModelSyncCoordinator {
                             }
                         }
 
-                        // C.3 Post-Conditions
+                        //post-cond
                         Value postVal = oVal.get("post");
                         if (!postVal.isNull()) {
                             for (Value p : postVal.asList(v -> v)) {
@@ -1168,7 +1157,7 @@ public class ModelSyncCoordinator {
                 stateMap.put(cls.getName(), cls);
             }
 
-            // Bước Kế thừa (Duyệt an toàn)
+            //generalization
             Result genRes = session.run("MATCH (c)-[:Extends]->(p) RETURN c.name as child, p.name as parent");
             while (genRes.hasNext()) {
                 Record r = genRes.next();
@@ -1178,7 +1167,7 @@ public class ModelSyncCoordinator {
             }
             fullSnapshot.classes = stateMap;
 
-            // --- PHẦN 2: QUÉT REGULAR ASSOCIATIONS (MỚI) ---
+            //regular assoc
             String assocCypher =
                     "MATCH (s)-[r]->(t) " +
                             "WHERE type(r) IN ['AssociateWith', 'ComposeOf', 'Aggregates'] " +
@@ -1207,24 +1196,17 @@ public class ModelSyncCoordinator {
 
     public FullModelSnapshot getFullModelSnapshotFromUSE() {
         FullModelSnapshot fullSnapshot = new FullModelSnapshot();
-
-        // 1. Duyệt Class & Enum (Giữ nguyên logic cũ của bạn)
         Map<String, ClassState> stateMap = new HashMap<>();
 
-        // ============================================================
-        // PHẦN 1: QUÉT TẤT CẢ CLASSES (CONCRETE, ABSTRACT, ASSOC-CLASS)
-        // ============================================================
         for (MClass mCls : useModel.classes()) {
             ClassState cls = new ClassState();
             cls.setName(mCls.name());
 
-            // Gán MetaNodeName chuẩn (Để so sánh và nạp M2)
             String metaName = "NodeConcreteClass";
             if (mCls instanceof MAssociationClass) metaName = "NodeAssociationClass";
             else if (mCls.isAbstract()) metaName = "NodeAbstractClass";
             cls.setMetaNodeName(metaName);
 
-            // 1. Map Attributes
             // Trong vòng lặp map Attributes của getModelSnapshotFromUSE
             for (MAttribute attr : mCls.attributes()) {
                 Map<String, Object> props = new HashMap<>();
@@ -1232,13 +1214,11 @@ public class ModelSyncCoordinator {
                 props.put("type", UmlTypeTranslator.toDatabaseType(attr.type()));
                 props.put("index", attr.getPositionInModel());
 
-                // SỬA LỖI Ở ĐÂY: Sử dụng interface Type để kiểm tra
                 org.tzi.use.uml.ocl.type.Type type = attr.type();
                 boolean isColl = type.isKindOfCollection(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID);
                 props.put("isCollection", isColl);
 
                 if (isColl) {
-                    // Xác định loại tập hợp dựa trên các hàm isKindOf...
                     if (type.isKindOfSet(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID)) {
                         props.put("collectionType", "Set");
                     } else if (type.isKindOfOrderedSet(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID)) {
@@ -1257,24 +1237,21 @@ public class ModelSyncCoordinator {
                 cls.getAttributes().put(attr.name(), props);
             }
 
-            // 2. Map Operations & Constraints
             for (MOperation op : mCls.operations()) {
                 Map<String, Object> opProps = new HashMap<>();
                 opProps.put("returnType", UmlTypeTranslator.toDatabaseType(op.resultType()));
 
-                // Thêm check collection cho Return Type
+
                 boolean retColl = op.resultType() != null && op.resultType().isKindOfCollection(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID);
                 opProps.put("isReturnCollection", retColl);
 
                 cls.getOperations().put(op.name(), opProps);
 
-                // Map Params
                 int pIdx = 0;
                 for (org.tzi.use.uml.ocl.expr.VarDecl p : op.paramList()) {
                     cls.addOperationParam(op.name(), p.name(), UmlTypeTranslator.toDatabaseType(p.type()), pIdx++);
                 }
 
-                // Map Pre/Post Conditions
                 for (MPrePostCondition pre : op.preConditions()) {
                     Map<String, Object> pc = new HashMap<>();
                     pc.put("name", pre.name());
@@ -1289,7 +1266,6 @@ public class ModelSyncCoordinator {
                 }
             }
 
-            // 3. Map Class Invariants
             for (MClassInvariant inv : useModel.classInvariants(mCls)) {
                 Map<String, Object> invMap = new HashMap<>();
                 invMap.put("name", inv.name());
@@ -1298,7 +1274,6 @@ public class ModelSyncCoordinator {
                 cls.addInvariant(invMap);
             }
 
-            // 4. Map Kế thừa và AssociationClass info
             mCls.parents().forEach(p -> cls.getParents().add(p.name()));
 
             if (mCls instanceof MAssociationClass) {
@@ -1310,9 +1285,6 @@ public class ModelSyncCoordinator {
             stateMap.put(cls.getName(), cls);
         }
 
-        // ============================================================
-        // PHẦN 2: QUÉT TẤT CẢ ENUMERATIONS (SỬA LỖI POPUP CỦA BẠN)
-        // ============================================================
         for (org.tzi.use.uml.ocl.type.EnumType e : useModel.enumTypes()) {
             ClassState enumCls = new ClassState();
             enumCls.setName(e.name());
@@ -1322,12 +1294,8 @@ public class ModelSyncCoordinator {
             fullSnapshot.classes.put(enumCls.getName(), enumCls);
         }
 
-
-        // [Thay đổi stateMap.put... thành fullSnapshot.classes.put...]
-
-        // 2. Duyệt Associations (MỚI)
         for (MAssociation mAssoc : useModel.associations()) {
-            // Chỉ xử lý association thường, bỏ qua AssociationClass vì nó đã nằm trong danh sách Class
+            //association class has already been handled in class part
             if (mAssoc instanceof MAssociationClass) continue;
 
             AssociationState as = new AssociationState();
@@ -1344,7 +1312,6 @@ public class ModelSyncCoordinator {
             as.tgtRole = tgtEnd.name();
             as.tgtMult = tgtEnd.multiplicity().toString();
 
-            // Xác định type dựa trên aggregationKind (0: None, 1: Aggregation, 2: Composition)
             int kind = tgtEnd.aggregationKind();
             as.type = (kind == 2) ? "ComposeOf" : (kind == 1 ? "Aggregates" : "AssociateWith");
 
@@ -1355,27 +1322,23 @@ public class ModelSyncCoordinator {
     }
 
     /**
-     * HÀM ĐỒNG BỘ THỜI GIAN THỰC (JAVA -> NEO4J)
-     * Tự động dọn dẹp và cập nhật không cần tương tác người dùng.
+     * for real-time utils
      */
     public void syncForwardRealtime() {
         String userIdentifier = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
 
-        // 1. Thử lấy Lock. Trong Real-time, nếu không lấy được Lock (do người khác đang giữ),
-        // ta im lặng bỏ qua để không chặn đứng luồng làm việc của UI.
+        // if the lock is not obtained, currently skip, not retrying yet
         LockManager.LockResult lock = LockManager.acquireLock(userIdentifier);
         if (!lock.success) {
             return;
         }
 
         try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().openSession()) {
-            // 2. So sánh trạng thái hiện tại
             ModelDiff diff = compareWithNeo4j();
 
-            // 3. TỰ ĐỘNG DỌN DẸP (Nếu có sự khác biệt)
             if (diff.hasDifference()) {
 
-                // A. Xóa Association không còn tồn tại
+                //clear assoc
                 if (!diff.neo4jOnlyAssociations.isEmpty()) {
                     for (String assocName : diff.neo4jOnlyAssociations) {
                         session.run("MATCH ()-[r {associationName: $name}]-() DELETE r",
@@ -1383,31 +1346,26 @@ public class ModelSyncCoordinator {
                     }
                 }
 
-                // B. Xóa Class/Enum không còn tồn tại (Chiến lược C1 tự động)
+                //clear class & enum
                 if (!diff.neo4jOnlyClasses.isEmpty()) {
                     for (String label : diff.neo4jOnlyClasses) {
-                        // 1. Xóa các thực thể Object (M0) của Class này
-                        // Ví dụ: Xóa tất cả các node có nhãn :Person
+                        // Xóa tất cả các node có nhãn :Person
                         session.run("MATCH (n:`" + label + "`) DETACH DELETE n");
 
-                        // 2. XÓA SÂU ĐỊNH NGHĨA MODEL (M1): Cascade Delete
+                        // ascade Delete
                         // Tìm Class và tất cả các node Attribute, Operation, Invariant, Param nối với nó
                         String deepDeleteCypher =
-                                // 1. Tìm đúng node Class/Enum dựa trên quan hệ InstanceOf tới MetaNode (Y hệt query snapshot)
                                 "MATCH (meta:MetaNode) WHERE meta.name IN ['NodeConcreteClass', 'NodeAbstractClass', 'NodeAssociationClass', 'NodeEnumeration'] " +
                                         "MATCH (c {name: $name})-[:InstanceOf]->(meta) " +
 
-                                        // 2. Tìm tất cả các thành phần phụ thuộc (Attributes, Operations, Invariants)
                                         "OPTIONAL MATCH (c)-[:HasAttribute]->(a) " +
                                         "OPTIONAL MATCH (c)-[:HasInvariant]->(inv) " +
                                         "OPTIONAL MATCH (c)-[:HasOperation]->(o) " +
 
-                                        // 3. Tìm các thành phần con của Operation (Params, Pre, Post)
                                         "OPTIONAL MATCH (o)-[:HasParam]->(p) " +
                                         "OPTIONAL MATCH (o)-[:HasPreCondition]->(pre) " +
                                         "OPTIONAL MATCH (o)-[:HasPostCondition]->(post) " +
 
-                                        // 4. GOM TẤT CẢ VÀO DANH SÁCH (Tránh lỗi Cartesian Product làm sót Node)
                                         "WITH c, " +
                                         "collect(DISTINCT a) as attrs, " +
                                         "collect(DISTINCT inv) as invs, " +
@@ -1416,19 +1374,16 @@ public class ModelSyncCoordinator {
                                         "collect(DISTINCT pre) as pres, " +
                                         "collect(DISTINCT post) as posts " +
 
-                                        // 5. THỰC THI XÓA LẦN LƯỢT (Dùng FOREACH để xử lý danh sách an toàn)
                                         "FOREACH (x IN attrs | DETACH DELETE x) " +
                                         "FOREACH (x IN invs | DETACH DELETE x) " +
                                         "FOREACH (x IN params | DETACH DELETE x) " +
                                         "FOREACH (x IN pres | DETACH DELETE x) " +
                                         "FOREACH (x IN posts | DETACH DELETE x) " +
-                                        "FOREACH (x IN ops | DETACH DELETE x) " + // Xóa Operation sau khi đã dọn con của nó
-                                        "DETACH DELETE c"; // Cuối cùng xóa chính Class đó
+                                        "FOREACH (x IN ops | DETACH DELETE x) " +
+                                        "DETACH DELETE c";
 
                         session.run(deepDeleteCypher, Values.parameters("name", label));
 
-                        // 3. Dọn dẹp các Association mồ côi
-                        // Nếu Association Class bị xóa, hoặc Association thường mang tên Class này bị xóa
                         session.run("MATCH ()-[r {associationName: $name}]-() DELETE r",
                                 Values.parameters("name", label));
 
@@ -1439,11 +1394,8 @@ public class ModelSyncCoordinator {
                 WorkLogManager.getInstance().log("AUTO_CLEANUP", "Removed obsolete elements: " + diff.neo4jOnlyClasses);
             }
 
-            // 4. ĐẨY DỮ LIỆU MỚI (Sử dụng hàm bridge đã viết)
-            // Hàm này thực hiện MERGE nên sẽ cập nhật mismatchedClasses và tạo javaOnlyClasses
             bridge.pushModelToNeo4j();
 
-            // 5. CẬP NHẬT PHIÊN BẢN (Mở khóa cho Object Sync)
             bridge.updateModelVersion(session, userIdentifier);
 
             System.out.println("Real-time Sync: Database matches USE model.");
@@ -1452,7 +1404,6 @@ public class ModelSyncCoordinator {
             System.err.println("Real-time Sync Error: " + e.getMessage());
             WorkLogManager.getInstance().log("REALTIME_ERROR", e.getMessage());
         } finally {
-            // 6. Giải phóng Lock
             LockManager.releaseLock();
         }
     }

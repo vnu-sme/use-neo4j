@@ -31,7 +31,7 @@ end
 
 -- association
 
-association WorksFor between
+composition WorksFor between
     Person[*] role employee
     University[0..1] role employer
 end

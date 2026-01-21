@@ -1499,3 +1499,153 @@
 [2026-01-20 00:59:10] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -261238839
 [2026-01-20 00:59:10] ACTION: PUSH_SUCCESS | DETAILS: Model Incremental is now synchronized.
 [2026-01-20 00:59:10] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -261238839
+[2026-01-20 11:55:13] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-20 11:55:13] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-20 11:55:13] ACTION: SESSION_CREATE | DETAILS: New session created with key: 0B2A5BDD
+[2026-01-20 11:55:13] ACTION: REALTIME | DETAILS: Service monitoring started.
+[2026-01-20 11:55:13] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 0B2A5BDD | Ver: unknown
+[2026-01-20 11:55:35] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-20 11:55:35] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-20 11:55:35] ACTION: SESSION_CREATE | DETAILS: New session created with key: E0F57580
+[2026-01-20 11:55:35] ACTION: REALTIME | DETAILS: Service monitoring started.
+[2026-01-20 11:55:35] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: E0F57580 | Ver: unknown
+[2026-01-20 11:55:44] ACTION: PUSH_START | DETAILS: User neo4j [Key: 0B2A5BDD] (audreycolar) initiated sync for model: LotteryTicketModel
+[2026-01-20 11:55:53] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -1000759573
+[2026-01-20 11:55:53] ACTION: PUSH_SUCCESS | DETAILS: Model LotteryTicketModel is now synchronized.
+[2026-01-20 11:55:53] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -1000759573
+[2026-01-20 11:55:53] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 0B2A5BDD] (audreycolar)
+[2026-01-20 11:58:51] ACTION: PULL_OP | DETAILS: Created Signature: Snapshot::succ
+[2026-01-20 11:58:51] ACTION: PULL_OP | DETAILS: Created Signature: Snapshot::pred
+[2026-01-20 11:58:51] ACTION: PULL_OP | DETAILS: Created Signature: Snapshot::copy
+[2026-01-20 11:58:51] ACTION: PULL_OP | DETAILS: Created Signature: OperationCall::succ
+[2026-01-20 11:58:51] ACTION: PULL_OP | DETAILS: Created Signature: OperationCall::pred
+[2026-01-20 11:58:51] ACTION: PULL_OP | DETAILS: Created Signature: BuyLotteryTicket::isFinalStep
+[2026-01-20 11:58:51] ACTION: PULL_OP | DETAILS: Created Signature: BuyLotteryTicket::match_step5_act
+[2026-01-20 11:58:51] ACTION: PULL_OP | DETAILS: Created Signature: BuyLotteryTicket::step1_act
+[2026-01-20 11:58:51] ACTION: PULL_OP | DETAILS: Created Signature: BuyLotteryTicket::step4_sys
+[2026-01-20 11:58:51] ACTION: PULL_OP | DETAILS: Created Signature: BuyLotteryTicket::step2_sys
+[2026-01-20 11:58:51] ACTION: PULL_OP | DETAILS: Created Signature: BuyLotteryTicket::match_step3_act
+[2026-01-20 11:58:51] ACTION: PULL_OP | DETAILS: Created Signature: BuyLotteryTicket::step6_sys
+[2026-01-20 11:58:51] ACTION: PULL_OP | DETAILS: Created Signature: BuyLotteryTicket::enter_BuyLotteryTicket
+[2026-01-20 11:58:51] ACTION: PULL_OP | DETAILS: Created Signature: BuyLotteryTicket::exit_BuyLotteryTicket
+[2026-01-20 11:58:51] ACTION: PULL_OP | DETAILS: Created Signature: BuyLotteryTicket::step5_act
+[2026-01-20 11:58:51] ACTION: PULL_OP | DETAILS: Created Signature: BuyLotteryTicket::step3_act
+[2026-01-20 11:58:51] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: BuyLotteryTicket_buyer
+[2026-01-20 11:58:51] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: BuyLotteryTicket_lotteryDraws
+[2026-01-20 11:58:51] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: BuyLotteryTicket_lotteryDraw
+[2026-01-20 11:58:51] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: BuyLotteryTicket_purchase
+[2026-01-20 11:58:51] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: SnapshotBuyLotteryTicket
+[2026-01-20 11:58:51] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: PredSuccBuyLotteryTicket
+[2026-01-20 11:58:51] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: MakesBy
+[2026-01-20 11:58:51] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: SnapshotBuyer
+[2026-01-20 11:58:51] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: PredSuccBuyer
+[2026-01-20 11:58:51] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: SnapshotLotteryDraw
+[2026-01-20 11:58:51] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: PredSuccLotteryDraw
+[2026-01-20 11:58:51] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: BuysFrom
+[2026-01-20 11:58:51] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: SnapshotPurchase
+[2026-01-20 11:58:51] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: PredSuccPurchase
+[2026-01-20 11:58:51] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: Filmstrip
+[2026-01-20 11:58:52] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: LotteryDraw
+[2026-01-20 11:58:52] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Purchase
+[2026-01-20 11:58:52] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: step1_act_BuyLotteryTicketOpC
+[2026-01-20 11:58:52] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: step3_act_BuyLotteryTicketOpC
+[2026-01-20 11:58:52] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Buyer
+[2026-01-20 11:58:52] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: step6_sys_BuyLotteryTicketOpC
+[2026-01-20 11:58:52] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Snapshot
+[2026-01-20 11:58:52] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: step2_sys_BuyLotteryTicketOpC
+[2026-01-20 11:58:52] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: step4_sys_BuyLotteryTicketOpC
+[2026-01-20 11:58:52] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: OperationCall
+[2026-01-20 11:58:52] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: BuyLotteryTicketOpC
+[2026-01-20 11:58:52] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: match_step5_act_BuyLotteryTicketOpC
+[2026-01-20 11:58:52] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: step5_act_BuyLotteryTicketOpC
+[2026-01-20 11:58:52] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: BuyLotteryTicket
+[2026-01-20 11:58:53] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: match_step3_act_BuyLotteryTicketOpC
+[2026-01-20 11:58:53] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: [LotteryDraw, Purchase, step1_act_BuyLotteryTicketOpC, step3_act_BuyLotteryTicketOpC, Buyer, step6_sys_BuyLotteryTicketOpC, Snapshot, step2_sys_BuyLotteryTicketOpC, step4_sys_BuyLotteryTicketOpC, OperationCall, BuyLotteryTicketOpC, match_step5_act_BuyLotteryTicketOpC, step5_act_BuyLotteryTicketOpC, BuyLotteryTicket, match_step3_act_BuyLotteryTicketOpC]
+[2026-01-20 11:58:53] ACTION: PUSH_START | DETAILS: User neo4j [Key: E0F57580] (audreycolar) initiated sync for model: LotteryTicketModel
+[2026-01-20 11:58:57] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -1000759573
+[2026-01-20 11:58:57] ACTION: PUSH_SUCCESS | DETAILS: Model LotteryTicketModel is now synchronized.
+[2026-01-20 11:58:57] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -1000759573
+[2026-01-20 14:58:11] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-20 14:58:11] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-20 14:58:11] ACTION: SESSION_CREATE | DETAILS: New session created with key: 881A3109
+[2026-01-20 14:58:11] ACTION: REALTIME | DETAILS: Service monitoring started.
+[2026-01-20 14:58:11] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 881A3109 | Ver: unknown
+[2026-01-20 14:58:18] ACTION: PUSH_START | DETAILS: User neo4j [Key: 881A3109] (audreycolar) initiated sync for model: Employee
+[2026-01-20 14:58:18] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-20 14:58:19] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-20 14:58:21] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 2112460567
+[2026-01-20 14:58:21] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-20 14:58:21] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 2112460567
+[2026-01-20 14:58:21] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 881A3109] (audreycolar)
+[2026-01-20 14:59:10] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Professor
+[2026-01-20 14:59:10] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: University
+[2026-01-20 14:59:10] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Employment
+[2026-01-20 14:59:10] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Student
+[2026-01-20 14:59:10] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Person
+[2026-01-20 14:59:10] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: [Professor, University, Employment, Student, Person]
+[2026-01-20 14:59:10] ACTION: PUSH_START | DETAILS: User neo4j [Key: 881A3109] (audreycolar) initiated sync for model: Employee
+[2026-01-20 14:59:10] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-20 14:59:10] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-20 14:59:12] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 2112460567
+[2026-01-20 14:59:12] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-20 14:59:12] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 2112460567
+[2026-01-20 14:59:15] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Professor
+[2026-01-20 14:59:15] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: University
+[2026-01-20 14:59:15] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Employment
+[2026-01-20 14:59:16] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: ContractType
+[2026-01-20 14:59:16] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Gender
+[2026-01-20 14:59:16] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Student
+[2026-01-20 14:59:16] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Person
+[2026-01-20 14:59:16] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: [Professor, University, Employment, ContractType, Gender, Student, Person]
+[2026-01-20 14:59:16] ACTION: PUSH_START | DETAILS: User neo4j [Key: 881A3109] (audreycolar) initiated sync for model: Plain
+[2026-01-20 14:59:16] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-01-20 14:59:16] ACTION: PUSH_SUCCESS | DETAILS: Model Plain is now synchronized.
+[2026-01-20 14:59:16] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-01-20 14:59:24] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-20 14:59:24] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-20 14:59:24] ACTION: SESSION_CREATE | DETAILS: New session created with key: 7836B5BA
+[2026-01-20 14:59:24] ACTION: REALTIME | DETAILS: Service monitoring started.
+[2026-01-20 14:59:24] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 7836B5BA | Ver: unknown
+[2026-01-20 14:59:50] ACTION: PUSH_START | DETAILS: User neo4j [Key: 7836B5BA] (audreycolar) initiated sync for model: Employee
+[2026-01-20 14:59:50] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-20 14:59:50] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-20 14:59:51] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 2112460567
+[2026-01-20 14:59:51] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-20 14:59:51] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 2112460567
+[2026-01-20 14:59:51] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 7836B5BA] (audreycolar)
+[2026-01-20 15:00:01] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: ContractType
+[2026-01-20 15:00:01] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: Gender
+[2026-01-20 15:00:01] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-01-20 15:00:01] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-20 15:00:01] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-01-20 15:00:01] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-01-20 16:39:05] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-20 16:39:05] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-20 16:39:05] ACTION: SESSION_CREATE | DETAILS: New session created with key: F0A8656F
+[2026-01-20 16:39:05] ACTION: REALTIME | DETAILS: Service monitoring started.
+[2026-01-20 16:39:05] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: F0A8656F | Ver: unknown
+[2026-01-20 16:40:16] ACTION: PUSH_START | DETAILS: User neo4j [Key: F0A8656F] (audreycolar) initiated sync for model: Employee
+[2026-01-20 16:40:16] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-20 16:40:16] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-20 16:40:18] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 2112460567
+[2026-01-20 16:40:18] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-20 16:40:18] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 2112460567
+[2026-01-20 16:40:18] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: F0A8656F] (audreycolar)
+[2026-01-20 16:50:27] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Professor
+[2026-01-20 16:50:27] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: University
+[2026-01-20 16:50:28] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Employment
+[2026-01-20 16:50:28] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Student
+[2026-01-20 16:50:28] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Person
+[2026-01-20 16:50:28] ACTION: PUSH_START | DETAILS: User neo4j [Key: F0A8656F] (audreycolar) initiated sync for model: Employee
+[2026-01-20 16:50:28] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-01-20 16:50:28] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-01-20 16:50:29] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 2112460567
+[2026-01-20 16:50:29] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-01-20 16:50:29] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 2112460567
+[2026-01-20 16:50:29] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: F0A8656F] (audreycolar)
+[2026-01-20 16:51:50] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: ContractType
+[2026-01-20 16:51:50] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: Gender
+[2026-01-20 16:51:50] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-01-20 16:51:50] ACTION: PULL_ASSOC | DETAILS: Successfully recreated association: WorksFor
+[2026-01-20 16:51:50] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-01-20 16:51:50] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
