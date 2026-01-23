@@ -192,8 +192,8 @@ operations
       end;
       result := s;
     end
-  pred() : Snapshot =
-    if (self.pred->size() = 1) then self.pred->any( $elem0:Snapshot | true ) else null endif
+  pred() : Boolean =
+    true
   succ() : Snapshot =
     if (self.succ->size() = 1) then self.succ->any( $elem0:Snapshot | true ) else null endif
 end

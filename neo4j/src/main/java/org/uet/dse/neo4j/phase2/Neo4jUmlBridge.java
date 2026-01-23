@@ -79,7 +79,11 @@ public class Neo4jUmlBridge {
 
             //Associations (Binary & AssociationClass Link)
             for (MAssociation assoc : model.associations()) {
-                if (assoc instanceof MAssociationClass) {
+                if (assoc.associationEnds().size() > 2) {
+                    // Xử lý quan hệ N-bên (vd: Filmstrip)
+                    repo.upsertTernaryAssociation(assoc);
+                }
+                else if (assoc instanceof MAssociationClass) {
                     //Star Schema (A -> AC -> B)
                     //sourceAssoClass, targetAssoClass, HasAssociationClass
                     repo.createAssociationClassStructure((MAssociationClass) assoc);
@@ -141,6 +145,24 @@ public class Neo4jUmlBridge {
                 props.put("isReturnCollection", rInfo.get("isCollection"));
                 props.put("isAbstract", cls.isAbstract());
 
+                // --- BỔ SUNG: TRÍCH XUẤT BODY ---
+                String body = null;
+                boolean isQuery = true;
+
+                if (op.hasExpression()) {
+                    // Nếu là OCL Query Operation
+                    body = op.expression().toString();
+                    isQuery = true;
+                } else if (op.hasStatement()) {
+                    // Nếu là SOIL Imperative Operation
+                    body = op.getStatement().toString();
+                    isQuery = false;
+                }
+
+                props.put("body", body);
+                props.put("isQuery", isQuery);
+
+
                 //create node operation
                 repo.createInstanceNode("NodeOperation", "Operation", props);
                 repo.createStructuralEdge(cls.name(), opId, "HasOperation");
@@ -201,6 +223,7 @@ public class Neo4jUmlBridge {
         if (isColl && type instanceof CollectionType) {
             baseType = ((CollectionType) type).elemType();
             if (type.isKindOfSet(VoidHandling.EXCLUDE_VOID)) map.put("collType", "Set");
+            else if (type.isKindOfBag(VoidHandling.EXCLUDE_VOID)) map.put("collType", "Bag");
             else map.put("collType", "List");
         } else {
             map.put("collType", "None");

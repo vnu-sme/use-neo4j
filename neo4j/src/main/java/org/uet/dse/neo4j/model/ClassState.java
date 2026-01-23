@@ -165,4 +165,15 @@ public class ClassState {
     public List<String> getEnumLiterals() { return enumLiterals; }
     public void setEnumLiterals(List<String> literals) { this.enumLiterals = literals; }
 
+    // Trong lớp ClassState.java
+// ...
+    public static class OpState {
+        public String body;
+        public boolean isQuery; // true nếu là OCL Expression, false nếu là SOIL Statement
+        // ... các trường cũ (returnType, etc.)
+    }
+
+// Cập nhật hàm isSameAs để so sánh cả body
+// Objects.equals(this.operations, other.operations) sẽ tự động so sánh body bên trong Map
+
 }

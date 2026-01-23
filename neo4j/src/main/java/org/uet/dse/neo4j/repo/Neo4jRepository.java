@@ -55,7 +55,7 @@ public class Neo4jRepository {
     /**
      * Tạo quan hệ Association (Đặc tả 9, 10, 11)
      */
-    public void createAssociationEdge(MAssociation assoc) {
+    public void createAssociationEdgeOld(MAssociation assoc) {
         if (assoc.associationEnds().size() < 2) return;
 
         MAssociationEnd end1 = assoc.associationEnds().get(0);
@@ -92,7 +92,7 @@ public class Neo4jRepository {
                     "MATCH (s {name: $sName}), (t {name: $tName}) " +
                             "MERGE (s)-[r:%s {associationName: $assocName}]->(t) " +
                             "SET r.sourceClassName = $sName, r.sourceClassrole = $sRole, r.sourceMultiplicity = $sMult, " +
-                            "    r.targetClassName = $tName, r.targerClassrole = $tRole, r.targetMultiplicity = $tMult",
+                            "    r.targetClassName = $tName, r.targetClassrole = $tRole, r.targetMultiplicity = $tMult",
                     edgeLabel);
 
             session.run(cypher, Values.parameters(
@@ -103,6 +103,57 @@ public class Neo4jRepository {
                     "tName", part.cls().name(),
                     "tRole", part.name(),
                     "tMult", part.multiplicity().toString()
+            ));
+        }
+    }
+    public void createAssociationEdge(MAssociation assoc) {
+        if (assoc.associationEnds().size() < 2) return;
+
+        // Lấy đúng thứ tự từ Model của USE
+        MAssociationEnd end0 = assoc.associationEnds().get(0); // Vị trí 1 trong file .use
+        MAssociationEnd end1 = assoc.associationEnds().get(1); // Vị trí 2 trong file .use
+
+        // XÁC ĐỊNH NHÃN CẠNH (Label)
+        // Ưu tiên nhãn theo đầu 1 (Target), nếu đầu 1 là None thì xét đầu 0
+        String edgeLabel = "AssociateWith";
+        int kind0 = end0.aggregationKind();
+        int kind1 = end1.aggregationKind();
+
+        if (kind1 == 2 || kind0 == 2) edgeLabel = "ComposeOf";
+        else if (kind1 == 1 || kind0 == 1) edgeLabel = "Aggregates";
+
+        String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
+        try (Session session = driver.session(SessionConfig.forDatabase(dbName))) {
+
+            // 1. Dọn dẹp an toàn: Xóa mọi cạnh cũ của Association này
+            session.run("MATCH ()-[r {associationName: $name}]-() DELETE r",
+                    Values.parameters("name", assoc.name()));
+
+            // 2. Tạo cạnh LUÔN ĐI TỪ END 0 SANG END 1 (Bảo toàn thứ tự tuyệt đối)
+            String cypher = String.format(
+                    "MATCH (s {name: $sName}), (t {name: $tName}) " +
+                            "MERGE (s)-[r:%s {associationName: $assocName}]->(t) " +
+                            "SET r.sourceClassName = $sName, " +
+                            "    r.sourceClassrole = $sRole, " +
+                            "    r.sourceMultiplicity = $sMult, " +
+                            "    r.sourceKind = $sKind, " +       // LƯU KIND ĐẦU 0
+                            "    r.targetClassName = $tName, " +
+                            "    r.targerClassrole = $tRole, " +
+                            "    r.targetMultiplicity = $tMult, " +
+                            "    r.targetKind = $tKind, " +       // LƯU KIND ĐẦU 1
+                            "    r.isTernary = false",            // Đánh dấu để hàm Pull Ternary bỏ qua
+                    edgeLabel);
+
+            session.run(cypher, Values.parameters(
+                    "assocName", assoc.name(),
+                    "sName", end0.cls().name(),
+                    "sRole", end0.name(),
+                    "sMult", end0.multiplicity().toString(),
+                    "sKind", kind0,
+                    "tName", end1.cls().name(),
+                    "tRole", end1.name(),
+                    "tMult", end1.multiplicity().toString(),
+                    "tKind", kind1
             ));
         }
     }
@@ -141,7 +192,8 @@ public class Neo4jRepository {
                             "MERGE (:MetaNode {name: 'NodeEnumeration', label: 'Enumeration'})" +
                             "MERGE (:MetaNode {name: 'NodeClassInvariant', label: 'ClassInvariant'}) " +
                             "MERGE (:MetaNode {name: 'NodePreCondition', label: 'PreCondition'}) " +
-                            "MERGE (:MetaNode {name: 'NodePostCondition', label: 'PostCondition'})";
+                            "MERGE (:MetaNode {name: 'NodePostCondition', label: 'PostCondition'}) " +
+                            "MERGE (:MetaNode {name: 'NodeTernaryAssociation', label: 'TernaryAssociation'})";
 
             session.run(script);
         }
@@ -307,4 +359,46 @@ public class Neo4jRepository {
         }
     }
 
+    /**
+     * Tạo cấu trúc quan hệ N-bên (Ternary) sử dụng Node Hub và Spoke Edges
+     */
+    public void upsertTernaryAssociation(MAssociation assoc) {
+        String assocName = assoc.name();
+        String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
+
+        try (Session session = driver.session(SessionConfig.forDatabase(dbName))) {
+            // 1. Tạo Node Hub (Vẫn như cũ)
+            String createHub = String.format(
+                    "MATCH (meta:MetaNode {name: 'NodeTernaryAssociation'}) " +
+                            "MERGE (h:`%s` {name: $name}) " +
+                            "MERGE (h)-[:InstanceOf]->(meta)", assocName);
+            session.run(createHub, Values.parameters("name", assocName));
+
+            // 2. Nối các đầu mút (Spokes)
+            List<MAssociationEnd> ends = assoc.associationEnds();
+            for (int i = 0; i < ends.size(); i++) {
+                MAssociationEnd end = ends.get(i);
+                String edgeLabel = (end.aggregationKind() == 2) ? "ComposeOf" :
+                        (end.aggregationKind() == 1 ? "Aggregates" : "AssociateWith");
+
+                // QUAN TRỌNG: Đưa {index: $idx} vào trong MERGE quan hệ
+                // Việc này giúp phân biệt rạch ròi 2 cạnh cùng nối từ Snapshot tới Filmstrip
+                String cypher = String.format(
+                        "MATCH (c {name: $clsName}), (hub:`%s` {name: $name}) " +
+                                "MERGE (c)-[r:%s {index: $idx}]->(hub) " +
+                                "SET r.associationName = $name, " +
+                                "    r.isTernary = true, " +
+                                "    r.sourceClassrole = $role, " +
+                                "    r.sourceMultiplicity = $mult", assocName, edgeLabel);
+
+                session.run(cypher, Values.parameters(
+                        "clsName", end.cls().name(),
+                        "name", assocName,
+                        "idx", i, // Dùng index làm định danh cho cạnh
+                        "role", end.name(),
+                        "mult", end.multiplicity().toString()
+                ));
+            }
+        }
+    }
 }

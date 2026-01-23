@@ -5,11 +5,13 @@ import org.neo4j.driver.Record;
 import org.tzi.use.api.UseModelApi;
 import org.tzi.use.gui.main.MainWindow;
 import org.tzi.use.main.Session;
+import org.tzi.use.parser.Context;
 import org.tzi.use.parser.Symtable;
 import org.tzi.use.parser.ocl.OCLCompiler;
 import org.tzi.use.uml.mm.*;
 import org.tzi.use.uml.ocl.expr.Expression;
 import org.tzi.use.uml.ocl.expr.VarDecl;
+import org.tzi.use.uml.ocl.value.VarBindings;
 import org.tzi.use.uml.sys.MSystem;
 import org.tzi.use.util.NullPrintWriter;
 import org.uet.dse.neo4j.model.AssociationState;
@@ -186,182 +188,182 @@ public class ModelSyncCoordinator {
         return diff;
     }
 
-    private Map<String, ClassState> getModelSnapshotFromNeo4j() {
-        Map<String, ClassState> stateMap = new HashMap<>();
-        String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
-
-        try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().getDriver().session(SessionConfig.forDatabase(dbName))) {
-
-            String cypher =
-                    // get class & enums
-                    "MATCH (meta:MetaNode) WHERE meta.name IN ['NodeConcreteClass', 'NodeAbstractClass', 'NodeAssociationClass', 'NodeEnumeration'] " +
-                            "MATCH (inst)-[:InstanceOf]->(meta) " +
-                            "WITH inst, meta, labels(inst)[0] as classType " +
-
-                            //attribute
-                            "OPTIONAL MATCH (inst)-[:HasAttribute]->(a) " +
-                            "OPTIONAL MATCH (a)-[r1]->(aRef) WHERE type(r1) = 'ReferenceType' " +
-                            "WITH inst, meta, classType, collect(DISTINCT {name: a.attrName, type: a.type, idx: a.index, ref: aRef.name, sCollection: a.isCollection, collectionType: a.collectionType}) as attrs " +
-
-                            //invariants
-                            "OPTIONAL MATCH (inst)-[:HasInvariant]->(inv) " +
-                            "WITH inst, meta, classType, attrs, collect(DISTINCT {name: inv.invName, expr: inv.expression, exist: inv.isExistential}) as invariants " +
-
-                            //association class
-                            "OPTIONAL MATCH (src)-[s:sourceAssoClass]->(inst) " +
-                            "OPTIONAL MATCH (inst)-[t:targetAssoClass]->(tgt) " +
-                            "WITH inst, meta, classType, attrs, invariants, " +
-                            "{name: src.name, role: s.role, mult: s.multiplicity} as acSrc, " +
-                            "{name: tgt.name, role: t.role, mult: t.multiplicity} as acTgt " +
-
-                            //operation & param & pre-post
-                            "OPTIONAL MATCH (inst)-[:HasOperation]->(o) " +
-                            "OPTIONAL MATCH (o)-[:HasParam]->(p) " +
-                            "OPTIONAL MATCH (p)-[r2]->(pRef) WHERE type(r2) = 'ReferenceType' " +
-                            "OPTIONAL MATCH (o)-[r3]->(retRef) WHERE type(r3) = 'ReferenceReturnType' " +
-                            "OPTIONAL MATCH (o)-[:HasPreCondition]->(pre) " +
-                            "OPTIONAL MATCH (o)-[:HasPostCondition]->(post) " +
-
-                            "WITH inst, meta, classType, attrs, invariants, acSrc, acTgt, o, retRef, " +
-                            "collect(DISTINCT {pName: p.pName, pType: p.type, pOrder: p.order, pRef: pRef.name}) as opParams, " +
-                            "collect(DISTINCT {name: pre.condName, expr: pre.expression}) as opPres, " +
-                            "collect(DISTINCT {name: post.condName, expr: post.expression}) as opPosts " +
-
-                            "WITH inst, meta, classType, attrs, invariants, acSrc, acTgt, " +
-                            "collect(DISTINCT {name: o.opName, ret: o.returnType, retRef: retRef.name, params: opParams, pre: opPres, post: opPosts}) as ops " +
-
-                            "RETURN inst.name as className, meta.name as metaName, classType, inst.value as enumValues, attrs, invariants, ops, acSrc, acTgt";
-            Result result = session.run(cypher);
-
-            while (result.hasNext()) {
-                org.neo4j.driver.Record row = result.next();
-
-                ClassState cls = new ClassState();
-                cls.setName(row.get("className").asString());
-                cls.setType(row.get("classType").asString());
-                cls.setMetaNodeName(row.get("metaName").asString());
-
-                if ("NodeEnumeration".equals(cls.getMetaNodeName())) {
-                    Value enumVals = row.get("enumValues");
-                    if (!enumVals.isNull()) {
-                        cls.setEnumLiterals(enumVals.asList(Value::asString));
-                    }
-                }
-
-                if ("NodeAssociationClass".equals(cls.getMetaNodeName())) {
-                    Value src = row.get("acSrc");
-                    Value tgt = row.get("acTgt");
-                    if (!src.get("name").isNull())
-                        cls.setAcSource(src.get("name").asString(), src.get("role").asString(), src.get("mult").asString());
-                    if (!tgt.get("name").isNull())
-                        cls.setAcTarget(tgt.get("name").asString(), tgt.get("role").asString(), tgt.get("mult").asString());
-                }
-
-                Value attrsVal = row.get("attrs");
-                if (!attrsVal.isNull()) {
-                    for (Value aVal : attrsVal.asList(v -> v)) {
-                        // Kiểm tra node rỗng (Tránh lỗi do OPTIONAL MATCH không khớp)
-                        if (aVal.get("name").isNull()) continue;
-
-                        Map<String, Object> props = new HashMap<>();
-
-                        // Tên thực tế của thuộc tính (ví dụ: 'age', 'sex')
-                        String attrName = aVal.get("name").asString();
-                        props.put("attrName", attrName);
-
-                        // Dùng làm ID duy nhất trong Map
-                        props.put("name", attrName);
-
-                        // Xử lý kiểu dữ liệu (Kiểm tra Object Reference)
-                        String rawType = aVal.get("type").asString("String");
-                        if ("Object".equals(rawType)) {
-                            // Nếu là Object, lấy tên Class/Enum đích từ trường 'ref'
-                            props.put("type", aVal.get("ref").asString("String"));
-                        } else {
-                            props.put("type", rawType);
-                        }
-
-                        // Thứ tự hiển thị
-                        props.put("index", aVal.get("idx").asInt(0));
-
-                        // Thông tin tập hợp (Dùng đúng key sCollection từ Cypher)
-                        props.put("isCollection", aVal.get("sCollection").asBoolean(false));
-                        props.put("collectionType", aVal.get("collectionType").asString("Set"));
-
-                        // Đưa vào danh sách thuộc tính của ClassState
-                        cls.getAttributes().put(attrName, props);
-                    }
-                }
-
-                // --- B. XỬ LÝ INVARIANTS (Null-Safe) ---
-                Value invsVal = row.get("invariants");
-                if (!invsVal.isNull()) {
-                    for (Value invVal : invsVal.asList(v -> v)) {
-                        if (invVal.get("expr").isNull()) continue;
-                        Map<String, Object> invMap = new HashMap<>(invVal.asMap());
-                        invMap.put("exist", invVal.get("exist").asBoolean(false));
-                        cls.addInvariant(invMap);
-                    }
-                }
-
-                // --- C. XỬ LÝ OPERATIONS (Null-Safe & Nested Null-Safe) ---
-                Value opsVal = row.get("ops");
-                if (!opsVal.isNull()) {
-                    for (Value oVal : opsVal.asList(v -> v)) {
-                        if (oVal.get("name").isNull()) continue;
-
-                        String opName = oVal.get("name").asString();
-                        Map<String, Object> opProps = new HashMap<>();
-                        String finalRet = "Object".equals(oVal.get("ret").asString()) ?
-                                oVal.get("retRef").asString() : oVal.get("ret").asString();
-                        opProps.put("returnType", finalRet);
-                        cls.getOperations().put(opName, opProps);
-
-                        // C.1 Params
-                        Value paramsVal = oVal.get("params");
-                        if (!paramsVal.isNull()) {
-                            for (Value pVal : paramsVal.asList(v -> v)) {
-                                if (pVal.get("pName").isNull()) continue;
-                                int order = pVal.get("pOrder").asInt(0);
-                                String pType = "Object".equals(pVal.get("pType").asString()) ? pVal.get("pRef").asString() : pVal.get("pType").asString();
-                                cls.addOperationParam(opName, pVal.get("pName").asString(), pType, order);
-                            }
-                        }
-
-                        // C.2 Pre-Conditions
-                        Value preVal = oVal.get("pre");
-                        if (!preVal.isNull()) {
-                            for (Value p : preVal.asList(v -> v)) {
-                                if (!p.get("expr").isNull()) cls.addPreCondition(opName, new HashMap<>(p.asMap()));
-                            }
-                        }
-
-                        // C.3 Post-Conditions
-                        Value postVal = oVal.get("post");
-                        if (!postVal.isNull()) {
-                            for (Value p : postVal.asList(v -> v)) {
-                                if (!p.get("expr").isNull()) cls.addPostCondition(opName, new HashMap<>(p.asMap()));
-                            }
-                        }
-                    }
-                }
-
-                stateMap.put(cls.getName(), cls);
-            }
-
-            // Bước Kế thừa (Duyệt an toàn)
-            Result genRes = session.run("MATCH (c)-[:Extends]->(p) RETURN c.name as child, p.name as parent");
-            while (genRes.hasNext()) {
-                Record r = genRes.next();
-                if (stateMap.containsKey(r.get("child").asString())) {
-                    stateMap.get(r.get("child").asString()).getParents().add(r.get("parent").asString());
-                }
-            }
-
-
-        }
-        return stateMap;
-    }
+//    private Map<String, ClassState> getModelSnapshotFromNeo4j() {
+//        Map<String, ClassState> stateMap = new HashMap<>();
+//        String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
+//
+//        try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().getDriver().session(SessionConfig.forDatabase(dbName))) {
+//
+//            String cypher =
+//                    // get class & enums
+//                    "MATCH (meta:MetaNode) WHERE meta.name IN ['NodeConcreteClass', 'NodeAbstractClass', 'NodeAssociationClass', 'NodeEnumeration'] " +
+//                            "MATCH (inst)-[:InstanceOf]->(meta) " +
+//                            "WITH inst, meta, labels(inst)[0] as classType " +
+//
+//                            //attribute
+//                            "OPTIONAL MATCH (inst)-[:HasAttribute]->(a) " +
+//                            "OPTIONAL MATCH (a)-[r1]->(aRef) WHERE type(r1) = 'ReferenceType' " +
+//                            "WITH inst, meta, classType, collect(DISTINCT {name: a.attrName, type: a.type, idx: a.index, ref: aRef.name, sCollection: a.isCollection, collectionType: a.collectionType}) as attrs " +
+//
+//                            //invariants
+//                            "OPTIONAL MATCH (inst)-[:HasInvariant]->(inv) " +
+//                            "WITH inst, meta, classType, attrs, collect(DISTINCT {name: inv.invName, expr: inv.expression, exist: inv.isExistential}) as invariants " +
+//
+//                            //association class
+//                            "OPTIONAL MATCH (src)-[s:sourceAssoClass]->(inst) " +
+//                            "OPTIONAL MATCH (inst)-[t:targetAssoClass]->(tgt) " +
+//                            "WITH inst, meta, classType, attrs, invariants, " +
+//                            "{name: src.name, role: s.role, mult: s.multiplicity} as acSrc, " +
+//                            "{name: tgt.name, role: t.role, mult: t.multiplicity} as acTgt " +
+//
+//                            //operation & param & pre-post
+//                            "OPTIONAL MATCH (inst)-[:HasOperation]->(o) " +
+//                            "OPTIONAL MATCH (o)-[:HasParam]->(p) " +
+//                            "OPTIONAL MATCH (p)-[r2]->(pRef) WHERE type(r2) = 'ReferenceType' " +
+//                            "OPTIONAL MATCH (o)-[r3]->(retRef) WHERE type(r3) = 'ReferenceReturnType' " +
+//                            "OPTIONAL MATCH (o)-[:HasPreCondition]->(pre) " +
+//                            "OPTIONAL MATCH (o)-[:HasPostCondition]->(post) " +
+//
+//                            "WITH inst, meta, classType, attrs, invariants, acSrc, acTgt, o, retRef, " +
+//                            "collect(DISTINCT {pName: p.pName, pType: p.type, pOrder: p.order, pRef: pRef.name}) as opParams, " +
+//                            "collect(DISTINCT {name: pre.condName, expr: pre.expression}) as opPres, " +
+//                            "collect(DISTINCT {name: post.condName, expr: post.expression}) as opPosts " +
+//
+//                            "WITH inst, meta, classType, attrs, invariants, acSrc, acTgt, " +
+//                            "collect(DISTINCT {name: o.opName, ret: o.returnType, retRef: retRef.name, params: opParams, pre: opPres, post: opPosts}) as ops " +
+//
+//                            "RETURN inst.name as className, meta.name as metaName, classType, inst.value as enumValues, attrs, invariants, ops, acSrc, acTgt";
+//            Result result = session.run(cypher);
+//
+//            while (result.hasNext()) {
+//                org.neo4j.driver.Record row = result.next();
+//
+//                ClassState cls = new ClassState();
+//                cls.setName(row.get("className").asString());
+//                cls.setType(row.get("classType").asString());
+//                cls.setMetaNodeName(row.get("metaName").asString());
+//
+//                if ("NodeEnumeration".equals(cls.getMetaNodeName())) {
+//                    Value enumVals = row.get("enumValues");
+//                    if (!enumVals.isNull()) {
+//                        cls.setEnumLiterals(enumVals.asList(Value::asString));
+//                    }
+//                }
+//
+//                if ("NodeAssociationClass".equals(cls.getMetaNodeName())) {
+//                    Value src = row.get("acSrc");
+//                    Value tgt = row.get("acTgt");
+//                    if (!src.get("name").isNull())
+//                        cls.setAcSource(src.get("name").asString(), src.get("role").asString(), src.get("mult").asString());
+//                    if (!tgt.get("name").isNull())
+//                        cls.setAcTarget(tgt.get("name").asString(), tgt.get("role").asString(), tgt.get("mult").asString());
+//                }
+//
+//                Value attrsVal = row.get("attrs");
+//                if (!attrsVal.isNull()) {
+//                    for (Value aVal : attrsVal.asList(v -> v)) {
+//                        // Kiểm tra node rỗng (Tránh lỗi do OPTIONAL MATCH không khớp)
+//                        if (aVal.get("name").isNull()) continue;
+//
+//                        Map<String, Object> props = new HashMap<>();
+//
+//                        // Tên thực tế của thuộc tính (ví dụ: 'age', 'sex')
+//                        String attrName = aVal.get("name").asString();
+//                        props.put("attrName", attrName);
+//
+//                        // Dùng làm ID duy nhất trong Map
+//                        props.put("name", attrName);
+//
+//                        // Xử lý kiểu dữ liệu (Kiểm tra Object Reference)
+//                        String rawType = aVal.get("type").asString("String");
+//                        if ("Object".equals(rawType)) {
+//                            // Nếu là Object, lấy tên Class/Enum đích từ trường 'ref'
+//                            props.put("type", aVal.get("ref").asString("String"));
+//                        } else {
+//                            props.put("type", rawType);
+//                        }
+//
+//                        // Thứ tự hiển thị
+//                        props.put("index", aVal.get("idx").asInt(0));
+//
+//                        // Thông tin tập hợp (Dùng đúng key sCollection từ Cypher)
+//                        props.put("isCollection", aVal.get("sCollection").asBoolean(false));
+//                        props.put("collectionType", aVal.get("collectionType").asString("Set"));
+//
+//                        // Đưa vào danh sách thuộc tính của ClassState
+//                        cls.getAttributes().put(attrName, props);
+//                    }
+//                }
+//
+//                // --- B. XỬ LÝ INVARIANTS (Null-Safe) ---
+//                Value invsVal = row.get("invariants");
+//                if (!invsVal.isNull()) {
+//                    for (Value invVal : invsVal.asList(v -> v)) {
+//                        if (invVal.get("expr").isNull()) continue;
+//                        Map<String, Object> invMap = new HashMap<>(invVal.asMap());
+//                        invMap.put("exist", invVal.get("exist").asBoolean(false));
+//                        cls.addInvariant(invMap);
+//                    }
+//                }
+//
+//                // --- C. XỬ LÝ OPERATIONS (Null-Safe & Nested Null-Safe) ---
+//                Value opsVal = row.get("ops");
+//                if (!opsVal.isNull()) {
+//                    for (Value oVal : opsVal.asList(v -> v)) {
+//                        if (oVal.get("name").isNull()) continue;
+//
+//                        String opName = oVal.get("name").asString();
+//                        Map<String, Object> opProps = new HashMap<>();
+//                        String finalRet = "Object".equals(oVal.get("ret").asString()) ?
+//                                oVal.get("retRef").asString() : oVal.get("ret").asString();
+//                        opProps.put("returnType", finalRet);
+//                        cls.getOperations().put(opName, opProps);
+//
+//                        // C.1 Params
+//                        Value paramsVal = oVal.get("params");
+//                        if (!paramsVal.isNull()) {
+//                            for (Value pVal : paramsVal.asList(v -> v)) {
+//                                if (pVal.get("pName").isNull()) continue;
+//                                int order = pVal.get("pOrder").asInt(0);
+//                                String pType = "Object".equals(pVal.get("pType").asString()) ? pVal.get("pRef").asString() : pVal.get("pType").asString();
+//                                cls.addOperationParam(opName, pVal.get("pName").asString(), pType, order);
+//                            }
+//                        }
+//
+//                        // C.2 Pre-Conditions
+//                        Value preVal = oVal.get("pre");
+//                        if (!preVal.isNull()) {
+//                            for (Value p : preVal.asList(v -> v)) {
+//                                if (!p.get("expr").isNull()) cls.addPreCondition(opName, new HashMap<>(p.asMap()));
+//                            }
+//                        }
+//
+//                        // C.3 Post-Conditions
+//                        Value postVal = oVal.get("post");
+//                        if (!postVal.isNull()) {
+//                            for (Value p : postVal.asList(v -> v)) {
+//                                if (!p.get("expr").isNull()) cls.addPostCondition(opName, new HashMap<>(p.asMap()));
+//                            }
+//                        }
+//                    }
+//                }
+//
+//                stateMap.put(cls.getName(), cls);
+//            }
+//
+//            // Bước Kế thừa (Duyệt an toàn)
+//            Result genRes = session.run("MATCH (c)-[:Extends]->(p) RETURN c.name as child, p.name as parent");
+//            while (genRes.hasNext()) {
+//                Record r = genRes.next();
+//                if (stateMap.containsKey(r.get("child").asString())) {
+//                    stateMap.get(r.get("child").asString()).getParents().add(r.get("parent").asString());
+//                }
+//            }
+//
+//
+//        }
+//        return stateMap;
+//    }
 
 
     /**
@@ -533,7 +535,8 @@ public class ModelSyncCoordinator {
 
         SwingUtilities.invokeLater(() -> {
             try {
-                Map<String, ClassState> dbSnapshot = getModelSnapshotFromNeo4j();
+                FullModelSnapshot fullModelSnapshot = getFullModelSnapshotFromNeo4j();
+                Map<String, ClassState> dbSnapshot = fullModelSnapshot.classes;
                 if (dbSnapshot.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "No model found in Database.");
                     return;
@@ -551,7 +554,7 @@ public class ModelSyncCoordinator {
 
                 //map data to USE layer
                 // Hàm này chứa 5 bước: Class -> Attr (Index) -> Op (Ref) -> Gen -> Assoc
-                applyChangesFromSnapshot(newModel, dbSnapshot);
+                applyChangesFromSnapshot(newModel, fullModelSnapshot);
 
                 // 6. THAY THẾ SESSION
                 MSystem newSystem = new MSystem(newModel);
@@ -590,16 +593,17 @@ public class ModelSyncCoordinator {
      * @param targetModel Đối tượng MModel mới đang được xây dựng
      * @param tempApi API thao tác trên targetModel
      */
-    private void syncAssociationsToTargetModel(MModel targetModel, org.tzi.use.api.UseModelApi tempApi) {
+    private void syncAssociationsToTargetModelOld(MModel targetModel, org.tzi.use.api.UseModelApi tempApi) {
         String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
 
         // Sử dụng driver để mở session tới database hiện hành
         try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().getDriver().session(
                 org.neo4j.driver.SessionConfig.forDatabase(dbName))) {
 
-            // Truy vấn lấy tất cả các cạnh quan hệ Model (M1)
+            // Truy vấn lấy tất cả các cạnh quan hệ Model (M1), ddax update chir laasy cacs binary assocc
             String cypher = "MATCH (s)-[r]->(t) " +
                     "WHERE type(r) IN ['AssociateWith', 'ComposeOf', 'Aggregates'] " +
+                    "AND NOT coalesce(r.isTernary, false) " + // CHỈ lấy Binary Assoc
                     "RETURN r.associationName as name, s.name as src, t.name as tgt, " +
                     "r.sourceClassrole as sRole, r.sourceMultiplicity as sMult, " +
                     "r.targerClassrole as tRole, r.targetMultiplicity as tMult, type(r) as edgeType";
@@ -660,6 +664,74 @@ public class ModelSyncCoordinator {
         }
     }
 
+    private void syncAssociationsToTargetModel(MModel targetModel, org.tzi.use.api.UseModelApi tempApi) {
+        String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
+
+        try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().getDriver().session(
+                org.neo4j.driver.SessionConfig.forDatabase(dbName))) {
+
+            // CẬP NHẬT TRUY VẤN: Lấy thêm r.sourceKind và r.targetKind
+            String cypher = "MATCH (s)-[r]->(t) " +
+                    "WHERE type(r) IN ['AssociateWith', 'ComposeOf', 'Aggregates'] " +
+                    "AND NOT coalesce(r.isTernary, false) " +
+                    "RETURN r.associationName as name, s.name as src, t.name as tgt, " +
+                    "r.sourceClassrole as sRole, r.sourceMultiplicity as sMult, r.sourceKind as sKind, " +
+                    "r.targerClassrole as tRole, r.targetMultiplicity as tMult, r.targetKind as tKind, " +
+                    "type(r) as edgeType";
+
+            org.neo4j.driver.Result res = session.run(cypher);
+
+            while (res.hasNext()) {
+                org.neo4j.driver.Record rec = res.next();
+                String assocName = rec.get("name").asString();
+
+                if (targetModel.getAssociation(assocName) != null) continue;
+
+                // 1. Thông tin đầu Nguồn (End 0)
+                String srcName = rec.get("src").asString();
+                String sRole = rec.get("sRole").asString("src_" + assocName);
+                String sMult = rec.get("sMult").asString("1");
+                // Lấy kind từ DB, nếu null thì mặc định 0
+                int sKind = rec.get("sKind").isNull() ? 0 : rec.get("sKind").asInt();
+
+                // 2. Thông tin đầu Đích (End 1)
+                String tgtName = rec.get("tgt").asString();
+                String tRole = rec.get("tRole").asString("tgt_" + assocName);
+                String tMult = rec.get("tMult").asString("*");
+                int tKind = rec.get("tKind").isNull() ? 0 : rec.get("tKind").asInt();
+
+                // 3. Logic Fallback (Dành cho dữ liệu cũ chưa có trường Kind trong DB)
+                if (rec.get("sKind").isNull() && rec.get("tKind").isNull()) {
+                    String edgeType = rec.get("edgeType").asString();
+                    if (edgeType.equals("ComposeOf")) tKind = 2;
+                    else if (edgeType.equals("Aggregates")) tKind = 1;
+                }
+
+                try {
+                    MClass srcCls = targetModel.getClass(srcName);
+                    MClass tgtCls = targetModel.getClass(tgtName);
+
+                    if (srcCls == null || tgtCls == null) continue;
+
+                    // 4. THỰC THI TẠO VỚI THỨ TỰ TUYỆT ĐỐI
+                    // srcName luôn ở vị trí đầu tiên (End 0), tgtName luôn ở vị trí thứ hai (End 1)
+                    tempApi.createAssociation(
+                            assocName,
+                            srcName, sRole, sMult, sKind, // Nạp Kind thực tế của đầu 0
+                            tgtName, tRole, tMult, tKind  // Nạp Kind thực tế của đầu 1
+                    );
+
+                    WorkLogManager.getInstance().log("PULL_ASSOC", "Restored: " + assocName);
+
+                } catch (Exception e) {
+                    System.err.println("Error creating assoc " + assocName + ": " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            WorkLogManager.getInstance().log("PULL_DB_ERROR", e.getMessage());
+        }
+    }
+
     /**
      * Vấn đề 1: Xóa sạch các thành phần cũ trong Java
      */
@@ -687,13 +759,12 @@ public class ModelSyncCoordinator {
     /**
      * Xây dựng toàn bộ cấu trúc Model vào một đối tượng MModel mục tiêu
      * @param targetModel Đối tượng model mới tinh (thường dùng cho chiến lược REPLACE)
-     * @param dbSnapshot Snapshot dữ liệu metadata lấy từ Neo4j
      */
-    private void applyChangesFromSnapshot(MModel targetModel, Map<String, ClassState> dbSnapshot) throws Exception {
+    private void applyChangesFromSnapshot(MModel targetModel, FullModelSnapshot fullModelSnapshot) throws Exception {
         org.tzi.use.api.UseModelApi tempApi = new org.tzi.use.api.UseModelApi(targetModel);
 
         //enums must be loaded first
-        for (ClassState dbCls : dbSnapshot.values()) {
+        for (ClassState dbCls : fullModelSnapshot.classes.values()) {
             if ("NodeEnumeration".equals(dbCls.getMetaNodeName())) {
                 List<String> literals = dbCls.getEnumLiterals();
                 if (literals != null && !literals.isEmpty()) {
@@ -704,14 +775,14 @@ public class ModelSyncCoordinator {
         }
 
         //create concrete and abstract class first
-        for (ClassState dbCls : dbSnapshot.values()) {
+        for (ClassState dbCls : fullModelSnapshot.classes.values()) {
             if (!"NodeAssociationClass".equals(dbCls.getMetaNodeName()) && !"NodeEnumeration".equals(dbCls.getMetaNodeName())) {
                 tempApi.createClass(dbCls.getName(), "NodeAbstractClass".equals(dbCls.getMetaNodeName()));
             }
         }
 
         //create association class
-        for (ClassState dbCls : dbSnapshot.values()) {
+        for (ClassState dbCls : fullModelSnapshot.classes.values()) {
             if ("NodeAssociationClass".equals(dbCls.getMetaNodeName())) {
                 Map<String, Object> src = dbCls.getAcSource();
                 Map<String, Object> tgt = dbCls.getAcTarget();
@@ -725,7 +796,7 @@ public class ModelSyncCoordinator {
         }
 
         //all types are ready -> map attributes
-        for (ClassState dbCls : dbSnapshot.values()) {
+        for (ClassState dbCls : fullModelSnapshot.classes.values()) {
             // Enum không có thuộc tính, bỏ qua để tránh lỗi
             if ("NodeEnumeration".equals(dbCls.getMetaNodeName())) continue;
 
@@ -747,39 +818,31 @@ public class ModelSyncCoordinator {
         }
 
 
-        //operations mappings
-        for (ClassState dbCls : dbSnapshot.values()) {
+        //operation mappings
+        for (ClassState dbCls : fullModelSnapshot.classes.values()) {
             String className = dbCls.getName();
-
             for (Map.Entry<String, Map<String, Object>> opEntry : dbCls.getOperations().entrySet()) {
                 String opName = opEntry.getKey();
                 Map<String, Object> opProps = opEntry.getValue();
 
                 try {
-                    //handle return type
+                    // 1. Xử lý kiểu trả về
                     String rawRetType = (String) opProps.get("returnType");
                     String umlRetType = UmlTypeTranslator.toUmlTypeString(rawRetType);
 
-                    //handle parameter list
+                    // 2. Xử lý danh sách tham số (Giữ nguyên logic cũ đang chạy tốt)
                     List<ClassState.OpParam> paramList = dbCls.getOpParamsSorted(opName);
                     String[][] parameterArray = new String[paramList.size()][2];
 
                     for (int i = 0; i < paramList.size(); i++) {
                         ClassState.OpParam p = paramList.get(i);
                         String pName = p.getName();
-
-                        // Fix lỗi tên tham số bị rỗng
                         if (pName == null || pName.isEmpty()) pName = "arg" + i;
-
-                        // Translate kiểu (vd: "Double" -> "Real", "Person" -> "Person")
                         String pType = UmlTypeTranslator.toUmlTypeString(p.getType());
-
                         parameterArray[i][0] = pName;
                         parameterArray[i][1] = pType;
-
-                        System.out.println("DEBUG: Rebuilding Op [" + opName + "] with param [" + pName + ":" + pType + "]");
                     }
-
+                    // FIX: DÒNG NÀY PHẢI CÓ ĐỂ TẠO OPERATION TRONG JAVA
                     tempApi.createOperation(className, opName, parameterArray, umlRetType);
 
                     WorkLogManager.getInstance().log("PULL_OP", "Created Signature: " + className + "::" + opName);
@@ -787,13 +850,14 @@ public class ModelSyncCoordinator {
                 } catch (Exception e) {
                     String errMsg = String.format("Failed to define Op [%s] in Class [%s]: %s",
                             opName, className, e.getMessage());
+                    System.err.println(errMsg);
                     WorkLogManager.getInstance().log("PULL_OP_ERROR", errMsg);
                 }
             }
         }
 
         //handle extends association
-        for (ClassState dbCls : dbSnapshot.values()) {
+        for (ClassState dbCls : fullModelSnapshot.classes.values()) {
             MClass child = targetModel.getClass(dbCls.getName());
             for (String pName : dbCls.getParents()) {
                 MClass parent = targetModel.getClass(pName);
@@ -808,13 +872,208 @@ public class ModelSyncCoordinator {
         syncAssociationsToTargetModel(targetModel, tempApi);
 
 
+        // 7b. Nạp Ternary Association (N bên - vd: Filmstrip)
+        syncTernaryAssociationsFromGraph(targetModel, tempApi, fullModelSnapshot.ternaryAssociations);
+
+
+
+        //vi body access car data cuar association nen phari load association trc
+
+        // BƯỚC 7: Nạp OPERATION BODIES (Sau khi đã có đủ Class/Attr/Assoc)
+        applyOperationBodiesFromSnapshot(targetModel, fullModelSnapshot.classes);
+
         // --- BƯỚC 6: NẠP CLASS INVARIANTS (OCL) ---
-        applyInvariantsFromSnapshot(targetModel, dbSnapshot);
+        applyInvariantsFromSnapshot(targetModel, fullModelSnapshot.classes);
 
         // --- BƯỚC 7: NẠP PRE/POST CONDITIONS (OCL) ---
-        applyOperationConstraintsFromSnapshot(targetModel, dbSnapshot);
+        applyOperationConstraintsFromSnapshot(targetModel, fullModelSnapshot.classes);
     }
 
+    private void syncTernaryAssociationsFromGraph(MModel targetModel, UseModelApi tempApi, List<Map<String, Object>> ternaryList) {
+        for (Map<String, Object> ternaryData : ternaryList) {
+            String assocName = (String) ternaryData.get("name");
+            List<Object> rawParticipants = (List<Object>) ternaryData.get("participants");
+
+            // 1. Chuyển đổi và Sắp xếp theo index (0, 1, 2...)
+            List<Map<String, Object>> participants = new ArrayList<>();
+            for (Object o : rawParticipants) participants.add((Map<String, Object>) o);
+
+            participants.sort(Comparator.comparingInt(p -> ((Number) p.get("idx")).intValue()));
+
+            int n = participants.size();
+            String[] classNames = new String[n];
+            String[] roleNames = new String[n];
+            String[] multiplicities = new String[n];
+            int[] aggregationKinds = new int[n];
+            boolean[] orderedInfo = new boolean[n];
+
+            // 2. Điền dữ liệu vào mảng (Vị trí 0: pred, Vị trí 1: succ, Vị trí 2: OpCall)
+            for (int i = 0; i < n; i++) {
+                Map<String, Object> p = participants.get(i);
+                classNames[i] = (String) p.get("cls");
+                roleNames[i] = (String) p.get("role");
+                multiplicities[i] = (String) p.get("mult");
+
+                String edgeType = (String) p.get("type");
+                aggregationKinds[i] = edgeType.equals("ComposeOf") ? 2 : (edgeType.equals("Aggregates") ? 1 : 0);
+                orderedInfo[i] = false;
+            }
+
+            try {
+                // GỌI API NẠP QUAN HỆ ĐA ĐẦU MÚT
+                tempApi.createAssociation(assocName, classNames, roleNames, multiplicities, aggregationKinds, orderedInfo, new String[0][][]);
+                WorkLogManager.getInstance().log("PULL_TERNARY", "Restored: " + assocName + " with " + n + " ends.");
+            } catch (Exception e) {
+                System.err.println("N-ary Assoc Fail [" + assocName + "]: " + e.getMessage());
+            }
+        }
+    }
+    private void applyOperationBodiesFromSnapshot(MModel targetModel, Map<String, ClassState> dbSnapshot) {
+        for (ClassState dbCls : dbSnapshot.values()) {
+            String className = dbCls.getName();
+            MClass useCls = targetModel.getClass(className);
+            if (useCls == null) continue;
+
+            for (Map.Entry<String, Map<String, Object>> opEntry : dbCls.getOperations().entrySet()) {
+                String opName = opEntry.getKey();
+                Map<String, Object> opProps = opEntry.getValue();
+                String body = (String) opProps.get("body");
+                boolean isQuery = (boolean) opProps.get("isQuery");
+
+                if (body == null || body.trim().isEmpty() || body.equals("null")) continue;
+
+                // Lấy đối tượng hàm ĐÃ TẠO ở Bước 4
+                MOperation useOp = useCls.operation(opName, false);
+
+                if (useOp != null) {
+                    // GỌI HÀM BIÊN DỊCH VÀ GẮN VÀO (Không tạo mới hàm)
+                    compileOpBodySafe(targetModel, useCls, useOp, body, isQuery);
+                }
+            }
+        }
+    }
+
+    private void compileOpBodySafe(MModel model, MClass cls, MOperation op, String body, boolean isQuery) {
+        if (op == null || body == null || body.equals("null")) return;
+        body = body.trim();
+        try {
+            if (isQuery) {
+                // --- XỬ LÝ OCL QUERY (=) ---
+                // Loại bỏ dấu ngoặc kép bọc ngoài nếu có do dữ liệu DB
+                if (body.startsWith("\"") && body.endsWith("\"")) {
+                    body = body.substring(1, body.length() - 1);
+                }
+                // --- BỘ MÁY 1: OCL COMPILER (Cho succ, pred, isFinalStep) ---
+                Symtable symtable = createSymtable(model, cls, op);
+                Expression expr = org.tzi.use.parser.ocl.OCLCompiler.compileExpression(
+                        model, body, "OCL_Parser", org.tzi.use.util.NullPrintWriter.getInstance(), symtable);
+
+                if (expr != null) {
+                    op.setExpression(expr);
+                }
+            } else {
+                // --- XỬ LÝ SOIL IMPERATIVE (begin...end) ---
+                // ĐẶC TẢ QUAN TRỌNG: Nếu thiếu begin/end, phải bọc lại để SoilParser không lỗi 'declare'
+                String soilCode = body;
+                if (!soilCode.toLowerCase().startsWith("begin")) {
+                    soilCode = "begin\n" + soilCode + "\nend";
+                }
+                // --- BỘ MÁY 2: SOIL COMPILER (Cho hàm copy có 'declare') ---
+                // SOIL cần input stream để đọc khối lệnh
+                java.io.InputStream is = new java.io.ByteArrayInputStream(soilCode.getBytes());
+                java.io.PrintWriter errWriter = new java.io.PrintWriter(System.err);
+
+                // 1. Tạo cây cú pháp SOIL
+                org.tzi.use.parser.soil.ast.ASTStatement ast =
+                        org.tzi.use.parser.soil.SoilCompiler.constructAST(is, "SOIL_Parser", errWriter, false);
+
+                if (ast != null) {
+                    // 2. Tạo ngữ cảnh thực thi SOIL
+                    Context soilCtx =
+                            new Context("SOIL_Context", errWriter, new org.tzi.use.uml.ocl.value.VarBindings(), null);
+                    soilCtx.setModel(model);
+
+                    // 3. Biến đổi AST thành Statement và gán vào hàm
+                    org.tzi.use.uml.sys.soil.MStatement statement = ast.generateStatement(soilCtx, op);
+                    op.setStatement(statement);
+                    WorkLogManager.getInstance().log("PULL_SOIL", "Successfully compiled SOIL: " + op.name());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Compilation failed for " + op.name() + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Hàm trợ giúp xóa Operation khỏi Class để nạp lại SOIL
+     */
+    private void removeOperationFromClass(MClass cls, String opName) {
+        try {
+            // Sử dụng reflection hoặc trực tiếp truy cập nếu API cho phép
+            // Trong USE MClass, danh sách operation thường nằm trong một Map
+            MOperation op = cls.operation(opName, false);
+            if (op != null) {
+                // Lưu ý: Tùy phiên bản USE, bạn có thể cần can thiệp vào List internal
+                // cls.operations().remove(op);
+            }
+        } catch (Exception e) {
+            System.err.println("Remove Op fail: " + opName);
+        }
+    }
+
+    /**
+     * Tạo bảng ký hiệu (Context) cho trình biên dịch OCL.
+     * Bao gồm biến 'self' và toàn bộ tham số của hàm.
+     */
+    private Symtable createSymtable(MModel model, MClass cls, MOperation op) {
+        // Khởi tạo bảng ký hiệu từ thư viện của tool USE
+        Symtable symtable = new Symtable();
+
+        try {
+            // 1. Nạp biến 'self': Đại diện cho chính thực thể của lớp chứa hàm
+            // Trong OCL, self luôn trỏ về class ngữ cảnh.
+            symtable.add("self", cls, null);
+
+            // 2. Nạp toàn bộ THAM SỐ của hàm vào ngữ cảnh
+            // Việc này giúp fix lỗi "Undefined operation/variable named p"
+            // vì trình biên dịch sẽ biết 'p' là một biến đã được khai báo.
+            if (op != null && op.paramList() != null) {
+                org.tzi.use.uml.ocl.expr.VarDeclList paramList = op.paramList();
+                for (int i = 0; i < paramList.size(); i++) {
+                    org.tzi.use.uml.ocl.expr.VarDecl var = paramList.varDecl(i);
+                    // Nạp tên biến (ví dụ: 'p') và kiểu dữ liệu của nó (ví dụ: 'Person')
+                    symtable.add(var.name(), var.type(), null);
+
+                    // Debug để kiểm tra
+                    // System.out.println("Context: Added param '" + var.name() + "' to symtable.");
+                }
+            }
+
+            // 3. (Tùy chọn) Nếu bạn đang xử lý hậu điều kiện (Post-condition),
+            // bạn có thể nạp thêm biến 'result' tại đây nếu hàm có kiểu trả về.
+
+        } catch (org.tzi.use.parser.SemanticException e) {
+            // Lỗi xảy ra nếu có hai biến trùng tên trong cùng một ngữ cảnh
+            System.err.println("Symtable Error: " + e.getMessage());
+        }
+
+        return symtable;
+    }
+    /**
+     * Trích xuất tham số từ đối tượng MOperation có sẵn sang mảng String[][]
+     */
+    private String[][] buildParamArrayFromUSEOperation(MOperation op) {
+        org.tzi.use.uml.ocl.expr.VarDeclList varList = op.paramList();
+        String[][] params = new String[varList.size()][2];
+
+        for (int i = 0; i < varList.size(); i++) {
+            org.tzi.use.uml.ocl.expr.VarDecl var = varList.varDecl(i);
+            params[i][0] = var.name();
+            // Lấy tên kiểu dữ liệu (Sử dụng shortName() từ interface Type của USE)
+            params[i][1] = var.type().shortName();
+        }
+        return params;
+    }
     /**
      * Helper nạp Invariants (Tách riêng cho gọn)
      */
@@ -1036,7 +1295,7 @@ public class ModelSyncCoordinator {
                             "collect(DISTINCT {name: post.condName, expr: post.expression}) as opPosts " +
 
                             "WITH inst, meta, classType, attrs, invariants, acSrc, acTgt, " +
-                            "collect(DISTINCT {name: o.opName, ret: o.returnType, retRef: retRef.name, params: opParams, pre: opPres, post: opPosts}) as ops " +
+                            "collect(DISTINCT {name: o.opName,  body: o.body, isQuery: o.isQuery, ret: o.returnType, retRef: retRef.name, params: opParams, pre: opPres, post: opPosts}) as ops " +
 
                             "RETURN inst.name as className, meta.name as metaName, classType, inst.value as enumValues, attrs, invariants, ops, acSrc, acTgt";
             Result result = session.run(cypher);
@@ -1123,6 +1382,10 @@ public class ModelSyncCoordinator {
                         String finalRet = "Object".equals(oVal.get("ret").asString()) ?
                                 oVal.get("retRef").asString() : oVal.get("ret").asString();
                         opProps.put("returnType", finalRet);
+                        // Lấy Body và Loại hàm
+                        opProps.put("body", oVal.get("body").asString(null));
+                        opProps.put("isQuery", oVal.get("isQuery").asBoolean(true));
+
                         cls.getOperations().put(opName, opProps);
 
                         // params
@@ -1189,6 +1452,30 @@ public class ModelSyncCoordinator {
                 as.tgtMult = rec.get("tMult").asString("*");
 
                 fullSnapshot.associations.put(as.name, as);
+            }
+
+
+
+
+            // Trong hàm getFullModelSnapshotFromNeo4j
+// ... (Sau khi quét Class và Association thường)
+
+            // --- QUÉT QUAN HỆ N-BÊN (Filmstrip, v.v.) ---
+            String ternaryCypher =
+                    "MATCH (c)-[r]->(hub)-[:InstanceOf]->(:MetaNode {name: 'NodeTernaryAssociation'}) " +
+                            "WHERE r.isTernary = true " +
+                            // Chìa khóa: Thu thập thông tin từ cạnh 'r' để phân biệt các đầu mút
+                            "RETURN hub.name as assocName, " +
+                            "collect({cls: c.name, role: r.sourceClassrole, mult: r.sourceMultiplicity, idx: r.index, type: type(r)}) as participants";
+
+            Result res = session.run(ternaryCypher);
+            while (res.hasNext()) {
+                Record rec = res.next();
+                Map<String, Object> data = new HashMap<>();
+                data.put("name", rec.get("assocName").asString());
+                // participants lúc này sẽ có ĐỦ 3 phần tử cho Filmstrip (dù có 2 Snapshot)
+                data.put("participants", rec.get("participants").asList());
+                fullSnapshot.ternaryAssociations.add(data);
             }
         }
         return fullSnapshot;
