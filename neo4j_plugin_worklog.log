@@ -3705,3 +3705,351 @@ body:1:10: Undefined operation named `purchase' in expression `BuyLotteryTicket.
 [2026-01-24 02:01:47] ACTION: PULL_TERNARY | DETAILS: Restored: Filmstrip with 3 ends.
 [2026-01-24 02:01:47] ACTION: PULL_SOIL | DETAILS: Successfully compiled SOIL: copy
 [2026-01-24 02:01:47] ACTION: PULL_CONST | DETAILS: Applied: copy::uncopied
+[2026-01-24 21:39:40] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-24 21:39:50] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-24 21:39:50] ACTION: SESSION_CREATE | DETAILS: New session created with key: 8F1F7C68
+[2026-01-24 21:39:50] ACTION: REALTIME | DETAILS: Service monitoring started.
+[2026-01-24 21:39:51] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 8F1F7C68 | Ver: unknown
+[2026-01-24 21:40:35] ACTION: PUSH_START | DETAILS: User neo4j [Key: 8F1F7C68] (audreycolar) initiated sync for model: ObjectTest
+[2026-01-24 21:40:37] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1630112399
+[2026-01-24 21:40:37] ACTION: PUSH_SUCCESS | DETAILS: Model ObjectTest is now synchronized.
+[2026-01-24 21:40:37] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1630112399
+[2026-01-24 21:40:37] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 8F1F7C68] (audreycolar)
+[2026-01-24 21:40:48] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass1
+[2026-01-24 21:40:48] ACTION: PUSH_START | DETAILS: User neo4j [Key: 8F1F7C68] (audreycolar) initiated sync for model: ObjectTest
+[2026-01-24 21:40:49] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1630112399
+[2026-01-24 21:40:49] ACTION: PUSH_SUCCESS | DETAILS: Model ObjectTest is now synchronized.
+[2026-01-24 21:40:49] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1630112399
+[2026-01-24 21:40:49] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 8F1F7C68] (audreycolar)
+[2026-01-24 21:50:54] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-24 21:50:54] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-24 21:50:54] ACTION: SESSION_CREATE | DETAILS: New session created with key: 612410C4
+[2026-01-24 21:50:54] ACTION: REALTIME | DETAILS: Service monitoring started.
+[2026-01-24 21:50:55] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 612410C4 | Ver: unknown
+[2026-01-24 21:51:35] ACTION: PUSH_START | DETAILS: User neo4j [Key: 612410C4] (audreycolar) initiated sync for model: ObjectTest
+[2026-01-24 21:51:35] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1630112399
+[2026-01-24 21:51:35] ACTION: PUSH_SUCCESS | DETAILS: Model ObjectTest is now synchronized.
+[2026-01-24 21:51:35] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1630112399
+[2026-01-24 21:51:35] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 612410C4] (audreycolar)
+[2026-01-24 21:53:39] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-24 21:53:39] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-24 21:53:40] ACTION: SESSION_CREATE | DETAILS: New session created with key: 63C823E0
+[2026-01-24 21:53:40] ACTION: REALTIME | DETAILS: Service monitoring started.
+[2026-01-24 21:53:40] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 63C823E0 | Ver: unknown
+[2026-01-24 22:02:29] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-24 22:02:30] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-24 22:02:30] ACTION: SESSION_CREATE | DETAILS: New session created with key: 833B97E4
+[2026-01-24 22:02:30] ACTION: REALTIME | DETAILS: Service monitoring started.
+[2026-01-24 22:02:30] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 833B97E4 | Ver: unknown
+[2026-01-24 22:02:43] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass1
+[2026-01-24 22:02:47] ACTION: PUSH_START | DETAILS: User neo4j [Key: 833B97E4] (audreycolar) initiated sync for model: ObjectTest
+[2026-01-24 22:03:01] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 246164285
+[2026-01-24 22:03:01] ACTION: PUSH_SUCCESS | DETAILS: Model ObjectTest is now synchronized.
+[2026-01-24 22:03:01] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 246164285
+[2026-01-24 22:03:01] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 833B97E4] (audreycolar)
+[2026-01-24 22:03:58] ACTION: OBJECT_PUSH | DETAILS: Sync completed.
+[2026-01-24 22:05:14] ACTION: OBJECT_PUSH | DETAILS: Sync completed.
+[2026-01-24 22:05:47] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object in USE: c1
+[2026-01-24 22:05:47] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object in USE: c2
+[2026-01-24 22:05:47] ACTION: PULL_SUCCESS | DETAILS: Object state synchronized from DB.
+[2026-01-24 22:07:38] ACTION: OBJECT_PUSH | DETAILS: Sync completed.
+[2026-01-24 22:08:38] ACTION: OBJECT_PUSH | DETAILS: Sync completed.
+[2026-01-24 23:45:40] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-24 23:45:40] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-24 23:45:40] ACTION: SESSION_CREATE | DETAILS: New session created with key: 3145037F
+[2026-01-24 23:45:40] ACTION: REALTIME | DETAILS: Service monitoring started.
+[2026-01-24 23:45:40] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 3145037F | Ver: unknown
+[2026-01-24 23:45:51] ACTION: PUSH_START | DETAILS: User neo4j [Key: 3145037F] (audreycolar) initiated sync for model: ObjectTest
+[2026-01-24 23:45:53] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 246164285
+[2026-01-24 23:45:53] ACTION: PUSH_SUCCESS | DETAILS: Model ObjectTest is now synchronized.
+[2026-01-24 23:45:53] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 246164285
+[2026-01-24 23:45:53] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 3145037F] (audreycolar)
+[2026-01-24 23:47:06] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-24 23:47:50] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-24 23:48:18] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-24 23:48:47] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-24 23:49:25] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-24 23:50:33] ACTION: SYNC_CANCEL | DETAILS: User cancelled sync after reviewing diff.
+[2026-01-24 23:50:39] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-24 23:51:17] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-24 23:51:47] ACTION: PULL_ASSOC | DETAILS: Restored: Connect
+[2026-01-24 23:52:23] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: o1
+[2026-01-24 23:52:23] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: o2
+[2026-01-24 23:52:23] ACTION: ATTR_ERROR | DETAILS: Failed to set age for o1
+[2026-01-24 23:52:23] ACTION: ATTR_ERROR | DETAILS: Failed to set age for o2
+[2026-01-24 23:52:26] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 2 objects, 1 links updated.
+[2026-01-24 23:52:30] ACTION: PULL_ASSOC | DETAILS: Restored: Connect
+[2026-01-24 23:52:40] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: o1
+[2026-01-24 23:52:40] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: o2
+[2026-01-24 23:52:40] ACTION: ATTR_ERROR | DETAILS: Failed to set age for o1
+[2026-01-24 23:52:40] ACTION: ATTR_ERROR | DETAILS: Failed to set age for o2
+[2026-01-24 23:52:41] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 2 objects, 1 links updated.
+[2026-01-25 00:10:47] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass2
+[2026-01-25 00:10:47] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass1
+[2026-01-25 00:10:47] ACTION: PUSH_START | DETAILS: User neo4j [Key: 3145037F] (audreycolar) initiated sync for model: ObjectTest
+[2026-01-25 00:10:49] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -1960443738
+[2026-01-25 00:10:49] ACTION: PUSH_SUCCESS | DETAILS: Model ObjectTest is now synchronized.
+[2026-01-25 00:10:49] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -1960443738
+[2026-01-25 00:10:49] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 3145037F] (audreycolar)
+[2026-01-25 00:20:42] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-25 00:20:43] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-25 00:20:44] ACTION: SESSION_CREATE | DETAILS: New session created with key: C51D210F
+[2026-01-25 00:20:44] ACTION: REALTIME | DETAILS: Service monitoring started.
+[2026-01-25 00:20:44] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: C51D210F | Ver: unknown
+[2026-01-25 00:20:55] ACTION: PUSH_START | DETAILS: User neo4j [Key: C51D210F] (audreycolar) initiated sync for model: ObjectTest
+[2026-01-25 00:20:56] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -1960443738
+[2026-01-25 00:20:56] ACTION: PUSH_SUCCESS | DETAILS: Model ObjectTest is now synchronized.
+[2026-01-25 00:20:56] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -1960443738
+[2026-01-25 00:20:56] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: C51D210F] (audreycolar)
+[2026-01-25 00:21:15] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-25 00:21:51] ACTION: CLEANUP | DETAILS: Deep deleted object: o1
+[2026-01-25 00:21:51] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-25 00:23:50] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-25 00:24:22] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-25 00:26:38] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass2
+[2026-01-25 00:26:38] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass1
+[2026-01-25 00:26:38] ACTION: PUSH_START | DETAILS: User neo4j [Key: C51D210F] (audreycolar) initiated sync for model: ObjectTest
+[2026-01-25 00:26:39] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -193163280
+[2026-01-25 00:26:39] ACTION: PUSH_SUCCESS | DETAILS: Model ObjectTest is now synchronized.
+[2026-01-25 00:26:39] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -193163280
+[2026-01-25 00:26:39] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: C51D210F] (audreycolar)
+[2026-01-25 00:26:57] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-25 00:28:18] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-25 00:44:46] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass2
+[2026-01-25 00:44:46] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass1
+[2026-01-25 00:44:46] ACTION: PUSH_START | DETAILS: User neo4j [Key: C51D210F] (audreycolar) initiated sync for model: ObjectTest
+[2026-01-25 00:44:47] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 259552691
+[2026-01-25 00:44:47] ACTION: PUSH_SUCCESS | DETAILS: Model ObjectTest is now synchronized.
+[2026-01-25 00:44:47] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 259552691
+[2026-01-25 00:44:47] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: C51D210F] (audreycolar)
+[2026-01-25 01:24:54] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-25 01:24:57] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-25 01:24:57] ACTION: SESSION_CREATE | DETAILS: New session created with key: 41A83E55
+[2026-01-25 01:24:57] ACTION: REALTIME | DETAILS: Service monitoring started.
+[2026-01-25 01:24:57] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 41A83E55 | Ver: unknown
+[2026-01-25 01:25:11] ACTION: PUSH_START | DETAILS: User neo4j [Key: 41A83E55] (audreycolar) initiated sync for model: ObjectTest
+[2026-01-25 01:25:12] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 259552691
+[2026-01-25 01:25:12] ACTION: PUSH_SUCCESS | DETAILS: Model ObjectTest is now synchronized.
+[2026-01-25 01:25:12] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 259552691
+[2026-01-25 01:25:12] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 41A83E55] (audreycolar)
+[2026-01-25 01:27:21] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass2
+[2026-01-25 01:27:21] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass1
+[2026-01-25 01:27:21] ACTION: PUSH_START | DETAILS: User neo4j [Key: 41A83E55] (audreycolar) initiated sync for model: ObjectTest
+[2026-01-25 01:27:22] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -351591988
+[2026-01-25 01:27:22] ACTION: PUSH_SUCCESS | DETAILS: Model ObjectTest is now synchronized.
+[2026-01-25 01:27:22] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -351591988
+[2026-01-25 01:27:22] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 41A83E55] (audreycolar)
+[2026-01-25 01:28:13] ACTION: PULL_ASSOC | DETAILS: Restored: Connect
+[2026-01-25 01:44:43] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-25 01:44:46] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-25 01:44:46] ACTION: SESSION_CREATE | DETAILS: New session created with key: A74176BF
+[2026-01-25 01:44:46] ACTION: REALTIME | DETAILS: Service monitoring started.
+[2026-01-25 01:44:46] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: A74176BF | Ver: unknown
+[2026-01-25 01:47:56] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-25 01:47:56] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-25 01:47:56] ACTION: SESSION_CREATE | DETAILS: New session created with key: 01FA49E1
+[2026-01-25 01:47:56] ACTION: REALTIME | DETAILS: Service monitoring started.
+[2026-01-25 01:47:56] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 01FA49E1 | Ver: unknown
+[2026-01-25 01:55:15] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-25 01:55:15] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-25 01:55:15] ACTION: SESSION_CREATE | DETAILS: New session created with key: 8807CA5A
+[2026-01-25 01:55:15] ACTION: REALTIME | DETAILS: Service monitoring started.
+[2026-01-25 01:55:15] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 8807CA5A | Ver: unknown
+[2026-01-25 01:58:08] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-25 01:58:08] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-25 01:58:08] ACTION: SESSION_CREATE | DETAILS: New session created with key: CBED6633
+[2026-01-25 01:58:08] ACTION: REALTIME | DETAILS: Service monitoring started.
+[2026-01-25 01:58:08] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: CBED6633 | Ver: unknown
+[2026-01-25 01:58:16] ACTION: PULL_ASSOC | DETAILS: Restored: Connect
+[2026-01-25 14:35:34] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-25 14:35:41] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-25 14:35:41] ACTION: SESSION_CREATE | DETAILS: New session created with key: C65348A8
+[2026-01-25 14:35:41] ACTION: REALTIME | DETAILS: Service monitoring started.
+[2026-01-25 14:35:42] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: C65348A8 | Ver: unknown
+[2026-01-25 14:35:54] ACTION: PULL_ASSOC | DETAILS: Restored: Connect
+[2026-01-28 23:00:21] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-28 23:00:22] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-28 23:00:22] ACTION: SESSION_CREATE | DETAILS: New session created with key: 38DC338A
+[2026-01-28 23:00:22] ACTION: REALTIME | DETAILS: Service monitoring started.
+[2026-01-28 23:00:22] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 38DC338A | Ver: unknown
+[2026-01-28 23:00:33] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass2
+[2026-01-28 23:00:33] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass1
+[2026-01-28 23:00:33] ACTION: PUSH_START | DETAILS: User neo4j [Key: 38DC338A] (audreycolar) initiated sync for model: ObjectTest
+[2026-01-28 23:00:34] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -351591988
+[2026-01-28 23:00:34] ACTION: PUSH_SUCCESS | DETAILS: Model ObjectTest is now synchronized.
+[2026-01-28 23:00:34] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -351591988
+[2026-01-28 23:00:34] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 38DC338A] (audreycolar)
+[2026-01-28 23:01:13] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-28 23:02:44] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-28 23:20:28] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-28 23:20:28] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-28 23:20:28] ACTION: SESSION_CREATE | DETAILS: New session created with key: 6CB0B6F6
+[2026-01-28 23:20:28] ACTION: REALTIME | DETAILS: Service monitoring started.
+[2026-01-28 23:20:28] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 6CB0B6F6 | Ver: unknown
+[2026-01-28 23:20:43] ACTION: PUSH_START | DETAILS: User neo4j [Key: 6CB0B6F6] (audreycolar) initiated sync for model: ObjectTest
+[2026-01-28 23:20:44] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -351591988
+[2026-01-28 23:20:44] ACTION: PUSH_SUCCESS | DETAILS: Model ObjectTest is now synchronized.
+[2026-01-28 23:20:44] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -351591988
+[2026-01-28 23:20:44] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 6CB0B6F6] (audreycolar)
+[2026-01-28 23:22:08] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-28 23:22:46] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-28 23:29:16] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-28 23:29:16] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-28 23:29:16] ACTION: SESSION_CREATE | DETAILS: New session created with key: DEB79A3E
+[2026-01-28 23:29:16] ACTION: REALTIME | DETAILS: Service monitoring started.
+[2026-01-28 23:29:16] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: DEB79A3E | Ver: unknown
+[2026-01-28 23:35:53] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-28 23:35:53] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-28 23:35:53] ACTION: SESSION_CREATE | DETAILS: New session created with key: 5BA1FE2E
+[2026-01-28 23:35:53] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-01-28 23:35:53] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 5BA1FE2E | Ver: unknown
+[2026-01-28 23:36:20] ACTION: CLEANUP | DETAILS: Deep deleted object: CSS
+[2026-01-28 23:36:20] ACTION: CLEANUP | DETAILS: Deep deleted object: c1
+[2026-01-28 23:36:20] ACTION: CLEANUP | DETAILS: Deep deleted object: c2
+[2026-01-28 23:36:20] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-28 23:36:33] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-28 23:36:53] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-28 23:37:07] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-28 23:37:40] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-28 23:37:41] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-28 23:37:41] ACTION: SESSION_CREATE | DETAILS: New session created with key: 898A40BC
+[2026-01-28 23:37:41] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-01-28 23:37:41] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 898A40BC | Ver: unknown
+[2026-01-28 23:37:48] ACTION: PULL_ASSOC | DETAILS: Restored: Connect
+[2026-01-28 23:38:11] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: CSS
+[2026-01-28 23:38:11] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: e123
+[2026-01-28 23:38:11] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: e12
+[2026-01-28 23:38:11] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: e1
+[2026-01-28 23:38:11] ACTION: ATTR_ERROR | DETAILS: Failed to set lref for CSS
+[2026-01-28 23:38:11] ACTION: ATTR_ERROR | DETAILS: Failed to set coli for CSS
+[2026-01-28 23:38:11] ACTION: ATTR_ERROR | DETAILS: Failed to set gref for CSS
+[2026-01-28 23:38:11] ACTION: ATTR_ERROR | DETAILS: Failed to set cref for CSS
+[2026-01-28 23:38:11] ACTION: ATTR_ERROR | DETAILS: Failed to set age for CSS
+[2026-01-28 23:38:11] ACTION: ATTR_ERROR | DETAILS: Failed to set lref for e123
+[2026-01-28 23:38:11] ACTION: ATTR_ERROR | DETAILS: Failed to set coli for e123
+[2026-01-28 23:38:11] ACTION: ATTR_ERROR | DETAILS: Failed to set gref for e123
+[2026-01-28 23:38:11] ACTION: ATTR_ERROR | DETAILS: Failed to set age for e123
+[2026-01-28 23:38:11] ACTION: ATTR_ERROR | DETAILS: Failed to set cref for e123
+[2026-01-28 23:38:11] ACTION: ATTR_ERROR | DETAILS: Failed to set lref for e12
+[2026-01-28 23:38:11] ACTION: ATTR_ERROR | DETAILS: Failed to set coli for e12
+[2026-01-28 23:38:11] ACTION: ATTR_ERROR | DETAILS: Failed to set gref for e12
+[2026-01-28 23:38:11] ACTION: ATTR_ERROR | DETAILS: Failed to set cref for e12
+[2026-01-28 23:38:11] ACTION: ATTR_ERROR | DETAILS: Failed to set age for e12
+[2026-01-28 23:38:11] ACTION: ATTR_ERROR | DETAILS: Failed to set lref for e1
+[2026-01-28 23:38:11] ACTION: ATTR_ERROR | DETAILS: Failed to set coli for e1
+[2026-01-28 23:38:11] ACTION: ATTR_ERROR | DETAILS: Failed to set gref for e1
+[2026-01-28 23:38:11] ACTION: ATTR_ERROR | DETAILS: Failed to set cref for e1
+[2026-01-28 23:38:11] ACTION: ATTR_ERROR | DETAILS: Failed to set age for e1
+[2026-01-28 23:38:21] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-28 23:38:23] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: e1234
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set lref for e1234
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set coli for e1234
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set gref for e1234
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set cref for e1234
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set age for e1234
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set lref for CSS
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set coli for CSS
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set gref for CSS
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set cref for CSS
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set age for CSS
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set lref for e123
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set coli for e123
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set gref for e123
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set age for e123
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set cref for e123
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set lref for e12
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set coli for e12
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set gref for e12
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set cref for e12
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set age for e12
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set lref for e1
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set coli for e1
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set gref for e1
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set cref for e1
+[2026-01-28 23:38:23] ACTION: ATTR_ERROR | DETAILS: Failed to set age for e1
+[2026-01-28 23:38:27] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-28 23:38:29] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: e12348
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set lref for e12348
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set coli for e12348
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set gref for e12348
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set cref for e12348
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set age for e12348
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set lref for e1234
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set coli for e1234
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set gref for e1234
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set cref for e1234
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set age for e1234
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set lref for CSS
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set coli for CSS
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set gref for CSS
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set cref for CSS
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set age for CSS
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set lref for e123
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set coli for e123
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set gref for e123
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set age for e123
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set cref for e123
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set lref for e12
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set coli for e12
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set gref for e12
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set cref for e12
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set age for e12
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set lref for e1
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set coli for e1
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set gref for e1
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set cref for e1
+[2026-01-28 23:38:29] ACTION: ATTR_ERROR | DETAILS: Failed to set age for e1
+[2026-01-28 23:38:51] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set lref for e1234
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set coli for e1234
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set gref for e1234
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set cref for e1234
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set age for e1234
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set lref for CSS
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set coli for CSS
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set gref for CSS
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set cref for CSS
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set age for CSS
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set lref for e12348
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set coli for e12348
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set gref for e12348
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set cref for e12348
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set age for e12348
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set lref for e123
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set coli for e123
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set gref for e123
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set age for e123
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set cref for e123
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set lref for e12
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set coli for e12
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set gref for e12
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set cref for e12
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set age for e12
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set lref for e1
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set coli for e1
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set gref for e1
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set cref for e1
+[2026-01-28 23:38:53] ACTION: ATTR_ERROR | DETAILS: Failed to set age for e1
+[2026-01-29 00:04:10] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-29 00:04:12] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-29 00:04:12] ACTION: SESSION_CREATE | DETAILS: New session created with key: 2ABEBBF8
+[2026-01-29 00:04:12] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-01-29 00:04:12] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 2ABEBBF8 | Ver: unknown
+[2026-01-29 00:04:26] ACTION: PUSH_START | DETAILS: User neo4j [Key: 2ABEBBF8] (audreycolar) initiated sync for model: ObjectTest
+[2026-01-29 00:04:28] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -351591988
+[2026-01-29 00:04:28] ACTION: PUSH_SUCCESS | DETAILS: Model ObjectTest is now synchronized.
+[2026-01-29 00:04:28] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -351591988
+[2026-01-29 00:04:28] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 2ABEBBF8] (audreycolar)
+[2026-01-29 00:04:45] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-29 00:04:45] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-29 00:04:45] ACTION: SESSION_CREATE | DETAILS: New session created with key: 849D6879
+[2026-01-29 00:04:45] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-01-29 00:04:45] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 849D6879 | Ver: unknown
+[2026-01-29 00:04:51] ACTION: PULL_ASSOC | DETAILS: Restored: Connect
+[2026-01-29 00:05:12] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-29 00:05:15] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: c1
+[2026-01-29 00:05:20] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-29 00:05:21] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: c2
+[2026-01-29 00:05:34] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-29 00:05:46] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-29 00:06:01] ACTION: SYNC | DETAILS: Object & Link sync completed.

@@ -4,3 +4,12 @@
 !openter CSU fires(Tom)
 !delete (Tom, CSU) from WorksFor
 !opexit
+
+
+!insert (o1, o2) into Connect
+
+!set o1.coli := Set{1, 5, 9}
+
+!set o1.name := 'huhu'
+
+!create CSS:Cass1

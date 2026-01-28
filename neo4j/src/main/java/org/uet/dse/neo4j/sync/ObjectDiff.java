@@ -1,5 +1,6 @@
 package org.uet.dse.neo4j.sync;
 
+import org.uet.dse.neo4j.model.FullObjectSnapshot;
 import org.uet.dse.neo4j.model.ObjectState;
 import java.util.*;
 
@@ -36,95 +37,90 @@ public class ObjectDiff {
         this.mismatchDetails = mismatchDetails;
     }
 
-    public Map<String, ObjectState> getJavaSnapshot() {
+    public FullObjectSnapshot getJavaSnapshot() {
         return javaSnapshot;
     }
 
-    public void setJavaSnapshot(Map<String, ObjectState> javaSnapshot) {
+    public void setJavaSnapshot(FullObjectSnapshot javaSnapshot) {
         this.javaSnapshot = javaSnapshot;
     }
 
-    public Map<String, ObjectState> getNeo4jSnapshot() {
+    public FullObjectSnapshot getNeo4jSnapshot() {
         return neo4jSnapshot;
     }
 
-    public void setNeo4jSnapshot(Map<String, ObjectState> neo4jSnapshot) {
+    public void setNeo4jSnapshot(FullObjectSnapshot neo4jSnapshot) {
         this.neo4jSnapshot = neo4jSnapshot;
     }
 
-    // Những đối tượng chỉ có ở phía Java (USE)
+    // --- Đối tượng (Nodes) ---
     public List<String> javaOnlyObjects = new ArrayList<>();
-    // Những đối tượng chỉ có ở phía Database (Neo4j)
     public List<String> neo4jOnlyObjects = new ArrayList<>();
-    // Những đối tượng có ở cả hai nơi nhưng giá trị thuộc tính hoặc tham chiếu khác nhau
     public List<String> mismatchedObjects = new ArrayList<>();
+
+    // --- Liên kết (Edges) ---
+    public List<String> javaOnlyLinks = new ArrayList<>();
+    public List<String> neo4jOnlyLinks = new ArrayList<>();
+    public List<String> mismatchedLinks = new ArrayList<>();
+
 
     // Map chứa thông tin chi tiết sự sai lệch giá trị (ObjectName -> Danh sách mô tả lỗi)
     public Map<String, List<String>> mismatchDetails = new HashMap<>();
 
     // Lưu trữ snapshot để truy xuất dữ liệu khi thực hiện Push/Pull
-    public Map<String, ObjectState> javaSnapshot;
-    public Map<String, ObjectState> neo4jSnapshot;
+// Snapshot lưu trữ để truy xuất dữ liệu thực thi
+    public FullObjectSnapshot javaSnapshot;
+    public FullObjectSnapshot neo4jSnapshot;
+
 
     /**
      * Kiểm tra xem có bất kỳ sự sai lệch nào không
      */
+
+    /**
+     * Kiểm tra tổng thể xem có bất kỳ sự sai lệch nào không
+     */
     public boolean hasDifference() {
-        return !javaOnlyObjects.isEmpty() || !neo4jOnlyObjects.isEmpty() || !mismatchedObjects.isEmpty();
+        return !javaOnlyObjects.isEmpty() || !neo4jOnlyObjects.isEmpty() || !mismatchedObjects.isEmpty() ||
+                !javaOnlyLinks.isEmpty() || !neo4jOnlyLinks.isEmpty() || !mismatchedLinks.isEmpty();
     }
 
     /**
-     * Báo cáo cho chiều XUÔI (Java -> DB): Đẩy dữ liệu từ máy mình lên server
+     * Báo cáo cho chiều XUÔI (Java -> DB)
      */
     public String generateForwardReport() {
         StringBuilder sb = new StringBuilder("===== OBJECT SYNC: PUSH TO DATABASE =====\n");
-        if (javaOnlyObjects.isEmpty() && neo4jOnlyObjects.isEmpty() && mismatchedObjects.isEmpty()) {
-            return sb.append("Status: All objects are already in sync.").toString();
-        }
+        if (!hasDifference()) return "Status: All objects and links are in sync.";
 
-        if (!javaOnlyObjects.isEmpty()) {
-            sb.append("[+] NEW OBJECTS (Will be created in DB):\n");
-            javaOnlyObjects.forEach(o -> sb.append("    - ").append(o).append("\n"));
-        }
+        if (!javaOnlyObjects.isEmpty()) sb.append("[+] NEW OBJECTS: ").append(javaOnlyObjects).append("\n");
+        if (!neo4jOnlyObjects.isEmpty()) sb.append("[!] DELETE OBJECTS FROM DB: ").append(neo4jOnlyObjects).append("\n");
+        if (!mismatchedObjects.isEmpty()) sb.append("[*] UPDATE OBJECT VALUES: ").append(mismatchedObjects).append("\n");
 
-        if (!neo4jOnlyObjects.isEmpty()) {
-            sb.append("[!] ORPHAN DB NODES (Not in your USE - Will be DELETED from DB):\n");
-            neo4jOnlyObjects.forEach(o -> sb.append("    - ").append(o).append("\n"));
-        }
+        sb.append("\n--- Relationship Changes ---\n");
+        if (!javaOnlyLinks.isEmpty()) sb.append("[+] NEW LINKS: ").append(javaOnlyLinks).append("\n");
+        if (!neo4jOnlyLinks.isEmpty()) sb.append("[!] REMOVE LINKS FROM DB: ").append(neo4jOnlyLinks).append("\n");
 
-        if (!mismatchedObjects.isEmpty()) {
-            sb.append("[*] VALUE MISMATCHES (DB values will be overwritten by Java):\n");
-            mismatchedObjects.forEach(o -> {
-                sb.append("    - ").append(o).append("\n");
-                if (mismatchDetails.containsKey(o)) {
-                    mismatchDetails.get(o).forEach(d -> sb.append("        > ").append(d).append("\n"));
-                }
-            });
-        }
         return sb.toString();
     }
 
     /**
-     * Báo cáo cho chiều NGƯỢC (DB -> Java): Kéo dữ liệu từ server về máy mình
+     * Báo cáo cho chiều NGƯỢC (DB -> Java)
      */
     public String generateBackwardReport() {
         StringBuilder sb = new StringBuilder("===== OBJECT SYNC: PULL FROM DATABASE =====\n");
-        if (!hasDifference()) return sb.append("Status: All objects are already in sync.").toString();
+        if (!hasDifference()) return "Status: Local objects and links match Database.";
 
-        if (!neo4jOnlyObjects.isEmpty()) {
-            sb.append("[+] NEW FROM DB (Will be created in USE):\n");
-            neo4jOnlyObjects.forEach(o -> sb.append("    - ").append(o).append("\n"));
-        }
+        if (!neo4jOnlyObjects.isEmpty()) sb.append("[+] NEW FROM DB: ").append(neo4jOnlyObjects).append("\n");
+        if (!javaOnlyObjects.isEmpty()) sb.append("[-] REMOVE FROM USE: ").append(javaOnlyObjects).append("\n");
 
-        if (!javaOnlyObjects.isEmpty()) {
-            sb.append("[-] REMOVED IN DB (Will be DELETED from USE):\n");
-            javaOnlyObjects.forEach(o -> sb.append("    - ").append(o).append("\n"));
-        }
+        sb.append("\n--- Relationship Changes ---\n");
+        if (!neo4jOnlyLinks.isEmpty()) sb.append("[+] NEW LINKS FROM DB: ").append(neo4jOnlyLinks).append("\n");
+        if (!javaOnlyLinks.isEmpty()) sb.append("[-] REMOVE LINKS FROM USE: ").append(javaOnlyLinks).append("\n");
 
-        if (!mismatchedObjects.isEmpty()) {
-            sb.append("[*] VALUE UPDATES (Your USE values will match DB):\n");
-            mismatchedObjects.forEach(o -> sb.append("    - ").append(o).append("\n"));
-        }
         return sb.toString();
     }
+
+    // --- Getters/Setters để đảm bảo code sạch ---
+    public List<String> getJavaOnlyLinks() { return javaOnlyLinks; }
+    public List<String> getNeo4jOnlyLinks() { return neo4jOnlyLinks; }
 }

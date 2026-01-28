@@ -3,7 +3,7 @@ package org.uet.dse.neo4j.phase2;
 import org.tzi.use.uml.ocl.type.CollectionType;
 import org.tzi.use.uml.ocl.type.Type;
 import org.tzi.use.uml.ocl.type.Type.VoidHandling;
-import org.uet.dse.neo4j.repo.Neo4jRepository;
+import org.uet.dse.neo4j.repo.Neo4jModelRepository;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +49,7 @@ public class TypeMapper {
      * @param useType Kiểu dữ liệu cần kiểm tra reference
      * @param isReturnType true nếu là cạnh ReferenceReturnType (17), false nếu là ReferenceType (16)
      */
-    public static void handleTypeReference(Neo4jRepository repo, String sourceNodeName, Type useType, boolean isReturnType) {
+    public static void handleTypeReference(Neo4jModelRepository repo, String sourceNodeName, Type useType, boolean isReturnType) {
         if (useType == null) return;
 
         // Phân tích để lấy thông tin kiểu cơ sở (getBaseType)

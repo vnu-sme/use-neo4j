@@ -47,6 +47,8 @@ public class SyncSettingsDialog extends JDialog {
             config.autoPullModelOnChange = chkPullModel.isSelected();
             config.autoPullObjectOnChange = chkPullObject.isSelected();
             config.save();
+            // Log để kiểm tra giá trị sau khi lưu
+            System.out.println("Settings Updated: autoPushObject = " + config.autoPushObjectOnChange);
             JOptionPane.showMessageDialog(this, "Settings saved!");
             dispose();
         });

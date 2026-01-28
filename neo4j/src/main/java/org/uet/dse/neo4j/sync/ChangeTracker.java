@@ -45,23 +45,23 @@ public class ChangeTracker {
 
     // Trong lớp ChangeTracker.java
     public static void startMonitoring(JLabel modelLabel, JLabel objectLabel, org.tzi.use.main.Session session) {
-        scheduler.scheduleAtFixedRate(() -> {
-            try {
-                if (Neo4jDriverManager.getInstance().isConnected()) {
-                    ModelSyncCoordinator mc = new ModelSyncCoordinator(session);
-                    ObjectSyncCoordinator oc = new ObjectSyncCoordinator(session.system());
-
-                    // Lấy tóm tắt nhanh
-                    String modelSum = mc.getQuickSummary();
-                    String objectSum = oc.getQuickSummary();
-
-                    SwingUtilities.invokeLater(() -> {
-                        updateStatusLabel(modelLabel, "Model", modelSum);
-                        updateStatusLabel(objectLabel, "Object", objectSum);
-                    });
-                }
-            } catch (Exception e) { /* Silent ignore */ }
-        }, 0, 5, TimeUnit.SECONDS);
+//        scheduler.scheduleAtFixedRate(() -> {
+//            try {
+//                if (Neo4jDriverManager.getInstance().isConnected()) {
+//                    ModelSyncCoordinator mc = new ModelSyncCoordinator(session);
+//                    ObjectSyncCoordinator oc = new ObjectSyncCoordinator(session.system());
+//
+//                    // Lấy tóm tắt nhanh
+//                    String modelSum = mc.getQuickSummary();
+//                    String objectSum = oc.getQuickSummary();
+//
+//                    SwingUtilities.invokeLater(() -> {
+//                        updateStatusLabel(modelLabel, "Model", modelSum);
+//                        updateStatusLabel(objectLabel, "Object", objectSum);
+//                    });
+//                }
+//            } catch (Exception e) { /* Silent ignore */ }
+//        }, 0, 5, TimeUnit.SECONDS);
     }
 
     private static void updateStatusLabel(JLabel label, String type, String summary) {

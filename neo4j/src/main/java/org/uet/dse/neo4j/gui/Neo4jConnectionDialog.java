@@ -7,7 +7,7 @@ import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.phase2.SessionManager;
 import org.uet.dse.neo4j.phase2.WorkLogManager;
 import org.uet.dse.neo4j.realtime.Neo4jRealTimeService;
-import org.uet.dse.neo4j.repo.Neo4jRepository;
+import org.uet.dse.neo4j.repo.Neo4jModelRepository;
 
 import javax.swing.*;
 import java.awt.*;
@@ -177,7 +177,7 @@ public class Neo4jConnectionDialog extends JDialog {
 			Neo4jDriverManager.connect(uri, user, pass, dbName, createNew, deleteOnExit);
 
 			// init metamodel schema structure
-			Neo4jRepository repo = new Neo4jRepository();
+			Neo4jModelRepository repo = new Neo4jModelRepository();
 			repo.initializeMetamodel();
 
 			WorkLogManager.getInstance().log("SCHEMA_INIT", "Metamodel nodes initialized for DB: " + dbName);

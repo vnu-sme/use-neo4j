@@ -13,10 +13,10 @@ import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import java.util.List;
 import java.util.Map;
 
-public class Neo4jRepository {
+public class Neo4jModelRepository {
     private final Driver driver;
 
-    public Neo4jRepository() {
+    public Neo4jModelRepository() {
         // Lấy driver từ Manager đã connect thành công
         this.driver = Neo4jDriverManager.getInstance().getDriver();
     }
@@ -193,7 +193,8 @@ public class Neo4jRepository {
                             "MERGE (:MetaNode {name: 'NodeClassInvariant', label: 'ClassInvariant'}) " +
                             "MERGE (:MetaNode {name: 'NodePreCondition', label: 'PreCondition'}) " +
                             "MERGE (:MetaNode {name: 'NodePostCondition', label: 'PostCondition'}) " +
-                            "MERGE (:MetaNode {name: 'NodeTernaryAssociation', label: 'TernaryAssociation'})";
+                            "MERGE (:MetaNode {name: 'NodeTernaryAssociation', label: 'TernaryAssociation'}) " +
+                            "MERGE (:MetaNode {name: 'NodeNestedCollection', label: 'NestedCollection'})";
 
             session.run(script);
         }

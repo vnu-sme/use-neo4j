@@ -1263,12 +1263,25 @@ public class ModelSyncCoordinator {
                     // get class & enums
                     "MATCH (meta:MetaNode) WHERE meta.name IN ['NodeConcreteClass', 'NodeAbstractClass', 'NodeAssociationClass', 'NodeEnumeration'] " +
                             "MATCH (inst)-[:InstanceOf]->(meta) " +
-                            "WITH inst, meta, labels(inst)[0] as classType " +
+                            "WITH inst, meta, labels(inst)[0] as classType, inst.value as enumValues " +
 
                             //attribute
+                            // 1. Thu thập Attributes và Sợi xích lồng nhau (Fix độ sâu vô hạn)
                             "OPTIONAL MATCH (inst)-[:HasAttribute]->(a) " +
-                            "OPTIONAL MATCH (a)-[r1]->(aRef) WHERE type(r1) = 'ReferenceType' " +
-                            "WITH inst, meta, classType, collect(DISTINCT {name: a.attrName, type: a.type, idx: a.index, ref: aRef.name, sCollection: a.isCollection, collectionType: a.collectionType}) as attrs " +
+                            "OPTIONAL MATCH (a)-[rRef]->(aRef) WHERE type(rRef) = 'ReferenceType' " +
+                            // Tìm đường đi xuyên qua tất cả các tầng NestedCollection
+                            "OPTIONAL MATCH p = (a)-[:HasNestedCollection*]->(n:NestedCollection) " +
+                            "WITH inst, meta, classType, a, aRef, p ORDER BY length(p) DESC " +
+                            // Với mỗi attribute, chỉ lấy con đường dài nhất để có đủ các tầng
+                            "WITH inst, meta, classType, a, aRef, head(collect(p)) as longestPath " +
+                            // Trích xuất mảng tên các Collection từ các node trong path (Bỏ qua node attribute đầu tiên)
+                            "WITH inst, meta, classType, a, aRef, " +
+                            "     [node in nodes(longestPath) WHERE 'NestedCollection' IN labels(node) | node.collectionName] as fullChain " +
+                            "WITH inst, meta, classType, collect(DISTINCT { " +
+                            "  name: a.attrName, type: a.type, idx: a.index, ref: aRef.name, " +
+                            "  sCollection: a.isCollection, isNested: a.isNestedCollection, " +
+                            "  collectionType: a.collectionType, chain: fullChain " +
+                            "}) as attrs " +
 
                             //invariants
                             "OPTIONAL MATCH (inst)-[:HasInvariant]->(inv) " +
@@ -1354,6 +1367,20 @@ public class ModelSyncCoordinator {
                         // Thông tin tập hợp (Dùng đúng key sCollection từ Cypher)
                         props.put("isCollection", aVal.get("sCollection").asBoolean(false));
                         props.put("collectionType", aVal.get("collectionType").asString("Set"));
+
+
+                        // MỚI: Lấy thông tin lồng nhau
+                        props.put("isNestedCollection", aVal.get("isNested").asBoolean(false));
+
+                        // MỚI: Lấy danh sách chuỗi các lớp lồng (ví dụ: ["Sequence", "Bag"])
+                        // SỬA LỖI COERCE TẠI ĐÂY:
+                        Value chainVal = aVal.get("chain");
+                        if (chainVal.isNull()) {
+                            props.put("nestedChain", new ArrayList<String>());
+                        } else {
+                            props.put("nestedChain", chainVal.asList(Value::asString));
+                        }
+
 
                         // Đưa vào danh sách thuộc tính của ClassState
                         cls.getAttributes().put(attrName, props);

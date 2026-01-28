@@ -12,7 +12,7 @@ import org.tzi.use.uml.ocl.value.Value;
 import org.tzi.use.uml.sys.MObject;
 import org.tzi.use.uml.sys.MSystemState;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
-import org.uet.dse.neo4j.repo.Neo4jRepository;
+import org.uet.dse.neo4j.repo.Neo4jModelRepository;
 import org.uet.dse.neo4j.sync.ObjectSyncCoordinator;
 import org.uet.dse.neo4j.sync.UmlTypeTranslator;
 
@@ -23,11 +23,11 @@ public class Neo4jUmlBridge {
     private final UseModelApi modelApi;
     private final WorkLogManager logger = WorkLogManager.getInstance();
 
-    private final Neo4jRepository repo;
+    private final Neo4jModelRepository repo;
 
     public Neo4jUmlBridge(UseModelApi modelApi) {
         this.modelApi = modelApi;
-        this.repo = new Neo4jRepository();
+        this.repo = new Neo4jModelRepository();
         // Khởi tạo metamodel trước khi push
         this.repo.initializeMetamodel();
     }
@@ -281,27 +281,99 @@ public class Neo4jUmlBridge {
     }
 
     private void mapAttributes(Session session, MClass cls) {
-        //use attributes() instead of allAttributes() to take only the attribute at this class
+        int index = 0;
         for (MAttribute attr : cls.attributes()) {
-            Map<String, Object> tInfo = parseType(attr.type());
+            Type fullType = attr.type();
             String instanceId = cls.name() + "_" + attr.name();
 
+            // 1. Phân tích kiểu dữ liệu
+            Type ultimateBaseType = UmlTypeTranslator.getUltimateBaseType(fullType);
+            int depth = UmlTypeTranslator.getCollectionDepth(fullType);
+            boolean isCollection = depth > 0;
+            boolean isNested = depth > 1;
+
+            // 2. Chuẩn bị thuộc tính cho Node Attribute gốc
             Map<String, Object> props = new HashMap<>();
             props.put("name", instanceId);
             props.put("attrName", attr.name());
+            props.put("index", index++);
 
-            // DÙNG TRANSLATOR: Real -> Double
-            props.put("type", UmlTypeTranslator.toDatabaseType(attr.type()));
-            props.put("isCollection", tInfo.get("isCollection"));
-            props.put("collectionType", tInfo.get("collType"));
+            // ĐẶC TẢ MỚI: isNestedCollection
+            props.put("isNestedCollection", isNested);
+            props.put("isCollection", isCollection);
+
+            // Luôn lưu kiểu cơ sở cuối cùng (Vd: Int, Person) để cạnh ReferenceType hoạt động đúng
+            props.put("type", UmlTypeTranslator.toDatabaseType(ultimateBaseType));
+
+            // Lưu loại tập hợp lớp ngoài cùng (Vd: Set)
+            props.put("collectionType", isCollection ? UmlTypeTranslator.getCollectionType(fullType) : "None");
             props.put("isDerived", attr.isDerived());
 
-            // createInstanceNode bên trong đã dùng MERGE theo 'name', nên sẽ không bị trùng
+            // 3. Tạo Node thực thể Attribute (M1)
             repo.createInstanceNode("NodeAttribute", "Attribute", props);
             repo.createStructuralEdge(cls.name(), instanceId, "HasAttribute");
-            TypeMapper.handleTypeReference(repo, instanceId, attr.type(), false);
+
+            // 4. Nối cạnh ReferenceType từ Node gốc tới Class/Enum đích (Nếu có)
+            // Việc dùng ultimateBaseType đảm bảo lấy đúng kiểu dữ liệu trong Nested
+            TypeMapper.handleTypeReference(repo, instanceId, ultimateBaseType, false);
+
+            // 5. Nếu là Nested Collection -> Tạo các Node con trung gian
+            if (isNested) {
+                // Bắt đầu đệ quy từ lớp vỏ thứ 2
+                pushNestedCollectionNodes(session, instanceId, ((CollectionType) fullType).elemType());
+            }
         }
     }
+
+    /**
+     * Hàm đệ quy tạo chuỗi Node NestedCollection
+     */
+    private void pushNestedCollectionNodes(Session session, String parentId, Type currentType) {
+        // Chỉ xử lý nếu lớp hiện tại vẫn là một Collection
+        if (!currentType.isKindOfCollection(VoidHandling.EXCLUDE_VOID)) return;
+
+        // Tạo ID duy nhất cho Node Nested
+        String nestedId = "nested_" + UUID.randomUUID().toString();
+
+        // Kiểm tra xem lớp tiếp theo bên trong còn là Collection nữa không
+        Type innerType = ((CollectionType) currentType).elemType();
+        boolean stillNested = innerType.isKindOfCollection(VoidHandling.EXCLUDE_VOID);
+
+        Map<String, Object> props = new HashMap<>();
+        props.put("name", nestedId);
+        props.put("collectionName", UmlTypeTranslator.getCollectionType(currentType));
+        props.put("isNestedCollection", stillNested);
+
+        // Tạo Node thực thể Nested và nối cạnh HasNestedCollection
+        repo.createInstanceNode("NodeNestedCollection", "NestedCollection", props);
+        repo.createStructuralEdge(parentId, nestedId, "HasNestedCollection");
+
+        // Nếu vẫn còn lớp bên trong -> Tiếp tục đệ quy
+        if (stillNested) {
+            pushNestedCollectionNodes(session, nestedId, innerType);
+        }
+    }
+
+    private void pushNestedLevels(Session session, String parentId, org.tzi.use.uml.ocl.type.Type currentType) {
+        if (!currentType.isKindOfCollection(VoidHandling.EXCLUDE_VOID)) return;
+
+        String nestedId = "nested_" + UUID.randomUUID().toString();
+        boolean hasMore = ((org.tzi.use.uml.ocl.type.CollectionType)currentType).elemType().isKindOfCollection(VoidHandling.EXCLUDE_VOID);
+
+        Map<String, Object> props = new HashMap<>();
+        props.put("name", nestedId);
+        props.put("collectionName", UmlTypeTranslator.getCollectionType(currentType));
+        props.put("isNestedCollection", hasMore);
+
+        repo.createInstanceNode("NodeNestedCollection", "NestedCollection", props);
+        repo.createStructuralEdge(parentId, nestedId, "HasNestedCollection");
+
+        if (hasMore) {
+            pushNestedLevels(session, nestedId, ((org.tzi.use.uml.ocl.type.CollectionType)currentType).elemType());
+        }
+    }
+
+
     /**
      * Ánh xạ Class Invariants (Đặc tả 1 & 6)
      */

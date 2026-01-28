@@ -93,19 +93,101 @@ public class UmlTypeTranslator {
         String umlBase = toUmlTypeString(typeObj.toString());
         if (umlBase == null) return null;
 
-        // Ở bước trên ta đã put vào Map với key "isCollection"
-        Object isCollObj = props.get("isCollection");
-        boolean isColl = false;
-        if (isCollObj != null) {
-            isColl = (Boolean) isCollObj;
+        boolean isColl = (boolean) props.getOrDefault("isCollection", false);
+        if (!isColl) return umlBase;
+
+        boolean isNested = (boolean) props.getOrDefault("isNestedCollection", false);
+        String rootCollType = (String) props.getOrDefault("collectionType", "Set");
+
+        // TRƯỜNG HỢP: LỒNG NHAU (Bất kể độ sâu)
+        if (isNested) {
+            Object chainObj = props.get("nestedChain");
+            if (chainObj instanceof List) {
+                List<String> chain = (List<String>) chainObj;
+
+                // Bắt đầu từ lõi: Integer
+                String result = umlBase;
+
+                // Duyệt ngược từ phần tử cuối cùng của xích (lớp lồng sâu nhất) về đầu
+                // Ví dụ: Set(Sequence(Bag(Integer)))
+                // chain sẽ là ["Sequence", "Bag"]
+                // Vòng 1: Bag(Integer)
+                // Vòng 2: Sequence(Bag(Integer))
+                for (int i = chain.size() - 1; i >= 0; i--) {
+                    String collName = chain.get(i);
+                    if (collName != null && !collName.isEmpty()) {
+                        result = String.format("%s(%s)", collName, result);
+                    }
+                }
+
+                // Cuối cùng bọc bởi lớp ngoài cùng (rootCollType)
+                return String.format("%s(%s)", rootCollType, result);
+            }
         }
 
-        if (isColl) {
-            // Mặc định là Set nếu không có collectionType
-            String collKind = (String) props.getOrDefault("collectionType", "Set");
-            return String.format("%s(%s)", collKind, umlBase);
+        // TRƯỜNG HỢP: TẬP HỢP ĐƠN
+        return String.format("%s(%s)", rootCollType, umlBase);
+    }
+    public static String reconstructNestedTypeString(Map<String, Object> props, List<String> nestedTypes) {
+        String baseType = (String) props.get("type");
+        String umlBase = toUmlTypeString(baseType);
+
+        boolean isColl = (boolean) props.get("isCollection");
+        boolean isNested = (boolean) props.get("isNestedCollection");
+
+        if (!isColl) return umlBase;
+
+        // Nếu không lồng nhau
+        if (!isNested) {
+            return props.get("collectionType") + "(" + umlBase + ")";
         }
 
-        return umlBase;
+        // Nếu lồng nhau: Duyệt ngược từ trong ra ngoài
+        // Ví dụ nestedTypes: ["Sequence"], rootCollType: "Set" -> Set(Sequence(Integer))
+        String result = umlBase;
+        for (int i = nestedTypes.size() - 1; i >= 0; i--) {
+            result = nestedTypes.get(i) + "(" + result + ")";
+        }
+        result = props.get("collectionType") + "(" + result + ")";
+
+        return result;
+    }
+
+    /**
+     * Lấy loại tập hợp cụ thể (Set, Sequence, Bag, OrderedSet)
+     */
+    public static String getCollectionType(Type type) {
+        if (type == null || !type.isKindOfCollection(VoidHandling.EXCLUDE_VOID)) {
+            return "None";
+        }
+        if (type.isKindOfOrderedSet(VoidHandling.EXCLUDE_VOID)) return "OrderedSet";
+        if (type.isKindOfSet(VoidHandling.EXCLUDE_VOID)) return "Set";
+        if (type.isKindOfSequence(VoidHandling.EXCLUDE_VOID)) return "Sequence";
+        if (type.isKindOfBag(VoidHandling.EXCLUDE_VOID)) return "Bag";
+        return "Set";
+    }
+
+    /**
+     * Bóc tách đệ quy để lấy kiểu dữ liệu cuối cùng bên trong các lớp tập hợp
+     * Ví dụ: Set(Sequence(Person)) -> Person
+     */
+    public static Type getUltimateBaseType(Type type) {
+        if (type.isKindOfCollection(VoidHandling.EXCLUDE_VOID) && type instanceof CollectionType) {
+            return getUltimateBaseType(((CollectionType) type).elemType());
+        }
+        return type;
+    }
+
+    /**
+     * Tính độ sâu của tập hợp
+     */
+    public static int getCollectionDepth(Type type) {
+        int depth = 0;
+        Type current = type;
+        while (current.isKindOfCollection(VoidHandling.EXCLUDE_VOID) && current instanceof CollectionType) {
+            depth++;
+            current = ((CollectionType) current).elemType();
+        }
+        return depth;
     }
 }
