@@ -12,4 +12,12 @@ public class FullModelSnapshot {
 
     // Chứa các Association N-bên (vd: Filmstrip)
     public List<Map<String, Object>> ternaryAssociations = new ArrayList<>();
+
+    public boolean isEmpty() {
+        return (classes == null || classes.isEmpty())
+                && (associations == null || associations.isEmpty())
+                && (ternaryAssociations == null || ternaryAssociations.isEmpty());
+    }
+
+
 }

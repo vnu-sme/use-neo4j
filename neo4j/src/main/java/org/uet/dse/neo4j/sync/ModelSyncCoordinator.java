@@ -14,6 +14,7 @@ import org.tzi.use.uml.ocl.expr.VarDecl;
 import org.tzi.use.uml.ocl.value.VarBindings;
 import org.tzi.use.uml.sys.MSystem;
 import org.tzi.use.util.NullPrintWriter;
+import org.uet.dse.neo4j.collaboration.ConsensusService;
 import org.uet.dse.neo4j.manager.Neo4jAuditLogService;
 import org.uet.dse.neo4j.model.AssociationState;
 import org.uet.dse.neo4j.model.ClassState;
@@ -74,7 +75,57 @@ public class ModelSyncCoordinator {
     }
 
 
+    /**
+     * Hàm này chỉ được gọi khi ConsensusService báo "APPROVED"
+     */
+    public void executeFinalPush() {
+        try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().openSession()) {
+            // Thực thi lệnh Push thực sự xuống DB (Code cũ của bạn)
+            bridge.pushModelToNeo4j();
+            // Xóa hoặc đóng Proposal sau khi xong
+            session.run("MATCH (p:ModelProposal {proposer: $me}) SET p.status = 'FINISHED'",
+                    Map.of("me", Neo4jDriverManager.getInstance().getUser()));
+        }
+    }
+    /**
+     * Bộ gác cổng (Gatekeeper) quản lý luồng đồng thuận.
+     * @return true nếu đề xuất đã được APPROVED và sẵn sàng PUSH.
+     */
+    private boolean handleConsensusGatekeeper(ModelDiff diff) {
+        ConsensusService consensus = ConsensusService.getInstance();
 
+        // ĐẶC TẢ 1: Nếu không có ai khác online -> Cho phép PUSH luôn, ko cần Proposal
+        if (consensus.countOtherActiveUsers() == 0) {
+            System.out.println("Working alone: Bypassing consensus.");
+            return true;
+        }
+
+        String status = consensus.getMyProposalStatus();
+        switch (status) {
+            case "NONE":
+                int choice = JOptionPane.showConfirmDialog(null,
+                        "Model has changed. Send a proposal to the team for approval?",
+                        "Consensus Required", JOptionPane.YES_NO_OPTION);
+                if (choice == JOptionPane.YES_OPTION) {
+                    consensus.submitModelProposal(diff.generateForwardReport());
+                }
+                return false;
+
+            case "PENDING":
+                // Kiểm tra lại lần nữa xem trong lúc chờ có đủ phiếu chưa
+                if (consensus.checkAndAutoApproveProposal()) {
+                    return true; // Đã đủ phiếu -> Cho phép Push
+                }
+                JOptionPane.showMessageDialog(null, "Waiting for votes from other users...");
+                return false;
+
+            case "APPROVED":
+                return true; // Đã được duyệt
+
+            default:
+                return false;
+        }
+    }
     public void syncForward() {
         //get user identification
         String userIdentifier = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
@@ -94,6 +145,13 @@ public class ModelSyncCoordinator {
 
         try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().openSession()) {
             ModelDiff diff = compareWithNeo4j();
+
+            // ============================================================
+            // 3. GỌI BỘ GÁC CỔNG ĐỒNG THUẬN (Logic mới đã tách riêng)
+            // ============================================================
+            if (!handleConsensusGatekeeper(diff)) {
+                return; // Thoát nếu chưa đủ điều kiện Push (đang chờ vote hoặc user cancel)
+            }
 
             if (diff.hasDifference()) {
                 // 4. Hiển thị Pop-up thống kê cho chiều XUÔI (Java -> DB)
@@ -1239,19 +1297,22 @@ public class ModelSyncCoordinator {
 
     public String getQuickSummary() {
         try {
-            if (isQuickSyncCheck()) { // Check ModelHash
-                return "All Synced";
+            if (Neo4jDriverManager.getInstance() == null || !Neo4jDriverManager.getInstance().isConnected()) {
+                return "No Connection";
             }
 
+            // Nếu DB rỗng (chưa từng push), isQuickSyncCheck sẽ false
+            if (isQuickSyncCheck()) return "All Synced";
+
             ModelDiff diff = compareWithNeo4j();
-            if (!diff.hasDifference()) return "All Synced";
+            if (diff == null || !diff.hasDifference()) return "All Synced";
 
             return String.format("%d New, %d Missing, %d Mismatch",
                     diff.javaOnlyClasses.size(),
                     diff.neo4jOnlyClasses.size(),
                     diff.mismatchedClasses.size());
         } catch (Exception e) {
-            return "Check Failed";
+            return "Check Failed"; // Luôn trả về String
         }
     }
 
@@ -1724,6 +1785,58 @@ public class ModelSyncCoordinator {
             WorkLogManager.getInstance().log("REALTIME_ERROR", e.getMessage());
         } finally {
             LockManager.releaseLock();
+        }
+    }
+
+    public void proposeModelSync() {
+        ModelDiff diff = compareWithNeo4j();
+        if (!diff.hasDifference()) {
+            JOptionPane.showMessageDialog(null, "Model is already up-to-date.");
+            return;
+        }
+
+        String summary = diff.generateForwardReport();
+        int confirm = JOptionPane.showConfirmDialog(null, "Do you want to broadcast this change to the team?", "Propose Change", JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            // Gửi đề xuất lên Neo4j
+            ConsensusService.getInstance().submitModelProposal(summary);
+            JOptionPane.showMessageDialog(null, "Proposal sent! Waiting for team consensus.");
+        }
+    }
+
+    /**
+     * Thực hiện Pull dữ liệu từ DB về Java mà không hiển thị bảng Diff Preview.
+     * Dùng cho các quy trình tự động hoặc đã được phê duyệt qua Voting.
+     */
+    public void syncBackwardSilent() {
+        try {
+            FullModelSnapshot dbSnapshot = getFullModelSnapshotFromNeo4j();
+            if (dbSnapshot.isEmpty()) return;
+
+            // Lấy tên model thực tế từ DB
+            String actualModelName = getModelNameFromDb();
+
+//            // 1. Đóng view để an toàn
+//            mainWindow.closeAllViews();
+
+            // 2. Thay thế Model và System
+            org.tzi.use.uml.mm.ModelFactory factory = new org.tzi.use.uml.mm.ModelFactory();
+            org.tzi.use.uml.mm.MModel newModel = factory.createModel(actualModelName);
+
+            // Nạp data
+            applyChangesFromSnapshot(newModel, dbSnapshot);
+
+            // Đổi System
+            org.tzi.use.uml.sys.MSystem newSystem = new org.tzi.use.uml.sys.MSystem(newModel);
+            useSession.setSystem(newSystem);
+
+//            // 3. Refresh GUI
+//            mainWindow.getModelBrowser().update();
+//            mainWindow.showModelStatus();
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

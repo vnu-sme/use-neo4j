@@ -1,0 +1,7 @@
+model BWTest
+
+class Cass1
+attributes
+    name: String
+    age: Integer
+end

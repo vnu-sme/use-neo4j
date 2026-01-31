@@ -761,35 +761,26 @@ public class ObjectSyncCoordinator {
      * Trả về chuỗi: "All Synced" hoặc "X New, Y Missing, Z Mismatch"
      */
     public String getQuickSummary() {
-//        try {
-//            // Bước 1: Kiểm tra nhanh bằng Timestamp
-//            // Nếu timestamp khớp, coi như đã đồng bộ hoàn toàn (Tiết kiệm tài nguyên)
-//            if (isQuickSyncCheck()) {
-//                return "All Synced";
-//            }
-//
-//            // Bước 2: Nếu Timestamp lệch, thực hiện quét sâu (Deep Comparison) để lấy con số cụ thể
-//            Map<String, ObjectState> javaSnap = getJavaObjectSnapshot().objects;
-//            Map<String, ObjectState> neoSnap = getNeo4jObjectSnapshot().objects;
-//
-//            ObjectDiff diff = compareObjects(javaSnap, neoSnap);
-//
-//            if (!diff.hasDifference()) {
-//                // Trường hợp hy hữu: Timestamp lệch nhưng dữ liệu thực tế lại giống nhau
-//                return "All Synced";
-//            }
-//
-//            // Trả về thống kê theo đúng đặc tả "Thống kê rõ ràng"
-//            return String.format("%d New, %d Missing, %d Mismatch",
-//                    diff.javaOnlyObjects.size(),   // Có ở Java nhưng DB không có
-//                    diff.neo4jOnlyObjects.size(),  // Có ở DB nhưng Java không có
-//                    diff.mismatchedObjects.size() // Cả hai cùng có nhưng khác giá trị
-//            );
-//
-//        } catch (Exception e) {
-//            return "Check Failed";
-//        }
-        return null;
+        try {
+            if (Neo4jDriverManager.getInstance() == null || !Neo4jDriverManager.getInstance().isConnected()) {
+                return "No Connection";
+            }
+
+            if (isQuickSyncCheck()) return "All Synced";
+
+            // Deep check
+            FullObjectSnapshot javaSnap = getJavaObjectSnapshot();
+            FullObjectSnapshot neoSnap = getNeo4jObjectSnapshot();
+            ObjectDiff diff = compareObjects(javaSnap, neoSnap);
+
+            if (diff == null || !diff.hasDifference()) return "All Synced";
+
+            return String.format("%d Obj, %d Link diff",
+                    (diff.javaOnlyObjects.size() + diff.mismatchedObjects.size()),
+                    (diff.javaOnlyLinks.size() + diff.mismatchedLinks.size()));
+        } catch (Exception e) {
+            return "Check Failed";
+        }
     }
 
     /**

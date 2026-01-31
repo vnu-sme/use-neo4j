@@ -11,15 +11,20 @@ import org.uet.dse.neo4j.sync.ObjectSyncCoordinator;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 public class Neo4jDashboardView extends JDialog {
     private static Neo4jDashboardView instance;
     private final Session session;
+    private final MainWindow mainWindow;
 
-    // UI Components
+    // UI Components - Metadata
     private JLabel lblUri, lblDb, lblUser, lblVersion, lblKey, lblDate;
+
+    // UI Components - Status
     private JLabel lblModelStatus, lblObjectStatus, lblActiveStatus;
     private JButton btnToggleActive;
 
@@ -31,42 +36,61 @@ public class Neo4jDashboardView extends JDialog {
     }
 
     private Neo4jDashboardView(MainWindow parent, Session session) {
-        super(parent, "Neo4j Collaboration Dashboard", false);
+        super(parent, "Neo4j Collaboration Dashboard", false); // Non-modal
         this.session = session;
-        this.setSize(850, 600); // Tăng kích thước để xem bảng Log dễ hơn
+        this.mainWindow = parent;
+
+        // Cấu hình cửa sổ
+        this.setSize(900, 650);
         this.setLayout(new BorderLayout());
+        ((JComponent) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // 1. Panel thông tin Metadata cố định ở trên đầu (North)
-        add(createMetadataPanel(), BorderLayout.NORTH);
+        // --- BƯỚC 1: KHỞI TẠO UI (Cực kỳ quan trọng: Phải tạo Node UI trước khi nạp Data) ---
+        initAllComponents();
 
-        // 2. TẠO HỆ THỐNG TAB Ở GIỮA
-        JTabbedPane tabbedPane = new JTabbedPane();
-
-        // --- TAB 1: QUẢN LÝ ĐỒNG BỘ ---
-        JPanel pnlSyncManager = new JPanel(new BorderLayout(10, 10));
-        pnlSyncManager.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        pnlSyncManager.add(createStatusPanel(), BorderLayout.CENTER);
-        pnlSyncManager.add(createSyncControlPanel(), BorderLayout.SOUTH);
-        tabbedPane.addTab("Sync & Management", new ImageIcon(), pnlSyncManager, "Control data flow");
-
-        // --- TAB 2: NHẬT KÝ THAO TÁC (Audit Log) ---
-        tabbedPane.addTab("Collaborative Logs", new ImageIcon(), new Neo4jLogTab(), "Monitor team actions");
-
-        add(tabbedPane, BorderLayout.CENTER);
-
-        // Khởi tạo dữ liệu
+        // --- BƯỚC 2: NẠP DỮ LIỆU BAN ĐẦU ---
         refreshData();
 
-        // Start monitoring (truyền label vào ChangeTracker như cũ)
-        ChangeTracker.startMonitoring(lblModelStatus);
+        // --- BƯỚC 3: KÍCH HOẠT THEO DÕI REAL-TIME ---
+        ChangeTracker.startMonitoring(parent, session, lblModelStatus, lblObjectStatus);
 
-        this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+        // Xử lý khi đóng cửa sổ
+        this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                instance = null; // Để lần sau mở lại sẽ tạo mới
+            }
+        });
+
         this.setLocationRelativeTo(parent);
     }
+
+    private void initAllComponents() {
+        // 1. Metadata Panel (Cố định ở phía trên)
+        add(createMetadataPanel(), BorderLayout.NORTH);
+
+        // 2. Hệ thống Tab ở giữa
+        JTabbedPane tabbedPane = new JTabbedPane();
+
+        // --- Tab 1: Synchronization ---
+        JPanel pnlSync = new JPanel(new BorderLayout(10, 10));
+        pnlSync.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        pnlSync.add(createStatusPanel(), BorderLayout.CENTER);
+        pnlSync.add(createSyncControlPanel(), BorderLayout.SOUTH);
+
+        tabbedPane.addTab("Sync & Management", pnlSync);
+
+        // --- Tab 2: Collaborative Logs ---
+        tabbedPane.addTab("Collaborative Logs", new Neo4jLogTab());
+
+        add(tabbedPane, BorderLayout.CENTER);
+    }
+
     private JPanel createMetadataPanel() {
         JPanel pnl = new JPanel(new GridLayout(3, 2, 10, 8));
         pnl.setBorder(BorderFactory.createTitledBorder("Database Information"));
-        pnl.setBackground(new Color(240, 248, 255)); // AliceBlue
+        pnl.setBackground(new Color(240, 248, 255));
 
         lblUri = new JLabel("Server: -");
         lblDb = new JLabel("Database: -");
@@ -81,38 +105,51 @@ public class Neo4jDashboardView extends JDialog {
         return pnl;
     }
 
-    private JPanel createCenterPanel() {
-        JPanel pnlMain = new JPanel(new BorderLayout(0, 10));
+    private JPanel createStatusPanel() {
+        JPanel pnlMain = new JPanel(new GridLayout(3, 1, 10, 10));
+        pnlMain.setBorder(BorderFactory.createTitledBorder("Live Synchronization Status"));
 
-        // Trạng thái Sync
-        JPanel pnlSync = new JPanel(new GridLayout(2, 1, 5, 5));
-        pnlSync.setBorder(BorderFactory.createTitledBorder("Real-time Synchronization Status"));
-        lblModelStatus = new JLabel("Model Status: Checking...");
-        lblObjectStatus = new JLabel("Object Status: Checking...");
+        // Row 1: Model
+        JPanel pnlModel = new JPanel(new BorderLayout());
+        lblModelStatus = new JLabel("Model Status: Initializing...");
         lblModelStatus.setFont(new Font("SansSerif", Font.BOLD, 13));
-        lblObjectStatus.setFont(new Font("SansSerif", Font.BOLD, 13));
-        pnlSync.add(lblModelStatus);
-        pnlSync.add(lblObjectStatus);
+        JButton btnModelInspect = new JButton("Inspect & Selective Sync");
+        btnModelInspect.addActionListener(e -> new SyncDetailDialog("Model",
+                new ModelSyncCoordinator(session, mainWindow),
+                new ObjectSyncCoordinator(session.system())).setVisible(true));
+        pnlModel.add(lblModelStatus, BorderLayout.CENTER);
+        pnlModel.add(btnModelInspect, BorderLayout.EAST);
 
-        // Trạng thái Collaboration
-        JPanel pnlActive = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 5));
-        pnlActive.setBorder(BorderFactory.createTitledBorder("Working Status"));
+        // Row 2: Object
+        JPanel pnlObject = new JPanel(new BorderLayout());
+        lblObjectStatus = new JLabel("Object Status: Initializing...");
+        lblObjectStatus.setFont(new Font("SansSerif", Font.BOLD, 13));
+        JButton btnObjectInspect = new JButton("Inspect & Selective Sync");
+        btnObjectInspect.addActionListener(e -> new SyncDetailDialog("Object",
+                new ModelSyncCoordinator(session, mainWindow),
+                new ObjectSyncCoordinator(session.system())).setVisible(true));
+        pnlObject.add(lblObjectStatus, BorderLayout.CENTER);
+        pnlObject.add(btnObjectInspect, BorderLayout.EAST);
+
+        // Row 3: Active Status
+        JPanel pnlActive = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
         lblActiveStatus = new JLabel("STATUS: UNKNOWN");
         lblActiveStatus.setFont(new Font("SansSerif", Font.BOLD, 14));
-        btnToggleActive = new JButton("Set Inactive");
+        btnToggleActive = new JButton("Go Inactive");
         btnToggleActive.addActionListener(e -> toggleActiveStatus());
         pnlActive.add(lblActiveStatus);
         pnlActive.add(btnToggleActive);
 
-        pnlMain.add(pnlSync, BorderLayout.CENTER);
-        pnlMain.add(pnlActive, BorderLayout.SOUTH);
+        pnlMain.add(pnlModel);
+        pnlMain.add(pnlObject);
+        pnlMain.add(pnlActive);
+
         return pnlMain;
     }
 
     private JPanel createSyncControlPanel() {
         JPanel pnlActions = new JPanel(new BorderLayout(10, 10));
 
-        // 4 Nút bấm chính
         JPanel pnlButtons = new JPanel(new GridLayout(2, 2, 10, 10));
         pnlButtons.setBorder(BorderFactory.createTitledBorder("Manual Sync Controls"));
 
@@ -121,16 +158,14 @@ public class Neo4jDashboardView extends JDialog {
         JButton btnPushObject = new JButton("Push Objects (Java -> DB)");
         JButton btnPullObject = new JButton("Pull Objects (DB -> Java)");
 
-        // Liên kết các bộ điều phối
-        btnPushModel.addActionListener(e -> new ModelSyncCoordinator(session).syncForward());
-        btnPullModel.addActionListener(e -> new ModelSyncCoordinator(session).syncBackward());
+        btnPushModel.addActionListener(e -> new ModelSyncCoordinator(session, mainWindow).syncForward());
+        btnPullModel.addActionListener(e -> new ModelSyncCoordinator(session, mainWindow).syncBackward());
         btnPushObject.addActionListener(e -> new ObjectSyncCoordinator(session.system()).syncObjectsForward(true));
         btnPullObject.addActionListener(e -> new ObjectSyncCoordinator(session.system()).syncObjectsBackward(true));
 
         pnlButtons.add(btnPushModel); pnlButtons.add(btnPullModel);
         pnlButtons.add(btnPushObject); pnlButtons.add(btnPullObject);
 
-        // Nút Setting & Log
         JPanel pnlMisc = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnSettings = new JButton("Settings");
         btnSettings.addActionListener(e -> new SyncSettingsDialog(null).setVisible(true));
@@ -148,14 +183,16 @@ public class Neo4jDashboardView extends JDialog {
         Map<String, Object> stats = manager.getDatabaseStats();
         SessionManager sm = manager.getSessionManager();
 
-        lblUri.setText("Server: " + manager.getUri());
-        lblDb.setText("Database: " + manager.getActiveDatabase());
-        lblUser.setText("User: " + manager.getUser());
-        lblVersion.setText("Neo4j Version: " + stats.getOrDefault("version", "N/A"));
-        lblKey.setText("Session Key: " + sm.getSessionKey());
-        lblDate.setText("Connected Date: " + sm.getConnectionDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+        if (lblUri != null) lblUri.setText("Server: " + manager.getUri());
+        if (lblDb != null) lblDb.setText("Database: " + manager.getActiveDatabase());
+        if (lblUser != null) lblUser.setText("User: " + manager.getUser());
+        if (lblVersion != null) lblVersion.setText("Neo4j Version: " + stats.getOrDefault("version", "N/A"));
 
-        updateStatusUI(sm.isActive());
+        if (sm != null) {
+            if (lblKey != null) lblKey.setText("Session Key: " + sm.getSessionKey());
+            if (lblDate != null) lblDate.setText("Connected Date: " + sm.getConnectionDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+            updateStatusUI(sm.isActive());
+        }
     }
 
     private void toggleActiveStatus() {
@@ -167,41 +204,12 @@ public class Neo4jDashboardView extends JDialog {
     }
 
     private void updateStatusUI(boolean isActive) {
-        lblActiveStatus.setText("STATUS: " + (isActive ? "ACTIVE" : "INACTIVE"));
-        lblActiveStatus.setForeground(isActive ? new Color(0, 150, 0) : Color.RED);
-        btnToggleActive.setText(isActive ? "Go Inactive" : "Go Active");
-    }
-
-    private JPanel createStatusPanel() {
-        JPanel pnlMain = new JPanel(new GridLayout(2, 1, 10, 10));
-        pnlMain.setBorder(BorderFactory.createTitledBorder("Live Synchronization Status"));
-
-        // --- Row 1: Model Status ---
-        JPanel pnlModel = new JPanel(new BorderLayout());
-        lblModelStatus = new JLabel("Model Status: Initializing...");
-        lblModelStatus.setFont(new Font("SansSerif", Font.BOLD, 12));
-        JButton btnModelInspect = new JButton("Inspect & Selective Sync");
-        btnModelInspect.addActionListener(e -> new SyncDetailDialog("Model",
-                new ModelSyncCoordinator(session),
-                new ObjectSyncCoordinator(session.system())).setVisible(true));
-
-        pnlModel.add(lblModelStatus, BorderLayout.CENTER);
-        pnlModel.add(btnModelInspect, BorderLayout.EAST);
-
-        // --- Row 2: Object Status ---
-        JPanel pnlObject = new JPanel(new BorderLayout());
-        lblObjectStatus = new JLabel("Object Status: Initializing...");
-        lblObjectStatus.setFont(new Font("SansSerif", Font.BOLD, 12));
-        JButton btnObjectInspect = new JButton("Inspect & Selective Sync");
-        btnObjectInspect.addActionListener(e -> new SyncDetailDialog("Object",
-                new ModelSyncCoordinator(session),
-                new ObjectSyncCoordinator(session.system())).setVisible(true));
-
-        pnlObject.add(lblObjectStatus, BorderLayout.CENTER);
-        pnlObject.add(btnObjectInspect, BorderLayout.EAST);
-
-        pnlMain.add(pnlModel);
-        pnlMain.add(pnlObject);
-        return pnlMain;
+        if (lblActiveStatus != null) {
+            lblActiveStatus.setText("STATUS: " + (isActive ? "ACTIVE" : "INACTIVE"));
+            lblActiveStatus.setForeground(isActive ? new Color(0, 150, 0) : Color.RED);
+        }
+        if (btnToggleActive != null) {
+            btnToggleActive.setText(isActive ? "Go Inactive" : "Go Active");
+        }
     }
 }

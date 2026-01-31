@@ -200,6 +200,11 @@ public class Neo4jConnectionDialog extends JDialog {
 			//set static object
 			Neo4jDriverManager.getInstance().setSessionManager(sm);
 
+// ============================================================
+			// CHỖ CẦN THÊM: ĐĂNG KÝ NGƯỜI DÙNG VÀO HỆ THỐNG ĐỒNG THUẬN
+			// ============================================================
+			org.uet.dse.neo4j.collaboration.ConsensusService.getInstance().registerUser();
+			// ============================================================
 
 			// ============================================================
 			// CHỖ CẦN THÊM: KÍCH HOẠT REAL-TIME SERVICE

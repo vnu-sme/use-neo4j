@@ -4194,3 +4194,169 @@ body:1:10: Undefined operation named `purchase' in expression `BuyLotteryTicket.
 [2026-01-31 20:00:15] ACTION: SYNC | DETAILS: Object & Link sync completed.
 [2026-01-31 20:00:23] ACTION: SYNC | DETAILS: Object & Link sync completed.
 [2026-01-31 20:00:32] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 22:28:48] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-31 22:28:48] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-31 22:28:49] ACTION: SESSION_CREATE | DETAILS: New session created with key: B3AC86FD
+[2026-01-31 22:28:49] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-01-31 22:28:49] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: B3AC86FD | Ver: unknown
+[2026-01-31 22:28:52] ACTION: ERROR | DETAILS: Class missing for object: c6
+[2026-01-31 22:29:24] ACTION: REALTIME | DETAILS: Service restarted with new frequency.
+[2026-01-31 22:30:33] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-31 22:30:33] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-31 22:30:33] ACTION: SESSION_CREATE | DETAILS: New session created with key: 33DD8BC9
+[2026-01-31 22:30:33] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-01-31 22:30:33] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 33DD8BC9 | Ver: unknown
+[2026-01-31 22:30:39] ACTION: PUSH_START | DETAILS: User neo4j [Key: 33DD8BC9] (audreycolar) initiated sync for model: BWTest
+[2026-01-31 22:30:39] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1630112399
+[2026-01-31 22:30:39] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-01-31 22:30:39] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1630112399
+[2026-01-31 22:30:39] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 33DD8BC9] (audreycolar)
+[2026-01-31 22:30:53] ACTION: REALTIME | DETAILS: Service restarted with new frequency.
+[2026-01-31 22:31:34] ACTION: REALTIME | DETAILS: Service restarted with new frequency.
+[2026-01-31 22:32:00] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass1
+[2026-01-31 22:32:00] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: [Cass1]
+[2026-01-31 22:32:00] ACTION: PUSH_START | DETAILS: User neo4j [Key: 33DD8BC9] (audreycolar) initiated sync for model: BWTest
+[2026-01-31 22:32:00] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 246164285
+[2026-01-31 22:32:00] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-01-31 22:32:00] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 246164285
+[2026-01-31 22:32:54] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass2
+[2026-01-31 22:32:54] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass1
+[2026-01-31 22:32:54] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: [Cass2, Cass1]
+[2026-01-31 22:32:54] ACTION: PUSH_START | DETAILS: User neo4j [Key: 33DD8BC9] (audreycolar) initiated sync for model: BWTest
+[2026-01-31 22:32:55] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 232522698
+[2026-01-31 22:32:55] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-01-31 22:32:55] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 232522698
+[2026-01-31 22:33:42] ACTION: PULL_ASSOC | DETAILS: Restored: Connect
+[2026-01-31 22:33:43] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass3
+[2026-01-31 22:33:43] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass2
+[2026-01-31 22:33:43] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass1
+[2026-01-31 22:33:43] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: [Cass3, Cass2, Cass1]
+[2026-01-31 22:33:43] ACTION: PUSH_START | DETAILS: User neo4j [Key: 33DD8BC9] (audreycolar) initiated sync for model: BWTest
+[2026-01-31 22:33:44] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 232522698
+[2026-01-31 22:33:44] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-01-31 22:33:44] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 232522698
+[2026-01-31 22:33:52] ACTION: PULL_ASSOC | DETAILS: Restored: Connect
+[2026-01-31 22:33:52] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass3
+[2026-01-31 22:33:52] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass2
+[2026-01-31 22:33:52] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass1
+[2026-01-31 22:33:52] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: [Cass3, Cass2, Cass1]
+[2026-01-31 22:33:52] ACTION: PUSH_START | DETAILS: User neo4j [Key: 33DD8BC9] (audreycolar) initiated sync for model: BWTest
+[2026-01-31 22:33:52] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 232522698
+[2026-01-31 22:33:52] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-01-31 22:33:52] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 232522698
+[2026-01-31 22:34:11] ACTION: PULL_ASSOC | DETAILS: Restored: Connect
+[2026-02-01 00:07:48] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-01 00:07:50] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-01 00:07:51] ACTION: SESSION_CREATE | DETAILS: New session created with key: 835183C3
+[2026-02-01 00:07:51] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-01 00:07:51] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 835183C3 | Ver: unknown
+[2026-02-01 00:07:51] ACTION: CONNECTION_ERROR | DETAILS: Cannot invoke "javax.swing.JLabel.setText(String)" because "this.lblActiveStatus" is null
+[2026-02-01 00:07:57] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-01 00:07:57] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-01 00:07:57] ACTION: SESSION_CREATE | DETAILS: New session created with key: 9F1F19E7
+[2026-02-01 00:07:57] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-01 00:07:57] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 9F1F19E7 | Ver: unknown
+[2026-02-01 00:07:58] ACTION: CONNECTION_ERROR | DETAILS: Cannot invoke "javax.swing.JLabel.setText(String)" because "this.lblActiveStatus" is null
+[2026-02-01 00:12:56] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-01 00:12:56] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-01 00:12:57] ACTION: SESSION_CREATE | DETAILS: New session created with key: 48A330EF
+[2026-02-01 00:12:57] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-01 00:12:57] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 48A330EF | Ver: unknown
+[2026-02-01 00:13:31] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass3
+[2026-02-01 00:13:31] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass2
+[2026-02-01 00:13:31] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass1
+[2026-02-01 00:13:31] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: [Cass3, Cass2, Cass1]
+[2026-02-01 00:13:31] ACTION: PUSH_START | DETAILS: User neo4j [Key: 48A330EF] (audreycolar) initiated sync for model: BWTest
+[2026-02-01 00:13:31] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1630112399
+[2026-02-01 00:13:31] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-01 00:13:31] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1630112399
+[2026-02-01 00:13:42] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass1
+[2026-02-01 00:13:42] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: [Cass1]
+[2026-02-01 00:13:42] ACTION: PUSH_START | DETAILS: User neo4j [Key: 48A330EF] (audreycolar) initiated sync for model: Plain
+[2026-02-01 00:13:42] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-02-01 00:13:42] ACTION: PUSH_SUCCESS | DETAILS: Model Plain is now synchronized.
+[2026-02-01 00:13:42] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-02-01 00:13:58] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: []
+[2026-02-01 00:13:58] ACTION: PUSH_START | DETAILS: User neo4j [Key: 48A330EF] (audreycolar) initiated sync for model: BWTest
+[2026-02-01 00:13:58] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 232522698
+[2026-02-01 00:13:58] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-01 00:13:58] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 232522698
+[2026-02-01 00:18:26] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-01 00:18:26] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-01 00:18:26] ACTION: SESSION_CREATE | DETAILS: New session created with key: AEA56565
+[2026-02-01 00:18:26] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-01 00:18:26] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: AEA56565 | Ver: unknown
+[2026-02-01 00:19:43] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-01 00:19:43] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-01 00:19:43] ACTION: SESSION_CREATE | DETAILS: New session created with key: 96B5C1FF
+[2026-02-01 00:19:43] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-01 00:19:43] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 96B5C1FF | Ver: unknown
+[2026-02-01 00:26:04] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-01 00:26:04] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-01 00:26:04] ACTION: SESSION_CREATE | DETAILS: New session created with key: AEE22559
+[2026-02-01 00:26:04] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-01 00:26:04] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: AEE22559 | Ver: unknown
+[2026-02-01 00:26:20] ACTION: PUSH_START | DETAILS: User neo4j [Key: AEE22559] (audreycolar) initiated sync for model: BWTest
+[2026-02-01 00:26:21] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 232522698
+[2026-02-01 00:26:21] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-01 00:26:21] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 232522698
+[2026-02-01 00:26:21] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: AEE22559] (audreycolar)
+[2026-02-01 00:26:55] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-01 00:26:55] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-01 00:26:55] ACTION: SESSION_CREATE | DETAILS: New session created with key: ECE6491E
+[2026-02-01 00:26:55] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-01 00:26:55] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: ECE6491E | Ver: unknown
+[2026-02-01 00:27:16] ACTION: PULL_ASSOC | DETAILS: Restored: Connect
+[2026-02-01 00:27:16] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass3
+[2026-02-01 00:27:17] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass2
+[2026-02-01 00:27:17] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass1
+[2026-02-01 00:27:17] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: [Cass3, Cass2, Cass1]
+[2026-02-01 00:27:17] ACTION: PUSH_START | DETAILS: User neo4j [Key: ECE6491E] (audreycolar) initiated sync for model: BWTest
+[2026-02-01 00:27:17] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 232522698
+[2026-02-01 00:27:17] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-01 00:27:17] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 232522698
+[2026-02-01 00:27:32] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass3
+[2026-02-01 00:27:32] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass2
+[2026-02-01 00:27:32] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass1
+[2026-02-01 00:27:32] ACTION: PUSH_START | DETAILS: User neo4j [Key: AEE22559] (audreycolar) initiated sync for model: BWTest
+[2026-02-01 00:27:32] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 232522698
+[2026-02-01 00:27:32] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-01 00:27:32] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 232522698
+[2026-02-01 00:27:32] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: AEE22559] (audreycolar)
+[2026-02-01 00:27:40] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass3
+[2026-02-01 00:27:40] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass2
+[2026-02-01 00:27:40] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass1
+[2026-02-01 00:27:40] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: [Cass3, Cass2, Cass1]
+[2026-02-01 00:27:40] ACTION: PUSH_START | DETAILS: User neo4j [Key: ECE6491E] (audreycolar) initiated sync for model: Plain
+[2026-02-01 00:27:40] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-02-01 00:27:40] ACTION: PUSH_SUCCESS | DETAILS: Model Plain is now synchronized.
+[2026-02-01 00:27:40] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 0
+[2026-02-01 00:27:46] ACTION: PUSH_START | DETAILS: User neo4j [Key: AEE22559] (audreycolar) initiated sync for model: BWTest
+[2026-02-01 00:27:46] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 232522698
+[2026-02-01 00:27:46] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-01 00:27:46] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 232522698
+[2026-02-01 00:27:46] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: AEE22559] (audreycolar)
+[2026-02-01 00:27:54] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass3
+[2026-02-01 00:27:54] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass2
+[2026-02-01 00:27:54] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass1
+[2026-02-01 00:27:54] ACTION: PUSH_START | DETAILS: User neo4j [Key: AEE22559] (audreycolar) initiated sync for model: BWTest
+[2026-02-01 00:27:54] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 232522698
+[2026-02-01 00:27:54] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-01 00:27:54] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 232522698
+[2026-02-01 00:27:54] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: AEE22559] (audreycolar)
+[2026-02-01 00:28:15] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass3
+[2026-02-01 00:28:15] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass2
+[2026-02-01 00:28:15] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass1
+[2026-02-01 00:28:15] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: [Cass3, Cass2, Cass1]
+[2026-02-01 00:28:15] ACTION: PUSH_START | DETAILS: User neo4j [Key: ECE6491E] (audreycolar) initiated sync for model: ObjectTest
+[2026-02-01 00:28:17] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -351591988
+[2026-02-01 00:28:17] ACTION: PUSH_SUCCESS | DETAILS: Model ObjectTest is now synchronized.
+[2026-02-01 00:28:17] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -351591988
+[2026-02-01 00:28:28] ACTION: PULL_ASSOC | DETAILS: Restored: Connect
+[2026-02-01 00:28:28] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass2
+[2026-02-01 00:28:28] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass1
+[2026-02-01 00:28:28] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: [Cass2, Cass1]
+[2026-02-01 00:28:28] ACTION: PUSH_START | DETAILS: User neo4j [Key: AEE22559] (audreycolar) initiated sync for model: ObjectTest
+[2026-02-01 00:28:29] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -351591988
+[2026-02-01 00:28:29] ACTION: PUSH_SUCCESS | DETAILS: Model ObjectTest is now synchronized.
+[2026-02-01 00:28:29] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -351591988
