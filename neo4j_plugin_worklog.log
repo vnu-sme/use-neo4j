@@ -4053,3 +4053,144 @@ body:1:10: Undefined operation named `purchase' in expression `BuyLotteryTicket.
 [2026-01-29 00:05:34] ACTION: SYNC | DETAILS: Object & Link sync completed.
 [2026-01-29 00:05:46] ACTION: SYNC | DETAILS: Object & Link sync completed.
 [2026-01-29 00:06:01] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 19:42:01] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-31 19:42:06] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-31 19:42:06] ACTION: SESSION_CREATE | DETAILS: New session created with key: D2E2C712
+[2026-01-31 19:42:06] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-01-31 19:42:06] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: D2E2C712 | Ver: unknown
+[2026-01-31 19:42:06] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-31 19:42:07] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-31 19:42:07] ACTION: SESSION_CREATE | DETAILS: New session created with key: 2F24ABBE
+[2026-01-31 19:42:07] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-01-31 19:42:07] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 2F24ABBE | Ver: unknown
+[2026-01-31 19:42:10] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: c1
+[2026-01-31 19:42:10] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: c1
+[2026-01-31 19:42:10] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: c2
+[2026-01-31 19:42:10] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: c2
+[2026-01-31 19:42:23] ACTION: PULL_ASSOC | DETAILS: Restored: Connect
+[2026-01-31 19:42:25] ACTION: CLEANUP | DETAILS: Deep deleted object: c1
+[2026-01-31 19:42:25] ACTION: CLEANUP | DETAILS: Deep deleted object: c2
+[2026-01-31 19:42:25] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 19:42:27] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: c1
+[2026-01-31 19:42:27] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: c2
+[2026-01-31 19:42:31] ACTION: PULL_ASSOC | DETAILS: Restored: Connect
+[2026-01-31 19:43:15] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 19:43:18] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: c1
+[2026-01-31 19:44:03] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 19:44:06] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: c12
+[2026-01-31 19:54:23] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-31 19:54:23] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-31 19:54:23] ACTION: SESSION_CREATE | DETAILS: New session created with key: 3A96659B
+[2026-01-31 19:54:23] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-01-31 19:54:23] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 3A96659B | Ver: unknown
+[2026-01-31 19:54:34] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-01-31 19:54:34] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-01-31 19:54:34] ACTION: SESSION_CREATE | DETAILS: New session created with key: FB859A8E
+[2026-01-31 19:54:34] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-01-31 19:54:34] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: FB859A8E | Ver: unknown
+[2026-01-31 19:55:02] ACTION: REALTIME | DETAILS: Service restarted with new frequency.
+[2026-01-31 19:55:04] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: c12
+[2026-01-31 19:55:04] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: c1
+[2026-01-31 19:55:30] ACTION: REALTIME | DETAILS: Service restarted with new frequency.
+[2026-01-31 19:55:31] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: c12
+[2026-01-31 19:55:31] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: c1
+[2026-01-31 19:55:38] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 19:55:38] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: b
+[2026-01-31 19:55:42] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 19:55:42] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: i
+[2026-01-31 19:55:48] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 19:55:48] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: ii
+[2026-01-31 19:55:50] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 19:55:50] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: iiii
+[2026-01-31 19:55:50] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: iii
+[2026-01-31 19:55:52] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 19:55:52] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: iiiii
+[2026-01-31 19:55:52] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: iiiiii
+[2026-01-31 19:55:52] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: iiiiiiiii
+[2026-01-31 19:55:52] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: iiiiiii
+[2026-01-31 19:55:52] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: iiiiiiii
+[2026-01-31 19:55:54] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 19:55:54] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: iiiiiiiiii
+[2026-01-31 19:55:54] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: iiiiiiiiiiiii
+[2026-01-31 19:55:54] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: iiiiiiiiiii
+[2026-01-31 19:55:54] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: iiiiiiiiiiii
+[2026-01-31 19:55:55] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: iiiiiiiiiiiiiii
+[2026-01-31 19:55:55] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: iiiiiiiiiiiiii
+[2026-01-31 19:56:11] ACTION: CLEANUP | DETAILS: Deep deleted object: ii
+[2026-01-31 19:56:11] ACTION: CLEANUP | DETAILS: Deep deleted object: iiiiiiiiii
+[2026-01-31 19:56:11] ACTION: CLEANUP | DETAILS: Deep deleted object: iiiiiiiiiiiii
+[2026-01-31 19:56:11] ACTION: CLEANUP | DETAILS: Deep deleted object: b
+[2026-01-31 19:56:11] ACTION: CLEANUP | DETAILS: Deep deleted object: iiiiiiiiiii
+[2026-01-31 19:56:11] ACTION: CLEANUP | DETAILS: Deep deleted object: c12
+[2026-01-31 19:56:11] ACTION: CLEANUP | DETAILS: Deep deleted object: iiiiii
+[2026-01-31 19:56:11] ACTION: CLEANUP | DETAILS: Deep deleted object: iii
+[2026-01-31 19:56:11] ACTION: CLEANUP | DETAILS: Deep deleted object: iiiiiiiii
+[2026-01-31 19:56:11] ACTION: CLEANUP | DETAILS: Deep deleted object: i
+[2026-01-31 19:56:11] ACTION: CLEANUP | DETAILS: Deep deleted object: iiiiiiiiiiii
+[2026-01-31 19:56:11] ACTION: CLEANUP | DETAILS: Deep deleted object: c1
+[2026-01-31 19:56:11] ACTION: CLEANUP | DETAILS: Deep deleted object: iiiiiiii
+[2026-01-31 19:56:11] ACTION: CLEANUP | DETAILS: Deep deleted object: iiii
+[2026-01-31 19:56:11] ACTION: CLEANUP | DETAILS: Deep deleted object: iiiii
+[2026-01-31 19:56:11] ACTION: CLEANUP | DETAILS: Deep deleted object: iiiiiiiiiiiiiii
+[2026-01-31 19:56:11] ACTION: CLEANUP | DETAILS: Deep deleted object: iiiiiii
+[2026-01-31 19:56:11] ACTION: CLEANUP | DETAILS: Deep deleted object: iiiiiiiiiiiiii
+[2026-01-31 19:56:11] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 19:56:12] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: ii
+[2026-01-31 19:56:12] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: iiiiiiiiii
+[2026-01-31 19:56:12] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: iiiiiiiiiiiii
+[2026-01-31 19:56:12] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: b
+[2026-01-31 19:56:12] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: iiiiiiiiiii
+[2026-01-31 19:56:12] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: c12
+[2026-01-31 19:56:12] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: iiiiii
+[2026-01-31 19:56:12] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: iii
+[2026-01-31 19:56:12] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: iiiiiiiii
+[2026-01-31 19:56:12] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: i
+[2026-01-31 19:56:12] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: iiiiiiiiiiii
+[2026-01-31 19:56:12] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: c1
+[2026-01-31 19:56:12] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: iiiiiiii
+[2026-01-31 19:56:12] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: iiii
+[2026-01-31 19:56:12] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: iiiii
+[2026-01-31 19:56:12] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: iiiiiiiiiiiiiii
+[2026-01-31 19:56:12] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: iiiiiii
+[2026-01-31 19:56:12] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: iiiiiiiiiiiiii
+[2026-01-31 19:57:54] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 19:57:56] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: c1
+[2026-01-31 19:57:56] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: c2
+[2026-01-31 19:57:56] ACTION: CLEANUP | DETAILS: Deep deleted object: c2
+[2026-01-31 19:58:08] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 19:58:08] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: c1
+[2026-01-31 19:58:14] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 19:58:16] ACTION: CLEANUP | DETAILS: Deep deleted object: c4
+[2026-01-31 19:58:16] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: c3
+[2026-01-31 19:58:16] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: c4
+[2026-01-31 19:58:30] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 19:58:30] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: c3
+[2026-01-31 19:58:58] ACTION: CLEANUP | DETAILS: Deep deleted object: c3
+[2026-01-31 19:58:58] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 19:58:58] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: c3
+[2026-01-31 19:59:00] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 19:59:00] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: c3
+[2026-01-31 19:59:08] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 19:59:08] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: c6
+[2026-01-31 19:59:09] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 19:59:10] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: c5
+[2026-01-31 19:59:33] ACTION: CLEANUP | DETAILS: Deep deleted object: c3
+[2026-01-31 19:59:33] ACTION: CLEANUP | DETAILS: Deep deleted object: c4
+[2026-01-31 19:59:33] ACTION: CLEANUP | DETAILS: Deep deleted object: c5
+[2026-01-31 19:59:33] ACTION: CLEANUP | DETAILS: Deep deleted object: c6
+[2026-01-31 19:59:33] ACTION: CLEANUP | DETAILS: Deep deleted object: c1
+[2026-01-31 19:59:33] ACTION: CLEANUP | DETAILS: Deep deleted object: c2
+[2026-01-31 19:59:33] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 19:59:34] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: c3
+[2026-01-31 19:59:34] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: c4
+[2026-01-31 19:59:34] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: c5
+[2026-01-31 19:59:34] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: c6
+[2026-01-31 19:59:34] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: c1
+[2026-01-31 19:59:34] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: c2
+[2026-01-31 19:59:41] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 19:59:42] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 20:00:14] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 20:00:15] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 20:00:15] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 20:00:23] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-01-31 20:00:32] ACTION: SYNC | DETAILS: Object & Link sync completed.

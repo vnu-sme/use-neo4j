@@ -9,6 +9,7 @@ import org.tzi.use.uml.mm.MAttribute;
 import org.tzi.use.uml.ocl.type.Type;
 import org.tzi.use.uml.ocl.value.Value;
 import org.tzi.use.uml.sys.*;
+import org.uet.dse.neo4j.manager.Neo4jAuditLogService;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.model.FullObjectSnapshot;
 import org.uet.dse.neo4j.model.LinkState;
@@ -213,6 +214,7 @@ public class ObjectSyncCoordinator {
 
             Neo4jUmlBridge.updateObjectVersionOnServer();
             WorkLogManager.getInstance().log("SYNC", "Object & Link sync completed.");
+
         }
     }
     private void processPushBinaryLink(TransactionContext tx, MLink link) {

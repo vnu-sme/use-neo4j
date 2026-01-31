@@ -16,7 +16,7 @@ public class Neo4jRealTimeService implements ChangeListener, Session.EvaluatedSt
     private static Neo4jRealTimeService instance;
     private final Session session;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private final ScheduledExecutorService pollScheduler = Executors.newScheduledThreadPool(2);
+    private ScheduledExecutorService pollScheduler = Executors.newScheduledThreadPool(2);
 
     // Lưu dấu vân tay của trạng thái Object local lần cuối cùng được đồng bộ
     private long lastLocalStateFingerprint = 0L;
@@ -140,5 +140,35 @@ public class Neo4jRealTimeService implements ChangeListener, Session.EvaluatedSt
         session.removeEvaluatedStatementListener(this);
         executor.shutdown();
         pollScheduler.shutdown();
+    }
+
+
+    /**
+     * Hàm khởi tạo luồng quét với tần suất từ Config
+     */
+    private void startSchedulers() {
+        if (pollScheduler != null) pollScheduler.shutdownNow();
+
+        pollScheduler = Executors.newScheduledThreadPool(2);
+        int interval = SyncConfig.getInstance().syncInterval;
+
+        // 1. Luồng quét Server (Auto-Pull)
+        pollScheduler.scheduleAtFixedRate(this::performAutoPull, interval, interval, TimeUnit.MILLISECONDS);
+
+        // 2. Luồng quét Local (Auto-Push)
+        pollScheduler.scheduleAtFixedRate(this::performLocalScan, interval, interval, TimeUnit.MILLISECONDS);
+
+        System.out.println("Real-time service started with interval: " + interval + "ms");
+    }
+
+
+    /**
+     * Hàm hỗ trợ khởi động lại khi người dùng đổi Setting
+     */
+    public static synchronized void restart() {
+        if (instance != null) {
+            instance.startSchedulers();
+            WorkLogManager.getInstance().log("REALTIME", "Service restarted with new frequency.");
+        }
     }
 }

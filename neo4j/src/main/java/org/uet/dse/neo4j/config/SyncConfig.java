@@ -4,6 +4,8 @@ import java.io.*;
 import java.util.Properties;
 
 public class SyncConfig {
+    // Tần suất quét mặc định là 2000ms (2 giây)
+    public int syncInterval = 2000;
     private static SyncConfig instance;
     private static final String CONFIG_FILE = "neo4j_sync_settings.properties";
 
@@ -29,6 +31,7 @@ public class SyncConfig {
         props.setProperty("autoPullModelOnChange", String.valueOf(autoPullModelOnChange));
         props.setProperty("autoPullObjectOnChange", String.valueOf(autoPullObjectOnChange));
 
+        props.setProperty("syncInterval", String.valueOf(syncInterval));
         try (OutputStream out = new FileOutputStream(CONFIG_FILE)) {
             props.store(out, "Neo4j Sync Settings");
         } catch (IOException e) {
@@ -44,6 +47,8 @@ public class SyncConfig {
             autoPushObjectOnChange = Boolean.parseBoolean(props.getProperty("autoPushObjectOnChange", "false"));
             autoPullModelOnChange = Boolean.parseBoolean(props.getProperty("autoPullModelOnChange", "false"));
             autoPullObjectOnChange = Boolean.parseBoolean(props.getProperty("autoPullObjectOnChange", "false"));
+
+            syncInterval = Integer.parseInt(props.getProperty("syncInterval", "2000"));
         } catch (IOException e) {
             // Nếu chưa có file thì dùng default (false)
         }

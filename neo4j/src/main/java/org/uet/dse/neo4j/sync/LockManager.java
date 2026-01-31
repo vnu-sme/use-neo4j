@@ -26,6 +26,28 @@ public class LockManager {
         }
     }
 
+    // Trong lớp LockManager
+    public static LockResult acquireLockWithRetry(String sessionKey, int maxRetries, int sleepMillis) {
+        int attempts = 0;
+        while (attempts < maxRetries) {
+            LockResult result = acquireLock(sessionKey);
+            if (result.success) {
+                return result;
+            }
+
+            // Nếu không lấy được, đợi một chút rồi thử lại
+            try {
+                attempts++;
+                // Tăng dần thời gian chờ để giảm tải cho DB (Exponential Backoff)
+                Thread.sleep(sleepMillis * attempts);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+        return new LockResult(false, "Timeout after " + maxRetries + " attempts");
+    }
+
     public static void releaseLock() {
         try (Session session = Neo4jDriverManager.getInstance().openSession()) {
             session.run("MATCH (l:DbLock {id: 'GLOBAL_LOCK'}) DELETE l");

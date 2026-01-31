@@ -13,6 +13,7 @@ import org.tzi.use.uml.sys.MObject;
 import org.tzi.use.uml.sys.MSystemState;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.repo.Neo4jModelRepository;
+import org.uet.dse.neo4j.repo.Neo4jSideRepository;
 import org.uet.dse.neo4j.sync.ObjectSyncCoordinator;
 import org.uet.dse.neo4j.sync.UmlTypeTranslator;
 
@@ -96,6 +97,8 @@ public class Neo4jUmlBridge {
             updateModelVersion(session, currentUser);
 
             logger.log("PUSH_SUCCESS", "Model " + model.name() + " is now synchronized.");
+
+
 
         } catch (Exception e) {
             logger.log("PUSH_ERROR", "Failed to push model: " + e.getMessage());

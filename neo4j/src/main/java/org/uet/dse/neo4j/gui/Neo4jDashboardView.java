@@ -31,29 +31,38 @@ public class Neo4jDashboardView extends JDialog {
     }
 
     private Neo4jDashboardView(MainWindow parent, Session session) {
-        super(parent, "Neo4j Collaboration & Sync Management", false); // false = Non-modal
+        super(parent, "Neo4j Collaboration Dashboard", false);
         this.session = session;
-        this.setSize(700, 550);
-        this.setLayout(new BorderLayout(15, 15));
-        ((JComponent) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        this.setSize(850, 600); // Tăng kích thước để xem bảng Log dễ hơn
+        this.setLayout(new BorderLayout());
 
-        // 1. Panel Thông tin Metadata (North)
+        // 1. Panel thông tin Metadata cố định ở trên đầu (North)
         add(createMetadataPanel(), BorderLayout.NORTH);
 
-        // 2. Panel Trạng thái & Collaboration (Center)
-        add(createCenterPanel(), BorderLayout.CENTER);
+        // 2. TẠO HỆ THỐNG TAB Ở GIỮA
+        JTabbedPane tabbedPane = new JTabbedPane();
 
-        // 3. Panel Điều khiển Sync (South)
-        add(createSyncControlPanel(), BorderLayout.SOUTH);
+        // --- TAB 1: QUẢN LÝ ĐỒNG BỘ ---
+        JPanel pnlSyncManager = new JPanel(new BorderLayout(10, 10));
+        pnlSyncManager.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        pnlSyncManager.add(createStatusPanel(), BorderLayout.CENTER);
+        pnlSyncManager.add(createSyncControlPanel(), BorderLayout.SOUTH);
+        tabbedPane.addTab("Sync & Management", new ImageIcon(), pnlSyncManager, "Control data flow");
+
+        // --- TAB 2: NHẬT KÝ THAO TÁC (Audit Log) ---
+        tabbedPane.addTab("Collaborative Logs", new ImageIcon(), new Neo4jLogTab(), "Monitor team actions");
+
+        add(tabbedPane, BorderLayout.CENTER);
 
         // Khởi tạo dữ liệu
         refreshData();
+
+        // Start monitoring (truyền label vào ChangeTracker như cũ)
         ChangeTracker.startMonitoring(lblModelStatus);
 
         this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
         this.setLocationRelativeTo(parent);
     }
-
     private JPanel createMetadataPanel() {
         JPanel pnl = new JPanel(new GridLayout(3, 2, 10, 8));
         pnl.setBorder(BorderFactory.createTitledBorder("Database Information"));

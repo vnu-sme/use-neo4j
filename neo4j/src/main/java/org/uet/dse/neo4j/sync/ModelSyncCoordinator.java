@@ -14,6 +14,7 @@ import org.tzi.use.uml.ocl.expr.VarDecl;
 import org.tzi.use.uml.ocl.value.VarBindings;
 import org.tzi.use.uml.sys.MSystem;
 import org.tzi.use.util.NullPrintWriter;
+import org.uet.dse.neo4j.manager.Neo4jAuditLogService;
 import org.uet.dse.neo4j.model.AssociationState;
 import org.uet.dse.neo4j.model.ClassState;
 import org.uet.dse.neo4j.model.FullModelSnapshot;
@@ -77,6 +78,7 @@ public class ModelSyncCoordinator {
     public void syncForward() {
         //get user identification
         String userIdentifier = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
+        Neo4jAuditLogService.log("START", "MODEL_SYNC", "Global", "User initiated manual model synchronization.");
 
         //lock db while working
         LockManager.LockResult lock = LockManager.acquireLock(userIdentifier);
@@ -85,6 +87,8 @@ public class ModelSyncCoordinator {
                     "Database is currently LOCKED by:\n" + lock.owner +
                             "\nPlease wait until they finish or the lock expires.",
                     "Sync Blocked", JOptionPane.WARNING_MESSAGE);
+
+            Neo4jAuditLogService.log("LOCK_DENIED", "DATABASE", "Ticket", "Sync attempt blocked by: " + lock.owner);
             return;
         }
 
@@ -110,6 +114,7 @@ public class ModelSyncCoordinator {
                 //delete strategy
                 if (!diff.neo4jOnlyClasses.isEmpty()) {
                     handleDeletionStrategy(diff.neo4jOnlyClasses);
+                    Neo4jAuditLogService.log("CLEANUP", "MODEL", diff.neo4jOnlyClasses.toString(), "Removing obsolete classes from Database.");
                 }
             }
 
