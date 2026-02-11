@@ -3,41 +3,34 @@ package org.uet.dse.neo4j.model;
 import java.util.*;
 
 public class ClassState {
-
-    // --- Thuộc tính cơ bản ---
     private String name;
     private String type;
     private Set<String> parents = new HashSet<>();
     private Map<String, Map<String, Object>> attributes = new HashMap<>();
     private Map<String, Map<String, Object>> operations = new HashMap<>();
-
-    // --- Thuộc tính ràng buộc (Constraints) ---
     private List<Map<String, Object>> invariants = new ArrayList<>();
     private Map<String, List<Map<String, Object>>> preConditions = new HashMap<>();
     private Map<String, List<Map<String, Object>>> postConditions = new HashMap<>();
-
-    // --- Thuộc tính tham số (Parameters) ---
     private Map<String, List<OpParam>> opParams = new HashMap<>();
+    private String metaNodeName;
+    private Map<String, Object> acSourceInfo = new HashMap<>();
+    private Map<String, Object> acTargetInfo = new HashMap<>();
+    private List<String> enumLiterals = new ArrayList<>();
     public Map<String, List<Map<String, Object>>> getPreConditions() {
         return preConditions;
     }
-
     public void setPreConditions(Map<String, List<Map<String, Object>>> preConditions) {
         this.preConditions = preConditions;
     }
-
     public Map<String, List<Map<String, Object>>> getPostConditions() {
         return postConditions;
     }
-
     public void setPostConditions(Map<String, List<Map<String, Object>>> postConditions) {
         this.postConditions = postConditions;
     }
-
     public Map<String, List<OpParam>> getOpParams() {
         return opParams;
     }
-
     public void setOpParams(Map<String, List<OpParam>> opParams) {
         this.opParams = opParams;
     }
@@ -94,10 +87,6 @@ public class ClassState {
         return params;
     }
 
-    /**
-     * TRÁI TIM CỦA CƠ CHẾ PHÁT HIỆN CONFLICT
-     * Đã bổ sung so sánh Pre/Post Conditions để đảm bảo an toàn tuyệt đối.
-     */
     public boolean isSameAs(ClassState other) {
         if (other == null) return false;
         return Objects.equals(this.name, other.name) &&
@@ -106,13 +95,11 @@ public class ClassState {
                 Objects.equals(this.attributes, other.attributes) &&
                 Objects.equals(this.operations, other.operations) &&
                 Objects.equals(this.invariants, other.invariants) &&
-                Objects.equals(this.preConditions, other.preConditions) && // So sánh thêm Pre
+                Objects.equals(this.preConditions, other.preConditions) &&
                 Objects.equals(this.postConditions, other.postConditions) &&
-                Objects.equals(this.enumLiterals, other.enumLiterals); // So sánh các giá trị Enum; // So sánh thêm Post
+                Objects.equals(this.enumLiterals, other.enumLiterals);
     }
 
-
-    // --- Inner Class đại diện cho tham số ---
     public static class OpParam {
         String name;
         String type;
@@ -143,10 +130,6 @@ public class ClassState {
         }
     }
 
-    private String metaNodeName; // Lưu 'NodeConcreteClass', 'NodeAbstractClass' hoặc 'NodeAssociationClass'
-    private Map<String, Object> acSourceInfo = new HashMap<>();
-    private Map<String, Object> acTargetInfo = new HashMap<>();
-
     public String getMetaNodeName() { return metaNodeName; }
     public void setMetaNodeName(String name) { this.metaNodeName = name; }
 
@@ -159,21 +142,12 @@ public class ClassState {
     public Map<String, Object> getAcSource() { return acSourceInfo; }
     public Map<String, Object> getAcTarget() { return acTargetInfo; }
 
-    // Trong lớp ClassState.java
-    private List<String> enumLiterals = new ArrayList<>();
-
     public List<String> getEnumLiterals() { return enumLiterals; }
     public void setEnumLiterals(List<String> literals) { this.enumLiterals = literals; }
 
-    // Trong lớp ClassState.java
-// ...
     public static class OpState {
         public String body;
         public boolean isQuery; // true nếu là OCL Expression, false nếu là SOIL Statement
-        // ... các trường cũ (returnType, etc.)
     }
-
-// Cập nhật hàm isSameAs để so sánh cả body
-// Objects.equals(this.operations, other.operations) sẽ tự động so sánh body bên trong Map
 
 }

@@ -4730,3 +4730,154 @@ body:1:10: Undefined operation named `purchase' in expression `BuyLotteryTicket.
 [2026-02-04 20:41:26] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: hd
 [2026-02-04 20:41:33] ACTION: SYNC | DETAILS: Object & Link sync completed.
 [2026-02-04 20:41:55] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-11 22:54:38] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-11 22:54:40] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-11 22:54:40] ACTION: SESSION_CREATE | DETAILS: New session created with key: E887B36A
+[2026-02-11 22:54:40] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-11 22:54:40] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: E887B36A | Ver: unknown
+[2026-02-11 22:54:55] ACTION: REALTIME | DETAILS: Service restarted with new frequency.
+[2026-02-11 22:57:24] ACTION: PUSH_START | DETAILS: User neo4j [Key: E887B36A] (audreycolar) initiated sync for model: BWTest
+[2026-02-11 22:57:25] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1327717658
+[2026-02-11 22:57:25] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-11 22:57:25] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1327717658
+[2026-02-11 22:57:25] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: E887B36A] (audreycolar)
+[2026-02-11 22:58:04] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass1
+[2026-02-11 22:58:04] ACTION: PUSH_START | DETAILS: User neo4j [Key: E887B36A] (audreycolar) initiated sync for model: BWTest
+[2026-02-11 22:58:04] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1378009483
+[2026-02-11 22:58:04] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-11 22:58:04] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1378009483
+[2026-02-11 22:58:04] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: E887B36A] (audreycolar)
+[2026-02-11 23:01:49] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-11 23:01:49] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-11 23:01:49] ACTION: SESSION_CREATE | DETAILS: New session created with key: 3326EFB8
+[2026-02-11 23:01:49] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-11 23:01:49] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 3326EFB8 | Ver: unknown
+[2026-02-11 23:02:01] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass2
+[2026-02-11 23:02:01] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass1
+[2026-02-11 23:02:01] ACTION: PUSH_START | DETAILS: User neo4j [Key: 3326EFB8] (audreycolar) initiated sync for model: BWTest
+[2026-02-11 23:02:01] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1378009483
+[2026-02-11 23:02:01] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-11 23:02:01] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 3326EFB8] (audreycolar)
+[2026-02-11 23:05:19] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass2
+[2026-02-11 23:05:19] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass1
+[2026-02-11 23:05:19] ACTION: PUSH_START | DETAILS: User neo4j [Key: 3326EFB8] (audreycolar) initiated sync for model: BWTest
+[2026-02-11 23:05:19] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -251872886
+[2026-02-11 23:05:19] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-11 23:05:19] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 3326EFB8] (audreycolar)
+[2026-02-11 23:05:59] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass3
+[2026-02-11 23:05:59] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass2
+[2026-02-11 23:05:59] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass1
+[2026-02-11 23:05:59] ACTION: PUSH_START | DETAILS: User neo4j [Key: 3326EFB8] (audreycolar) initiated sync for model: BWTest
+[2026-02-11 23:05:59] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -251872886
+[2026-02-11 23:05:59] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-11 23:05:59] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 3326EFB8] (audreycolar)
+[2026-02-11 23:08:43] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass3
+[2026-02-11 23:08:43] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass2
+[2026-02-11 23:08:43] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass1
+[2026-02-11 23:08:43] ACTION: PUSH_START | DETAILS: User neo4j [Key: 3326EFB8] (audreycolar) initiated sync for model: BWTest
+[2026-02-11 23:24:23] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -2123990325
+[2026-02-11 23:24:23] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-11 23:24:23] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 3326EFB8] (audreycolar)
+[2026-02-11 23:25:00] ACTION: SYNC_CANCEL | DETAILS: User cancelled sync after reviewing diff.
+[2026-02-11 23:25:14] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass3
+[2026-02-11 23:25:14] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass2
+[2026-02-11 23:25:14] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass5
+[2026-02-11 23:25:14] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass4
+[2026-02-11 23:25:14] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass1
+[2026-02-11 23:25:14] ACTION: PUSH_START | DETAILS: User neo4j [Key: 3326EFB8] (audreycolar) initiated sync for model: BWTest
+[2026-02-11 23:25:15] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -2123990325
+[2026-02-11 23:25:15] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-11 23:25:15] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 3326EFB8] (audreycolar)
+[2026-02-11 23:26:13] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-11 23:26:14] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-11 23:26:14] ACTION: SESSION_CREATE | DETAILS: New session created with key: 7788D4EE
+[2026-02-11 23:26:14] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-11 23:26:14] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 7788D4EE | Ver: unknown
+[2026-02-11 23:39:29] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass3
+[2026-02-11 23:39:29] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass2
+[2026-02-11 23:39:29] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass5
+[2026-02-11 23:39:29] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass4
+[2026-02-11 23:39:29] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass1
+[2026-02-11 23:39:29] ACTION: PUSH_START | DETAILS: User neo4j [Key: 7788D4EE] (audreycolar) initiated sync for model: BWTest
+[2026-02-11 23:39:30] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -2123990325
+[2026-02-11 23:39:30] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-11 23:39:30] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 7788D4EE] (audreycolar)
+[2026-02-11 23:58:05] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-11 23:58:05] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-11 23:58:05] ACTION: SESSION_CREATE | DETAILS: New session created with key: 6166459D
+[2026-02-11 23:58:05] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-11 23:58:05] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 6166459D | Ver: unknown
+[2026-02-11 23:58:24] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass3
+[2026-02-11 23:58:24] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass2
+[2026-02-11 23:58:24] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass5
+[2026-02-11 23:58:24] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass4
+[2026-02-11 23:58:24] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass1
+[2026-02-11 23:58:24] ACTION: PUSH_START | DETAILS: User neo4j [Key: 6166459D] (audreycolar) initiated sync for model: Employee
+[2026-02-11 23:58:24] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-11 23:58:24] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-11 23:58:29] ACTION: PUSH_ERROR | DETAILS: Failed to push model: Cannot invoke "java.util.Map.get(Object)" because the return value of "org.uet.dse.neo4j.mm.core.node.AbstractMetaNode.toPropertyMap()" is null
+[2026-02-11 23:58:29] ACTION: SYNC_FORWARD_ERROR | DETAILS: Cannot invoke "java.util.Map.get(Object)" because the return value of "org.uet.dse.neo4j.mm.core.node.AbstractMetaNode.toPropertyMap()" is null
+[2026-02-11 23:58:58] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Professor
+[2026-02-11 23:58:58] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: University
+[2026-02-11 23:58:58] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Employment
+[2026-02-11 23:58:58] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Student
+[2026-02-11 23:58:58] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Person
+[2026-02-11 23:58:58] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: C1Assoc
+[2026-02-11 23:58:58] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: C2Aggreg
+[2026-02-11 23:58:58] ACTION: PUSH_START | DETAILS: User neo4j [Key: 6166459D] (audreycolar) initiated sync for model: Employee
+[2026-02-11 23:58:58] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-11 23:58:58] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-11 23:59:00] ACTION: PUSH_ERROR | DETAILS: Failed to push model: Cannot invoke "java.util.Map.get(Object)" because the return value of "org.uet.dse.neo4j.mm.core.node.AbstractMetaNode.toPropertyMap()" is null
+[2026-02-11 23:59:00] ACTION: SYNC_FORWARD_ERROR | DETAILS: Cannot invoke "java.util.Map.get(Object)" because the return value of "org.uet.dse.neo4j.mm.core.node.AbstractMetaNode.toPropertyMap()" is null
+[2026-02-11 23:59:21] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-11 23:59:21] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-11 23:59:21] ACTION: SESSION_CREATE | DETAILS: New session created with key: FF068EB4
+[2026-02-11 23:59:21] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-11 23:59:21] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: FF068EB4 | Ver: unknown
+[2026-02-11 23:59:31] ACTION: PUSH_START | DETAILS: User neo4j [Key: FF068EB4] (audreycolar) initiated sync for model: Employee
+[2026-02-11 23:59:31] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-11 23:59:31] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-11 23:59:34] ACTION: PUSH_ERROR | DETAILS: Failed to push model: Cannot invoke "java.util.Map.get(Object)" because the return value of "org.uet.dse.neo4j.mm.core.node.AbstractMetaNode.toPropertyMap()" is null
+[2026-02-11 23:59:34] ACTION: SYNC_FORWARD_ERROR | DETAILS: Cannot invoke "java.util.Map.get(Object)" because the return value of "org.uet.dse.neo4j.mm.core.node.AbstractMetaNode.toPropertyMap()" is null
+[2026-02-12 00:10:44] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-12 00:10:44] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-12 00:10:45] ACTION: SESSION_CREATE | DETAILS: New session created with key: 9BB0FA3A
+[2026-02-12 00:10:45] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-12 00:10:45] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 9BB0FA3A | Ver: unknown
+[2026-02-12 00:10:53] ACTION: PUSH_START | DETAILS: User neo4j [Key: 9BB0FA3A] (audreycolar) initiated sync for model: Employee
+[2026-02-12 00:10:53] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-12 00:10:53] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-12 00:10:57] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 58552147
+[2026-02-12 00:10:57] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-02-12 00:10:57] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 9BB0FA3A] (audreycolar)
+[2026-02-12 00:11:17] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: ContractType
+[2026-02-12 00:11:17] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: Gender
+[2026-02-12 00:11:17] ACTION: PULL_OP | DETAILS: Created Signature: Professor::canSupervise
+[2026-02-12 00:11:17] ACTION: PULL_OP | DETAILS: Created Signature: Professor::getSalaryAdvantage
+[2026-02-12 00:11:17] ACTION: PULL_OP | DETAILS: Created Signature: Professor::isSenior
+[2026-02-12 00:11:17] ACTION: PULL_OP | DETAILS: Created Signature: University::getStudents
+[2026-02-12 00:11:17] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-02-12 00:11:17] ACTION: PULL_OP | DETAILS: Created Signature: University::getEmployeeCount
+[2026-02-12 00:11:17] ACTION: PULL_OP | DETAILS: Created Signature: University::getProfessors
+[2026-02-12 00:11:17] ACTION: PULL_OP | DETAILS: Created Signature: University::hasFullTimeEmployees
+[2026-02-12 00:11:17] ACTION: PULL_OP | DETAILS: Created Signature: University::getTotalSalaryExpense
+[2026-02-12 00:11:17] ACTION: PULL_OP | DETAILS: Created Signature: University::getEmployeesByContract
+[2026-02-12 00:11:17] ACTION: PULL_OP | DETAILS: Created Signature: Employment::passedProbation
+[2026-02-12 00:11:17] ACTION: PULL_OP | DETAILS: Created Signature: Employment::isPermanent
+[2026-02-12 00:11:17] ACTION: PULL_OP | DETAILS: Created Signature: Employment::getEmployeeName
+[2026-02-12 00:11:17] ACTION: PULL_OP | DETAILS: Created Signature: Employment::isTemporary
+[2026-02-12 00:11:17] ACTION: PULL_OP | DETAILS: Created Signature: Employment::getDurationYears
+[2026-02-12 00:11:17] ACTION: PULL_OP | DETAILS: Created Signature: Employment::getUniversityName
+[2026-02-12 00:11:17] ACTION: PULL_OP | DETAILS: Created Signature: Student::isWorking
+[2026-02-12 00:11:17] ACTION: PULL_OP | DETAILS: Created Signature: Student::canGraduate
+[2026-02-12 00:11:17] ACTION: PULL_OP | DETAILS: Created Signature: Person::getAnnualSalary
+[2026-02-12 00:11:18] ACTION: PULL_OP | DETAILS: Created Signature: Person::hasContract
+[2026-02-12 00:11:18] ACTION: PULL_OP | DETAILS: Created Signature: Person::getContract
+[2026-02-12 00:11:18] ACTION: PULL_OP | DETAILS: Created Signature: Person::isEligibleForPromotion
+[2026-02-12 00:11:18] ACTION: PULL_OP | DETAILS: Created Signature: Person::isEmployed
+[2026-02-12 00:11:18] ACTION: PULL_ASSOC | DETAILS: Restored: DemoAggregation
+[2026-02-12 00:11:18] ACTION: PULL_ASSOC | DETAILS: Restored: DemoAssociation
+[2026-02-12 00:11:18] ACTION: PULL_ASSOC | DETAILS: Restored: WorksFor
+[2026-02-12 00:11:18] ACTION: PULL_TERNARY | DETAILS: Restored: Ternari with 3 ends.
+[2026-02-12 00:11:18] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-02-12 00:11:18] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost

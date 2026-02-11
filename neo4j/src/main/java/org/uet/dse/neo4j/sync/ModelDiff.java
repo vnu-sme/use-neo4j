@@ -2,27 +2,24 @@ package org.uet.dse.neo4j.sync;
 
 import java.util.*;
 
+/**
+ * this class holds the different between 2 snapshot of model in USE and Neo4j
+ * includes:
+ * - class
+ * - associations
+ */
 public class ModelDiff {
-    // --- 1. Class & Enumeration Lists ---
     public List<String> javaOnlyClasses = new ArrayList<>();
     public List<String> neo4jOnlyClasses = new ArrayList<>();
     public List<String> mismatchedClasses = new ArrayList<>();
 
-    // --- 2. Attribute Lists (ClassName -> List of Attrs) ---
     public Map<String, List<String>> javaOnlyAttributes = new HashMap<>();
     public Map<String, List<String>> neo4jOnlyAttributes = new HashMap<>();
 
-    // --- 3. Association Lists (Regular Links) ---
     public List<String> javaOnlyAssociations = new ArrayList<>();
     public List<String> neo4jOnlyAssociations = new ArrayList<>();
     public List<String> mismatchedAssociations = new ArrayList<>();
 
-    // --- 4. Details for Reporting ---
-    public List<String> conflictDetails = new ArrayList<>();
-
-    /**
-     * Kiểm tra xem có bất kỳ sự sai lệch nào giữa Java và Neo4j không
-     */
     public boolean hasDifference() {
         return !javaOnlyClasses.isEmpty() ||
                 !neo4jOnlyClasses.isEmpty() ||
@@ -32,9 +29,7 @@ public class ModelDiff {
                 !mismatchedAssociations.isEmpty();
     }
 
-    /**
-     * Báo cáo cho chiều XUÔI (Java -> DB): Những gì sẽ thay đổi dưới Neo4j
-     */
+
     public String generateForwardReport() {
         StringBuilder sb = new StringBuilder("===== SYNC FORWARD: PUSH TO DATABASE =====\n\n");
 
@@ -65,9 +60,6 @@ public class ModelDiff {
         return sb.toString();
     }
 
-    /**
-     * Báo cáo cho chiều NGƯỢC (DB -> Java): Những gì sẽ thay đổi trong tool USE
-     */
     public String generateBackwardReport() {
         StringBuilder sb = new StringBuilder("===== SYNC BACKWARD: PULL FROM DATABASE =====\n\n");
 

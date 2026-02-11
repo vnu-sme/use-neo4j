@@ -1,0 +1,11 @@
+model CoreClass
+
+class ConcreteClass
+attributes
+end
+
+abstract class AbstractClass
+attributes
+end
+
+enum EnumClass {OK}

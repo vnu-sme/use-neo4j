@@ -29,7 +29,7 @@ import java.util.*;
 import java.util.List;
 
 public class ModelSyncCoordinator {
-    private final Session useSession; // Thay vì chỉ giữ MModel, hãy giữ cả Session
+    private final Session useSession;
     private final MModel useModel;
 
     private final MainWindow mainWindow;
@@ -129,40 +129,31 @@ public class ModelSyncCoordinator {
         }
     }
 
-
-    /**
-     * Phân tích sâu sự khác biệt giữa 2 Snapshot
-     */
     public ModelDiff compareWithNeo4j() {
         ModelDiff diff = new ModelDiff();
         FullModelSnapshot neoSnap = getFullModelSnapshotFromNeo4j();
         FullModelSnapshot javaSnap = getFullModelSnapshotFromUSE();
 
-        // 1. Tìm những thứ Java có (có thể là javaOnly hoặc mismatched)
         for (String className : javaSnap.classes.keySet()) {
             ClassState useCls = javaSnap.classes.get(className);
             if (!neoSnap.classes.containsKey(className)) {
-                // Java có mà DB không có
+
                 diff.javaOnlyClasses.add(className);
             } else {
-                // Cả hai cùng có, kiểm tra deep equal
                 ClassState n4jCls = neoSnap.classes.get(className);
                 if (!useCls.isSameAs(n4jCls)) {
                     diff.mismatchedClasses.add(className);
-                    // Kiểm tra chi tiết Attribute
                     compareAttributesDeep(className, useCls, n4jCls, diff);
                 }
             }
         }
 
-        // 2. Tìm những thứ chỉ Neo4j mới có
         for (String className : neoSnap.classes.keySet()) {
             if (!javaSnap.classes.containsKey(className)) {
                 diff.neo4jOnlyClasses.add(className);
             }
         }
-        // --- SO SÁNH ASSOCIATION (MỚI) ---
-        // 1. Tìm Association chỉ có ở Java hoặc bị Mismatch -> Cần Push
+
         for (String name : javaSnap.associations.keySet()) {
             AssociationState jAssoc = javaSnap.associations.get(name);
             if (!neoSnap.associations.containsKey(name)) {
@@ -171,13 +162,11 @@ public class ModelSyncCoordinator {
                 diff.mismatchedAssociations.add(name);
             }
         }
-        // 2. Tìm Association chỉ có ở Neo4j -> Cần Delete ở DB (khi push) hoặc Add vào Java (khi pull)
         for (String name : neoSnap.associations.keySet()) {
             if (!javaSnap.associations.containsKey(name)) {
                 diff.neo4jOnlyAssociations.add(name);
             }
         }
-
         return diff;
     }
 
@@ -818,8 +807,6 @@ public class ModelSyncCoordinator {
         }
     }
 
-    //////
-
     private FullModelSnapshot getFullModelSnapshotFromNeo4j() {
         FullModelSnapshot fullSnapshot = new FullModelSnapshot();
         String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
@@ -830,55 +817,55 @@ public class ModelSyncCoordinator {
             String cypher =
                     // get class & enums
                     "MATCH (meta:MetaNode) WHERE meta.name IN ['NodeConcreteClass', 'NodeAbstractClass', 'NodeAssociationClass', 'NodeEnumeration'] " +
-                            "MATCH (inst)-[:InstanceOf]->(meta) " +
-                            "WITH inst, meta, labels(inst)[0] as classType, inst.value as enumValues " +
+                    "MATCH (inst)-[:InstanceOf]->(meta) " +
+                    "WITH inst, meta, labels(inst)[0] as classType, inst.value as enumValues " +
 
-                            //attribute
-                            // 1. Thu thập Attributes và Sợi xích lồng nhau (Fix độ sâu vô hạn)
-                            "OPTIONAL MATCH (inst)-[:HasAttribute]->(a) " +
-                            "OPTIONAL MATCH (a)-[rRef]->(aRef) WHERE type(rRef) = 'ReferenceType' " +
-                            // Tìm đường đi xuyên qua tất cả các tầng NestedCollection
-                            "OPTIONAL MATCH p = (a)-[:HasNestedCollection*]->(n:NestedCollection) " +
-                            "WITH inst, meta, classType, a, aRef, p ORDER BY length(p) DESC " +
-                            // Với mỗi attribute, chỉ lấy con đường dài nhất để có đủ các tầng
-                            "WITH inst, meta, classType, a, aRef, head(collect(p)) as longestPath " +
-                            // Trích xuất mảng tên các Collection từ các node trong path (Bỏ qua node attribute đầu tiên)
-                            "WITH inst, meta, classType, a, aRef, " +
-                            "     [node in nodes(longestPath) WHERE 'NestedCollection' IN labels(node) | node.collectionName] as fullChain " +
-                            "WITH inst, meta, classType, collect(DISTINCT { " +
-                            "  name: a.attrName, type: a.type, idx: a.index, ref: aRef.name, " +
-                            "  sCollection: a.isCollection, isNested: a.isNestedCollection, " +
-                            "  collectionType: a.collectionType, chain: fullChain " +
-                            "}) as attrs " +
+                    //attribute
+                    // 1. Thu thập Attributes và Sợi xích lồng nhau (Fix độ sâu vô hạn)
+                    "OPTIONAL MATCH (inst)-[:HasAttribute]->(a) " +
+                    "OPTIONAL MATCH (a)-[rRef]->(aRef) WHERE type(rRef) = 'ReferenceType' " +
+                    // Tìm đường đi xuyên qua tất cả các tầng NestedCollection
+                    "OPTIONAL MATCH p = (a)-[:HasNestedCollection*]->(n:NestedCollection) " +
+                    "WITH inst, meta, classType, a, aRef, p ORDER BY length(p) DESC " +
+                    // Với mỗi attribute, chỉ lấy con đường dài nhất để có đủ các tầng
+                    "WITH inst, meta, classType, a, aRef, head(collect(p)) as longestPath " +
+                    // Trích xuất mảng tên các Collection từ các node trong path (Bỏ qua node attribute đầu tiên)
+                    "WITH inst, meta, classType, a, aRef, " +
+                    "     [node in nodes(longestPath) WHERE 'NestedCollection' IN labels(node) | node.collectionName] as fullChain " +
+                    "WITH inst, meta, classType, collect(DISTINCT { " +
+                    "  name: a.attrName, type: a.type, idx: a.index, ref: aRef.name, " +
+                    "  sCollection: a.isCollection, isNested: a.isNestedCollection, " +
+                    "  collectionType: a.collectionType, chain: fullChain " +
+                    "}) as attrs " +
 
-                            //invariants
-                            "OPTIONAL MATCH (inst)-[:HasInvariant]->(inv) " +
-                            "WITH inst, meta, classType, attrs, collect(DISTINCT {name: inv.invName, expr: inv.expression, exist: inv.isExistential}) as invariants " +
+                    //invariants
+                    "OPTIONAL MATCH (inst)-[:HasInvariant]->(inv) " +
+                    "WITH inst, meta, classType, attrs, collect(DISTINCT {name: inv.invName, expr: inv.expression, exist: inv.isExistential}) as invariants " +
 
-                            //association class
-                            "OPTIONAL MATCH (src)-[s:sourceAssoClass]->(inst) " +
-                            "OPTIONAL MATCH (inst)-[t:targetAssoClass]->(tgt) " +
-                            "WITH inst, meta, classType, attrs, invariants, " +
-                            "{name: src.name, role: s.role, mult: s.multiplicity} as acSrc, " +
-                            "{name: tgt.name, role: t.role, mult: t.multiplicity} as acTgt " +
+                    //association class
+                    "OPTIONAL MATCH (src)-[s:sourceAssoClass]->(inst) " +
+                    "OPTIONAL MATCH (inst)-[t:targetAssoClass]->(tgt) " +
+                    "WITH inst, meta, classType, attrs, invariants, " +
+                    "{name: src.name, role: s.role, mult: s.multiplicity} as acSrc, " +
+                    "{name: tgt.name, role: t.role, mult: t.multiplicity} as acTgt " +
 
-                            //operation & param & pre-post
-                            "OPTIONAL MATCH (inst)-[:HasOperation]->(o) " +
-                            "OPTIONAL MATCH (o)-[:HasParam]->(p) " +
-                            "OPTIONAL MATCH (p)-[r2]->(pRef) WHERE type(r2) = 'ReferenceType' " +
-                            "OPTIONAL MATCH (o)-[r3]->(retRef) WHERE type(r3) = 'ReferenceReturnType' " +
-                            "OPTIONAL MATCH (o)-[:HasPreCondition]->(pre) " +
-                            "OPTIONAL MATCH (o)-[:HasPostCondition]->(post) " +
+                    //operation & param & pre-post
+                    "OPTIONAL MATCH (inst)-[:HasOperation]->(o) " +
+                    "OPTIONAL MATCH (o)-[:HasParam]->(p) " +
+                    "OPTIONAL MATCH (p)-[r2]->(pRef) WHERE type(r2) = 'ReferenceType' " +
+                    "OPTIONAL MATCH (o)-[r3]->(retRef) WHERE type(r3) = 'ReferenceReturnType' " +
+                    "OPTIONAL MATCH (o)-[:HasPreCondition]->(pre) " +
+                    "OPTIONAL MATCH (o)-[:HasPostCondition]->(post) " +
 
-                            "WITH inst, meta, classType, attrs, invariants, acSrc, acTgt, o, retRef, " +
-                            "collect(DISTINCT {pName: p.pName, pType: p.type, pOrder: p.order, pRef: pRef.name}) as opParams, " +
-                            "collect(DISTINCT {name: pre.condName, expr: pre.expression}) as opPres, " +
-                            "collect(DISTINCT {name: post.condName, expr: post.expression}) as opPosts " +
+                    "WITH inst, meta, classType, attrs, invariants, acSrc, acTgt, o, retRef, " +
+                    "collect(DISTINCT {pName: p.pName, pType: p.type, pOrder: p.order, pRef: pRef.name}) as opParams, " +
+                    "collect(DISTINCT {name: pre.condName, expr: pre.expression}) as opPres, " +
+                    "collect(DISTINCT {name: post.condName, expr: post.expression}) as opPosts " +
 
-                            "WITH inst, meta, classType, attrs, invariants, acSrc, acTgt, " +
-                            "collect(DISTINCT {name: o.opName,  body: o.body, isQuery: o.isQuery, ret: o.returnType, retRef: retRef.name, params: opParams, pre: opPres, post: opPosts}) as ops " +
+                    "WITH inst, meta, classType, attrs, invariants, acSrc, acTgt, " +
+                    "collect(DISTINCT {name: o.opName,  body: o.body, isQuery: o.isQuery, ret: o.returnType, retRef: retRef.name, params: opParams, pre: opPres, post: opPosts}) as ops " +
 
-                            "RETURN inst.name as className, meta.name as metaName, classType, inst.value as enumValues, attrs, invariants, ops, acSrc, acTgt";
+                    "RETURN inst.name as className, meta.name as metaName, classType, inst.value as enumValues, attrs, invariants, ops, acSrc, acTgt";
             Result result = session.run(cypher);
 
             while (result.hasNext()) {
@@ -932,16 +919,11 @@ public class ModelSyncCoordinator {
                         // Thứ tự hiển thị
                         props.put("index", aVal.get("idx").asInt(0));
 
-                        // Thông tin tập hợp (Dùng đúng key sCollection từ Cypher)
                         props.put("isCollection", aVal.get("sCollection").asBoolean(false));
                         props.put("collectionType", aVal.get("collectionType").asString("Set"));
 
-
-                        // MỚI: Lấy thông tin lồng nhau
                         props.put("isNestedCollection", aVal.get("isNested").asBoolean(false));
 
-                        // MỚI: Lấy danh sách chuỗi các lớp lồng (ví dụ: ["Sequence", "Bag"])
-                        // SỬA LỖI COERCE TẠI ĐÂY:
                         Value chainVal = aVal.get("chain");
                         if (chainVal.isNull()) {
                             props.put("nestedChain", new ArrayList<String>());
@@ -949,8 +931,6 @@ public class ModelSyncCoordinator {
                             props.put("nestedChain", chainVal.asList(Value::asString));
                         }
 
-
-                        // Đưa vào danh sách thuộc tính của ClassState
                         cls.getAttributes().put(attrName, props);
                     }
                 }
@@ -1049,13 +1029,6 @@ public class ModelSyncCoordinator {
                 fullSnapshot.associations.put(as.name, as);
             }
 
-
-
-
-            // Trong hàm getFullModelSnapshotFromNeo4j
-// ... (Sau khi quét Class và Association thường)
-
-            // --- QUÉT QUAN HỆ N-BÊN (Filmstrip, v.v.) ---
             String ternaryCypher =
                     "MATCH (c)-[r]->(hub)-[:InstanceOf]->(:MetaNode {name: 'NodeTernaryAssociation'}) " +
                             "WHERE r.isTernary = true " +
@@ -1068,7 +1041,6 @@ public class ModelSyncCoordinator {
                 Record rec = res.next();
                 Map<String, Object> data = new HashMap<>();
                 data.put("name", rec.get("assocName").asString());
-                // participants lúc này sẽ có ĐỦ 3 phần tử cho Filmstrip (dù có 2 Snapshot)
                 data.put("participants", rec.get("participants").asList());
                 fullSnapshot.ternaryAssociations.add(data);
             }
@@ -1089,7 +1061,6 @@ public class ModelSyncCoordinator {
             else if (mCls.isAbstract()) metaName = "NodeAbstractClass";
             cls.setMetaNodeName(metaName);
 
-            // Trong vòng lặp map Attributes của getModelSnapshotFromUSE
             for (MAttribute attr : mCls.attributes()) {
                 Map<String, Object> props = new HashMap<>();
                 props.put("attrName", attr.name());

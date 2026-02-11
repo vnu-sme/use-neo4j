@@ -9,8 +9,6 @@ public class FullModelSnapshot {
     public Map<String, ClassState> classes = new HashMap<>();
     public Map<String, AssociationState> associations = new HashMap<>();
 
-
-    // Chứa các Association N-bên (vd: Filmstrip)
     public List<Map<String, Object>> ternaryAssociations = new ArrayList<>();
 
     public boolean isEmpty() {

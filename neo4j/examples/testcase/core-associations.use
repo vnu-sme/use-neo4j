@@ -1,0 +1,46 @@
+model CoreAssociation
+
+class C1
+attributes
+end
+
+class C2
+attributes
+end
+
+class C3
+attributes
+end
+
+class C4
+attributes
+end
+
+class C5
+attributes
+end
+
+class C6
+attributes
+end
+
+
+composition compositionC1ToC2 between
+    C1[*] role up
+    C2[0..1] role down
+end
+
+composition compositionC1ToC3 between
+    C1[*] role up1
+    C3[0..1] role down1
+end
+
+association associationC3ToC4 between
+    C3[0] role up
+    C4[1..*] role down
+end
+
+aggregation aggregationC5ToC6 between
+    C5[1..2] role up
+    C6[1] role down
+end

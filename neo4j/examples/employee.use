@@ -11,6 +11,8 @@ attributes
     sex : Gender
     codes: Set(String)
     codesBag: Bag(String)
+    nested: Set(Set(String))
+    nestedDiff: Set(Bag(String))
 operations
     -- Check if person is eligible for promotion
     isEligibleForPromotion() : Boolean =
@@ -116,6 +118,25 @@ composition WorksFor between
     Person[*] role employee
     University[0..1] role employer
 end
+
+class C1Assoc
+attributes
+end
+
+class C2Aggreg
+attributes
+end
+
+association DemoAssociation between
+    C1Assoc[*] role s1
+    University[0..1] role t1
+end
+
+aggregation DemoAggregation between
+    C2Aggreg[*] role s2
+    University[0..1] role t2
+end
+
 
 -- Association class for detailed employment information
 association Ternari between
