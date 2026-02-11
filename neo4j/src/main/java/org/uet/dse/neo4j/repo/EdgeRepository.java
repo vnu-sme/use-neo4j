@@ -1,6 +1,6 @@
 package org.uet.dse.neo4j.repo;
 
-import org.uet.dse.neo4j.mm.Edge;
+import org.uet.dse.neo4j.mm.graphdb.Edge;
 import org.neo4j.driver.*;
 
 import java.util.ArrayList;

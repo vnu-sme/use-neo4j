@@ -1,7 +1,7 @@
 package org.uet.dse.neo4j.repo;
 
-import org.uet.dse.neo4j.mm.Tag;
-import org.uet.dse.neo4j.mm.Vertex;
+import org.uet.dse.neo4j.mm.graphdb.Tag;
+import org.uet.dse.neo4j.mm.graphdb.Vertex;
 import org.neo4j.driver.*;
 
 import java.util.ArrayList;

@@ -15,17 +15,6 @@ public class ConsensusService {
 
     public enum VoteType { APPROVE, REJECT, POSTPONE }
 
-    public void registerUser() {
-        String myUser = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
-        try (Session session = Neo4jDriverManager.getInstance().openSession()) {
-            session.run("MERGE (u:SessionUser {name: $name}) SET u.lastActive = timestamp(), u.status = 'ONLINE'",
-                    Map.of("name", myUser));
-        }
-    }
-
-    /**
-     * Cập nhật nhịp đập để hệ thống biết mình vẫn đang online
-     */
     public void heartbeat() {
         String myUser = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
         try (Session session = Neo4jDriverManager.getInstance().openSession()) {
@@ -132,86 +121,5 @@ public class ConsensusService {
         }
     }
 
-    /**
-     * Hủy đăng ký người dùng khi thoát Plugin hoặc ngắt kết nối.
-     * Việc này giúp hệ thống đồng thuận loại bỏ user này khỏi danh sách cần lấy phiếu.
-     */
-    public void unregisterUser() {
-        // 1. Kiểm tra an toàn để tránh lỗi NullPointer khi Driver đã đóng trước đó
-        if (Neo4jDriverManager.getInstance() == null || !Neo4jDriverManager.getInstance().isConnected()) {
-            return;
-        }
 
-        String myUser = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
-
-        // 2. Mở session tới DB hiện hành
-        try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().openSession()) {
-
-            // 3. Câu lệnh Cypher cập nhật trạng thái
-            // status = 'OFFLINE': Để logic đếm phiếu 'checkMyProposalApproval' bỏ qua user này.
-            // lastActive = timestamp(): Lưu lại dấu vết lần cuối online.
-            String cypher = "MATCH (u:SessionUser {name: $name}) " +
-                    "SET u.status = 'OFFLINE', u.lastActive = timestamp()";
-
-            session.run(cypher, java.util.Map.of("name", myUser));
-
-            // Ghi log ra console của Java để theo dõi vòng đời
-            System.out.println("Consensus Service: User [" + myUser + "] is now OFFLINE.");
-
-        } catch (Exception e) {
-            // Chúng ta chỉ in log lỗi, không ném Exception
-            // vì hàm này thường được gọi trong quá trình đóng ứng dụng (Cleanup phase)
-            System.err.println("Could not unregister user cleanly: " + e.getMessage());
-        }
-    }
-    // Trong ConsensusService.java
-
-    /**
-     * Đếm số lượng người dùng khác (trừ tôi) đang thực sự ONLINE trong 1 phút qua
-     */
-    public long countOtherActiveUsers() {
-        String myName = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
-        try (Session session = Neo4jDriverManager.getInstance().openSession()) {
-            String cypher = "MATCH (u:SessionUser) " +
-                    "WHERE u.name <> $me AND u.status = 'ONLINE' " +
-                    "AND u.lastActive > (timestamp() - 60000) " +
-                    "RETURN count(u) as count";
-            var res = session.run(cypher, Map.of("me", myName));
-            return res.hasNext() ? res.next().get("count").asLong() : 0;
-        } catch (Exception e) { return 0; }
-    }
-
-    /**
-     * Kiểm tra và TỰ ĐỘNG duyệt đề xuất nếu đủ phiếu
-     */
-    public boolean checkAndAutoApproveProposal() {
-        String myName = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
-        long othersCount = countOtherActiveUsers();
-
-        // Nếu không có ai khác online -> Tự động coi như đã được duyệt
-        if (othersCount == 0) return true;
-
-        try (Session session = Neo4jDriverManager.getInstance().openSession()) {
-            // Đếm số phiếu APPROVE thực tế cho Proposal PENDING của tôi
-            String cypher =
-                    "MATCH (p:ModelProposal {proposer: $me, status: 'PENDING'}) " +
-                            "OPTIONAL MATCH (u:SessionUser)-[v:VOTED]->(p) WHERE v.type = 'APPROVE' " +
-                            "WITH p, count(DISTINCT u) as voteCount " +
-                            "RETURN p.id as id, voteCount";
-
-            var res = session.run(cypher, Map.of("me", myName));
-            if (res.hasNext()) {
-                var rec = res.next();
-                long votes = rec.get("voteCount").asLong();
-
-                // Nếu số phiếu đồng ý >= số người đang online
-                if (votes >= othersCount) {
-                    // TỰ ĐỘNG CHUYỂN SANG APPROVED
-                    finalizeProposal();
-                    return true;
-                }
-            }
-        } catch (Exception e) { e.printStackTrace(); }
-        return false;
-    }
 }

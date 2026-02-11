@@ -2,6 +2,7 @@ package org.uet.dse.neo4j.repo;
 
 import org.neo4j.driver.Driver;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
+import org.uet.dse.neo4j.sync.ObjectSyncCoordinator;
 
 public class Neo4jSideRepository {
     private final Driver driver;
@@ -38,5 +39,16 @@ public class Neo4jSideRepository {
                 "user", user, "key", sessionKey, "type", actionType,
                 "cat", category, "target", target, "details", details
         ));
+    }
+
+    public static void updateObjectVersionOnServer() {
+        long ts = System.currentTimeMillis();
+
+        try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().openSession()) {
+            String cypher = "MERGE (v:ModelVersion {id: 'CURRENT'}) SET v.objectTimestamp = $ts";
+            session.run(cypher, org.neo4j.driver.Values.parameters("ts", ts));
+
+            ObjectSyncCoordinator.updateLocalSyncTimestamp(ts);
+        }
     }
 }

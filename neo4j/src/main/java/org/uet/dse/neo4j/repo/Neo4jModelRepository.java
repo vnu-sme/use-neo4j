@@ -9,9 +9,16 @@ import org.tzi.use.uml.mm.MAssociationClass;
 import org.tzi.use.uml.mm.MAssociationEnd;
 import org.tzi.use.uml.mm.MClassifier;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
+import org.uet.dse.neo4j.mm.core.node.AbstractMetaNode;
+import org.uet.dse.neo4j.mm.core.node.NodeEnumeration;
+import org.uet.dse.neo4j.query.builder.CypherQueryBuilder;
+import org.uet.dse.neo4j.query.builder.MetaNodeCypherBuilder;
+import org.uet.dse.neo4j.query.model.MetaNodeDescriptor;
+import org.uet.dse.neo4j.query.model.MetaNodeRegistry;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Neo4jModelRepository {
     private final Driver driver;
@@ -21,91 +28,6 @@ public class Neo4jModelRepository {
         this.driver = Neo4jDriverManager.getInstance().getDriver();
     }
 
-    /**
-     * Tạo Node tổng quát (Dùng cho đặc tả 1-7)
-     */
-    public void createNode(String label, Map<String, Object> params) {
-        String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
-        try (Session session = driver.session(SessionConfig.forDatabase(dbName))) {
-            // MERGE theo name để tránh trùng lặp, SET các thuộc tính còn lại
-            String query = String.format("MERGE (n:%s {name: $name}) SET n += $params", label);
-            session.run(query, Values.parameters("name", params.get("name"), "params", params));
-        }
-    }
-
-    /**
-     * Tạo quan hệ kế thừa (Đặc tả 8 & 12)
-     */
-    public void createExtendsEdge(MClassifier child, MClassifier parent) {
-        String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
-        try (Session session = driver.session(SessionConfig.forDatabase(dbName))) {
-            String cypher = "MATCH (src {name: $srcName}), (tgt {name: $tgtName}) " +
-                    "MERGE (src)-[r:Extends]->(tgt) " +
-                    "SET r.name = $edgeName, r.sourceName = $srcName, r.targetName = $tgtName, " +
-                    "    r.sourceMultiplicity = '1', r.targetMultiplicity = '1'";
-
-            session.run(cypher, Values.parameters(
-                    "srcName", child.name(),
-                    "tgtName", parent.name(),
-                    "edgeName", child.name() + "Inherits" + parent.name()
-            ));
-        }
-    }
-
-    /**
-     * Tạo quan hệ Association (Đặc tả 9, 10, 11)
-     */
-    public void createAssociationEdgeOld(MAssociation assoc) {
-        if (assoc.associationEnds().size() < 2) return;
-
-        MAssociationEnd end1 = assoc.associationEnds().get(0);
-        MAssociationEnd end2 = assoc.associationEnds().get(1);
-
-        // Mặc định: end1 là Source, end2 là Target
-        MAssociationEnd whole = end1;
-        MAssociationEnd part = end2;
-        String edgeLabel = "AssociateWith";
-
-        // LOGIC XÁC ĐỊNH HƯỚNG (Whole -> Part)
-        // Nếu đầu 1 (end1) mang tính chất tập hợp -> Nó là Part, vậy đầu 2 là Whole
-        if (end1.aggregationKind() > 0) {
-            whole = end2;
-            part = end1;
-            edgeLabel = (end1.aggregationKind() == 2) ? "ComposeOf" : "Aggregates";
-        }
-        // Nếu đầu 2 (end2) mang tính chất tập hợp -> Nó là Part, vậy đầu 1 là Whole
-        else if (end2.aggregationKind() > 0) {
-            whole = end1;
-            part = end2;
-            edgeLabel = (end2.aggregationKind() == 2) ? "ComposeOf" : "Aggregates";
-        }
-
-        String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
-        try (Session session = driver.session(SessionConfig.forDatabase(dbName))) {
-
-            // 1. Dọn dẹp: Xóa mọi cạnh cũ của Association này (tránh bị 2 mũi tên ngược chiều khi đổi thiết kế)
-            session.run("MATCH ()-[r {associationName: $name}]-() DELETE r",
-                    Values.parameters("name", assoc.name()));
-
-            // 2. Tạo cạnh theo đúng hướng Whole -> Part
-            String cypher = String.format(
-                    "MATCH (s {name: $sName}), (t {name: $tName}) " +
-                            "MERGE (s)-[r:%s {associationName: $assocName}]->(t) " +
-                            "SET r.sourceClassName = $sName, r.sourceClassrole = $sRole, r.sourceMultiplicity = $sMult, " +
-                            "    r.targetClassName = $tName, r.targetClassrole = $tRole, r.targetMultiplicity = $tMult",
-                    edgeLabel);
-
-            session.run(cypher, Values.parameters(
-                    "assocName", assoc.name(),
-                    "sName", whole.cls().name(),
-                    "sRole", whole.name(),
-                    "sMult", whole.multiplicity().toString(),
-                    "tName", part.cls().name(),
-                    "tRole", part.name(),
-                    "tMult", part.multiplicity().toString()
-            ));
-        }
-    }
     public void createAssociationEdge(MAssociation assoc) {
         if (assoc.associationEnds().size() < 2) return;
 
@@ -158,54 +80,43 @@ public class Neo4jModelRepository {
         }
     }
 
-    /**
-     * Tạo các quan hệ cấu trúc (Đặc tả 13, 14, 15)
-     */
     public void createStructuralEdge(String fromNodeName, String toNodeName, String edgeLabel) {
         String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
-        try (Session session = driver.session(SessionConfig.forDatabase(dbName))) {
-            // MATCH linh hoạt: b có thể là bất cứ nhãn nào (ConcreteClass, AbstractClass, Enumeration)
-            String cypher = String.format(
-                    "MATCH (a {name: $from}), (b {name: $to}) " +
-                            "MERGE (a)-[r:%s]->(b)", edgeLabel);
 
-            session.run(cypher, Values.parameters("from", fromNodeName, "to", toNodeName));
+        try (Session session = driver.session(SessionConfig.forDatabase(dbName))) {
+            String cypher = CypherQueryBuilder.buildStructuralEdgeQuery(edgeLabel);
+            session.run(cypher, Values.parameters(
+                    "from", fromNodeName,
+                    "to", toNodeName
+            ));
         }
     }
 
-
-
     /**
-     * Khởi tạo các Meta-nodes (M2 Layer) cho Database
-     * Chạy như một Script khởi tạo khi tạo mới DB hoặc Session
+     * run script for meta node creation
      */
     public void initializeMetamodel() {
         String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
-        try (Session session = driver.session(SessionConfig.forDatabase(dbName))) {
-            String script =
-                    "MERGE (:MetaNode {name: 'NodeAttribute', label: 'Attribute'}) " +
-                            "MERGE (:MetaNode {name: 'NodeOperation', label: 'Operation'}) " +
-                            "MERGE (:MetaNode {name: 'NodeParam', label: 'Param'}) " +
-                            "MERGE (:MetaNode {name: 'NodeAssociationClass', label: 'AssociationClass'}) " +
-                            "MERGE (:MetaNode {name: 'NodeAbstractClass', label: 'AbstractClass'}) " +
-                            "MERGE (:MetaNode {name: 'NodeConcreteClass', label: 'ConcreteClass'}) " +
-                            "MERGE (:MetaNode {name: 'NodeEnumeration', label: 'Enumeration'})" +
-                            "MERGE (:MetaNode {name: 'NodeClassInvariant', label: 'ClassInvariant'}) " +
-                            "MERGE (:MetaNode {name: 'NodePreCondition', label: 'PreCondition'}) " +
-                            "MERGE (:MetaNode {name: 'NodePostCondition', label: 'PostCondition'}) " +
-                            "MERGE (:MetaNode {name: 'NodeTernaryAssociation', label: 'TernaryAssociation'}) " +
-                            "MERGE (:MetaNode {name: 'NodeNestedCollection', label: 'NestedCollection'})";
 
+        List<MetaNodeDescriptor> descriptors =
+                MetaNodeRegistry.ALL.stream()
+                        .map(MetaNodeDescriptor::from)
+                        .toList();
+
+        String script = MetaNodeCypherBuilder.buildMerge(descriptors);
+
+        try (Session session = driver.session(SessionConfig.forDatabase(dbName))) {
             session.run(script);
         }
     }
 
-    /**
-     * Tạo một Node thực thể (M1) và nối InstanceOf tới MetaNode (M2)
-     * @param metaNodeName Tên của node metamodel (ví dụ: NodeConcreteClass)
-     * @param instanceLabel Nhãn của thực thể (ví dụ: Person)
-     * @param params Các thuộc tính của thực thể
-     */
+
+//    /**
+//     * Tạo một Node thực thể (M1) và nối InstanceOf tới MetaNode (M2)
+//     * @param metaNodeName Tên của node metamodel (ví dụ: NodeConcreteClass)
+//     * @param instanceLabel Nhãn của thực thể (ví dụ: Person)
+//     * @param params Các thuộc tính của thực thể
+//     */
     public void createInstanceNode(String metaNodeName, String instanceLabel, Map<String, Object> params) {
         String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
         try (Session session = driver.session(SessionConfig.forDatabase(dbName))) {
@@ -229,63 +140,33 @@ public class Neo4jModelRepository {
             ));
         }
     }
-    public void setPrimitiveAttribute(String objName, String clsName, String attrName, Object value) {
+
+    /**
+     * refactored
+     * @param node
+     * @param dynamicLabel
+     */
+    public void createInstanceNode(AbstractMetaNode node, String dynamicLabel) {
         String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
-        try (org.neo4j.driver.Session session = driver.session(org.neo4j.driver.SessionConfig.forDatabase(dbName))) {
-            String attrId = clsName + "_" + attrName;
-            String cypher =
-                    "MATCH (obj {name: $objName}), (attr:Attribute {name: $attrId}) " +
-                            "MERGE (obj)-[r:HAS_VALUE]->(attr) " +
-                            "SET r.value = $val"; // $val có thể là String hoặc List<String>
+        try (Session session = driver.session(SessionConfig.forDatabase(dbName))) {
+            String cypher = CypherQueryBuilder.buildInstanceCreationQuery(dynamicLabel);
 
-            session.run(cypher, Values.parameters("objName", objName, "attrId", attrId, "val", value));
-        }
-    }
-
-    public void setObjectReferenceAttribute(String srcObjName, String attrName, Object targetValue) {
-        String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
-        try (org.neo4j.driver.Session session = driver.session(org.neo4j.driver.SessionConfig.forDatabase(dbName))) {
-
-            // Xóa các tham chiếu cũ của attribute này để gán mới (Overwrite logic)
-            session.run("MATCH (s {name: $sName})-[r:REFERENCES {role: $role}]->() DELETE r",
-                    Values.parameters("sName", srcObjName, "role", attrName));
-
-            if (targetValue instanceof List) {
-                // Trường hợp Collection Object Reference
-                List<String> targetNames = (List<String>) targetValue;
-                String cypher =
-                        "MATCH (s {name: $sName}), (t) WHERE t.name IN $tNames " +
-                                "MERGE (s)-[:REFERENCES {role: $role}]->(t)";
-                session.run(cypher, Values.parameters("sName", srcObjName, "role", attrName, "tNames", targetNames));
-            } else if (targetValue != null) {
-                // Trường hợp Single Object Reference
-                String cypher =
-                        "MATCH (s {name: $sName}), (t {name: $tName}) " +
-                                "MERGE (s)-[:REFERENCES {role: $role}]->(t)";
-                session.run(cypher, Values.parameters("sName", srcObjName, "role", attrName, "tName", targetValue.toString()));
+            Object idValue = node.toPropertyMap().get("name");
+            if (idValue == null) {
+                throw new RuntimeException("Property 'name' is missing for " + dynamicLabel);
             }
-        }
-    }
 
-    public void upsertObject(String objectName, String className) {
-        String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
-        try (org.neo4j.driver.Session session = driver.session(org.neo4j.driver.SessionConfig.forDatabase(dbName))) {
-            // MATCH lớp (M1) và tạo thực thể Object (M0) nối InstanceOf
-            // Sử dụng dấu nháy ngược cho Label động (tên Class)
-            String cypher = String.format(
-                    "MATCH (meta:MetaNode {name: 'NodeConcreteClass'}) " +
-                            "MATCH (cls:ConcreteClass {name: $clsName})-[:InstanceOf]->(meta) " +
-                            "MERGE (obj:`%s` {name: $objName}) " +
-                            "MERGE (obj)-[:InstanceOf]->(cls)", className);
-
-            session.run(cypher, org.neo4j.driver.Values.parameters("clsName", className, "objName", objectName));
+            session.run(cypher, Values.parameters(
+                    "metaName", node.getMetaName(),
+                    "id", node.getName(),
+                    "props", node.toPropertyMap()
+            ));
         }
     }
 
     public long getRemoteObjectTimestamp() {
         String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
         try (org.neo4j.driver.Session session = driver.session(org.neo4j.driver.SessionConfig.forDatabase(dbName))) {
-            // Lấy timestamp từ node ModelVersion (dùng chung node này để quản lý version)
             org.neo4j.driver.Result res = session.run("MATCH (v:ModelVersion {id: 'CURRENT'}) RETURN v.objectTimestamp AS ts");
             if (res.hasNext()) {
                 org.neo4j.driver.Value val = res.single().get("ts");
@@ -297,7 +178,6 @@ public class Neo4jModelRepository {
         return 0L;
     }
 
-    // Đặc tả 18: Edge HasAssociationClass
     public void createAssociationClassStructure(MAssociationClass ac) {
         MAssociationEnd sourceEnd = ac.associationEnds().get(0);
         MAssociationEnd targetEnd = ac.associationEnds().get(1);
@@ -339,23 +219,19 @@ public class Neo4jModelRepository {
         }
     }
 
-    /**
-     * Tạo Node thực thể Enumeration và nối InstanceOf tới MetaNode
-     */
     public void upsertEnumeration(String enumName, List<String> literals) {
+        NodeEnumeration nodeEnum = new NodeEnumeration();
+        nodeEnum.setName(enumName);
+        nodeEnum.setValues(literals);
+
         String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
+
         try (org.neo4j.driver.Session session = driver.session(org.neo4j.driver.SessionConfig.forDatabase(dbName))) {
-            // Sử dụng nhãn động là tên của Enum (ví dụ :Gender)
-            // Dùng nháy ngược `` để an toàn với tên có ký tự đặc biệt
-            String cypher = String.format(
-                    "MATCH (meta:MetaNode {name: 'NodeEnumeration'}) " +
-                            "MERGE (e:`%s` {name: $name}) " +
-                            "SET e.value = $values " +
-                            "MERGE (e)-[:InstanceOf]->(meta)", enumName);
+            String cypher = CypherQueryBuilder.buildUpsertEnumerationQuery(nodeEnum.getName());
 
             session.run(cypher, org.neo4j.driver.Values.parameters(
-                    "name", enumName,
-                    "values", literals
+                    "name", nodeEnum.getName(),
+                    "values", nodeEnum.getValues()
             ));
         }
     }
@@ -382,8 +258,6 @@ public class Neo4jModelRepository {
                 String edgeLabel = (end.aggregationKind() == 2) ? "ComposeOf" :
                         (end.aggregationKind() == 1 ? "Aggregates" : "AssociateWith");
 
-                // QUAN TRỌNG: Đưa {index: $idx} vào trong MERGE quan hệ
-                // Việc này giúp phân biệt rạch ròi 2 cạnh cùng nối từ Snapshot tới Filmstrip
                 String cypher = String.format(
                         "MATCH (c {name: $clsName}), (hub:`%s` {name: $name}) " +
                                 "MERGE (c)-[r:%s {index: $idx}]->(hub) " +
@@ -395,7 +269,7 @@ public class Neo4jModelRepository {
                 session.run(cypher, Values.parameters(
                         "clsName", end.cls().name(),
                         "name", assocName,
-                        "idx", i, // Dùng index làm định danh cho cạnh
+                        "idx", i,
                         "role", end.name(),
                         "mult", end.multiplicity().toString()
                 ));

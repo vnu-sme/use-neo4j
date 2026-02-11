@@ -1,0 +1,14 @@
+model ABC
+
+enum Gender { Male, Female, Other }
+enum ContractType { FullTime, PartTime, Intern, Consultant }
+
+class Person
+attributes
+    name : String
+    age : Integer
+    salary : Real
+    sex : Gender
+    codes: Set(String)
+    codesBag: Bag(Set(String))
+end

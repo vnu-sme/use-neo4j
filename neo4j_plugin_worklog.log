@@ -4360,3 +4360,373 @@ body:1:10: Undefined operation named `purchase' in expression `BuyLotteryTicket.
 [2026-02-01 00:28:29] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -351591988
 [2026-02-01 00:28:29] ACTION: PUSH_SUCCESS | DETAILS: Model ObjectTest is now synchronized.
 [2026-02-01 00:28:29] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -351591988
+[2026-02-01 22:31:21] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-01 22:31:25] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-01 22:31:25] ACTION: SESSION_CREATE | DETAILS: New session created with key: 4C0A92E6
+[2026-02-01 22:31:26] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-01 22:31:26] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 4C0A92E6 | Ver: unknown
+[2026-02-01 23:10:53] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-01 23:10:53] ACTION: CONNECTION_ERROR | DETAILS: NodeAttribute is not annotated with @MetaNode
+[2026-02-01 23:13:21] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-01 23:13:23] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-01 23:13:23] ACTION: SESSION_CREATE | DETAILS: New session created with key: BF6A6A73
+[2026-02-01 23:13:23] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-01 23:13:23] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: BF6A6A73 | Ver: unknown
+[2026-02-01 23:31:49] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: []
+[2026-02-01 23:31:49] ACTION: PUSH_START | DETAILS: User neo4j [Key: BF6A6A73] (audreycolar) initiated sync for model: ObjectTest
+[2026-02-01 23:31:52] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -351591988
+[2026-02-01 23:31:52] ACTION: PUSH_SUCCESS | DETAILS: Model ObjectTest is now synchronized.
+[2026-02-01 23:31:52] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -351591988
+[2026-02-01 23:31:58] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass2
+[2026-02-01 23:31:58] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Cass1
+[2026-02-01 23:31:58] ACTION: PUSH_START | DETAILS: User neo4j [Key: BF6A6A73] (audreycolar) initiated sync for model: ObjectTest
+[2026-02-01 23:31:59] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -351591988
+[2026-02-01 23:31:59] ACTION: PUSH_SUCCESS | DETAILS: Model ObjectTest is now synchronized.
+[2026-02-01 23:31:59] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -351591988
+[2026-02-01 23:31:59] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: BF6A6A73] (audreycolar)
+[2026-02-01 23:32:20] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass2
+[2026-02-01 23:32:20] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Cass1
+[2026-02-01 23:32:20] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: [Cass2, Cass1]
+[2026-02-01 23:32:20] ACTION: PUSH_START | DETAILS: User neo4j [Key: BF6A6A73] (audreycolar) initiated sync for model: LotteryTicketModel
+[2026-02-01 23:32:28] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -1000759573
+[2026-02-01 23:32:28] ACTION: PUSH_SUCCESS | DETAILS: Model LotteryTicketModel is now synchronized.
+[2026-02-01 23:32:28] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -1000759573
+[2026-02-01 23:32:29] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: LotteryDraw
+[2026-02-01 23:32:29] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Purchase
+[2026-02-01 23:32:29] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: step1_act_BuyLotteryTicketOpC
+[2026-02-01 23:32:29] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: step3_act_BuyLotteryTicketOpC
+[2026-02-01 23:32:29] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Buyer
+[2026-02-01 23:32:29] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: step6_sys_BuyLotteryTicketOpC
+[2026-02-01 23:32:29] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Snapshot
+[2026-02-01 23:32:30] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: step2_sys_BuyLotteryTicketOpC
+[2026-02-01 23:32:30] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: step4_sys_BuyLotteryTicketOpC
+[2026-02-01 23:32:30] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: OperationCall
+[2026-02-01 23:32:30] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: BuyLotteryTicketOpC
+[2026-02-01 23:32:30] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: match_step5_act_BuyLotteryTicketOpC
+[2026-02-01 23:32:30] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: step5_act_BuyLotteryTicketOpC
+[2026-02-01 23:32:30] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: BuyLotteryTicket
+[2026-02-01 23:32:30] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: match_step3_act_BuyLotteryTicketOpC
+[2026-02-01 23:32:30] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: [LotteryDraw, Purchase, step1_act_BuyLotteryTicketOpC, step3_act_BuyLotteryTicketOpC, Buyer, step6_sys_BuyLotteryTicketOpC, Snapshot, step2_sys_BuyLotteryTicketOpC, step4_sys_BuyLotteryTicketOpC, OperationCall, BuyLotteryTicketOpC, match_step5_act_BuyLotteryTicketOpC, step5_act_BuyLotteryTicketOpC, BuyLotteryTicket, match_step3_act_BuyLotteryTicketOpC]
+[2026-02-01 23:32:30] ACTION: PUSH_START | DETAILS: User neo4j [Key: BF6A6A73] (audreycolar) initiated sync for model: Employee
+[2026-02-01 23:32:30] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-01 23:32:30] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-01 23:32:32] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: LotteryDraw
+[2026-02-01 23:32:33] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Purchase
+[2026-02-01 23:32:33] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: step1_act_BuyLotteryTicketOpC
+[2026-02-01 23:32:33] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: step3_act_BuyLotteryTicketOpC
+[2026-02-01 23:32:33] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Buyer
+[2026-02-01 23:32:33] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: step6_sys_BuyLotteryTicketOpC
+[2026-02-01 23:32:33] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Snapshot
+[2026-02-01 23:32:33] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: step2_sys_BuyLotteryTicketOpC
+[2026-02-01 23:32:33] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: step4_sys_BuyLotteryTicketOpC
+[2026-02-01 23:32:33] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: OperationCall
+[2026-02-01 23:32:33] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: BuyLotteryTicketOpC
+[2026-02-01 23:32:33] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: match_step5_act_BuyLotteryTicketOpC
+[2026-02-01 23:32:33] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: step5_act_BuyLotteryTicketOpC
+[2026-02-01 23:32:33] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: BuyLotteryTicket
+[2026-02-01 23:32:33] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: match_step3_act_BuyLotteryTicketOpC
+[2026-02-01 23:32:33] ACTION: PUSH_START | DETAILS: User neo4j [Key: BF6A6A73] (audreycolar) initiated sync for model: Employee
+[2026-02-01 23:32:33] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-01 23:32:33] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-01 23:32:34] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 933010803
+[2026-02-01 23:32:34] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-02-01 23:32:34] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 933010803
+[2026-02-01 23:32:34] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-02-01 23:32:34] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 933010803
+[2026-02-01 23:32:34] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 933010803
+[2026-02-01 23:32:34] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: BF6A6A73] (audreycolar)
+[2026-02-02 00:29:49] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml2]
+[2026-02-02 00:29:51] ACTION: CONNECTION_ERROR | DETAILS: The database is not currently available to serve your request, refer to the database logs for more details. Retrying your request at a later time may succeed.
+[2026-02-02 00:32:13] ACTION: CONNECTION_ERROR | DETAILS: Cannot invoke "org.uet.dse.neo4j.phase2.SessionManager.getUserDisplayName()" because the return value of "org.uet.dse.neo4j.manager.Neo4jDriverManager.getSessionManager()" is null
+[2026-02-02 00:32:23] ACTION: CONNECTION_ERROR | DETAILS: Cannot invoke "org.uet.dse.neo4j.phase2.SessionManager.getUserDisplayName()" because the return value of "org.uet.dse.neo4j.manager.Neo4jDriverManager.getSessionManager()" is null
+[2026-02-02 00:32:58] ACTION: CONNECTION_ERROR | DETAILS: Cannot invoke "org.uet.dse.neo4j.phase2.SessionManager.getUserDisplayName()" because the return value of "org.uet.dse.neo4j.manager.Neo4jDriverManager.getSessionManager()" is null
+[2026-02-02 00:33:04] ACTION: CONNECTION_ERROR | DETAILS: Cannot invoke "org.uet.dse.neo4j.phase2.SessionManager.getUserDisplayName()" because the return value of "org.uet.dse.neo4j.manager.Neo4jDriverManager.getSessionManager()" is null
+[2026-02-02 00:33:36] ACTION: CONNECTION_ERROR | DETAILS: Cannot invoke "org.uet.dse.neo4j.phase2.SessionManager.getUserDisplayName()" because the return value of "org.uet.dse.neo4j.manager.Neo4jDriverManager.getSessionManager()" is null
+[2026-02-02 00:36:02] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml2]
+[2026-02-02 00:36:05] ACTION: CONNECTION_ERROR | DETAILS: The database is not currently available to serve your request, refer to the database logs for more details. Retrying your request at a later time may succeed.
+[2026-02-02 00:36:14] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: use-test]
+[2026-02-02 00:36:15] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: use-test
+[2026-02-02 00:36:15] ACTION: SESSION_CREATE | DETAILS: New session created with key: 1658186F
+[2026-02-02 00:36:15] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-02 00:36:15] ACTION: CONNECTION_SUCCESS | DETAILS: DB: use-test | Key: 1658186F | Ver: unknown
+[2026-02-02 00:37:05] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: []
+[2026-02-02 00:37:05] ACTION: PUSH_START | DETAILS: User neo4j [Key: 1658186F] (audreycolar) initiated sync for model: ABC
+[2026-02-02 00:37:06] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-02 00:37:06] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-02 00:37:07] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1703347750
+[2026-02-02 00:37:07] ACTION: PUSH_SUCCESS | DETAILS: Model ABC is now synchronized.
+[2026-02-02 00:37:07] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1703347750
+[2026-02-02 00:37:11] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Person
+[2026-02-02 00:37:11] ACTION: PUSH_START | DETAILS: User neo4j [Key: 1658186F] (audreycolar) initiated sync for model: ABC
+[2026-02-02 00:37:11] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-02 00:37:11] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-02 00:37:11] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1703347750
+[2026-02-02 00:37:11] ACTION: PUSH_SUCCESS | DETAILS: Model ABC is now synchronized.
+[2026-02-02 00:37:11] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1703347750
+[2026-02-02 00:37:11] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 1658186F] (audreycolar)
+[2026-02-02 00:37:54] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Person
+[2026-02-02 00:37:54] ACTION: PUSH_START | DETAILS: User neo4j [Key: 1658186F] (audreycolar) initiated sync for model: ABC
+[2026-02-02 00:37:54] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-02 00:37:54] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-02 00:37:55] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1703347750
+[2026-02-02 00:37:55] ACTION: PUSH_SUCCESS | DETAILS: Model ABC is now synchronized.
+[2026-02-02 00:37:55] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1703347750
+[2026-02-02 00:37:55] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 1658186F] (audreycolar)
+[2026-02-02 00:38:42] ACTION: PUSH_START | DETAILS: User neo4j [Key: 1658186F] (audreycolar) initiated sync for model: ABC
+[2026-02-02 00:38:42] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-02 00:38:42] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-02 00:38:42] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1703347750
+[2026-02-02 00:38:42] ACTION: PUSH_SUCCESS | DETAILS: Model ABC is now synchronized.
+[2026-02-02 00:38:42] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1703347750
+[2026-02-02 00:38:42] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 1658186F] (audreycolar)
+[2026-02-02 00:39:22] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Person
+[2026-02-02 00:39:22] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: [Person]
+[2026-02-02 00:39:22] ACTION: PUSH_START | DETAILS: User neo4j [Key: 1658186F] (audreycolar) initiated sync for model: ABC
+[2026-02-02 00:39:22] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-02 00:39:22] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-02 00:39:22] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1703347750
+[2026-02-02 00:39:22] ACTION: PUSH_SUCCESS | DETAILS: Model ABC is now synchronized.
+[2026-02-02 00:39:22] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1703347750
+[2026-02-02 00:39:26] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Person
+[2026-02-02 00:39:26] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: [Person]
+[2026-02-02 00:39:26] ACTION: PUSH_START | DETAILS: User neo4j [Key: 1658186F] (audreycolar) initiated sync for model: Employee
+[2026-02-02 00:39:26] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-02 00:39:26] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-02 00:39:29] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: ContractType
+[2026-02-02 00:39:29] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: Gender
+[2026-02-02 00:39:32] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 933010803
+[2026-02-02 00:39:32] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-02-02 00:39:32] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 933010803
+[2026-02-02 00:39:33] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: ContractType
+[2026-02-02 00:39:33] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: Gender
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: Professor::canSupervise
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: Professor::getSalaryAdvantage
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: Professor::isSenior
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: University::getStudents
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: University::getProfessors
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: University::getEmployeeCount
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: University::hasFullTimeEmployees
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: University::getTotalSalaryExpense
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: University::getEmployeesByContract
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: Employment::passedProbation
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: Employment::isPermanent
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: Employment::getEmployeeName
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: Employment::getDurationYears
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: Employment::isTemporary
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: Employment::getUniversityName
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: Student::isWorking
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: Student::canGraduate
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: Person::getAnnualSalary
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: Person::hasContract
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: Person::getContract
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: Person::isEligibleForPromotion
+[2026-02-02 00:39:33] ACTION: PULL_OP | DETAILS: Created Signature: Person::isEmployed
+[2026-02-02 00:39:33] ACTION: PULL_ASSOC | DETAILS: Restored: WorksFor
+[2026-02-02 00:39:33] ACTION: PULL_TERNARY | DETAILS: Restored: Ternari with 3 ends.
+[2026-02-02 00:39:33] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-02-02 00:39:33] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-02-02 00:39:34] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Professor
+[2026-02-02 00:39:34] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: University
+[2026-02-02 00:39:34] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Employment
+[2026-02-02 00:39:34] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Student
+[2026-02-02 00:39:34] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Person
+[2026-02-02 00:39:34] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: [Professor, University, Employment, Student, Person]
+[2026-02-02 00:39:34] ACTION: PUSH_START | DETAILS: User neo4j [Key: 1658186F] (audreycolar) initiated sync for model: Employee
+[2026-02-02 00:39:34] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-02 00:39:34] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-02 00:39:36] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 933010803
+[2026-02-02 00:39:36] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-02-02 00:39:36] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 933010803
+[2026-02-02 00:39:47] ACTION: SYNC_CANCEL | DETAILS: User cancelled sync after reviewing diff.
+[2026-02-02 00:40:00] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: ContractType
+[2026-02-02 00:40:00] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: Gender
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: Professor::canSupervise
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: Professor::getSalaryAdvantage
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: Professor::isSenior
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: University::getStudents
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: University::getProfessors
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: University::getEmployeeCount
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: University::hasFullTimeEmployees
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: University::getTotalSalaryExpense
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: University::getEmployeesByContract
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: Employment::passedProbation
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: Employment::isPermanent
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: Employment::getEmployeeName
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: Employment::getDurationYears
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: Employment::isTemporary
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: Employment::getUniversityName
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: Student::isWorking
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: Student::canGraduate
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: Person::getAnnualSalary
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: Person::hasContract
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: Person::getContract
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: Person::isEligibleForPromotion
+[2026-02-02 00:40:00] ACTION: PULL_OP | DETAILS: Created Signature: Person::isEmployed
+[2026-02-02 00:40:00] ACTION: PULL_ASSOC | DETAILS: Restored: WorksFor
+[2026-02-02 00:40:00] ACTION: PULL_TERNARY | DETAILS: Restored: Ternari with 3 ends.
+[2026-02-02 00:40:00] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-02-02 00:40:00] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-02-02 00:40:00] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Professor
+[2026-02-02 00:40:00] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: University
+[2026-02-02 00:40:00] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Employment
+[2026-02-02 00:40:00] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Student
+[2026-02-02 00:40:00] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Person
+[2026-02-02 00:40:00] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: [Professor, University, Employment, Student, Person]
+[2026-02-02 00:40:00] ACTION: PUSH_START | DETAILS: User neo4j [Key: 1658186F] (audreycolar) initiated sync for model: Employee
+[2026-02-02 00:40:00] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-02 00:40:00] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-02 00:40:03] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 933010803
+[2026-02-02 00:40:03] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-02-02 00:40:03] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 933010803
+[2026-02-02 00:40:12] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Professor
+[2026-02-02 00:40:12] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: University
+[2026-02-02 00:40:12] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Employment
+[2026-02-02 00:40:12] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Student
+[2026-02-02 00:40:12] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Person
+[2026-02-02 00:40:12] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: [Professor, University, Employment, Student, Person]
+[2026-02-02 00:40:12] ACTION: PUSH_START | DETAILS: User neo4j [Key: 1658186F] (audreycolar) initiated sync for model: Employee
+[2026-02-02 00:40:12] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-02 00:40:12] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-02 00:40:14] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 933010803
+[2026-02-02 00:40:14] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-02-02 00:40:14] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 933010803
+[2026-02-02 00:40:14] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Professor
+[2026-02-02 00:40:14] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: University
+[2026-02-02 00:40:14] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Employment
+[2026-02-02 00:40:14] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Student
+[2026-02-02 00:40:14] ACTION: CLEANUP | DETAILS: Deep deleted class and all its components: Person
+[2026-02-02 00:40:14] ACTION: AUTO_CLEANUP | DETAILS: Removed obsolete elements: [Professor, University, Employment, Student, Person]
+[2026-02-02 00:40:14] ACTION: PUSH_START | DETAILS: User neo4j [Key: 1658186F] (audreycolar) initiated sync for model: ABC
+[2026-02-02 00:40:14] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-02 00:40:14] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-02 00:40:14] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1703347750
+[2026-02-02 00:40:14] ACTION: PUSH_SUCCESS | DETAILS: Model ABC is now synchronized.
+[2026-02-02 00:40:14] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1703347750
+[2026-02-02 00:40:18] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Person
+[2026-02-02 00:40:18] ACTION: PUSH_START | DETAILS: User neo4j [Key: 1658186F] (audreycolar) initiated sync for model: ABC
+[2026-02-02 00:40:18] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-02 00:40:18] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-02 00:40:19] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1703347750
+[2026-02-02 00:40:19] ACTION: PUSH_SUCCESS | DETAILS: Model ABC is now synchronized.
+[2026-02-02 00:40:19] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1703347750
+[2026-02-02 00:40:19] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 1658186F] (audreycolar)
+[2026-02-02 00:40:29] ACTION: REALTIME | DETAILS: Service restarted with new frequency.
+[2026-02-02 00:40:41] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: ContractType
+[2026-02-02 00:40:41] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: Gender
+[2026-02-02 01:03:17] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: use-test]
+[2026-02-02 01:03:17] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: use-test
+[2026-02-02 01:03:17] ACTION: SESSION_CREATE | DETAILS: New session created with key: 42E832DA
+[2026-02-02 01:03:17] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-02 01:03:17] ACTION: CONNECTION_SUCCESS | DETAILS: DB: use-test | Key: 42E832DA | Ver: unknown
+[2026-02-02 01:03:31] ACTION: PUSH_START | DETAILS: User neo4j [Key: 42E832DA] (audreycolar) initiated sync for model: ABC
+[2026-02-02 01:03:31] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-02 01:03:31] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-02 01:03:32] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1703347750
+[2026-02-02 01:03:32] ACTION: PUSH_SUCCESS | DETAILS: Model ABC is now synchronized.
+[2026-02-02 01:03:32] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1703347750
+[2026-02-02 01:03:32] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 42E832DA] (audreycolar)
+[2026-02-02 01:04:32] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Person
+[2026-02-02 01:04:32] ACTION: PUSH_START | DETAILS: User neo4j [Key: 42E832DA] (audreycolar) initiated sync for model: ABC
+[2026-02-02 01:04:32] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-02 01:04:32] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-02 01:04:32] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -1262162445
+[2026-02-02 01:04:32] ACTION: PUSH_SUCCESS | DETAILS: Model ABC is now synchronized.
+[2026-02-02 01:04:32] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -1262162445
+[2026-02-02 01:04:32] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 42E832DA] (audreycolar)
+[2026-02-02 01:05:43] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: ContractType
+[2026-02-02 01:05:43] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: Gender
+[2026-02-04 20:38:47] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-04 20:38:48] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-04 20:38:48] ACTION: SESSION_CREATE | DETAILS: New session created with key: 5BB12AB4
+[2026-02-04 20:38:48] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-04 20:38:48] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 5BB12AB4 | Ver: unknown
+[2026-02-04 20:38:57] ACTION: PUSH_START | DETAILS: User neo4j [Key: 5BB12AB4] (audreycolar) initiated sync for model: Employee
+[2026-02-04 20:38:57] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-04 20:38:58] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-04 20:39:04] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 933010803
+[2026-02-04 20:39:04] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-02-04 20:39:04] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 933010803
+[2026-02-04 20:39:04] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 5BB12AB4] (audreycolar)
+[2026-02-04 20:39:53] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-04 20:39:54] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-04 20:39:54] ACTION: SESSION_CREATE | DETAILS: New session created with key: DFB749B4
+[2026-02-04 20:39:54] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-04 20:39:54] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: DFB749B4 | Ver: unknown
+[2026-02-04 20:40:00] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-04 20:40:00] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-04 20:40:00] ACTION: SESSION_CREATE | DETAILS: New session created with key: 846393A1
+[2026-02-04 20:40:00] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-04 20:40:00] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 846393A1 | Ver: unknown
+[2026-02-04 20:40:09] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: ContractType
+[2026-02-04 20:40:09] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: Gender
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: Professor::canSupervise
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: Professor::getSalaryAdvantage
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: Professor::isSenior
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: University::getStudents
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: University::getEmployeeCount
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: University::getProfessors
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: University::hasFullTimeEmployees
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: University::getTotalSalaryExpense
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: University::getEmployeesByContract
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: Employment::passedProbation
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: Employment::isPermanent
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: Employment::getEmployeeName
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: Employment::getDurationYears
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: Employment::isTemporary
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: Employment::getUniversityName
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: Student::isWorking
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: Student::canGraduate
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: Person::getAnnualSalary
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: Person::hasContract
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: Person::getContract
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: Person::isEligibleForPromotion
+[2026-02-04 20:40:09] ACTION: PULL_OP | DETAILS: Created Signature: Person::isEmployed
+[2026-02-04 20:40:09] ACTION: PULL_ASSOC | DETAILS: Restored: WorksFor
+[2026-02-04 20:40:09] ACTION: PULL_TERNARY | DETAILS: Restored: Ternari with 3 ends.
+[2026-02-04 20:40:09] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-02-04 20:40:09] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-02-04 20:40:13] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: ContractType
+[2026-02-04 20:40:13] ACTION: PULL_ENUM | DETAILS: Successfully created Enum: Gender
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: Professor::canSupervise
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: Professor::getSalaryAdvantage
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: Professor::isSenior
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: University::getStudents
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: University::fires
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: University::getEmployeeCount
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: University::getProfessors
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: University::hasFullTimeEmployees
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: University::getTotalSalaryExpense
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: University::getEmployeesByContract
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: Employment::passedProbation
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: Employment::isPermanent
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: Employment::getEmployeeName
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: Employment::getDurationYears
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: Employment::isTemporary
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: Employment::getUniversityName
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: Student::isWorking
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: Student::canGraduate
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: Person::getAnnualSalary
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: Person::hasContract
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: Person::getContract
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: Person::isEligibleForPromotion
+[2026-02-04 20:40:13] ACTION: PULL_OP | DETAILS: Created Signature: Person::isEmployed
+[2026-02-04 20:40:13] ACTION: PULL_ASSOC | DETAILS: Restored: WorksFor
+[2026-02-04 20:40:13] ACTION: PULL_TERNARY | DETAILS: Restored: Ternari with 3 ends.
+[2026-02-04 20:40:13] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-02-04 20:40:13] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-02-04 20:40:40] ACTION: REALTIME | DETAILS: Service restarted with new frequency.
+[2026-02-04 20:40:48] ACTION: REALTIME | DETAILS: Service restarted with new frequency.
+[2026-02-04 20:40:59] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-04 20:40:59] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-04 20:41:00] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Tom
+[2026-02-04 20:41:07] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-04 20:41:07] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: CSU
+[2026-02-04 20:41:07] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-04 20:41:17] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-04 20:41:26] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-04 20:41:26] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: hd
+[2026-02-04 20:41:33] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-04 20:41:55] ACTION: SYNC | DETAILS: Object & Link sync completed.

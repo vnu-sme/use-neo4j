@@ -142,8 +142,6 @@ public class Neo4jDriverManager implements AutoCloseable {
     @Override
     public void close() throws Exception {
         if (driver != null) {
-            // 1. Đánh dấu Offline trên DB trước khi ngắt Bolt
-            org.uet.dse.neo4j.collaboration.ConsensusService.getInstance().unregisterUser();
             if (deleteOnExit && !activeDatabase.equals("neo4j") && !activeDatabase.equals("system")) {
                 WorkLogManager.getInstance().log("CLEANUP", "Deleting temporary database: " + activeDatabase);
                 try (Session sysSession = driver.session(SessionConfig.forDatabase("system"))) {

@@ -3,22 +3,19 @@ package org.uet.dse.neo4j.sync;
 import org.neo4j.driver.*;
 import org.neo4j.driver.Record;
 import org.tzi.use.api.UseSystemApi;
-import org.tzi.use.uml.mm.MAssociation;
 import org.tzi.use.uml.mm.MAssociationEnd;
 import org.tzi.use.uml.mm.MAttribute;
-import org.tzi.use.uml.ocl.type.Type;
 import org.tzi.use.uml.ocl.value.Value;
 import org.tzi.use.uml.sys.*;
-import org.uet.dse.neo4j.manager.Neo4jAuditLogService;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.model.FullObjectSnapshot;
 import org.uet.dse.neo4j.model.LinkState;
 import org.uet.dse.neo4j.model.ObjectState;
-import org.uet.dse.neo4j.phase2.Neo4jUmlBridge;
-import org.uet.dse.neo4j.phase2.ValueMapper;
+import org.uet.dse.neo4j.helper.ValueMapper;
 import org.uet.dse.neo4j.phase2.WorkLogManager;
 import org.uet.dse.neo4j.repo.Neo4jModelRepository;
 import org.uet.dse.neo4j.repo.Neo4jObjectRepository;
+import org.uet.dse.neo4j.repo.Neo4jSideRepository;
 
 import javax.swing.*;
 import java.awt.*;
@@ -212,7 +209,7 @@ public class ObjectSyncCoordinator {
                 return null;
             });
 
-            Neo4jUmlBridge.updateObjectVersionOnServer();
+            Neo4jSideRepository.updateObjectVersionOnServer();
             WorkLogManager.getInstance().log("SYNC", "Object & Link sync completed.");
 
         }
@@ -787,25 +784,25 @@ public class ObjectSyncCoordinator {
      * CHỈ ĐẨY 1 OBJECT LÊN DB (JAVA -> DB)
      */
     public void pushSingleObjectByName(String objName) {
-        MObject obj = system.state().objectByName(objName);
-        if (obj == null) return;
-
-        try (Session session = Neo4jDriverManager.getInstance().openSession()) {
-            session.executeWrite(tx -> {
-                // 1. Chụp ảnh trạng thái của đúng Object này
-                ObjectState state = captureSingleObjectState(obj);
-
-                // 2. Đẩy lên server (Sử dụng hàm pushSingleObject đã viết ở phần executePush)
-                // Lưu ý: pushSingleObject cần Transaction (tx)
-                pushSingleObject(tx, state);
-
-                return null;
-            });
-
-            // Cập nhật timestamp để dashboard nhận diện
-            Neo4jUmlBridge.updateObjectVersionOnServer();
-            System.out.println("SELECTIVE_PUSH_OBJ" + "Pushed object: " + objName);
-        }
+//        MObject obj = system.state().objectByName(objName);
+//        if (obj == null) return;
+//
+//        try (Session session = Neo4jDriverManager.getInstance().openSession()) {
+//            session.executeWrite(tx -> {
+//                // 1. Chụp ảnh trạng thái của đúng Object này
+//                ObjectState state = captureSingleObjectState(obj);
+//
+//                // 2. Đẩy lên server (Sử dụng hàm pushSingleObject đã viết ở phần executePush)
+//                // Lưu ý: pushSingleObject cần Transaction (tx)
+//                pushSingleObject(tx, state);
+//
+//                return null;
+//            });
+//
+//            // Cập nhật timestamp để dashboard nhận diện
+//            Neo4jUmlBridge.updateObjectVersionOnServer();
+//            System.out.println("SELECTIVE_PUSH_OBJ" + "Pushed object: " + objName);
+//        }
     }
 
     /**

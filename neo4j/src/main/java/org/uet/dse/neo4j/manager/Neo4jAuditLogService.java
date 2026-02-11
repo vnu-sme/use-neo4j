@@ -23,13 +23,11 @@ public class Neo4jAuditLogService {
      * Ghi log bất đồng bộ (Non-blocking)
      */
     public static void log(String actionType, String category, String target, String details) {
-        // Lấy thông tin ngữ cảnh ngay tại luồng chính để đảm bảo chính xác
         SessionManager sm = Neo4jDriverManager.getInstance().getSessionManager();
         String user = sm.getUserDisplayName();
         String sessionKey = sm.getSessionKey();
         long timestamp = System.currentTimeMillis();
 
-        // Đẩy công việc ghi log vào luồng background
         logExecutor.submit(() -> {
             try (Session session = Neo4jDriverManager.getInstance().openSession()) {
                 String cypher = 
@@ -55,7 +53,6 @@ public class Neo4jAuditLogService {
                     "details", details
                 ));
             } catch (Exception e) {
-                // Nếu ghi log lên DB lỗi (mất mạng), ghi tạm ra console để không mất dấu vết
                 System.err.println("Async Logging Failed: " + e.getMessage());
             }
         });
