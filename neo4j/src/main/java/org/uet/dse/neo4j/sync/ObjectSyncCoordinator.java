@@ -23,7 +23,7 @@ import java.util.*;
 import java.util.List;
 
 public class ObjectSyncCoordinator {
-    // Cờ chặn để phân biệt: Thay đổi do người dùng gõ lệnh hay do Plugin đang tự nạp dữ liệu
+    //changes from user /plugin
     private static boolean isApplyingInternalChange = false;
     private static long lastLocalObjectSyncTimestamp = 0;
     private final MSystem system;
@@ -32,67 +32,53 @@ public class ObjectSyncCoordinator {
     private final Neo4jObjectRepository objectRepository;
     private final UseSystemApi systemApi;
 
+    private final ObjectSnapshotCompare objectSnapshotCompare;
+
     public ObjectSyncCoordinator(MSystem system) {
         this.system = system;
-        // Sử dụng UseSystemApi để thao tác với Object State của USE
         this.systemApi = UseSystemApi.create(system, true);
         this.repo = new Neo4jModelRepository();
         this.objectRepository = new Neo4jObjectRepository();
+        objectSnapshotCompare = new ObjectSnapshotCompare(this.systemApi.getSystem().model());
     }
 
     /**
-     * KIỂM TRA PHIÊN BẢN MODEL (Rule quan trọng nhất)
-     * Đảm bảo Java và DB đang dùng chung 1 version Model
+     * check model version (important)
      */
     private boolean isModelInSync() {
-        // Tính hash của model hiện tại trong Java
         long localHash = calculateModelHash(system.model());
-        // Lấy hash lưu trên Node ModelVersion ở DB
         long remoteHash = objectRepository.getRemoteModelHash();
-
         return localHash != -1 && localHash == remoteHash;
     }
 
-    /**
-     * SYNC XUÔI (Java -> Neo4j)
-     */
     public void syncObjectsForward(boolean isManual) {
-        // 1. KIỂM TRA ĐIỀU KIỆN MODEL (QUY TẮC CHUNG - MODEL LÀ SOT)
         if (!isModelInSync()) {
             if (isManual) {
-                // Nếu người dùng nhấn nút -> Báo lỗi để họ đi sync model trước
                 handleInconsistentModel("Push Objects");
             } else {
-                // Nếu là Real-time -> Chỉ in log console để không làm phiền người dùng gõ lệnh
                 System.out.println("Real-time sync skipped: Model version mismatch.");
             }
             return;
         }
 
-        // 2. CHỤP ẢNH VÀ SO SÁNH
         ObjectDiff diff = compareObjects(getJavaObjectSnapshot(), getNeo4jObjectSnapshot());
 
-        // 3. KIỂM TRA SỰ THAY ĐỔI
         if (!diff.hasDifference()) {
             if (isManual) {
                 JOptionPane.showMessageDialog(null, "Object states are already in sync.", "No Changes", JOptionPane.INFORMATION_MESSAGE);
             }
-            return; // Không có gì để sync thì thoát
+            return;
         }
 
-        // 4. XỬ LÝ PREVIEW (CHỈ DÀNH CHO MANUAL)
         if (isManual) {
             if (!showSyncPreview(diff, "Forward (Java -> DB)")) {
-                return; // Người dùng nhấn Cancel trong bảng Preview
+                return;
             }
         }
 
-        // 5. THỰC THI PUSH DỮ LIỆU
         try {
-            // executePush đã bao gồm logic check Class tồn tại dưới DB và dọn dẹp Link rác
             executePush(diff);
 
-            // 6. THÔNG BÁO THÀNH CÔNG (CHỈ DÀNH CHO MANUAL)
             if (isManual) {
                 SwingUtilities.invokeLater(() -> {
                     JOptionPane.showMessageDialog(null,
@@ -103,7 +89,6 @@ public class ObjectSyncCoordinator {
                             "Success", JOptionPane.INFORMATION_MESSAGE);
                 });
             } else {
-                // Nếu tự động -> Chỉ ghi log ngầm
                 System.out.println("Real-time: Successfully pushed " + diff.javaOnlyObjects.size() + " new objects.");
             }
 
@@ -118,34 +103,27 @@ public class ObjectSyncCoordinator {
     }
 
     public void syncObjectsBackward(boolean isManual) {
-        // 1. Kiểm tra Model Version (Model là SOT của Object)
         if (!isModelInSync()) {
             handleInconsistentModel("Pull Objects");
             return;
         }
 
-        // 2. Chụp ảnh snapshot đầy đủ (Objects + Links)
         FullObjectSnapshot javaSnap = getJavaObjectSnapshot();
         FullObjectSnapshot neoSnap = getNeo4jObjectSnapshot();
 
-        // 3. So sánh
         ObjectDiff diff = compareObjects(javaSnap, neoSnap);
 
-        // 4. Manual Preview
         if (isManual) {
             if (!diff.hasDifference()) {
                 JOptionPane.showMessageDialog(null, "Your local state matches the Database.");
                 return;
             }
-            // generateBackwardReport() bây giờ sẽ hiển thị cả Link thay đổi
             if (!showSyncPreview(diff, "Pull Objects (DB -> Java)")) return;
         }
 
-        // 5. Thực thi nạp vào USE
         try {
             applyChangesToUSEState(diff);
 
-            // 6. Cập nhật local timestamp để dashboard báo XANH
             long remoteTs = objectRepository.getRemoteObjectTimestamp();
             updateLocalSyncTimestamp(remoteTs);
 
@@ -168,15 +146,10 @@ public class ObjectSyncCoordinator {
 
         try (Session session = Neo4jDriverManager.getInstance().openSession()) {
             session.executeWrite(tx -> {
-                // --- PHẦN 1: DỌN DẸP (CLEANUP) ---
-
-                // --- BƯỚC 1: XỬ LÝ XÓA (CASCADE DELETE) ---
                 for (String objName : diff.neo4jOnlyObjects) {
-                    // GỌI HÀM XÓA SÂU Ở ĐÂY
                     objectRepository.deleteObjectDeeply(tx, objName);
                     WorkLogManager.getInstance().log("CLEANUP", "Deep deleted object: " + objName);
                 }
-                // B. Xóa Link rác (Cạnh có thuộc tính isObjectLink hoặc LinkHub)
                 for (String linkName : diff.neo4jOnlyLinks) {
                     tx.run("MATCH ()-[r {name: $name}]-() WHERE type(r) STARTS WITH 'Link' DELETE r",
                             Map.of("name", linkName));
@@ -184,7 +157,6 @@ public class ObjectSyncCoordinator {
                             Map.of("name", linkName));
                 }
 
-                // --- PHẦN 2: PUSH OBJECTS (NODES) ---
                 List<String> toPushObjs = new ArrayList<>(diff.javaOnlyObjects);
                 toPushObjs.addAll(diff.mismatchedObjects);
 
@@ -196,7 +168,6 @@ public class ObjectSyncCoordinator {
                     pushObject(tx, obj, state); // Hàm tạo Node Object và AttributeValue
                 }
 
-                // --- PHẦN 3: PUSH LINKS (EDGES) ---
                 for (MLink link : state.allLinks()) {
                     if (link instanceof MLinkObject) {
                         processPushLinkObject(tx, (MLinkObject) link);
@@ -284,7 +255,6 @@ public class ObjectSyncCoordinator {
                 } catch (Exception e) { /* Bỏ qua nếu link đã tồn tại */ }
             }
 
-            // --- 2. PULL TERNARY LINKS (Quan hệ N-bên qua Hub) ---
             String ternaryCypher =
                     "MATCH (p)-[r]->(hub:LinkHub) WHERE r.isTernary = true " +
                             "RETURN hub.name as assocName, collect({obj: p.use_id, idx: r.index}) as participants";
@@ -294,7 +264,6 @@ public class ObjectSyncCoordinator {
                 Record rec = terRes.next();
                 List<Map<String, Object>> parts = rec.get("participants").asList(v -> (Map<String, Object>)v.asMap());
 
-                // Sắp xếp người tham gia theo đúng thứ tự index (0, 1, 2...)
                 parts.sort(Comparator.comparingInt(p -> ((Number)p.get("idx")).intValue()));
 
                 String[] objNames = new String[parts.size()];
@@ -304,8 +273,6 @@ public class ObjectSyncCoordinator {
                     api.createLink(rec.get("assocName").asString(), objNames);
                 } catch (Exception e) { /* Log error */ }
             }
-
-            // --- 3. PULL LINK OBJECTS (Thực thể Association Class) ---
             String loCypher =
                     "MATCH (lo)-[:ObjectInstanceOf]->(ac:AssociationClass) " +
                             "MATCH (lo)-[r]->(p) WHERE r.isLinkObjectPart = true " +
@@ -361,7 +328,6 @@ public class ObjectSyncCoordinator {
             metadata.put("type", actualType); // LƯU KIỂU THỰC TẾ: "Int", "Sex", v.v.
             metadata.put("isCollection", value instanceof List);
 
-            // Bạn có thể lấy thêm collectionType từ Model nếu muốn chi tiết hơn (Set/Sequence)
             metadata.put("collectionType", (value instanceof List) ? "Collection" : "None");
 
             // Đẩy xuống Repo để tạo node AttributeValue
@@ -386,7 +352,6 @@ public class ObjectSyncCoordinator {
         FullObjectSnapshot fullSnapshot = new FullObjectSnapshot();
         MSystemState state = system.state();
 
-        // 1. QUÉT TẤT CẢ OBJECTS (Tầng M0)
         for (MObject obj : state.allObjects()) {
             ObjectState os = new ObjectState();
             os.name = obj.name();
@@ -417,7 +382,6 @@ public class ObjectSyncCoordinator {
             fullSnapshot.objects.put(os.name, os);
         }
 
-        // 2. QUÉT TẤT CẢ LINKS (Binary, Ternary, LinkObjects)
         for (MLink link : state.allLinks()) {
             LinkState ls = new LinkState();
             ls.assocName = link.association().name();
@@ -447,8 +411,6 @@ public class ObjectSyncCoordinator {
         String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
 
         try (Session session = Neo4jDriverManager.getInstance().getDriver().session(SessionConfig.forDatabase(dbName))) {
-
-            // --- PHẦN 1: QUÉT OBJECTS & ATTRIBUTE NODES ---
             String objCypher =
                     "MATCH (o)-[:ObjectInstanceOf]->(cls) " +
                             "OPTIONAL MATCH (o)-[:ObjectHasAttribute]->(val:AttributeValue)-[:InstanceOf]->(attrDef) " +
@@ -485,7 +447,6 @@ public class ObjectSyncCoordinator {
                     }
                 }
 
-                // Xử lý nạp tham chiếu (Sắp xếp theo index nếu là tập hợp)
                 for (String attr : refGroups.keySet()) {
                     List<Map<String, Object>> refs = refGroups.get(attr);
                     refs.sort(Comparator.comparingInt(m -> ((Number)m.get("idx")).intValue()));
@@ -496,7 +457,6 @@ public class ObjectSyncCoordinator {
                 fullSnapshot.objects.put(os.name, os);
             }
 
-            // --- PHẦN 2: QUÉT BINARY LINKS ---
             String binaryCypher =
                     "MATCH (a)-[r]->(b) WHERE type(r) STARTS WITH 'Link' AND NOT coalesce(r.isTernary, false) " +
                             "AND NOT coalesce(r.isLinkObjectPart, false) " +
@@ -512,7 +472,6 @@ public class ObjectSyncCoordinator {
                 fullSnapshot.links.put(ls.getIdentity(), ls);
             }
 
-            // --- PHẦN 3: QUÉT LINK OBJECTS (AssociationClass Instances) ---
             String loCypher =
                     "MATCH (lo)-[:ObjectInstanceOf]->(ac:AssociationClass) " +
                             "MATCH (lo)-[r]->(p) WHERE r.isLinkObjectPart = true " +
@@ -542,37 +501,28 @@ public class ObjectSyncCoordinator {
         diff.javaSnapshot = javaSnap;
         diff.neo4jSnapshot = neoSnap;
 
-        // 1. Duyệt qua các đối tượng phía Java (USE)
         for (String name : javaSnap.objects.keySet()) {
             if (!neoSnap.objects.containsKey(name)) {
-                // Chỉ có ở Java -> Máy mình đang thừa hoặc chưa Push
                 diff.javaOnlyObjects.add(name);
             } else {
-                // Có ở cả hai, thực hiện so sánh sâu (Deep Comparison)
                 ObjectState javaObj = javaSnap.objects.get(name);
                 ObjectState neoObj = neoSnap.objects.get(name);
 
                 if (!javaObj.isSameAs(neoObj)) {
-                    // Có sai lệch về giá trị hoặc tham chiếu
                     diff.mismatchedObjects.add(name);
 
-                    // Thu thập chi tiết lý do sai lệch để hiện lên Dashboard
                     List<String> details = findObjectMismatchDetails(javaObj, neoObj);
                     diff.mismatchDetails.put(name, details);
                 }
             }
         }
 
-        // 2. Duyệt qua các đối tượng phía Neo4j (DB)
         for (String name : neoSnap.objects.keySet()) {
             if (!javaSnap.objects.containsKey(name)) {
-                // Chỉ có ở Neo4j -> DB đang thừa hoặc máy mình chưa Pull
                 diff.neo4jOnlyObjects.add(name);
             }
         }
 
-        // 2. So sánh Links (Logic Mới)
-        // So sánh những gì máy Java đang có
         for (String identity : javaSnap.links.keySet()) {
             if (!neoSnap.links.containsKey(identity)) {
                 diff.javaOnlyLinks.add(identity);
@@ -580,15 +530,12 @@ public class ObjectSyncCoordinator {
                 diff.mismatchedLinks.add(identity);
             }
         }
-        // So sánh những gì Database đang thừa
+
         for (String identity : neoSnap.links.keySet()) {
             if (!javaSnap.links.containsKey(identity)) {
                 diff.neo4jOnlyLinks.add(identity);
             }
         }
-
-
-
 
         return diff;
     }
@@ -611,13 +558,10 @@ public class ObjectSyncCoordinator {
 
     public boolean isQuickSyncCheck() {
         try {
-            // 1. Lấy thời điểm thay đổi Object gần nhất trên Neo4j (do bất kỳ ai làm)
             long remoteTs = repo.getRemoteObjectTimestamp();
-
-            // 2. Nếu remoteTs = 0 nghĩa là DB chưa bao giờ có object nào
+            //nothing found
             if (remoteTs == 0) return true;
 
-            // 3. So sánh: Nếu remote mới hơn local -> Đã lỗi thời (Out of sync)
             return lastLocalObjectSyncTimestamp == remoteTs;
         } catch (Exception e) {
             return false;
@@ -625,29 +569,22 @@ public class ObjectSyncCoordinator {
     }
 
 
-    /**
-     * Cập nhật trạng thái thực thể vào USE (DB -> Java)
-     * Tuân thủ quy tắc: Database là nguồn chân lý (Source of Truth)
-     */
+    //db -? java
+    //db is sot
     private void applyChangesToUSEState(ObjectDiff diff) throws Exception {
-
-        // --- BƯỚC 1: XÓA LINKS CŨ (Java thừa so với DB) ---
-        // Phải xóa Link trước khi xóa Object để không vi phạm ràng buộc tham chiếu
         for (String linkId : diff.javaOnlyLinks) {
             LinkState ls = diff.javaSnapshot.links.get(linkId);
             if (ls != null) {
                 String[] parts = ls.participants.toArray(new String[0]);
                 try {
-                    // Xóa Link thường hoặc LinkObject
                     systemApi.deleteLink(ls.assocName, parts);
                     WorkLogManager.getInstance().log("LINK_PULL_DELETE", "Removed link: " + ls.getIdentity());
                 } catch (Exception e) {
-                    // Im lặng nếu link đã biến mất do Cascade Delete của Object
+
                 }
             }
         }
 
-        // --- BƯỚC 2: XÓA OBJECTS CŨ (Java thừa so với DB) ---
         for (String objName : diff.javaOnlyObjects) {
             if (systemApi.getObject(objName) != null) {
                 systemApi.deleteObject(objName);
@@ -655,50 +592,42 @@ public class ObjectSyncCoordinator {
             }
         }
 
-        // --- BƯỚC 3: TẠO OBJECTS MỚI (DB thừa so với Java) ---
         for (String objName : diff.neo4jOnlyObjects) {
             ObjectState dbObj = diff.neo4jSnapshot.objects.get(objName);
             if (system.model().getClass(dbObj.className) != null) {
                 systemApi.createObject(dbObj.className, objName);
                 WorkLogManager.getInstance().log("OBJECT_PULL_CREATE", "Created object: " + objName);
             } else {
-                // Trường hợp lỗi cực hiếm: Class chưa được pull mà Object đã đòi pull
+
                 WorkLogManager.getInstance().log("ERROR", "Class missing for object: " + objName);
             }
         }
 
-        // --- BƯỚC 4: ĐỒNG BỘ GIÁ TRỊ (Logic đối chiếu Metadata M1) ---
-        // Duyệt qua TẤT CẢ các đối tượng đang có trong hệ thống sau khi đã thêm/xóa ở trên
         for (org.tzi.use.uml.sys.MObject useObj : system.state().allObjects()) {
             String objName = useObj.name();
             ObjectState dbState = diff.neo4jSnapshot.objects.get(objName);
 
-            // Nếu đối tượng này không có trong Snapshot của DB, bỏ qua (trường hợp cực hiếm)
             if (dbState == null) continue;
 
-            // QUAN TRỌNG: Duyệt qua TẤT CẢ các thuộc tính mà Class này quy định (Tầng Model M1)
             for (org.tzi.use.uml.mm.MAttribute attrDef : useObj.cls().allAttributes()) {
                 String attrName = attrDef.name();
 
-                // KIỂM TRA TRẠNG THÁI TRÊN DB
                 boolean hasPrimitiveValue = dbState.primitiveValues.containsKey(attrName);
                 boolean hasObjectReference = dbState.objectReferences.containsKey(attrName);
 
                 try {
                     if (hasPrimitiveValue) {
-                        // TRƯỜNG HỢP 1: DB CÓ GIÁ TRỊ NGUYÊN THỦY
+
                         String oclVal = UmlTypeTranslator.toOclLiteral(dbState.primitiveValues.get(attrName));
                         systemApi.setAttributeValue(objName, attrName, oclVal);
                     }
                     else if (hasObjectReference) {
-                        // TRƯỜNG HỢP 2: DB CÓ THAM CHIẾU ĐỐI TƯỢNG
+
                         String oclRef = formatToOclReference(dbState.objectReferences.get(attrName));
                         systemApi.setAttributeValue(objName, attrName, oclRef);
                     }
                     else {
-                        // TRƯỜNG HỢP 3: DB KHÔNG CÓ NODE GIÁ TRỊ NÀO
-                        // Nghĩa là người dùng bên kia đã xóa/set null thuộc tính này
-                        // Kiểm tra nếu Java hiện tại đang có giá trị thì mới gọi reset để tối ưu hiệu năng
+
                         if (!useObj.state(system.state()).attributeValue(attrDef).isUndefined()) {
                             systemApi.setAttributeValue(objName, attrName, "Undefined");
                             WorkLogManager.getInstance().log("ATTR_RESET", "Reset " + attrName + " of " + objName + " to null");
@@ -709,9 +638,6 @@ public class ObjectSyncCoordinator {
                 }
             }
         }
-        // --- BƯỚC 5: TÁI TẠO TẤT CẢ CÁC LOẠI LINKS ---
-        // Việc gọi pullLinks(this.systemApi) ở đây là giải pháp THÔNG MINH nhất.
-        // Nó quét trực tiếp DB để nối mạch máu cho các Object vừa nạp.
         pullLinks(this.systemApi);
     }
     /**
@@ -720,7 +646,6 @@ public class ObjectSyncCoordinator {
     private String formatToOclExpression(Object val) {
         if (val == null || val.toString().equals("null")) return "Undefined";
 
-        // Nếu là String (không phải Boolean hay Number) thì bọc trong nháy đơn
         String s = val.toString();
         if (s.equalsIgnoreCase("true") || s.equalsIgnoreCase("false")) return s.toLowerCase();
         if (s.matches("-?\\d+(\\.\\d+)?")) return s; // Kiểm tra số (Integer/Real)
@@ -733,7 +658,7 @@ public class ObjectSyncCoordinator {
      */
     private String formatToOclReference(List<String> names) {
         if (names.isEmpty()) return "Set{}";
-        if (names.size() == 1) return names.get(0); // Gán trực tiếp tên object
+        if (names.size() == 1) return names.get(0);
 
         StringBuilder sb = new StringBuilder("Set{");
         for (int i = 0; i < names.size(); i++) {
@@ -805,15 +730,12 @@ public class ObjectSyncCoordinator {
 //        }
     }
 
-    /**
-     * Helper: Chụp ảnh trạng thái của 1 Object duy nhất
-     */
+
     private ObjectState captureSingleObjectState(MObject obj) {
         ObjectState os = new ObjectState();
         os.name = obj.name();
         os.className = obj.cls().name();
 
-        // Quét giá trị và tham chiếu (tương tự hàm getJavaObjectSnapshot nhưng cho 1 obj)
         var attrMap = obj.state(system.state()).attributeValueMap();
         attrMap.forEach((attr, val) -> {
             Object mapped = ValueMapper.mapUseValue(val);
@@ -826,16 +748,14 @@ public class ObjectSyncCoordinator {
         return os;
     }
 
-    // Trong lớp ObjectSyncCoordinator
     public void syncObjectsForwardRealtime() {
         String user = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
 
-        // Thử lấy lock, nếu bận thì bỏ qua (Real-time ko đợi)
         LockManager.LockResult lock = LockManager.acquireLock(user);
         if (!lock.success) return;
 
         try {
-            if (!isModelInSync()) return; // Chỉ sync object nếu model đã khớp
+            if (!isModelInSync()) return;
 
             ObjectDiff diff = compareObjects(getJavaObjectSnapshot(), getNeo4jObjectSnapshot());
 
@@ -861,13 +781,11 @@ public class ObjectSyncCoordinator {
             MAttribute attr = entry.getKey();
             Value useVal = entry.getValue();
 
-            // NẾU GIÁ TRỊ RỖNG TRÊN JAVA -> XÓA NODE DƯỚI DB
             if (useVal.isUndefined()) {
                 objectRepository.removeAttributeValueNode(tx, objName, attr.name());
                 continue;
             }
 
-            // CHỈ GÁN KHI CÓ GIÁ TRỊ
             Map<String, Object> metadata = new HashMap<>();
             metadata.put("type", UmlTypeTranslator.toDatabaseType(attr.type()));
             metadata.put("isCollection", attr.type().isKindOfCollection(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID));
@@ -915,24 +833,19 @@ public class ObjectSyncCoordinator {
     }
 
 
-
-    /**
-     * AUTO-PULL: Kéo dữ liệu về Java mà không hiện Pop-up
-     */
     public void syncObjectsBackwardRealtime() {
         try {
-            isApplyingInternalChange = true; // Bắt đầu nạp dữ liệu -> Chặn Auto-Push
+            isApplyingInternalChange = true;
 
             ObjectDiff diff = compareObjects(getJavaObjectSnapshot(), getNeo4jObjectSnapshot());
             if (diff.hasDifference()) {
                 applyChangesToUSEState(diff);
-                // Cập nhật timestamp local để đồng bộ với server
                 updateLocalSyncTimestamp(new Neo4jObjectRepository().getRemoteObjectTimestamp());
             }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            isApplyingInternalChange = false; // Nạp xong -> Mở lại Auto-Push
+            isApplyingInternalChange = false;
         }
     }
 

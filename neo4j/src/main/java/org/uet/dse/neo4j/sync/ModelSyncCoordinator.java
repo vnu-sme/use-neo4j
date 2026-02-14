@@ -191,7 +191,6 @@ public class ModelSyncCoordinator {
     }
 
 
-
     public ModelDiff compareWithNeo4jObsolete() {
         ModelDiff diff = new ModelDiff();
         FullModelSnapshot neoSnap = getFullModelSnapshotFromNeo4j();

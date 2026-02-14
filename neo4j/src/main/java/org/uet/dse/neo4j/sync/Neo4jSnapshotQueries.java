@@ -70,4 +70,31 @@ public class Neo4jSnapshotQueries {
                     "RETURN hub.name AS assocName, " +
                     "       collect({cls: c.name, role: r.sourceClassrole, " +
                     "                mult: r.sourceMultiplicity, idx: r.index, type: type(r)}) AS participants";
+
+    static final String OBJECTS_AND_ATTRIBUTES =
+            "MATCH (o)-[:ObjectInstanceOf]->(cls) " +
+                    "OPTIONAL MATCH (o)-[:ObjectHasAttribute]->(val:AttributeValue)-[:InstanceOf]->(attrDef) " +
+                    "OPTIONAL MATCH (val)-[r:objectReference]->(target) " +
+                    "RETURN o.use_id AS name, cls.name AS className, " +
+                    "       collect({ " +
+                    "         attr:  attrDef.attrName, " +
+                    "         type:  val.type, " +
+                    "         value: val.value, " +
+                    "         ref:   target.use_id, " +
+                    "         idx:   r.index " +
+                    "       }) AS data";
+
+    static final String BINARY_LINKS =
+            "MATCH (a)-[r]->(b) " +
+                    "WHERE type(r) STARTS WITH 'Link' " +
+                    "  AND NOT coalesce(r.isTernary,        false) " +
+                    "  AND NOT coalesce(r.isLinkObjectPart, false) " +
+                    "RETURN r.name AS assocName, type(r) AS label, " +
+                    "       a.use_id AS src, b.use_id AS tgt";
+
+    static final String LINK_OBJECTS =
+            "MATCH (lo)-[:ObjectInstanceOf]->(ac:AssociationClass) " +
+                    "MATCH (lo)-[r]->(p) WHERE r.isLinkObjectPart = true " +
+                    "RETURN lo.use_id AS loName, ac.name AS acName, " +
+                    "       collect({p: p.use_id, idx: r.index}) AS parts";
 }

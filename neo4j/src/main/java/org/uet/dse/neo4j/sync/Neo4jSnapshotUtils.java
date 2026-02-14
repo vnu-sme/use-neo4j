@@ -32,7 +32,7 @@ public class Neo4jSnapshotUtils {
     private Map<String, ClassState> loadClassStates(Session session) {
         Map<String, ClassState> stateMap = new HashMap<>();
         session.run(Neo4jSnapshotQueries.CLASSES_AND_FEATURES).forEachRemaining(row -> {
-            ClassState cls = Neo4jSnapshotMapper.toClassState(row);
+            ClassState cls = Neo4jModelSnapshotMapper.toClassState(row);
             stateMap.put(cls.getName(), cls);
         });
         return stateMap;
@@ -49,14 +49,14 @@ public class Neo4jSnapshotUtils {
 
     private void loadBinaryAssociations(Session session, FullModelSnapshot snapshot) {
         session.run(Neo4jSnapshotQueries.BINARY_ASSOCIATIONS).forEachRemaining(rec -> {
-            AssociationState as = Neo4jSnapshotMapper.toBinaryAssociation(rec);
+            AssociationState as = Neo4jModelSnapshotMapper.toBinaryAssociation(rec);
             snapshot.associations.put(as.name, as);
         });
     }
 
     private void loadTernaryAssociations(Session session, FullModelSnapshot snapshot) {
         session.run(Neo4jSnapshotQueries.TERNARY_ASSOCIATIONS).forEachRemaining(rec ->
-                snapshot.ternaryAssociations.add(Neo4jSnapshotMapper.toTernaryAssociation(rec))
+                snapshot.ternaryAssociations.add(Neo4jModelSnapshotMapper.toTernaryAssociation(rec))
         );
     }
 }

@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-public class Neo4jSnapshotMapper {
+public class Neo4jModelSnapshotMapper {
 
-    private Neo4jSnapshotMapper() {}
+    private Neo4jModelSnapshotMapper() {}
 
     static ClassState toClassState(Record row) {
         ClassState cls = new ClassState();
