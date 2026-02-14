@@ -1,0 +1,62 @@
+package org.uet.dse.neo4j.sync;
+
+import org.neo4j.driver.Session;
+import org.neo4j.driver.SessionConfig;
+import org.uet.dse.neo4j.manager.Neo4jDriverManager;
+import org.uet.dse.neo4j.model.AssociationState;
+import org.uet.dse.neo4j.model.ClassState;
+import org.uet.dse.neo4j.model.FullModelSnapshot;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class Neo4jSnapshotUtils {
+    public FullModelSnapshot getFullModelSnapshotFromNeo4j() {
+        FullModelSnapshot fullSnapshot = new FullModelSnapshot();
+        String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
+
+        try (Session session = Neo4jDriverManager.getInstance().getDriver()
+                .session(SessionConfig.forDatabase(dbName))) {
+
+            Map<String, ClassState> stateMap = loadClassStates(session);
+            applyGeneralizations(session, stateMap);
+            fullSnapshot.classes = stateMap;
+
+            loadBinaryAssociations(session, fullSnapshot);
+            loadTernaryAssociations(session, fullSnapshot);
+        }
+
+        return fullSnapshot;
+    }
+
+    private Map<String, ClassState> loadClassStates(Session session) {
+        Map<String, ClassState> stateMap = new HashMap<>();
+        session.run(Neo4jSnapshotQueries.CLASSES_AND_FEATURES).forEachRemaining(row -> {
+            ClassState cls = Neo4jSnapshotMapper.toClassState(row);
+            stateMap.put(cls.getName(), cls);
+        });
+        return stateMap;
+    }
+
+    private void applyGeneralizations(Session session, Map<String, ClassState> stateMap) {
+        session.run(Neo4jSnapshotQueries.GENERALIZATIONS).forEachRemaining(row -> {
+            String child = row.get("child").asString();
+            if (stateMap.containsKey(child)) {
+                stateMap.get(child).getParents().add(row.get("parent").asString());
+            }
+        });
+    }
+
+    private void loadBinaryAssociations(Session session, FullModelSnapshot snapshot) {
+        session.run(Neo4jSnapshotQueries.BINARY_ASSOCIATIONS).forEachRemaining(rec -> {
+            AssociationState as = Neo4jSnapshotMapper.toBinaryAssociation(rec);
+            snapshot.associations.put(as.name, as);
+        });
+    }
+
+    private void loadTernaryAssociations(Session session, FullModelSnapshot snapshot) {
+        session.run(Neo4jSnapshotQueries.TERNARY_ASSOCIATIONS).forEachRemaining(rec ->
+                snapshot.ternaryAssociations.add(Neo4jSnapshotMapper.toTernaryAssociation(rec))
+        );
+    }
+}

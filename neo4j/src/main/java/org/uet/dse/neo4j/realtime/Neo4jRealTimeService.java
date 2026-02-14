@@ -8,6 +8,7 @@ import org.uet.dse.neo4j.phase2.WorkLogManager;
 import org.uet.dse.neo4j.sync.ModelSyncCoordinator;
 import org.uet.dse.neo4j.sync.ObjectDiff;
 import org.uet.dse.neo4j.sync.ObjectSyncCoordinator;
+import org.uet.dse.neo4j.sync.RealtimeModelSyncCoordinator;
 
 import java.util.concurrent.*;
 
@@ -131,7 +132,7 @@ public class Neo4jRealTimeService implements ChangeListener, Session.EvaluatedSt
     @Override
     public void stateChanged(ChangeEvent var1) {
         if (SyncConfig.getInstance().autoPushModelOnImport) {
-            executor.submit(() -> new ModelSyncCoordinator(session, null).syncForwardRealtime());
+            executor.submit(() -> new RealtimeModelSyncCoordinator(session, null).syncForwardRealtime());
         }
     }
 

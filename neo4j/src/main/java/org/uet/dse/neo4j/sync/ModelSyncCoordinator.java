@@ -18,7 +18,6 @@ import org.uet.dse.neo4j.manager.Neo4jAuditLogService;
 import org.uet.dse.neo4j.model.AssociationState;
 import org.uet.dse.neo4j.model.ClassState;
 import org.uet.dse.neo4j.model.FullModelSnapshot;
-import org.uet.dse.neo4j.phase2.Neo4jUmlBridge;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.phase2.WorkLogManager;
 
@@ -34,14 +33,15 @@ public class ModelSyncCoordinator {
 
     private final MainWindow mainWindow;
     private final UseModelApi modelApi;
-    private final Neo4jUmlBridge bridge;
 
-    public ModelSyncCoordinator(Session session, MainWindow mainWindow, MModel useModel, UseModelApi modelApi, Neo4jUmlBridge bridge) {
+    private final ModelSnapshotCompare modelSnapshotCompare;
+
+    public ModelSyncCoordinator(Session session, MainWindow mainWindow, MModel useModel, UseModelApi modelApi) {
         this.useSession = session;
         this.mainWindow = mainWindow;
         this.useModel = useModel;
         this.modelApi = modelApi;
-        this.bridge = bridge;
+        this.modelSnapshotCompare = new ModelSnapshotCompare(useModel);
     }
 
     public ModelSyncCoordinator(Session session, MainWindow mainWindow) {
@@ -49,7 +49,7 @@ public class ModelSyncCoordinator {
         this.mainWindow = mainWindow;
         this.useModel = session.system().model();
         this.modelApi = new UseModelApi(session.system().model());
-        this.bridge = new Neo4jUmlBridge(this.modelApi);
+        this.modelSnapshotCompare = new ModelSnapshotCompare(useModel);
     }
 
     public ModelSyncCoordinator(Session session) {
@@ -57,9 +57,8 @@ public class ModelSyncCoordinator {
         this.mainWindow = null;
         this.useModel = session.system().model();
         this.modelApi = new UseModelApi(session.system().model());
-        this.bridge = new Neo4jUmlBridge(this.modelApi);
+        this.modelSnapshotCompare = new ModelSnapshotCompare(useModel);
     }
-
 
     public MModel getUseModel() {
         return useModel;
@@ -69,8 +68,8 @@ public class ModelSyncCoordinator {
         return modelApi;
     }
 
-    public Neo4jUmlBridge getBridge() {
-        return bridge;
+    public ModelSnapshotCompare getModelSnapshotCompare() {
+        return this.modelSnapshotCompare;
     }
 
     public void syncForward() {
@@ -90,7 +89,7 @@ public class ModelSyncCoordinator {
             return;
         }
         try {
-            ModelDiff diff = compareWithNeo4j();
+            ModelDiff diff = modelSnapshotCompare.compareWithNeo4j();
 
             if (diff.hasDifference()) {
                 JTextArea textArea = new JTextArea(diff.generateForwardReport());
@@ -115,7 +114,8 @@ public class ModelSyncCoordinator {
             }
 
             //overwrite and add stuff that is in USE but not neo4j
-            bridge.pushModelToNeo4j();
+            ModelPushService modelPushService = new ModelPushService(this.modelApi);
+            modelPushService.pushModelToNeo4j();
 
             WorkLogManager.getInstance().log("SYNC_FORWARD_SUCCESS", "Model pushed by: " + userIdentifier);
             JOptionPane.showMessageDialog(null, "Synchronization to Neo4j completed successfully!");
@@ -129,7 +129,70 @@ public class ModelSyncCoordinator {
         }
     }
 
-    public ModelDiff compareWithNeo4j() {
+    public void syncBackward() {
+        String user = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
+        LockManager.LockResult lock = LockManager.acquireLock(user);
+        if (!lock.success) {
+            JOptionPane.showMessageDialog(null, "Database is locked by: " + lock.owner);
+            return;
+        }
+
+        SwingUtilities.invokeLater(() -> {
+            try {
+                FullModelSnapshot fullModelSnapshot = getFullModelSnapshotFromNeo4j();
+                Map<String, ClassState> dbSnapshot = fullModelSnapshot.classes;
+                if (dbSnapshot.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "No model found in Database.");
+                    return;
+                }
+
+                String actualModelName = getModelNameFromDb(); // Hàm này đọc từ node ModelVersion
+
+                //create new model
+                ModelFactory factory = new ModelFactory();
+                MModel newModel = factory.createModel(actualModelName);
+
+                ModelPullService modelPullService = new ModelPullService();
+                modelPullService.pullModelFromNeo4jAfterSnapshotComparing(newModel, fullModelSnapshot);
+
+                MSystem newSystem = new MSystem(newModel);
+                useSession.setSystem(newSystem);
+
+                //update & reload folder structure
+                mainWindow.getModelBrowser().updateUI();
+                // mainWindow.showModelStatus();
+                mainWindow.logWriter().println("Neo4j Sync: Model '" + actualModelName + "' successfully pulled.");
+
+                JOptionPane.showMessageDialog(mainWindow, "Sync Backward Success!");
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Sync Error: " + e.getMessage());
+            } finally {
+                LockManager.releaseLock();
+            }
+        });
+    }
+
+    /**
+     * Quy trình Sync Ngược: Neo4j -> Java
+     */
+    private String getModelNameFromDb() {
+        String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
+        try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().getDriver().session(
+                org.neo4j.driver.SessionConfig.forDatabase(dbName))) {
+
+            org.neo4j.driver.Result res = session.run("MATCH (v:ModelVersion {id: 'CURRENT'}) RETURN v.modelName as name");
+            if (res.hasNext()) {
+                return res.single().get("name").asString();
+            }
+        }
+        return "UntitledModel"; // Fallback nếu không tìm thấy
+    }
+
+
+
+    public ModelDiff compareWithNeo4jObsolete() {
         ModelDiff diff = new ModelDiff();
         FullModelSnapshot neoSnap = getFullModelSnapshotFromNeo4j();
         FullModelSnapshot javaSnap = getFullModelSnapshotFromUSE();
@@ -143,7 +206,7 @@ public class ModelSyncCoordinator {
                 ClassState n4jCls = neoSnap.classes.get(className);
                 if (!useCls.isSameAs(n4jCls)) {
                     diff.mismatchedClasses.add(className);
-                    compareAttributesDeep(className, useCls, n4jCls, diff);
+                    compareAttributesDeepObsolete(className, useCls, n4jCls, diff);
                 }
             }
         }
@@ -169,9 +232,7 @@ public class ModelSyncCoordinator {
         }
         return diff;
     }
-
-
-    private void compareAttributesDeep(String clsName, ClassState useCls, ClassState n4jCls, ModelDiff diff) {
+    private void compareAttributesDeepObsolete(String clsName, ClassState useCls, ClassState n4jCls, ModelDiff diff) {
         List<String> javaOnly = new ArrayList<>();
         List<String> neo4jOnly = new ArrayList<>();
 
@@ -185,73 +246,10 @@ public class ModelSyncCoordinator {
         if (!javaOnly.isEmpty()) diff.javaOnlyAttributes.put(clsName, javaOnly);
         if (!neo4jOnly.isEmpty()) diff.neo4jOnlyAttributes.put(clsName, neo4jOnly);
     }
-
-
     private void deleteObjectsByLabel(String label) {
         try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().openSession()) {
             session.run("MATCH (n:`" + label + "`) DETACH DELETE n");
         }
-    }
-
-    /**
-     * Quy trình Sync Ngược: Neo4j -> Java
-     */
-    public void syncBackward() {
-        String user = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
-        LockManager.LockResult lock = LockManager.acquireLock(user);
-        if (!lock.success) {
-            JOptionPane.showMessageDialog(null, "Database is locked by: " + lock.owner);
-            return;
-        }
-
-        SwingUtilities.invokeLater(() -> {
-            try {
-                FullModelSnapshot fullModelSnapshot = getFullModelSnapshotFromNeo4j();
-                Map<String, ClassState> dbSnapshot = fullModelSnapshot.classes;
-                if (dbSnapshot.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "No model found in Database.");
-                    return;
-                }
-
-                String actualModelName = getModelNameFromDb(); // Hàm này đọc từ node ModelVersion
-
-                //create new model
-                ModelFactory factory = new ModelFactory();
-                MModel newModel = factory.createModel(actualModelName);
-
-                //map data to USE layer
-                // Hàm này chứa 5 bước: Class -> Attr (Index) -> Op (Ref) -> Gen -> Assoc
-                applyChangesFromSnapshot(newModel, fullModelSnapshot);
-
-                MSystem newSystem = new MSystem(newModel);
-                useSession.setSystem(newSystem);
-
-                //update & reload folder structure
-                mainWindow.getModelBrowser().updateUI();
-               // mainWindow.showModelStatus();
-                mainWindow.logWriter().println("Neo4j Sync: Model '" + actualModelName + "' successfully pulled.");
-
-                JOptionPane.showMessageDialog(mainWindow, "Sync Backward Success!");
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(null, "Sync Error: " + e.getMessage());
-            } finally {
-                LockManager.releaseLock();
-            }
-        });
-    }
-    private String getModelNameFromDb() {
-        String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
-        try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().getDriver().session(
-                org.neo4j.driver.SessionConfig.forDatabase(dbName))) {
-
-            org.neo4j.driver.Result res = session.run("MATCH (v:ModelVersion {id: 'CURRENT'}) RETURN v.modelName as name");
-            if (res.hasNext()) {
-                return res.single().get("name").asString();
-            }
-        }
-        return "UntitledModel"; // Fallback nếu không tìm thấy
     }
 
     private void syncAssociationsToTargetModel(MModel targetModel, org.tzi.use.api.UseModelApi tempApi) {
@@ -322,11 +320,11 @@ public class ModelSyncCoordinator {
         }
     }
 
-    /**
-     * Xây dựng toàn bộ cấu trúc Model vào một đối tượng MModel mục tiêu
-     * @param targetModel Đối tượng model mới tinh (thường dùng cho chiến lược REPLACE)
-     */
-    private void applyChangesFromSnapshot(MModel targetModel, FullModelSnapshot fullModelSnapshot) throws Exception {
+    private void applyChangesFromSnapshot(MModel targetModel, FullModelSnapshot fullModelSnapshot) {
+        ModelPullService modelPullService = new ModelPullService();
+        modelPullService.pullModelFromNeo4jAfterSnapshotComparing(targetModel, fullModelSnapshot);
+    }
+    private void applyChangesFromSnapshotObsolete(MModel targetModel, FullModelSnapshot fullModelSnapshot) throws Exception {
         org.tzi.use.api.UseModelApi tempApi = new org.tzi.use.api.UseModelApi(targetModel);
 
         //enums must be loaded first
@@ -558,22 +556,7 @@ public class ModelSyncCoordinator {
         }
     }
 
-    /**
-     * Hàm trợ giúp xóa Operation khỏi Class để nạp lại SOIL
-     */
-    private void removeOperationFromClass(MClass cls, String opName) {
-        try {
-            // Sử dụng reflection hoặc trực tiếp truy cập nếu API cho phép
-            // Trong USE MClass, danh sách operation thường nằm trong một Map
-            MOperation op = cls.operation(opName, false);
-            if (op != null) {
-                // Lưu ý: Tùy phiên bản USE, bạn có thể cần can thiệp vào List internal
-                // cls.operations().remove(op);
-            }
-        } catch (Exception e) {
-            System.err.println("Remove Op fail: " + opName);
-        }
-    }
+
 
     /**
      * Tạo bảng ký hiệu (Context) cho trình biên dịch OCL.
@@ -792,10 +775,9 @@ public class ModelSyncCoordinator {
                 return "No Connection";
             }
 
-            // Nếu DB rỗng (chưa từng push), isQuickSyncCheck sẽ false
             if (isQuickSyncCheck()) return "All Synced";
 
-            ModelDiff diff = compareWithNeo4j();
+            ModelDiff diff = modelSnapshotCompare.compareWithNeo4j();
             if (diff == null || !diff.hasDifference()) return "All Synced";
 
             return String.format("%d New, %d Missing, %d Mismatch",
@@ -803,11 +785,16 @@ public class ModelSyncCoordinator {
                     diff.neo4jOnlyClasses.size(),
                     diff.mismatchedClasses.size());
         } catch (Exception e) {
-            return "Check Failed"; // Luôn trả về String
+            return "Check Failed";
         }
     }
 
     private FullModelSnapshot getFullModelSnapshotFromNeo4j() {
+        Neo4jSnapshotUtils neo4jSnapshotUtils = new Neo4jSnapshotUtils();
+        return neo4jSnapshotUtils.getFullModelSnapshotFromNeo4j();
+    }
+
+    private FullModelSnapshot getFullModelSnapshotFromNeo4jObsolete() {
         FullModelSnapshot fullSnapshot = new FullModelSnapshot();
         String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
 
@@ -1032,7 +1019,7 @@ public class ModelSyncCoordinator {
             String ternaryCypher =
                     "MATCH (c)-[r]->(hub)-[:InstanceOf]->(:MetaNode {name: 'NodeTernaryAssociation'}) " +
                             "WHERE r.isTernary = true " +
-                            // Chìa khóa: Thu thập thông tin từ cạnh 'r' để phân biệt các đầu mút
+                            //Thu thập thông tin từ cạnh 'r' để phân biệt các đầu mút
                             "RETURN hub.name as assocName, " +
                             "collect({cls: c.name, role: r.sourceClassrole, mult: r.sourceMultiplicity, idx: r.index, type: type(r)}) as participants";
 
@@ -1049,6 +1036,12 @@ public class ModelSyncCoordinator {
     }
 
     public FullModelSnapshot getFullModelSnapshotFromUSE() {
+        USEModelSnapshotUtils useModelSnapshotUtils = new USEModelSnapshotUtils(this.useModel);
+        return useModelSnapshotUtils.getFullModelSnapshotFromUSE();
+
+    }
+
+    public FullModelSnapshot getFullModelSnapshotFromUSEObsolete() {
         FullModelSnapshot fullSnapshot = new FullModelSnapshot();
         Map<String, ClassState> stateMap = new HashMap<>();
 
@@ -1174,95 +1167,9 @@ public class ModelSyncCoordinator {
         return fullSnapshot;
     }
 
-    /**
-     * for real-time utils
-     */
-    public void syncForwardRealtime() {
-        String userIdentifier = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
-
-        // if the lock is not obtained, currently skip, not retrying yet
-        LockManager.LockResult lock = LockManager.acquireLock(userIdentifier);
-        if (!lock.success) {
-            return;
-        }
-
-        try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().openSession()) {
-            ModelDiff diff = compareWithNeo4j();
-
-            if (diff.hasDifference()) {
-
-                //clear assoc
-                if (!diff.neo4jOnlyAssociations.isEmpty()) {
-                    for (String assocName : diff.neo4jOnlyAssociations) {
-                        session.run("MATCH ()-[r {associationName: $name}]-() DELETE r",
-                                Values.parameters("name", assocName));
-                    }
-                }
-
-                //clear class & enum
-                if (!diff.neo4jOnlyClasses.isEmpty()) {
-                    for (String label : diff.neo4jOnlyClasses) {
-                        // Xóa tất cả các node có nhãn :Person
-                        session.run("MATCH (n:`" + label + "`) DETACH DELETE n");
-
-                        // ascade Delete
-                        // Tìm Class và tất cả các node Attribute, Operation, Invariant, Param nối với nó
-                        String deepDeleteCypher =
-                                "MATCH (meta:MetaNode) WHERE meta.name IN ['NodeConcreteClass', 'NodeAbstractClass', 'NodeAssociationClass', 'NodeEnumeration'] " +
-                                        "MATCH (c {name: $name})-[:InstanceOf]->(meta) " +
-
-                                        "OPTIONAL MATCH (c)-[:HasAttribute]->(a) " +
-                                        "OPTIONAL MATCH (c)-[:HasInvariant]->(inv) " +
-                                        "OPTIONAL MATCH (c)-[:HasOperation]->(o) " +
-
-                                        "OPTIONAL MATCH (o)-[:HasParam]->(p) " +
-                                        "OPTIONAL MATCH (o)-[:HasPreCondition]->(pre) " +
-                                        "OPTIONAL MATCH (o)-[:HasPostCondition]->(post) " +
-
-                                        "WITH c, " +
-                                        "collect(DISTINCT a) as attrs, " +
-                                        "collect(DISTINCT inv) as invs, " +
-                                        "collect(DISTINCT o) as ops, " +
-                                        "collect(DISTINCT p) as params, " +
-                                        "collect(DISTINCT pre) as pres, " +
-                                        "collect(DISTINCT post) as posts " +
-
-                                        "FOREACH (x IN attrs | DETACH DELETE x) " +
-                                        "FOREACH (x IN invs | DETACH DELETE x) " +
-                                        "FOREACH (x IN params | DETACH DELETE x) " +
-                                        "FOREACH (x IN pres | DETACH DELETE x) " +
-                                        "FOREACH (x IN posts | DETACH DELETE x) " +
-                                        "FOREACH (x IN ops | DETACH DELETE x) " +
-                                        "DETACH DELETE c";
-
-                        session.run(deepDeleteCypher, Values.parameters("name", label));
-
-                        session.run("MATCH ()-[r {associationName: $name}]-() DELETE r",
-                                Values.parameters("name", label));
-
-                        WorkLogManager.getInstance().log("CLEANUP", "Deep deleted class and all its components: " + label);
-                    }
-                }
-
-                WorkLogManager.getInstance().log("AUTO_CLEANUP", "Removed obsolete elements: " + diff.neo4jOnlyClasses);
-            }
-
-            bridge.pushModelToNeo4j();
-
-            bridge.updateModelVersion(session, userIdentifier);
-
-            System.out.println("Real-time Sync: Database matches USE model.");
-
-        } catch (Exception e) {
-            System.err.println("Real-time Sync Error: " + e.getMessage());
-            WorkLogManager.getInstance().log("REALTIME_ERROR", e.getMessage());
-        } finally {
-            LockManager.releaseLock();
-        }
-    }
 
     public void proposeModelSync() {
-        ModelDiff diff = compareWithNeo4j();
+        ModelDiff diff = modelSnapshotCompare.compareWithNeo4j();
         if (!diff.hasDifference()) {
             JOptionPane.showMessageDialog(null, "Model is already up-to-date.");
             return;
@@ -1287,17 +1194,14 @@ public class ModelSyncCoordinator {
             FullModelSnapshot dbSnapshot = getFullModelSnapshotFromNeo4j();
             if (dbSnapshot.isEmpty()) return;
 
-            // Lấy tên model thực tế từ DB
             String actualModelName = getModelNameFromDb();
 
-            // 2. Thay thế Model và System
             org.tzi.use.uml.mm.ModelFactory factory = new org.tzi.use.uml.mm.ModelFactory();
             org.tzi.use.uml.mm.MModel newModel = factory.createModel(actualModelName);
 
-            // Nạp data
-            applyChangesFromSnapshot(newModel, dbSnapshot);
+            ModelPullService modelPullService = new ModelPullService();
+            modelPullService.pullModelFromNeo4jAfterSnapshotComparing(newModel, dbSnapshot);
 
-            // Đổi System
             org.tzi.use.uml.sys.MSystem newSystem = new org.tzi.use.uml.sys.MSystem(newModel);
             useSession.setSystem(newSystem);
 
