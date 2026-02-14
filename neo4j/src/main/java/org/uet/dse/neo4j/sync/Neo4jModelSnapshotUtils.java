@@ -10,7 +10,7 @@ import org.uet.dse.neo4j.model.FullModelSnapshot;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Neo4jSnapshotUtils {
+public class Neo4jModelSnapshotUtils {
     public FullModelSnapshot getFullModelSnapshotFromNeo4j() {
         FullModelSnapshot fullSnapshot = new FullModelSnapshot();
         String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();

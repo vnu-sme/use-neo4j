@@ -16,6 +16,9 @@ import org.uet.dse.neo4j.phase2.WorkLogManager;
 import org.uet.dse.neo4j.repo.Neo4jModelRepository;
 import org.uet.dse.neo4j.repo.Neo4jObjectRepository;
 import org.uet.dse.neo4j.repo.Neo4jSideRepository;
+import org.uet.dse.neo4j.sync.feedback.SyncFeedbackHandler;
+import org.uet.dse.neo4j.sync.feedback.object.AutoSyncFeedbackHandler;
+import org.uet.dse.neo4j.sync.feedback.object.ManualSyncFeedbackHandler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -39,7 +42,7 @@ public class ObjectSyncCoordinator {
         this.systemApi = UseSystemApi.create(system, true);
         this.repo = new Neo4jModelRepository();
         this.objectRepository = new Neo4jObjectRepository();
-        objectSnapshotCompare = new ObjectSnapshotCompare(this.systemApi.getSystem().model());
+        objectSnapshotCompare = new ObjectSnapshotCompare(this.system);
     }
 
     /**
@@ -52,16 +55,48 @@ public class ObjectSyncCoordinator {
     }
 
     public void syncObjectsForward(boolean isManual) {
+        SyncFeedbackHandler feedback = isManual
+                ? new ManualSyncFeedbackHandler(GUIHelper::showSyncPreview)
+                : new AutoSyncFeedbackHandler();
+
+        syncObjectsForward(feedback);
+    }
+
+    private void syncObjectsForward(SyncFeedbackHandler feedback) {
+        if (!isModelInSync()) {
+            feedback.onModelOutOfSync();
+            return;
+        }
+
+        ObjectDiff diff = objectSnapshotCompare.compareObjects();
+        if (!diff.hasDifference()) {
+            feedback.onAlreadyInSync();
+            return;
+        }
+
+        if (!feedback.onPreviewAndConfirm(diff)) {
+            return;
+        }
+
+        try {
+            executePush(diff);
+            feedback.onSuccess(diff);
+        } catch (Exception e) {
+            feedback.onFailure(e);
+        }
+    }
+
+    public void syncObjectsForwardObsolete(boolean isManual) {
         if (!isModelInSync()) {
             if (isManual) {
-                handleInconsistentModel("Push Objects");
+                GUIHelper.handleInconsistentModel("Push Objects");
             } else {
                 System.out.println("Real-time sync skipped: Model version mismatch.");
             }
             return;
         }
 
-        ObjectDiff diff = compareObjects(getJavaObjectSnapshot(), getNeo4jObjectSnapshot());
+        ObjectDiff diff = objectSnapshotCompare.compareObjects();
 
         if (!diff.hasDifference()) {
             if (isManual) {
@@ -71,7 +106,7 @@ public class ObjectSyncCoordinator {
         }
 
         if (isManual) {
-            if (!showSyncPreview(diff, "Forward (Java -> DB)")) {
+            if (!GUIHelper.showSyncPreview(diff, "Forward (Java -> DB)")) {
                 return;
             }
         }
@@ -104,21 +139,19 @@ public class ObjectSyncCoordinator {
 
     public void syncObjectsBackward(boolean isManual) {
         if (!isModelInSync()) {
-            handleInconsistentModel("Pull Objects");
+            GUIHelper.handleInconsistentModel("Pull Objects");
             return;
         }
 
-        FullObjectSnapshot javaSnap = getJavaObjectSnapshot();
-        FullObjectSnapshot neoSnap = getNeo4jObjectSnapshot();
+        ObjectDiff diff = objectSnapshotCompare.compareObjects(); //objectSnapshotCompare.compareObjects();
 
-        ObjectDiff diff = compareObjects(javaSnap, neoSnap);
 
         if (isManual) {
             if (!diff.hasDifference()) {
                 JOptionPane.showMessageDialog(null, "Your local state matches the Database.");
                 return;
             }
-            if (!showSyncPreview(diff, "Pull Objects (DB -> Java)")) return;
+            if (!GUIHelper.showSyncPreview(diff, "Pull Objects (DB -> Java)")) return;
         }
 
         try {
@@ -291,24 +324,6 @@ public class ObjectSyncCoordinator {
         }
     }
 
-    private boolean showSyncPreview(ObjectDiff diff, String title) {
-        String report = title.contains("Forward") ? diff.generateForwardReport() : diff.generateBackwardReport();
-        JTextArea textArea = new JTextArea(report);
-        textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
-        textArea.setEditable(false);
-        int res = JOptionPane.showConfirmDialog(null, new JScrollPane(textArea),
-                "Sync Preview: " + title, JOptionPane.OK_CANCEL_OPTION);
-        return res == JOptionPane.OK_OPTION;
-    }
-
-    private void handleInconsistentModel(String action) {
-        JOptionPane.showMessageDialog(null,
-                "<html><b>" + action + " Failed!</b><br/>" +
-                        "Your local Model version does not match Database.<br/>" +
-                        "<i>Reason: Model is the Source of Truth for Objects.</i><br/>" +
-                        "Please perform a <b>Model Sync</b> first.</html>",
-                "Version Conflict", JOptionPane.WARNING_MESSAGE);
-    }
 
     private void pushSingleObject(TransactionContext tx, ObjectState state) {
         // 1. Tạo node thực thể chính (vd: :Person {use_id: 'p1'})
@@ -493,7 +508,6 @@ public class ObjectSyncCoordinator {
         }
         return fullSnapshot;
     }
-
 
 
     public ObjectDiff compareObjects(FullObjectSnapshot javaSnap, FullObjectSnapshot neoSnap) {
@@ -691,9 +705,11 @@ public class ObjectSyncCoordinator {
             if (isQuickSyncCheck()) return "All Synced";
 
             // Deep check
-            FullObjectSnapshot javaSnap = getJavaObjectSnapshot();
-            FullObjectSnapshot neoSnap = getNeo4jObjectSnapshot();
-            ObjectDiff diff = compareObjects(javaSnap, neoSnap);
+//            FullObjectSnapshot javaSnap = getJavaObjectSnapshot();
+//            FullObjectSnapshot neoSnap = getNeo4jObjectSnapshot();
+//            ObjectDiff diff = compareObjects(javaSnap, neoSnap);
+
+            ObjectDiff diff = objectSnapshotCompare.compareObjects();
 
             if (diff == null || !diff.hasDifference()) return "All Synced";
 

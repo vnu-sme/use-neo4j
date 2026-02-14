@@ -15,9 +15,9 @@ public class ModelSnapshotCompare {
     }
 
     public ModelDiff compareWithNeo4j() {
-        Neo4jSnapshotUtils neo4jSnapshotUtils = new Neo4jSnapshotUtils();
+        Neo4jModelSnapshotUtils neo4JModelSnapshotUtils = new Neo4jModelSnapshotUtils();
         USEModelSnapshotUtils useModelSnapshotUtils = new USEModelSnapshotUtils(useModel);
-        FullModelSnapshot neoSnap = neo4jSnapshotUtils.getFullModelSnapshotFromNeo4j();
+        FullModelSnapshot neoSnap = neo4JModelSnapshotUtils.getFullModelSnapshotFromNeo4j();
         FullModelSnapshot javaSnap = useModelSnapshotUtils.getFullModelSnapshotFromUSE();
 
         return compareWithNeo4j(neoSnap, javaSnap);

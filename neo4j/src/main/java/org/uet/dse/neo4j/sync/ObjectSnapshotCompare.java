@@ -1,6 +1,7 @@
 package org.uet.dse.neo4j.sync;
 
 import org.tzi.use.uml.mm.MModel;
+import org.tzi.use.uml.sys.MSystem;
 import org.uet.dse.neo4j.model.FullObjectSnapshot;
 import org.uet.dse.neo4j.model.ObjectState;
 
@@ -8,15 +9,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class ObjectSnapshotCompare {
-    private MModel useModel;
+    private MSystem system;
 
-    public ObjectSnapshotCompare(MModel useModel) {
-        this.useModel = useModel;
+    public ObjectSnapshotCompare(MSystem system) {
+        this.system = system;
     }
 
     public ObjectDiff compareObjects() {
-        FullObjectSnapshot javaSnap = null;
-        FullObjectSnapshot neoSnap = null;
+        Neo4jObjectSnapshotUtils neo4jObjectSnapshotUtils = new Neo4jObjectSnapshotUtils();
+        USEObjectSnapshotUtils useObjectSnapshotUtils = new USEObjectSnapshotUtils(system);
+        FullObjectSnapshot javaSnap = useObjectSnapshotUtils.getJavaObjectSnapshot();
+        FullObjectSnapshot neoSnap = neo4jObjectSnapshotUtils.getNeo4jObjectSnapshot();
         ObjectDiff diff = new ObjectDiff();
         diff.javaSnapshot  = javaSnap;
         diff.neo4jSnapshot = neoSnap;

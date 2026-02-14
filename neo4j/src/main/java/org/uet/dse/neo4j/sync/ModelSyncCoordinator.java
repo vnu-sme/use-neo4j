@@ -789,8 +789,8 @@ public class ModelSyncCoordinator {
     }
 
     private FullModelSnapshot getFullModelSnapshotFromNeo4j() {
-        Neo4jSnapshotUtils neo4jSnapshotUtils = new Neo4jSnapshotUtils();
-        return neo4jSnapshotUtils.getFullModelSnapshotFromNeo4j();
+        Neo4jModelSnapshotUtils neo4JModelSnapshotUtils = new Neo4jModelSnapshotUtils();
+        return neo4JModelSnapshotUtils.getFullModelSnapshotFromNeo4j();
     }
 
     private FullModelSnapshot getFullModelSnapshotFromNeo4jObsolete() {
