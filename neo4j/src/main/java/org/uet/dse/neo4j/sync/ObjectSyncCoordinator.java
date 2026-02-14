@@ -272,8 +272,6 @@ public class ObjectSyncCoordinator {
     public void pullLinks(UseSystemApi api) {
         String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
         try (Session session = Neo4jDriverManager.getInstance().getDriver().session(SessionConfig.forDatabase(dbName))) {
-
-            // --- 1. PULL BINARY LINKS (Quan hệ 2 bên) ---
             String binaryCypher =
                     "MATCH (a)-[r]->(b) WHERE type(r) STARTS WITH 'Link' " +
                             "AND NOT coalesce(r.isTernary, false) AND NOT coalesce(r.isLinkObjectPart, false) " +
@@ -326,10 +324,8 @@ public class ObjectSyncCoordinator {
 
 
     private void pushSingleObject(TransactionContext tx, ObjectState state) {
-        // 1. Tạo node thực thể chính (vd: :Person {use_id: 'p1'})
         objectRepository.upsertObjectNode(tx, state.name, state.className);
 
-        // Tập hợp tất cả các thuộc tính để duyệt
         Set<String> allAttrNames = new HashSet<>();
         allAttrNames.addAll(state.primitiveValues.keySet());
         allAttrNames.addAll(state.objectReferences.keySet());
