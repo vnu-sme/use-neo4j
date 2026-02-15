@@ -85,20 +85,32 @@ public class ObjectDiff {
                 !javaOnlyLinks.isEmpty() || !neo4jOnlyLinks.isEmpty() || !mismatchedLinks.isEmpty();
     }
 
-    /**
-     * Báo cáo cho chiều XUÔI (Java -> DB)
-     */
+
     public String generateForwardReport() {
-        StringBuilder sb = new StringBuilder("===== OBJECT SYNC: PUSH TO DATABASE =====\n");
-        if (!hasDifference()) return "Status: All objects and links are in sync.";
+        StringBuilder sb = new StringBuilder("===== OBJECT SYNC: PUSH REPORT =====\n\n");
 
-        if (!javaOnlyObjects.isEmpty()) sb.append("[+] NEW OBJECTS: ").append(javaOnlyObjects).append("\n");
-        if (!neo4jOnlyObjects.isEmpty()) sb.append("[!] DELETE OBJECTS FROM DB: ").append(neo4jOnlyObjects).append("\n");
-        if (!mismatchedObjects.isEmpty()) sb.append("[*] UPDATE OBJECT VALUES: ").append(mismatchedObjects).append("\n");
+        // Hiện chi tiết cho Object MỚI
+        if (!javaOnlyObjects.isEmpty()) {
+            sb.append("[+] NEW OBJECTS (With Attributes):\n");
+            for (String name : javaOnlyObjects) {
+                ObjectState os = javaSnapshot.objects.get(name);
+                sb.append("  - ").append(name).append(" (").append(os.className).append(")\n");
+                os.primitiveValues.forEach((k, v) -> sb.append("      > ").append(k).append(": ").append(v).append("\n"));
+                os.objectReferences.forEach((k, v) -> sb.append("      > ").append(k).append(" (ref): ").append(v).append("\n"));
+            }
+        }
 
-        sb.append("\n--- Relationship Changes ---\n");
+        // Hiện chi tiết cho Object BỊ LỆCH
+        if (!mismatchedObjects.isEmpty()) {
+            sb.append("[*] MISMATCHED OBJECTS (Updates):\n");
+            for (String name : mismatchedObjects) {
+                sb.append("  - ").append(name).append(":\n");
+                mismatchDetails.get(name).forEach(d -> sb.append("      ! ").append(d).append("\n"));
+            }
+        }
+
+        if (!neo4jOnlyObjects.isEmpty()) sb.append("[!] DELETE FROM DB: ").append(neo4jOnlyObjects).append("\n");
         if (!javaOnlyLinks.isEmpty()) sb.append("[+] NEW LINKS: ").append(javaOnlyLinks).append("\n");
-        if (!neo4jOnlyLinks.isEmpty()) sb.append("[!] REMOVE LINKS FROM DB: ").append(neo4jOnlyLinks).append("\n");
 
         return sb.toString();
     }

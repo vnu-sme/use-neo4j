@@ -11,48 +11,45 @@ public class Neo4jObjectRepository {
         this.driver = Neo4jDriverManager.getInstance().getDriver();
     }
 
-    /**
-     * Bước 1: Tạo Node Object và nối tới Class định nghĩa (M1)
-     */
-    public void upsertObjectNode(org.neo4j.driver.TransactionContext tx, String objName, String className) {
-        // SỬA: Tìm Class dựa trên quan hệ InstanceOf tới MetaNode (Đúng chuẩn Metamodeling)
-        // Dùng nháy ngược `` cho nhãn Object (tên Class)
+    public void upsertObjectNode(TransactionContext tx, String objName, String className) {
         String cypher = String.format(
                 "MATCH (meta:MetaNode) WHERE meta.name IN ['NodeConcreteClass', 'NodeAbstractClass', 'NodeAssociationClass'] " +
-                        "MATCH (cls {name: $clsName})-[:InstanceOf]->(meta) " + // Tìm node định nghĩa M1
-                        "MERGE (obj:`%s` {use_id: $objName}) " +               // Tạo node thực thể M0
-                        "MERGE (obj)-[:ObjectInstanceOf]->(cls)", className);  // Nối M0 -> M1
+                        "MATCH (cls {name: $clsName})-[:InstanceOf]->(meta) " +
+                        "MERGE (obj:`%s` {use_id: $objName}) " + // Tạo nhãn chính
+                        "MERGE (obj)-[:ObjectHasAttribute]->(val:AttributeValue {name: $valId}) " + // Placeholder nếu cần
+                        "MERGE (obj)-[:ObjectInstanceOf]->(cls)", className);
 
-        tx.run(cypher, org.neo4j.driver.Values.parameters("clsName", className, "objName", objName));
+        String simpleUpsert = String.format(
+                "MATCH (cls {name: $clsName}) " +
+                        "MERGE (obj:`%s` {use_id: $objName}) " +
+                        "MERGE (obj)-[:ObjectInstanceOf]->(cls)", className);
+
+        tx.run(simpleUpsert, Values.parameters("clsName", className, "objName", objName));
     }
 
-    /**
-     * Bước 2: Tạo Node AttributeValue và các liên kết (ObjectHasAttribute, InstanceOf, objectReference)
-     */
-    /**
-     * Xóa node AttributeValue nếu thuộc tính đó bị xóa/rỗng trong USE
-     */
     public void removeAttributeValueNode(TransactionContext tx, String objName, String attrName) {
         String valNodeId = objName + "_" + attrName;
-        // DETACH DELETE để xóa sạch Node và các quan hệ ObjectHasAttribute, InstanceOf, objectReference
         tx.run("MATCH (v:AttributeValue {name: $vId}) DETACH DELETE v", Map.of("vId", valNodeId));
     }
 
-    public void setAttributeValueNode(TransactionContext tx, String objName, String className,
+
+
+    public void setAttributeValueNode(TransactionContext tx, String objName, String ownerClassName,
                                       String attrName, Object value, Map<String, Object> metadata) {
         String valNodeId = objName + "_" + attrName;
-        String attrDefId = className + "_" + attrName;
+        String attrDefId = ownerClassName + "_" + attrName;
 
-        // Lệnh Cypher tạo Node AttributeValue (Chỉ gán khi có giá trị)
-        String cypher = String.format(
-                "MATCH (obj {use_id: $objName}), (attrDef:Attribute {name: $attrDefId}) " +
-                        "MERGE (val:AttributeValue {name: $valId}) " +
-                        "SET val.type = $type, " +
-                        "    val.value = $val, " + // Gán giá trị thực (không dùng fallback "Undefined" ở đây)
-                        "    val.isCollection = $isColl, " +
-                        "    val.collectionType = $collType " +
-                        "MERGE (obj)-[:ObjectHasAttribute]->(val) " +
-                        "MERGE (val)-[:InstanceOf]->(attrDef)");
+        tx.run("MATCH (v:AttributeValue {name: $vId}) DETACH DELETE v", Map.of("vId", valNodeId));
+
+        String cypher = "MATCH (obj {use_id: $objName}), (attrDef:Attribute {name: $attrDefId}) " +
+                "CREATE (val:AttributeValue {name: $valId}) " +
+                "SET val.type = $type, " +
+                "    val.value = $val, " +
+                "    val.isCollection = $isColl, " +
+                "    val.collectionType = $collType, " +
+                "    val.isNestedCollection = $isNested " +
+                "CREATE (obj)-[:ObjectHasAttribute]->(val) " +
+                "CREATE (val)-[:InstanceOf]->(attrDef)";
 
         tx.run(cypher, Values.parameters(
                 "objName", objName,
@@ -61,18 +58,30 @@ public class Neo4jObjectRepository {
                 "type", metadata.get("type"),
                 "val", value,
                 "isColl", metadata.get("isCollection"),
-                "collType", metadata.get("collectionType")
+                "collType", metadata.get("collectionType"),
+                "isNested", metadata.get("isNestedCollection")
         ));
 
-        // (Logic handleObjectReferences giữ nguyên cho cạnh objectReference)
+
+        if ("Object".equals(metadata.get("type")) && !"Undefined".equals(value)) {
+            createObjectReferences(tx, valNodeId, value);
+        }
+    }
+    private void createObjectReferences(TransactionContext tx, String valNodeId, Object value) {
+        if (value instanceof List) {
+            List<String> targetIds = (List<String>) value;
+            for (int i = 0; i < targetIds.size(); i++) {
+                tx.run("MATCH (v {name: $vId}), (target {use_id: $tId}) " +
+                                "CREATE (v)-[:objectReference {index: $idx}]->(target)",
+                        Map.of("vId", valNodeId, "tId", targetIds.get(i), "idx", i));
+            }
+        } else if (value != null && !value.toString().equals("null")) {
+            tx.run("MATCH (v {name: $vId}), (target {use_id: $tId}) " +
+                            "CREATE (v)-[:objectReference {index: 0}]->(target)",
+                    Map.of("vId", valNodeId, "tId", value.toString()));
+        }
     }
 
-    // Trong Neo4jObjectRepository.java
-
-    /**
-     * Lấy Timestamp của lần cuối cùng tầng Object (M0) được cập nhật trên Neo4j
-     * Dùng cho tính năng Sync Status Check.
-     */
     public long getRemoteObjectTimestamp() {
         String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
 

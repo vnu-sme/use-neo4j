@@ -26,10 +26,57 @@ public class USEObjectSnapshotUtils {
         FullObjectSnapshot snapshot = new FullObjectSnapshot();
         MSystemState state = system.state();
 
-        collectObjects(state, snapshot);
-        collectLinks(state, snapshot);
+        // 1. Quét Objects
+        for (MObject obj : state.allObjects()) {
+            snapshot.objects.put(obj.name(), buildObjectState(obj, state));
+        }
+
+        // 2. Quét Links
+        for (MLink link : state.allLinks()) {
+            LinkState ls = buildLinkState(link);
+            snapshot.links.put(ls.getIdentity(), ls);
+        }
 
         return snapshot;
+    }
+
+    private ObjectState buildObjectState(MObject obj, MSystemState state) {
+        ObjectState os = new ObjectState();
+        os.name = obj.name();
+        os.className = obj.cls().name();
+
+        for (MAttribute attr : obj.cls().allAttributes()) {
+            Value useVal = obj.state(state).attributeValue(attr);
+
+            String dbType = UmlTypeTranslator.toDatabaseType(attr.type());
+            os.attributeTypes.put(attr.name(), dbType);
+
+            Object mapped = ValueMapper.mapUseValue(useVal);
+
+            if (isObjectReferenceType(attr.type())) {
+                if (mapped instanceof List) os.objectReferences.put(attr.name(), (List<String>) mapped);
+                else if (mapped != null) os.objectReferences.put(attr.name(), Collections.singletonList(mapped.toString()));
+            } else {
+                os.primitiveValues.put(attr.name(), mapped);
+            }
+        }
+        return os;
+    }
+
+    private boolean isObjectReferenceType(org.tzi.use.uml.ocl.type.Type type) {
+        if (type.isKindOfClass(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID)) return true;
+        if (type.isKindOfCollection(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID)) {
+            return ((org.tzi.use.uml.ocl.type.CollectionType) type).elemType().isKindOfClass(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID);
+        }
+        return false;
+    }
+
+    private LinkState buildLinkState(MLink link) {
+        LinkState ls = new LinkState();
+        ls.assocName = link.association().name();
+        link.linkedObjects().forEach(o -> ls.participants.add(o.name()));
+        if (link instanceof MLinkObject) ls.linkObjectName = ((MLinkObject) link).name();
+        return ls;
     }
 
     private void collectObjects(MSystemState state, FullObjectSnapshot snapshot) {
@@ -38,22 +85,6 @@ public class USEObjectSnapshotUtils {
         }
     }
 
-    private ObjectState buildObjectState(MObject obj, MSystemState state) {
-        ObjectState os = new ObjectState();
-        os.name      = obj.name();
-        os.className = obj.cls().name();
-
-        for (Map.Entry<MAttribute, Value> entry : obj.state(state).attributeValueMap().entrySet()) {
-            MAttribute attr      = entry.getKey();
-            Object     mapped    = ValueMapper.mapUseValue(entry.getValue());
-            String     dbType    = UmlTypeTranslator.toDatabaseType(attr.type());
-
-            os.attributeTypes.put(attr.name(), dbType);
-            classifyAttributeValue(os, attr, mapped);
-        }
-
-        return os;
-    }
 
     /**
      * Routes a mapped attribute value into either objectReferences or primitiveValues
@@ -76,42 +107,12 @@ public class USEObjectSnapshotUtils {
         }
     }
 
-    /**
-     * Returns true when a UML type is a class reference, or a collection whose
-     * element type is a class reference — both map to object references at M0.
-     */
-    private boolean isObjectReferenceType(org.tzi.use.uml.ocl.type.Type type) {
-        if (type.isKindOfClass(Type.VoidHandling.EXCLUDE_VOID)) {
-            return true;
-        }
-        if (type.isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID)) {
-            org.tzi.use.uml.ocl.type.CollectionType coll =
-                    (org.tzi.use.uml.ocl.type.CollectionType) type;
-            return coll.elemType().isKindOfClass(Type.VoidHandling.EXCLUDE_VOID);
-        }
-        return false;
-    }
 
     private void collectLinks(MSystemState state, FullObjectSnapshot snapshot) {
         for (MLink link : state.allLinks()) {
             LinkState ls = buildLinkState(link);
             snapshot.links.put(ls.getIdentity(), ls);
         }
-    }
-
-    private LinkState buildLinkState(MLink link) {
-        LinkState ls = new LinkState();
-        ls.assocName = link.association().name();
-        link.linkedObjects().forEach(o -> ls.participants.add(o.name()));
-        ls.edgeLabel = resolveLinkEdgeLabel(link);
-
-        if (link instanceof MLinkObject) {
-            ls.linkObjectName = ((MLinkObject) link).name();
-        } else if (link.linkedObjects().size() > 2) {
-            ls.isTernary = true;
-        }
-
-        return ls;
     }
 
     /**

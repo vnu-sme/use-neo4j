@@ -24,7 +24,7 @@ public class ObjectPushService {
         this.system = system;
     }
 
-    public void executePush(ObjectDiff diff) {
+    public void pushToNeo4j(ObjectDiff diff) {
         try (Session session = Neo4jDriverManager.getInstance().openSession()) {
             session.executeWrite(tx -> {
                 deleteStaleObjects(tx, diff.neo4jOnlyObjects);
@@ -90,7 +90,6 @@ public class ObjectPushService {
         MAssociationEnd endS = link.association().associationEnds().get(0);
         MAssociationEnd endT = link.association().associationEnds().get(1);
 
-        // Xác định nhãn dựa trên aggregationKind (0:None, 1:Agg, 2:Comp)
         String label = "LinkAssociateWith";
         if (endT.aggregationKind() == 2 || endS.aggregationKind() == 2) label = "LinkComposeOf";
         else if (endT.aggregationKind() == 1 || endS.aggregationKind() == 1) label = "LinkAggregates";
@@ -109,7 +108,7 @@ public class ObjectPushService {
             p.put("objName", obj.name());
             p.put("role", end.name());
             p.put("index", i);
-            p.put("label", "LinkAssociateWith"); // Ternary thường là Association
+            p.put("label", "LinkAssociateWith");
             participants.add(p);
         }
         objectRepository.upsertTernaryLink(tx, link.association().name(), participants);
@@ -124,32 +123,35 @@ public class ObjectPushService {
             p.put("label", "LinkAssociateWith");
             participants.add(p);
         }
-        // Vừa tạo Node cho LinkObject, vừa nối cạnh tới các participant
+
         objectRepository.upsertLinkObject(tx, lo.name(), lo.cls().name(), participants);
     }
 
-    public void pushObject(org.neo4j.driver.TransactionContext tx, MObject obj, MSystemState state) {
+    public void pushObject(TransactionContext tx, MObject obj, MSystemState state) {
         String objName = obj.name();
         String clsName = obj.cls().name();
+
         objectRepository.upsertObjectNode(tx, objName, clsName);
 
-        Map<MAttribute, Value> attrValues = obj.state(state).attributeValueMap();
-        for (Map.Entry<MAttribute, Value> entry : attrValues.entrySet()) {
-            MAttribute attr = entry.getKey();
-            Value useVal = entry.getValue();
-
-            if (useVal.isUndefined()) {
-                objectRepository.removeAttributeValueNode(tx, objName, attr.name());
-                continue;
-            }
+        for (org.tzi.use.uml.mm.MAttribute attr : obj.cls().allAttributes()) {
+            Value useVal = obj.state(state).attributeValue(attr);
+            String ownerClassName = attr.owner().name();
 
             Map<String, Object> metadata = new HashMap<>();
             metadata.put("type", UmlTypeTranslator.toDatabaseType(attr.type()));
             metadata.put("isCollection", attr.type().isKindOfCollection(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID));
             metadata.put("collectionType", UmlTypeTranslator.getCollectionType(attr.type()));
+            metadata.put("isNestedCollection", UmlTypeTranslator.getCollectionDepth(attr.type()) > 1);
 
-            Object mappedValue = ValueMapper.mapUseValue(useVal);
-            objectRepository.setAttributeValueNode(tx, objName, clsName, attr.name(), mappedValue, metadata);
+            Object mappedValue;
+            if (useVal.isUndefined()) {
+                mappedValue = "Undefined";
+            } else {
+                mappedValue = ValueMapper.mapUseValue(useVal);
+            }
+            objectRepository.setAttributeValueNode(tx, objName, ownerClassName, attr.name(), mappedValue, metadata);
         }
     }
+
+
 }

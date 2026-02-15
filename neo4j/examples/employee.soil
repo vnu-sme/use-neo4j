@@ -13,3 +13,17 @@
 !set o1.name := 'huhu'
 
 !create CSS:Cass1
+
+///
+!create Tom:Student
+!create CSU:University
+!insert (Tom, CSU) into WorksFor
+!set Tom.age := 18
+!set Tom.name := '18'
+!set CSU.name := 'uet'
+
+!create Tom:Student
+!set Tom.age := 18
+!set Tom.name := 'chris'
+
+!insert (o1, o2) into Connect

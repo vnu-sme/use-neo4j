@@ -35,6 +35,8 @@ public class ObjectSyncCoordinator {
     private final Neo4jObjectRepository objectRepository;
     private final UseSystemApi systemApi;
 
+    private final ObjectPushService objectPushService;
+
     private final ObjectSnapshotCompare objectSnapshotCompare;
 
     public ObjectSyncCoordinator(MSystem system) {
@@ -43,6 +45,7 @@ public class ObjectSyncCoordinator {
         this.repo = new Neo4jModelRepository();
         this.objectRepository = new Neo4jObjectRepository();
         objectSnapshotCompare = new ObjectSnapshotCompare(this.system);
+        objectPushService = new ObjectPushService(objectRepository, system);
     }
 
     /**
@@ -171,95 +174,8 @@ public class ObjectSyncCoordinator {
         }
     }
 
-    /**
-     * THỰC THI PUSH VỚI CƠ CHẾ CHẶN (Validation Rule)
-     */
     public void executePush(ObjectDiff diff) {
-        MSystemState state = system.state(); // Lấy state hiện hành
-
-        try (Session session = Neo4jDriverManager.getInstance().openSession()) {
-            session.executeWrite(tx -> {
-                for (String objName : diff.neo4jOnlyObjects) {
-                    objectRepository.deleteObjectDeeply(tx, objName);
-                    WorkLogManager.getInstance().log("CLEANUP", "Deep deleted object: " + objName);
-                }
-                for (String linkName : diff.neo4jOnlyLinks) {
-                    tx.run("MATCH ()-[r {name: $name}]-() WHERE type(r) STARTS WITH 'Link' DELETE r",
-                            Map.of("name", linkName));
-                    tx.run("MATCH (h:LinkHub {name: $name}) DETACH DELETE h",
-                            Map.of("name", linkName));
-                }
-
-                List<String> toPushObjs = new ArrayList<>(diff.javaOnlyObjects);
-                toPushObjs.addAll(diff.mismatchedObjects);
-
-                for (String objName : toPushObjs) {
-                    MObject obj = state.objectByName(objName);
-                    if (!objectRepository.checkClassExistsInDb(tx, obj.cls().name())) {
-                        throw new RuntimeException("Class '" + obj.cls().name() + "' missing. Push Model first!");
-                    }
-                    pushObject(tx, obj, state); // Hàm tạo Node Object và AttributeValue
-                }
-
-                for (MLink link : state.allLinks()) {
-                    if (link instanceof MLinkObject) {
-                        processPushLinkObject(tx, (MLinkObject) link);
-                    } else if (link.linkedObjects().size() > 2) {
-                        processPushTernaryLink(tx, link);
-                    } else {
-                        processPushBinaryLink(tx, link);
-                    }
-                }
-                return null;
-            });
-
-            Neo4jSideRepository.updateObjectVersionOnServer();
-            WorkLogManager.getInstance().log("SYNC", "Object & Link sync completed.");
-
-        }
-    }
-    private void processPushBinaryLink(TransactionContext tx, MLink link) {
-        MObject s = link.linkedObjects().get(0);
-        MObject t = link.linkedObjects().get(1);
-        MAssociationEnd endS = link.association().associationEnds().get(0);
-        MAssociationEnd endT = link.association().associationEnds().get(1);
-
-        // Xác định nhãn dựa trên aggregationKind (0:None, 1:Agg, 2:Comp)
-        String label = "LinkAssociateWith";
-        if (endT.aggregationKind() == 2 || endS.aggregationKind() == 2) label = "LinkComposeOf";
-        else if (endT.aggregationKind() == 1 || endS.aggregationKind() == 1) label = "LinkAggregates";
-
-        objectRepository.upsertBinaryLink(tx, s.name(), t.name(), link.association().name(),
-                label, endS.name(), endT.name());
-    }
-
-    private void processPushTernaryLink(TransactionContext tx, MLink link) {
-        List<Map<String, Object>> participants = new ArrayList<>();
-        for (int i = 0; i < link.linkedObjects().size(); i++) {
-            MObject obj = link.linkedObjects().get(i);
-            MAssociationEnd end = link.association().associationEnds().get(i);
-
-            Map<String, Object> p = new HashMap<>();
-            p.put("objName", obj.name());
-            p.put("role", end.name());
-            p.put("index", i);
-            p.put("label", "LinkAssociateWith"); // Ternary thường là Association
-            participants.add(p);
-        }
-        objectRepository.upsertTernaryLink(tx, link.association().name(), participants);
-    }
-
-    private void processPushLinkObject(TransactionContext tx, MLinkObject lo) {
-        List<Map<String, Object>> participants = new ArrayList<>();
-        for (int i = 0; i < lo.linkedObjects().size(); i++) {
-            Map<String, Object> p = new HashMap<>();
-            p.put("objName", lo.linkedObjects().get(i).name());
-            p.put("role", lo.association().associationEnds().get(i).name());
-            p.put("label", "LinkAssociateWith");
-            participants.add(p);
-        }
-        // Vừa tạo Node cho LinkObject, vừa nối cạnh tới các participant
-        objectRepository.upsertLinkObject(tx, lo.name(), lo.cls().name(), participants);
+        objectPushService.pushToNeo4j(diff);
     }
 
     private String getLinkLabel(int kindT, int kindS) {

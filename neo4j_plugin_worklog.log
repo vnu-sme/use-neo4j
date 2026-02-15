@@ -4970,3 +4970,199 @@ body:1:10: Undefined operation named `purchase' in expression `BuyLotteryTicket.
 [2026-02-14 22:58:14] ACTION: PULL_TERNARY | DETAILS: Restored: Ternari with 3 ends.
 [2026-02-14 22:58:14] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
 [2026-02-14 22:58:14] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-02-15 22:28:53] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-15 22:28:53] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-15 22:28:53] ACTION: SESSION_CREATE | DETAILS: New session created with key: 48CA3AF2
+[2026-02-15 22:28:53] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-15 22:28:53] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 48CA3AF2 | Ver: unknown
+[2026-02-15 22:29:53] ACTION: PULL_ENUM | DETAILS: Created Enum: ContractType
+[2026-02-15 22:29:53] ACTION: PULL_ENUM | DETAILS: Created Enum: Gender
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: Professor::canSupervise
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: Professor::getSalaryAdvantage
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: Professor::isSenior
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: University::getStudents
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: University::fires
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: University::getEmployeeCount
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: University::getProfessors
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: University::hasFullTimeEmployees
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: University::getTotalSalaryExpense
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: University::getEmployeesByContract
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: Employment::passedProbation
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: Employment::isPermanent
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: Employment::getEmployeeName
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: Employment::getDurationYears
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: Employment::isTemporary
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: Employment::getUniversityName
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: Student::isWorking
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: Student::canGraduate
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: Person::getAnnualSalary
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: Person::hasContract
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: Person::getContract
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: Person::isEligibleForPromotion
+[2026-02-15 22:29:53] ACTION: PULL_OP | DETAILS: Created signature: Person::isEmployed
+[2026-02-15 22:29:53] ACTION: PULL_ASSOC | DETAILS: Restored: DemoAssociation
+[2026-02-15 22:29:53] ACTION: PULL_ASSOC | DETAILS: Restored: DemoAggregation
+[2026-02-15 22:29:53] ACTION: PULL_ASSOC | DETAILS: Restored: WorksFor
+[2026-02-15 22:29:53] ACTION: PULL_TERNARY | DETAILS: Restored: Ternari with 3 ends.
+[2026-02-15 22:29:53] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-02-15 22:29:53] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-02-15 22:31:09] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-15 22:32:23] ACTION: ATTR_RESET | DETAILS: Reset age of Tom to null
+[2026-02-15 22:32:24] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 0 objects, 0 links updated.
+[2026-02-15 22:32:35] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Tom
+[2026-02-15 22:32:35] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: CSU
+[2026-02-15 22:32:36] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 2 objects, 1 links updated.
+[2026-02-15 22:46:24] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-15 22:46:24] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-15 22:46:24] ACTION: SESSION_CREATE | DETAILS: New session created with key: F5B4B1F8
+[2026-02-15 22:46:24] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-15 22:46:24] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: F5B4B1F8 | Ver: unknown
+[2026-02-15 22:46:33] ACTION: PULL_ENUM | DETAILS: Created Enum: ContractType
+[2026-02-15 22:46:33] ACTION: PULL_ENUM | DETAILS: Created Enum: Gender
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: Professor::canSupervise
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: Professor::getSalaryAdvantage
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: Professor::isSenior
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: University::getStudents
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: University::fires
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: University::getEmployeeCount
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: University::getProfessors
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: University::hasFullTimeEmployees
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: University::getTotalSalaryExpense
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: University::getEmployeesByContract
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: Employment::passedProbation
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: Employment::isPermanent
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: Employment::getEmployeeName
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: Employment::getDurationYears
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: Employment::isTemporary
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: Employment::getUniversityName
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: Student::isWorking
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: Student::canGraduate
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: Person::getAnnualSalary
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: Person::hasContract
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: Person::getContract
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: Person::isEligibleForPromotion
+[2026-02-15 22:46:33] ACTION: PULL_OP | DETAILS: Created signature: Person::isEmployed
+[2026-02-15 22:46:33] ACTION: PULL_ASSOC | DETAILS: Restored: DemoAssociation
+[2026-02-15 22:46:33] ACTION: PULL_ASSOC | DETAILS: Restored: DemoAggregation
+[2026-02-15 22:46:33] ACTION: PULL_ASSOC | DETAILS: Restored: WorksFor
+[2026-02-15 22:46:33] ACTION: PULL_TERNARY | DETAILS: Restored: Ternari with 3 ends.
+[2026-02-15 22:46:34] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-02-15 22:46:34] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-02-15 22:46:57] ACTION: PUSH_START | DETAILS: User neo4j [Key: F5B4B1F8] (audreycolar) initiated sync for model: Employee
+[2026-02-15 22:46:57] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-15 22:46:57] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-15 22:47:01] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 58552147
+[2026-02-15 22:47:01] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-02-15 22:47:01] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: F5B4B1F8] (audreycolar)
+[2026-02-15 22:47:39] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-15 22:48:51] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-15 22:48:52] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-15 22:48:52] ACTION: SESSION_CREATE | DETAILS: New session created with key: 81E167B0
+[2026-02-15 22:48:52] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-15 22:48:52] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 81E167B0 | Ver: unknown
+[2026-02-15 22:49:12] ACTION: PUSH_START | DETAILS: User neo4j [Key: 81E167B0] (audreycolar) initiated sync for model: Employee
+[2026-02-15 22:49:12] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-15 22:49:12] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-15 22:49:16] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 58552147
+[2026-02-15 22:49:16] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-02-15 22:49:16] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 81E167B0] (audreycolar)
+[2026-02-15 22:49:33] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-15 22:50:46] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-15 22:50:46] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-15 22:50:46] ACTION: SESSION_CREATE | DETAILS: New session created with key: C1EA80A7
+[2026-02-15 22:50:46] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-15 22:50:46] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: C1EA80A7 | Ver: unknown
+[2026-02-15 22:50:53] ACTION: PUSH_START | DETAILS: User neo4j [Key: C1EA80A7] (audreycolar) initiated sync for model: Employee
+[2026-02-15 22:50:53] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-15 22:50:53] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-15 22:50:57] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 58552147
+[2026-02-15 22:50:57] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-02-15 22:50:57] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: C1EA80A7] (audreycolar)
+[2026-02-15 22:51:06] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-15 22:51:58] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-15 22:57:21] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-15 22:57:21] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-15 22:57:21] ACTION: SESSION_CREATE | DETAILS: New session created with key: FDADD53A
+[2026-02-15 22:57:21] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-15 22:57:21] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: FDADD53A | Ver: unknown
+[2026-02-15 22:57:30] ACTION: PUSH_START | DETAILS: User neo4j [Key: FDADD53A] (audreycolar) initiated sync for model: Employee
+[2026-02-15 22:57:30] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-15 22:57:30] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-15 22:57:34] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 58552147
+[2026-02-15 22:57:34] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-02-15 22:57:34] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: FDADD53A] (audreycolar)
+[2026-02-15 22:57:58] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-15 23:01:23] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-15 23:01:23] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-15 23:01:23] ACTION: SESSION_CREATE | DETAILS: New session created with key: 934D0EE2
+[2026-02-15 23:01:23] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-15 23:01:23] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 934D0EE2 | Ver: unknown
+[2026-02-15 23:02:36] ACTION: PUSH_START | DETAILS: User neo4j [Key: 934D0EE2] (audreycolar) initiated sync for model: Employee
+[2026-02-15 23:02:36] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-15 23:02:36] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-15 23:02:46] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 58552147
+[2026-02-15 23:02:46] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-02-15 23:02:46] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 934D0EE2] (audreycolar)
+[2026-02-15 23:04:37] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-15 23:13:47] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-15 23:13:48] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-15 23:13:48] ACTION: SESSION_CREATE | DETAILS: New session created with key: 9F0611AE
+[2026-02-15 23:13:48] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-15 23:13:48] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 9F0611AE | Ver: unknown
+[2026-02-15 23:14:17] ACTION: PUSH_START | DETAILS: User neo4j [Key: 9F0611AE] (audreycolar) initiated sync for model: Employee
+[2026-02-15 23:14:17] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-15 23:14:17] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-15 23:14:22] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 58552147
+[2026-02-15 23:14:22] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-02-15 23:14:22] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 9F0611AE] (audreycolar)
+[2026-02-15 23:15:36] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-15 23:16:27] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Tom
+[2026-02-15 23:16:29] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 1 objects, 0 links updated.
+[2026-02-15 23:22:07] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-15 23:22:07] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-15 23:22:07] ACTION: SESSION_CREATE | DETAILS: New session created with key: 02AF6697
+[2026-02-15 23:22:07] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-15 23:22:07] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 02AF6697 | Ver: unknown
+[2026-02-15 23:22:18] ACTION: PUSH_START | DETAILS: User neo4j [Key: 02AF6697] (audreycolar) initiated sync for model: Employee
+[2026-02-15 23:22:18] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-15 23:22:18] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-15 23:22:22] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 58552147
+[2026-02-15 23:22:22] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-02-15 23:22:22] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 02AF6697] (audreycolar)
+[2026-02-15 23:22:44] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-15 23:23:25] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Tom
+[2026-02-15 23:23:26] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 1 objects, 0 links updated.
+[2026-02-15 23:23:41] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-15 23:23:50] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Tom
+[2026-02-15 23:23:50] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: CSU
+[2026-02-15 23:23:51] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 2 objects, 1 links updated.
+[2026-02-15 23:27:47] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-15 23:27:48] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-15 23:27:48] ACTION: SESSION_CREATE | DETAILS: New session created with key: 941C61D4
+[2026-02-15 23:27:48] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-15 23:27:48] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 941C61D4 | Ver: unknown
+[2026-02-15 23:28:03] ACTION: PUSH_START | DETAILS: User neo4j [Key: 941C61D4] (audreycolar) initiated sync for model: Employee
+[2026-02-15 23:28:03] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-15 23:28:03] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-15 23:28:06] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 58552147
+[2026-02-15 23:28:06] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-02-15 23:28:06] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 941C61D4] (audreycolar)
+[2026-02-15 23:28:40] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-15 23:29:14] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-15 23:29:38] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Tom
+[2026-02-15 23:29:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync codes: Assignment of attribute value failed!
+[2026-02-15 23:29:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync codesBag: Assignment of attribute value failed!
+[2026-02-15 23:29:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync nested: Assignment of attribute value failed!
+[2026-02-15 23:29:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync nestedDiff: Assignment of attribute value failed!
+[2026-02-15 23:29:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex: Assignment of attribute value failed!
+[2026-02-15 23:29:39] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 1 objects, 0 links updated.
+[2026-02-15 23:30:11] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-15 23:30:38] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Tom
+[2026-02-15 23:30:38] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: CSU
+[2026-02-15 23:30:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync codes: Assignment of attribute value failed!
+[2026-02-15 23:30:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync codesBag: Assignment of attribute value failed!
+[2026-02-15 23:30:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync nested: Assignment of attribute value failed!
+[2026-02-15 23:30:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync nestedDiff: Assignment of attribute value failed!
+[2026-02-15 23:30:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync salary: Assignment of attribute value failed!
+[2026-02-15 23:30:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex: Assignment of attribute value failed!
+[2026-02-15 23:30:38] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 2 objects, 1 links updated.
