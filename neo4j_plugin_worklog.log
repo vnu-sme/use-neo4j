@@ -5166,3 +5166,111 @@ body:1:10: Undefined operation named `purchase' in expression `BuyLotteryTicket.
 [2026-02-15 23:30:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync salary: Assignment of attribute value failed!
 [2026-02-15 23:30:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex: Assignment of attribute value failed!
 [2026-02-15 23:30:38] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 2 objects, 1 links updated.
+[2026-02-16 16:50:11] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-16 16:50:12] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-16 16:50:12] ACTION: SESSION_CREATE | DETAILS: New session created with key: 9185B1B4
+[2026-02-16 16:50:12] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-16 16:50:12] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 9185B1B4 | Ver: unknown
+[2026-02-16 16:50:18] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-16 16:50:18] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-16 16:50:18] ACTION: SESSION_CREATE | DETAILS: New session created with key: A3C4AA5C
+[2026-02-16 16:50:18] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-16 16:50:18] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: A3C4AA5C | Ver: unknown
+[2026-02-16 16:50:30] ACTION: PULL_ENUM | DETAILS: Created Enum: ContractType
+[2026-02-16 16:50:30] ACTION: PULL_ENUM | DETAILS: Created Enum: Gender
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: Professor::canSupervise
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: Professor::getSalaryAdvantage
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: Professor::isSenior
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: University::getStudents
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: University::fires
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: University::getEmployeeCount
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: University::getProfessors
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: University::hasFullTimeEmployees
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: University::getTotalSalaryExpense
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: University::getEmployeesByContract
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: Employment::passedProbation
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: Employment::isPermanent
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: Employment::getEmployeeName
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: Employment::getDurationYears
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: Employment::isTemporary
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: Employment::getUniversityName
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: Student::isWorking
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: Student::canGraduate
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: Person::getAnnualSalary
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: Person::hasContract
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: Person::getContract
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: Person::isEligibleForPromotion
+[2026-02-16 16:50:30] ACTION: PULL_OP | DETAILS: Created signature: Person::isEmployed
+[2026-02-16 16:50:30] ACTION: PULL_ASSOC | DETAILS: Restored: DemoAssociation
+[2026-02-16 16:50:30] ACTION: PULL_ASSOC | DETAILS: Restored: DemoAggregation
+[2026-02-16 16:50:30] ACTION: PULL_ASSOC | DETAILS: Restored: WorksFor
+[2026-02-16 16:50:30] ACTION: PULL_TERNARY | DETAILS: Restored: Ternari with 3 ends.
+[2026-02-16 16:50:30] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-02-16 16:50:30] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-02-16 16:50:35] ACTION: PULL_ENUM | DETAILS: Created Enum: ContractType
+[2026-02-16 16:50:35] ACTION: PULL_ENUM | DETAILS: Created Enum: Gender
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: Professor::canSupervise
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: Professor::getSalaryAdvantage
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: Professor::isSenior
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: University::getStudents
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: University::fires
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: University::getEmployeeCount
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: University::getProfessors
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: University::hasFullTimeEmployees
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: University::getTotalSalaryExpense
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: University::getEmployeesByContract
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: Employment::passedProbation
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: Employment::isPermanent
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: Employment::getEmployeeName
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: Employment::getDurationYears
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: Employment::isTemporary
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: Employment::getUniversityName
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: Student::isWorking
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: Student::canGraduate
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: Person::getAnnualSalary
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: Person::hasContract
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: Person::getContract
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: Person::isEligibleForPromotion
+[2026-02-16 16:50:35] ACTION: PULL_OP | DETAILS: Created signature: Person::isEmployed
+[2026-02-16 16:50:35] ACTION: PULL_ASSOC | DETAILS: Restored: DemoAssociation
+[2026-02-16 16:50:35] ACTION: PULL_ASSOC | DETAILS: Restored: DemoAggregation
+[2026-02-16 16:50:35] ACTION: PULL_ASSOC | DETAILS: Restored: WorksFor
+[2026-02-16 16:50:35] ACTION: PULL_TERNARY | DETAILS: Restored: Ternari with 3 ends.
+[2026-02-16 16:50:35] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-02-16 16:50:35] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-02-16 16:50:57] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Tom
+[2026-02-16 16:50:57] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: CSU
+[2026-02-16 16:50:57] ACTION: ATTR_ERROR | DETAILS: Failed to sync codes: Assignment of attribute value failed!
+[2026-02-16 16:50:57] ACTION: ATTR_ERROR | DETAILS: Failed to sync codesBag: Assignment of attribute value failed!
+[2026-02-16 16:50:57] ACTION: ATTR_ERROR | DETAILS: Failed to sync nested: Assignment of attribute value failed!
+[2026-02-16 16:50:57] ACTION: ATTR_ERROR | DETAILS: Failed to sync nestedDiff: Assignment of attribute value failed!
+[2026-02-16 16:50:57] ACTION: ATTR_ERROR | DETAILS: Failed to sync salary: Assignment of attribute value failed!
+[2026-02-16 16:50:57] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex: Assignment of attribute value failed!
+[2026-02-16 16:51:00] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 2 objects, 1 links updated.
+[2026-02-16 16:51:04] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Tom
+[2026-02-16 16:51:04] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: CSU
+[2026-02-16 16:51:04] ACTION: ATTR_ERROR | DETAILS: Failed to sync codes: Assignment of attribute value failed!
+[2026-02-16 16:51:04] ACTION: ATTR_ERROR | DETAILS: Failed to sync codesBag: Assignment of attribute value failed!
+[2026-02-16 16:51:04] ACTION: ATTR_ERROR | DETAILS: Failed to sync nested: Assignment of attribute value failed!
+[2026-02-16 16:51:04] ACTION: ATTR_ERROR | DETAILS: Failed to sync nestedDiff: Assignment of attribute value failed!
+[2026-02-16 16:51:04] ACTION: ATTR_ERROR | DETAILS: Failed to sync salary: Assignment of attribute value failed!
+[2026-02-16 16:51:04] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex: Assignment of attribute value failed!
+[2026-02-16 16:51:05] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 2 objects, 1 links updated.
+[2026-02-16 16:51:22] ACTION: REALTIME | DETAILS: Service restarted with new frequency.
+[2026-02-16 16:51:29] ACTION: REALTIME | DETAILS: Service restarted with new frequency.
+[2026-02-16 16:51:44] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-16 16:51:45] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: haha
+[2026-02-16 16:51:45] ACTION: ATTR_ERROR | DETAILS: Failed to sync codes: Assignment of attribute value failed!
+[2026-02-16 16:51:45] ACTION: ATTR_ERROR | DETAILS: Failed to sync codesBag: Assignment of attribute value failed!
+[2026-02-16 16:51:45] ACTION: ATTR_ERROR | DETAILS: Failed to sync nested: Assignment of attribute value failed!
+[2026-02-16 16:51:45] ACTION: ATTR_ERROR | DETAILS: Failed to sync nestedDiff: Assignment of attribute value failed!
+[2026-02-16 16:51:45] ACTION: ATTR_ERROR | DETAILS: Failed to sync salary: Assignment of attribute value failed!
+[2026-02-16 16:51:45] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex: Assignment of attribute value failed!
+[2026-02-16 16:52:07] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-16 16:52:07] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: jiji
+[2026-02-16 16:52:07] ACTION: ATTR_ERROR | DETAILS: Failed to sync codes: Assignment of attribute value failed!
+[2026-02-16 16:52:07] ACTION: ATTR_ERROR | DETAILS: Failed to sync codesBag: Assignment of attribute value failed!
+[2026-02-16 16:52:07] ACTION: ATTR_ERROR | DETAILS: Failed to sync nested: Assignment of attribute value failed!
+[2026-02-16 16:52:07] ACTION: ATTR_ERROR | DETAILS: Failed to sync nestedDiff: Assignment of attribute value failed!
+[2026-02-16 16:52:07] ACTION: ATTR_ERROR | DETAILS: Failed to sync salary: Assignment of attribute value failed!
+[2026-02-16 16:52:07] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex: Assignment of attribute value failed!

@@ -1,7 +1,11 @@
 package org.uet.dse.neo4j.gui;
 
 import org.tzi.use.uml.mm.MClass;
-import org.uet.dse.neo4j.sync.*;
+import org.uet.dse.neo4j.sync.model.ModelDiff;
+import org.uet.dse.neo4j.sync.model.ModelPushService;
+import org.uet.dse.neo4j.sync.model.ModelSyncCoordinator;
+import org.uet.dse.neo4j.sync.object.ObjectDiff;
+import org.uet.dse.neo4j.sync.object.ObjectSyncCoordinator;
 
 import javax.swing.*;
 import java.awt.*;
@@ -46,10 +50,7 @@ public class SyncDetailDialog extends JDialog {
 
         }else if (type.equals("Object")) {
             // 1. Lấy Snapshot từ cả 2 phía và thực hiện so sánh khách quan
-            ObjectDiff diff = objCoord.compareObjects(
-                    objCoord.getJavaObjectSnapshot(),
-                    objCoord.getNeo4jObjectSnapshot()
-            );
+            ObjectDiff diff = objCoord.compareObjects();
 
             // 2. Thống kê những đối tượng chỉ có ở máy Java (Cần Push)
             diff.javaOnlyObjects.forEach(o ->

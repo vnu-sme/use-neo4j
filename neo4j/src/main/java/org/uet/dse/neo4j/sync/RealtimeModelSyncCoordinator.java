@@ -7,8 +7,12 @@ import org.tzi.use.main.Session;
 import org.tzi.use.uml.mm.MModel;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.phase2.WorkLogManager;
+import org.uet.dse.neo4j.sync.lock.LockManager;
+import org.uet.dse.neo4j.sync.model.ModelDiff;
+import org.uet.dse.neo4j.sync.model.ModelPushService;
+import org.uet.dse.neo4j.sync.model.ModelSyncCoordinator;
 
-public class RealtimeModelSyncCoordinator extends ModelSyncCoordinator{
+public class RealtimeModelSyncCoordinator extends ModelSyncCoordinator {
     public RealtimeModelSyncCoordinator(Session session, MainWindow mainWindow, MModel useModel, UseModelApi modelApi) {
         super(session, mainWindow, useModel, modelApi);
     }

@@ -4,7 +4,7 @@ import org.tzi.use.gui.main.MainWindow;
 import org.tzi.use.main.Session;
 import org.uet.dse.neo4j.collaboration.ConsensusService;
 import org.uet.dse.neo4j.migration.ObjectMigrationManager;
-import org.uet.dse.neo4j.sync.ModelSyncCoordinator;
+import org.uet.dse.neo4j.sync.model.ModelSyncCoordinator;
 
 import javax.swing.*;
 import java.awt.*;
@@ -51,7 +51,7 @@ public class ProposalVotingDialog extends JDialog {
             ObjectMigrationManager migration = new ObjectMigrationManager();
 
             // A. Backup Object hiện có
-            migration.backupLocalState(useSession.system());
+            //migration.backupLocalState(useSession.system());
 
             // B. Pull Model mới (Sử dụng hàm không hiện popup confirm vì đã confirm ở đây rồi)
             new ModelSyncCoordinator(useSession, mainWindow).syncBackwardSilent();

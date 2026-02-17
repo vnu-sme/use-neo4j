@@ -1,4 +1,4 @@
-package org.uet.dse.neo4j.sync;
+package org.uet.dse.neo4j.sync.model;
 
 import org.tzi.use.api.UseModelApi;
 import org.tzi.use.parser.Context;
@@ -14,6 +14,7 @@ import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.model.ClassState;
 import org.uet.dse.neo4j.model.FullModelSnapshot;
 import org.uet.dse.neo4j.phase2.WorkLogManager;
+import org.uet.dse.neo4j.sync.helper.UmlTypeTranslator;
 
 import java.io.PrintWriter;
 import java.util.*;

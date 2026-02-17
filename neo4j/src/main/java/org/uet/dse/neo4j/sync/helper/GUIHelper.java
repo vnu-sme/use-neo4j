@@ -1,4 +1,6 @@
-package org.uet.dse.neo4j.sync;
+package org.uet.dse.neo4j.sync.helper;
+
+import org.uet.dse.neo4j.sync.object.ObjectDiff;
 
 import javax.swing.*;
 import java.awt.*;

@@ -4,16 +4,10 @@ import org.tzi.use.api.UseSystemApi;
 import org.tzi.use.uml.sys.MSystem;
 import org.uet.dse.neo4j.model.FullObjectSnapshot;
 import org.uet.dse.neo4j.model.ObjectState;
-import org.uet.dse.neo4j.sync.ObjectSyncCoordinator;
+import org.uet.dse.neo4j.sync.object.ObjectSyncCoordinator;
 
 public class ObjectMigrationManager {
     private FullObjectSnapshot backup;
-
-    public void backupLocalState(MSystem system) {
-        ObjectSyncCoordinator coordinator = new ObjectSyncCoordinator(system);
-        this.backup = coordinator.getJavaObjectSnapshot();
-        System.out.println("Migration: Backup created for " + backup.objects.size() + " objects.");
-    }
 
     public void restoreState(MSystem newSystem) {
         if (backup == null || backup.objects.isEmpty()) return;

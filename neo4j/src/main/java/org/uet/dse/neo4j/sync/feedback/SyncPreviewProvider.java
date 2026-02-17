@@ -1,6 +1,6 @@
 package org.uet.dse.neo4j.sync.feedback;
 
-import org.uet.dse.neo4j.sync.ObjectDiff;
+import org.uet.dse.neo4j.sync.object.ObjectDiff;
 import reactor.util.annotation.NonNull;
 
 @FunctionalInterface

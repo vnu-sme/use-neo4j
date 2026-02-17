@@ -1,9 +1,8 @@
-package org.uet.dse.neo4j.sync;
+package org.uet.dse.neo4j.sync.object;
 
 import org.neo4j.driver.Session;
 import org.neo4j.driver.TransactionContext;
 import org.tzi.use.uml.mm.MAssociationEnd;
-import org.tzi.use.uml.mm.MAttribute;
 import org.tzi.use.uml.ocl.value.Value;
 import org.tzi.use.uml.sys.*;
 import org.uet.dse.neo4j.helper.ValueMapper;
@@ -11,6 +10,7 @@ import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.phase2.WorkLogManager;
 import org.uet.dse.neo4j.repo.Neo4jObjectRepository;
 import org.uet.dse.neo4j.repo.Neo4jSideRepository;
+import org.uet.dse.neo4j.sync.helper.UmlTypeTranslator;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -34,8 +34,19 @@ public class ObjectPushService {
                 return null;
             });
 
-            Neo4jSideRepository.updateObjectVersionOnServer();
+            updateObjectVersionOnServer();
             WorkLogManager.getInstance().log("SYNC", "Object & Link sync completed.");
+        }
+    }
+
+    public static void updateObjectVersionOnServer() {
+        long ts = System.currentTimeMillis();
+
+        try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().openSession()) {
+            String cypher = "MERGE (v:ModelVersion {id: 'CURRENT'}) SET v.objectTimestamp = $ts";
+            session.run(cypher, org.neo4j.driver.Values.parameters("ts", ts));
+
+            ObjectSyncCoordinator.updateLocalSyncTimestamp(ts);
         }
     }
 
@@ -136,12 +147,14 @@ public class ObjectPushService {
         for (org.tzi.use.uml.mm.MAttribute attr : obj.cls().allAttributes()) {
             Value useVal = obj.state(state).attributeValue(attr);
             String ownerClassName = attr.owner().name();
-
+            org.tzi.use.uml.ocl.type.Type type = attr.type();
+            boolean isObjRef = isObjectReferenceType(type);
             Map<String, Object> metadata = new HashMap<>();
             metadata.put("type", UmlTypeTranslator.toDatabaseType(attr.type()));
             metadata.put("isCollection", attr.type().isKindOfCollection(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID));
             metadata.put("collectionType", UmlTypeTranslator.getCollectionType(attr.type()));
             metadata.put("isNestedCollection", UmlTypeTranslator.getCollectionDepth(attr.type()) > 1);
+            metadata.put("isObjectReference", isObjRef);
 
             Object mappedValue;
             if (useVal.isUndefined()) {
@@ -151,6 +164,15 @@ public class ObjectPushService {
             }
             objectRepository.setAttributeValueNode(tx, objName, ownerClassName, attr.name(), mappedValue, metadata);
         }
+    }
+
+    private boolean isObjectReferenceType(org.tzi.use.uml.ocl.type.Type type) {
+        if (type.isKindOfClass(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID)) return true;
+        if (type.isKindOfCollection(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID)) {
+            return ((org.tzi.use.uml.ocl.type.CollectionType) type).elemType()
+                    .isKindOfClass(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID);
+        }
+        return false;
     }
 
 

@@ -5,9 +5,8 @@ import org.tzi.use.main.ChangeEvent;
 import org.tzi.use.main.ChangeListener;
 import org.uet.dse.neo4j.config.SyncConfig;
 import org.uet.dse.neo4j.phase2.WorkLogManager;
-import org.uet.dse.neo4j.sync.ModelSyncCoordinator;
-import org.uet.dse.neo4j.sync.ObjectDiff;
-import org.uet.dse.neo4j.sync.ObjectSyncCoordinator;
+import org.uet.dse.neo4j.sync.object.ObjectDiff;
+import org.uet.dse.neo4j.sync.object.ObjectSyncCoordinator;
 import org.uet.dse.neo4j.sync.RealtimeModelSyncCoordinator;
 
 import java.util.concurrent.*;
@@ -56,19 +55,12 @@ public class Neo4jRealTimeService implements ChangeListener, Session.EvaluatedSt
             if (lastLocalStateFingerprint != 0 && currentFingerprint != lastLocalStateFingerprint) {
                 System.out.println("Real-time: Identifying changed objects...");
 
-                // 1. Tạo Coordinator để so sánh
                 ObjectSyncCoordinator objectCoord = new ObjectSyncCoordinator(session.system());
 
-                // 2. Lấy Diff để biết chính xác AI bị thay đổi
-                ObjectDiff diff = objectCoord.compareObjects(
-                        objectCoord.getJavaObjectSnapshot(),
-                        objectCoord.getNeo4jObjectSnapshot()
-                );
+                ObjectDiff diff = objectCoord.compareObjects();
 
-                // 3. CHỈ ĐẨY NHỮNG GÌ THAY ĐỔI (Incremental Push)
-                // Việc này giúp p2 sẽ không bị quét trúng nếu bạn chỉ sửa p1
                 if (diff.hasDifference()) {
-                    objectCoord.executePush(diff);
+                    objectCoord.pushToNeo4j(diff);
                     System.out.println("Real-time: Syncing only modified entities.");
                 }
 

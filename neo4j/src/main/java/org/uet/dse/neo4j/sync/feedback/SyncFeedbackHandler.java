@@ -1,6 +1,6 @@
 package org.uet.dse.neo4j.sync.feedback;
 
-import org.uet.dse.neo4j.sync.ObjectDiff;
+import org.uet.dse.neo4j.sync.object.ObjectDiff;
 
 public interface SyncFeedbackHandler {
     /** Called when the model is out of sync before the operation begins. */
@@ -20,4 +20,9 @@ public interface SyncFeedbackHandler {
 
     /** Called when the push throws. */
     void onFailure(Exception e);
+
+    default String buildSuccessMessage(ObjectDiff diff) {
+        return String.format("Sync Complete: %d objects, %d links updated.",
+                diff.neo4jOnlyObjects.size(), diff.neo4jOnlyLinks.size());
+    }
 }

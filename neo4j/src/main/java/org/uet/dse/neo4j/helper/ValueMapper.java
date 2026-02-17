@@ -8,13 +8,34 @@ public class ValueMapper {
     public static Object mapUseValue(Value value) {
         if (value == null || value.isUndefined()) return null;
 
+//        if (value instanceof CollectionValue) {
+//            CollectionValue cv = (CollectionValue) value;
+//            List<Object> list = new ArrayList<>();
+//            for (Value v : cv.collection()) {
+//                list.add(mapUseValue(v));
+//            }
+//            return list;
+//        }
+
         if (value instanceof CollectionValue) {
             CollectionValue cv = (CollectionValue) value;
-            List<Object> list = new ArrayList<>();
+            Map<String, Object> collectionNode = new HashMap<>();
+
+            String kind = "Set";
+            if (cv.isSet()) kind = "Set";
+            else if (cv.isSequence()) kind = "Sequence";
+            else if (cv.isBag()) kind = "Bag";
+            else if (cv.isOrderedSet()) kind = "OrderedSet";
+
+            collectionNode.put("collectionType", kind);
+
+            List<Object> items = new ArrayList<>();
             for (Value v : cv.collection()) {
-                list.add(mapUseValue(v));
+                items.add(mapUseValue(v));
             }
-            return list;
+            collectionNode.put("items", items);
+
+            return collectionNode;
         }
 
         if (value instanceof ObjectValue) {

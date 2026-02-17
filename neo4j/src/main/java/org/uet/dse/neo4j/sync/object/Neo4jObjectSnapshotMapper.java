@@ -1,4 +1,4 @@
-package org.uet.dse.neo4j.sync;
+package org.uet.dse.neo4j.sync.object;
 
 import org.neo4j.driver.Record;
 import org.uet.dse.neo4j.model.LinkState;

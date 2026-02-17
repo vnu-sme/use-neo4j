@@ -1,7 +1,7 @@
 package org.uet.dse.neo4j.migration;
 
 import org.tzi.use.uml.sys.MSystem;
-import org.uet.dse.neo4j.sync.ModelDiff;
+import org.uet.dse.neo4j.sync.model.ModelDiff;
 import java.util.*;
 
 public class ObjectIntegrityService {

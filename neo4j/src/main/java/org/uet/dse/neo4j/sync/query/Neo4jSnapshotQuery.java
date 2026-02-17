@@ -1,9 +1,9 @@
-package org.uet.dse.neo4j.sync;
+package org.uet.dse.neo4j.sync.query;
 
-public class Neo4jSnapshotQueries {
-    private Neo4jSnapshotQueries() {}
+public class Neo4jSnapshotQuery {
+    private Neo4jSnapshotQuery() {}
 
-    static final String CLASSES_AND_FEATURES =
+    public static final String CLASSES_AND_FEATURES =
             "MATCH (meta:MetaNode) WHERE meta.name IN " +
                     "  ['NodeConcreteClass','NodeAbstractClass','NodeAssociationClass','NodeEnumeration'] " +
                     "MATCH (inst)-[:InstanceOf]->(meta) " +
@@ -54,24 +54,24 @@ public class Neo4jSnapshotQueries {
                     "RETURN inst.name AS className, meta.name AS metaName, classType, " +
                     "       inst.value AS enumValues, attrs, invariants, ops, acSrc, acTgt";
 
-    static final String GENERALIZATIONS =
+    public static final String GENERALIZATIONS =
             "MATCH (c)-[:Extends]->(p) RETURN c.name AS child, p.name AS parent";
 
-    static final String BINARY_ASSOCIATIONS =
+    public static final String BINARY_ASSOCIATIONS =
             "MATCH (s)-[r]->(t) " +
                     "WHERE type(r) IN ['AssociateWith','ComposeOf','Aggregates'] " +
                     "RETURN r.associationName AS name, type(r) AS type, " +
                     "       s.name AS src, r.sourceClassrole AS sRole, r.sourceMultiplicity AS sMult, " +
                     "       t.name AS tgt, r.targerClassrole   AS tRole, r.targetMultiplicity AS tMult";
 
-    static final String TERNARY_ASSOCIATIONS =
+    public static final String TERNARY_ASSOCIATIONS =
             "MATCH (c)-[r]->(hub)-[:InstanceOf]->(:MetaNode {name: 'NodeTernaryAssociation'}) " +
                     "WHERE r.isTernary = true " +
                     "RETURN hub.name AS assocName, " +
                     "       collect({cls: c.name, role: r.sourceClassrole, " +
                     "                mult: r.sourceMultiplicity, idx: r.index, type: type(r)}) AS participants";
 
-    static final String OBJECTS_AND_ATTRIBUTES =
+    public static final String OBJECTS_AND_ATTRIBUTES =
             "MATCH (o)-[:ObjectInstanceOf]->(cls) " +
                     "OPTIONAL MATCH (o)-[:ObjectHasAttribute]->(val:AttributeValue)-[:InstanceOf]->(attrDef) " +
                     "OPTIONAL MATCH (val)-[r:objectReference]->(target) " +
@@ -84,7 +84,7 @@ public class Neo4jSnapshotQueries {
                     "         idx:   r.index " +
                     "       }) AS data";
 
-    static final String BINARY_LINKS =
+    public static final String BINARY_LINKS =
             "MATCH (a)-[r]->(b) " +
                     "WHERE type(r) STARTS WITH 'Link' " +
                     "  AND NOT coalesce(r.isTernary,        false) " +
@@ -92,7 +92,7 @@ public class Neo4jSnapshotQueries {
                     "RETURN r.name AS assocName, type(r) AS label, " +
                     "       a.use_id AS src, b.use_id AS tgt";
 
-    static final String LINK_OBJECTS =
+    public  static final String LINK_OBJECTS =
             "MATCH (lo)-[:ObjectInstanceOf]->(ac:AssociationClass) " +
                     "MATCH (lo)-[r]->(p) WHERE r.isLinkObjectPart = true " +
                     "RETURN lo.use_id AS loName, ac.name AS acName, " +

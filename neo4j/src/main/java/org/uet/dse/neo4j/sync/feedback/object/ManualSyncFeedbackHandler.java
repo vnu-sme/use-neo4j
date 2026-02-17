@@ -1,7 +1,7 @@
 package org.uet.dse.neo4j.sync.feedback.object;
 
-import org.uet.dse.neo4j.sync.GUIHelper;
-import org.uet.dse.neo4j.sync.ObjectDiff;
+import org.uet.dse.neo4j.sync.helper.GUIHelper;
+import org.uet.dse.neo4j.sync.object.ObjectDiff;
 import org.uet.dse.neo4j.sync.feedback.SyncFeedbackHandler;
 import org.uet.dse.neo4j.sync.feedback.SyncPreviewProvider;
 
@@ -57,7 +57,7 @@ public class ManualSyncFeedbackHandler implements SyncFeedbackHandler {
         );
     }
 
-    private String buildSuccessMessage(ObjectDiff diff) {
+    public String buildSuccessMessage(ObjectDiff diff) {
         return String.format(
             "<html><b>Object Sync Successful!</b><br/>" +
             "Created: %d<br/>Updated: %d<br/>Deleted from DB: %d</html>",

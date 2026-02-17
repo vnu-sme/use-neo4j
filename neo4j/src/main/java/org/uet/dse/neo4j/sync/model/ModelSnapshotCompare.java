@@ -1,4 +1,4 @@
-package org.uet.dse.neo4j.sync;
+package org.uet.dse.neo4j.sync.model;
 
 import org.tzi.use.uml.mm.MModel;
 import org.uet.dse.neo4j.model.ClassState;

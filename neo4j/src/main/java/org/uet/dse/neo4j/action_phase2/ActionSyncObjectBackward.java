@@ -2,7 +2,7 @@ package org.uet.dse.neo4j.action_phase2;
 
 import org.tzi.use.runtime.gui.IPluginAction;
 import org.tzi.use.runtime.gui.IPluginActionDelegate;
-import org.uet.dse.neo4j.sync.ObjectSyncCoordinator;
+import org.uet.dse.neo4j.sync.object.ObjectSyncCoordinator;
 
 public class ActionSyncObjectBackward implements IPluginActionDelegate {
     @Override

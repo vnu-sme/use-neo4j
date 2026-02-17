@@ -15,6 +15,24 @@ public class ObjectState {
     // attrName -> Danh sách tên Object tham chiếu
     public Map<String, List<String>> objectReferences = new HashMap<>();
 
+    private Map<String, Object> rawData = new HashMap<>();
+
+    public Map<String, Object> getRawData() {
+        return this.rawData;
+    }
+
+    public void setRawData(Map<String, Object> rawData) {
+        this.rawData = rawData;
+    }
+
+    public void setRawValue(String attrName, Object value) {
+        this.rawData.put(attrName, value);
+    }
+
+    public Object getRawValue(String attrName) {
+        return this.rawData.get(attrName);
+    }
+
     public boolean isSameAs(ObjectState other) {
         if (other == null) return false;
 

@@ -15,8 +15,9 @@ import org.uet.dse.neo4j.mm.core.common.NType;
 import org.uet.dse.neo4j.mm.core.node.*;
 import org.uet.dse.neo4j.query.builder.CypherQueryBuilder;
 import org.uet.dse.neo4j.repo.Neo4jModelRepository;
-import org.uet.dse.neo4j.sync.ObjectSyncCoordinator;
-import org.uet.dse.neo4j.sync.UmlTypeTranslator;
+import org.uet.dse.neo4j.sync.object.ObjectSyncCoordinator;
+import org.uet.dse.neo4j.sync.helper.UmlTypeTranslator;
+import org.uet.dse.neo4j.sync.object.ObjectSyncHelper;
 
 import java.util.*;
 
@@ -114,7 +115,7 @@ public class Neo4jUmlBridge {
 
         String modelName = model.name();
 
-        long modelHash = ObjectSyncCoordinator.calculateModelHash(model);
+        long modelHash = ObjectSyncHelper.calculateModelHash(model);
         long ts = System.currentTimeMillis();
 
         // ModelHash này sẽ được SyncObjectCoordinator dùng để so sánh trước khi Push Object

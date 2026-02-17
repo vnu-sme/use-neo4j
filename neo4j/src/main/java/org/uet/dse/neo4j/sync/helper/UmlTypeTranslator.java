@@ -1,4 +1,4 @@
-package org.uet.dse.neo4j.sync;
+package org.uet.dse.neo4j.sync.helper;
 
 import org.tzi.use.uml.ocl.type.CollectionType;
 import org.tzi.use.uml.ocl.type.Type;

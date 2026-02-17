@@ -1,10 +1,11 @@
-package org.uet.dse.neo4j.sync;
+package org.uet.dse.neo4j.sync.model;
 
 import org.tzi.use.uml.mm.*;
 import org.tzi.use.uml.ocl.expr.VarDecl;
 import org.uet.dse.neo4j.model.AssociationState;
 import org.uet.dse.neo4j.model.ClassState;
 import org.uet.dse.neo4j.model.FullModelSnapshot;
+import org.uet.dse.neo4j.sync.helper.UmlTypeTranslator;
 
 import java.util.HashMap;
 import java.util.Map;

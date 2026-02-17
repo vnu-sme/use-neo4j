@@ -5,6 +5,9 @@ import org.tzi.use.gui.main.MainWindow;
 import org.uet.dse.neo4j.collaboration.ConsensusService;
 import org.uet.dse.neo4j.gui.ProposalVotingDialog;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
+import org.uet.dse.neo4j.sync.model.ModelSyncCoordinator;
+import org.uet.dse.neo4j.sync.object.ObjectSyncCoordinator;
+
 import javax.swing.*;
 import java.util.concurrent.*;
 

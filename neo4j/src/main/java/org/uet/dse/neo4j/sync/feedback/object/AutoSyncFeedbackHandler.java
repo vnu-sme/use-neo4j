@@ -1,7 +1,7 @@
 package org.uet.dse.neo4j.sync.feedback.object;
 
 import org.uet.dse.neo4j.phase2.WorkLogManager;
-import org.uet.dse.neo4j.sync.ObjectDiff;
+import org.uet.dse.neo4j.sync.object.ObjectDiff;
 import org.uet.dse.neo4j.sync.feedback.SyncFeedbackHandler;
 
 public class AutoSyncFeedbackHandler implements SyncFeedbackHandler {

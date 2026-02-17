@@ -1,6 +1,5 @@
-package org.uet.dse.neo4j.sync;
+package org.uet.dse.neo4j.sync.object;
 
-import org.tzi.use.uml.mm.MModel;
 import org.tzi.use.uml.sys.MSystem;
 import org.uet.dse.neo4j.model.FullObjectSnapshot;
 import org.uet.dse.neo4j.model.ObjectState;

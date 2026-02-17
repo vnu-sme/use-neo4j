@@ -1,4 +1,4 @@
-package org.uet.dse.neo4j.sync;
+package org.uet.dse.neo4j.sync.lock;
 
 import org.neo4j.driver.*;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;

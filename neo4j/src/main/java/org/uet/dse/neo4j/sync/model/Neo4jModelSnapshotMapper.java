@@ -1,4 +1,4 @@
-package org.uet.dse.neo4j.sync;
+package org.uet.dse.neo4j.sync.model;
 
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Value;

@@ -1,4 +1,4 @@
-package org.uet.dse.neo4j.sync;
+package org.uet.dse.neo4j.sync.model;
 
 import org.neo4j.driver.*;
 import org.neo4j.driver.Record;
@@ -20,6 +20,10 @@ import org.uet.dse.neo4j.model.ClassState;
 import org.uet.dse.neo4j.model.FullModelSnapshot;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.phase2.WorkLogManager;
+import org.uet.dse.neo4j.sync.lock.LockManager;
+import org.uet.dse.neo4j.sync.object.ObjectSyncCoordinator;
+import org.uet.dse.neo4j.sync.helper.UmlTypeTranslator;
+import org.uet.dse.neo4j.sync.object.ObjectSyncHelper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -435,8 +439,6 @@ public class ModelSyncCoordinator {
 
         syncTernaryAssociationsFromGraph(targetModel, tempApi, fullModelSnapshot.ternaryAssociations);
 
-
-
         //vi body access car data cuar association nen phari load association trc
         applyOperationBodiesFromSnapshot(targetModel, fullModelSnapshot.classes);
 
@@ -702,8 +704,8 @@ public class ModelSyncCoordinator {
 
     public boolean isQuickSyncCheck() {
         try {
-            long localHash = ObjectSyncCoordinator.calculateModelHash(useModel);
-            long remoteHash = ObjectSyncCoordinator.getRemoteModelHash(); // Lấy từ node ModelVersion
+            long localHash = ObjectSyncHelper.calculateModelHash(useModel);
+            long remoteHash = ObjectSyncHelper.getRemoteModelHash(); // Lấy từ node ModelVersion
             return localHash == remoteHash;
         } catch (Exception e) {
             return false;

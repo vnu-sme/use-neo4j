@@ -1,16 +1,15 @@
-package org.uet.dse.neo4j.sync;
+package org.uet.dse.neo4j.sync.object;
 
-import org.tzi.use.api.UseSystemApi;
 import org.tzi.use.uml.mm.MAssociation;
 import org.tzi.use.uml.mm.MAssociationEnd;
 import org.tzi.use.uml.mm.MAttribute;
-import org.tzi.use.uml.ocl.type.Type;
 import org.tzi.use.uml.ocl.value.Value;
 import org.tzi.use.uml.sys.*;
 import org.uet.dse.neo4j.helper.ValueMapper;
 import org.uet.dse.neo4j.model.FullObjectSnapshot;
 import org.uet.dse.neo4j.model.LinkState;
 import org.uet.dse.neo4j.model.ObjectState;
+import org.uet.dse.neo4j.sync.helper.UmlTypeTranslator;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,12 +25,10 @@ public class USEObjectSnapshotUtils {
         FullObjectSnapshot snapshot = new FullObjectSnapshot();
         MSystemState state = system.state();
 
-        // 1. Quét Objects
         for (MObject obj : state.allObjects()) {
             snapshot.objects.put(obj.name(), buildObjectState(obj, state));
         }
 
-        // 2. Quét Links
         for (MLink link : state.allLinks()) {
             LinkState ls = buildLinkState(link);
             snapshot.links.put(ls.getIdentity(), ls);
@@ -53,6 +50,10 @@ public class USEObjectSnapshotUtils {
 
             Object mapped = ValueMapper.mapUseValue(useVal);
 
+            // D. Phân loại vào Primitive hoặc Reference (Hành vi cũ để phục vụ so sánh Diff)
+            classifyAttributeValue(os, attr, mapped);
+
+            os.setRawValue(attr.name(), mapped);
             if (isObjectReferenceType(attr.type())) {
                 if (mapped instanceof List) os.objectReferences.put(attr.name(), (List<String>) mapped);
                 else if (mapped != null) os.objectReferences.put(attr.name(), Collections.singletonList(mapped.toString()));
@@ -75,9 +76,35 @@ public class USEObjectSnapshotUtils {
         LinkState ls = new LinkState();
         ls.assocName = link.association().name();
         link.linkedObjects().forEach(o -> ls.participants.add(o.name()));
-        if (link instanceof MLinkObject) ls.linkObjectName = ((MLinkObject) link).name();
+
+        ls.edgeLabel = resolveLinkEdgeLabel(link);
+        if (link instanceof MLinkObject) {
+            ls.linkObjectName = ((MLinkObject) link).name();
+        } else if (link.linkedObjects().size() > 2) {
+            ls.isTernary = true;
+        }
         return ls;
     }
+
+    private String resolveLinkEdgeLabel(MLink link) {
+        if (link instanceof MLinkObject || link.linkedObjects().size() > 2) {
+            return "LinkAssociateWith";
+        }
+        return resolveBinaryEdgeLabel(link.association());
+    }
+
+    private String resolveBinaryEdgeLabel(MAssociation assoc) {
+        int maxKind = assoc.associationEnds().stream()
+                .mapToInt(MAssociationEnd::aggregationKind)
+                .max()
+                .orElse(0);
+
+        if (maxKind == 2) return "LinkComposeOf";
+        if (maxKind == 1) return "LinkAggregates";
+        return "LinkAssociateWith";
+    }
+
+
 
     private void collectObjects(MSystemState state, FullObjectSnapshot snapshot) {
         for (MObject obj : state.allObjects()) {
@@ -86,17 +113,39 @@ public class USEObjectSnapshotUtils {
     }
 
 
-    /**
-     * Routes a mapped attribute value into either objectReferences or primitiveValues
-     * depending on whether the attribute's UML type resolves to a class (or collection
-     * of classes) at the M1 level.
-     */
     private void classifyAttributeValue(ObjectState os, MAttribute attr, Object mapped) {
+        if (mapped == null || mapped.equals("Undefined")) return;
+
         if (isObjectReferenceType(attr.type())) {
-            putObjectReference(os, attr.name(), mapped);
+            // Nếu là kiểu tham chiếu đối tượng
+            if (mapped instanceof Map) {
+                // Nếu là Nested Collection chứa Object, ta bóc tách các ID để so sánh nhanh
+                List<String> allIds = extractAllObjectIds(mapped);
+                os.objectReferences.put(attr.name(), allIds);
+            } else if (mapped instanceof List) {
+                os.objectReferences.put(attr.name(), (List<String>) mapped);
+            } else {
+                os.objectReferences.put(attr.name(), Collections.singletonList(mapped.toString()));
+            }
         } else {
+            // Nếu là kiểu nguyên thủy
             os.primitiveValues.put(attr.name(), mapped);
         }
+    }
+
+
+    /**
+     * Helper: Duyệt cây dữ liệu để lấy toàn bộ ID object phục vụ việc so sánh Diff nhanh
+     */
+    private List<String> extractAllObjectIds(Object mapped) {
+        java.util.List<String> ids = new java.util.ArrayList<>();
+        if (mapped instanceof Map) {
+            List<Object> items = (List<Object>) ((Map<?, ?>) mapped).get("items");
+            for (Object item : items) ids.addAll(extractAllObjectIds(item));
+        } else if (mapped != null && !mapped.equals("Undefined")) {
+            ids.add(mapped.toString());
+        }
+        return ids;
     }
 
     private void putObjectReference(ObjectState os, String attrName, Object mapped) {
@@ -121,21 +170,21 @@ public class USEObjectSnapshotUtils {
      * Binary links are promoted to Aggregates or ComposeOf when the association
      * ends carry an aggregation kind.
      */
-    private String resolveLinkEdgeLabel(MLink link) {
-        if (link instanceof MLinkObject || link.linkedObjects().size() > 2) {
-            return "LinkAssociateWith";
-        }
-        return resolveBinaryEdgeLabel(link.association());
-    }
+//    private String resolveLinkEdgeLabel(MLink link) {
+//        if (link instanceof MLinkObject || link.linkedObjects().size() > 2) {
+//            return "LinkAssociateWith";
+//        }
+//        return resolveBinaryEdgeLabel(link.association());
+//    }
 
-    private String resolveBinaryEdgeLabel(MAssociation assoc) {
-        int maxKind = assoc.associationEnds().stream()
-                .mapToInt(MAssociationEnd::aggregationKind)
-                .max()
-                .orElse(0);
-
-        if (maxKind == 2) return "LinkComposeOf";
-        if (maxKind == 1) return "LinkAggregates";
-        return "LinkAssociateWith";
-    }
+//    private String resolveBinaryEdgeLabel(MAssociation assoc) {
+//        int maxKind = assoc.associationEnds().stream()
+//                .mapToInt(MAssociationEnd::aggregationKind)
+//                .max()
+//                .orElse(0);
+//
+//        if (maxKind == 2) return "LinkComposeOf";
+//        if (maxKind == 1) return "LinkAggregates";
+//        return "LinkAssociateWith";
+//    }
 }
