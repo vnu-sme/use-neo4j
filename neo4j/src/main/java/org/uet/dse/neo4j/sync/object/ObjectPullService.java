@@ -204,16 +204,18 @@ public class ObjectPullService {
         String objName = useObj.name();
         String attrName = attrDef.name();
 
-        // --- CHIẾN LƯỢC 1: Ưu tiên hành vi mới (Dữ liệu đệ quy/Nested) ---
         Object dbData = dbState.getRawValue(attrName);
-        if (dbData != null && !dbData.equals("Undefined")) {
-            String oclExpression = reconstructOclExpression(dbData);
-            systemApi.setAttributeValue(objName, attrName, oclExpression);
-            return; // Thành công thì thoát
+
+        if (dbData == null) {
+            dbData = dbState.primitiveValues.get(attrName);
         }
 
-        // --- CHIẾN LƯỢC 2: Fallback về hành vi cũ (Dữ liệu phẳng) ---
-        // Kiểm tra trong Map Primitive cũ
+        if (dbData != null && !dbData.equals("Undefined")) {
+            String oclExpression = reconstructOclExpression(dbData, attrDef.type());
+            systemApi.setAttributeValue(objName, attrName, oclExpression);
+            return;
+        }
+
         if (dbState.primitiveValues.containsKey(attrName)) {
             Object val = dbState.primitiveValues.get(attrName);
             String oclVal = UmlTypeTranslator.toOclLiteral(val);
@@ -229,34 +231,45 @@ public class ObjectPullService {
             return;
         }
 
-        // --- CHIẾN LƯỢC 3: Nếu DB không có gì -> Reset về Undefined ---
         resetIfDefined(useObj, attrDef, objName, attrName);
     }
 
-    /**
-     * HÀM ĐỆ QUY CHỦ CHỐT: Tái cấu trúc biểu thức OCL từ mọi loại dữ liệu (Map, List, Primitive)
-     */
-    private String reconstructOclExpression(Object data) {
+    private String reconstructOclExpression(Object data, org.tzi.use.uml.ocl.type.Type expectedType) {
         if (data == null || data.equals("Undefined") || data.equals("null")) {
             return "Undefined";
         }
 
-        // 1. Trường hợp Dữ liệu mới (Dạng Map cho Collection Node)
-        if (data instanceof Map) {
-            Map<?, ?> map = (Map<?, ?>) data;
-            String collType = (String) map.get("collectionType"); // Set, Sequence, Bag
-            List<?> items = (List<?>) map.get("items");
+        if (expectedType instanceof org.tzi.use.uml.ocl.type.EnumType) {
+            String val = data.toString();
+            return val.startsWith("#") ? val : "#" + val;
+        }
 
-            if (items == null || items.isEmpty()) return collType + "{}";
+        if (data instanceof Map) {
+            Map<String, Object> map = (Map<String, Object>) data;
+
+            Object collTypeObj = map.get("collectionType");
+            String collType = (collTypeObj != null) ? collTypeObj.toString() : "Set";
+
+            Object itemsObj = map.get("items");
+            if (!(itemsObj instanceof List)) return collType + "{}";
+
+            List<?> items = (List<?>) itemsObj;
+            if (items.isEmpty()) return collType + "{}";
+
+            org.tzi.use.uml.ocl.type.Type elemType = expectedType;
+            if (expectedType instanceof org.tzi.use.uml.ocl.type.CollectionType) {
+                elemType = ((org.tzi.use.uml.ocl.type.CollectionType) expectedType).elemType();
+            }
+
+            final org.tzi.use.uml.ocl.type.Type finalElemType = elemType;
 
             String joined = items.stream()
-                    .map(this::reconstructOclExpression) // Đệ quy
-                    .collect(Collectors.joining(", "));
+                    .map(item -> reconstructOclExpression(item, finalElemType))
+                    .collect(java.util.stream.Collectors.joining(", "));
 
             return String.format("%s{%s}", collType, joined);
         }
 
-        // 2. Trường hợp danh sách phẳng (Thường là tham chiếu object cũ)
         if (data instanceof List) {
             List<String> refs = (List<String>) data;
             if (refs.isEmpty()) return "Set{}";
@@ -264,8 +277,10 @@ public class ObjectPullService {
             return "Set{" + String.join(", ", refs) + "}";
         }
 
-        // 3. Trường hợp giá trị đơn (Primitive)
-        // Gọi translator để xử lý nháy đơn cho String và .0 cho Real
+
+        if (expectedType.isKindOfClass(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID)) {
+            return data.toString();
+        }
         return UmlTypeTranslator.toOclLiteral(data);
     }
 

@@ -9,6 +9,7 @@ attributes
     age : Integer
     salary : Real
     sex : Gender
+    stud: Set(University)
     codes: Set(String)
     codesBag: Bag(String)
     nested: Set(Set(String))

@@ -24,8 +24,6 @@ public class Neo4jObjectSnapshotUtils {
         return snapshot;
     }
 
-// ── Private session-level helpers ─────────────────────────────────────────────
-
     private void collectObjects(Session session, FullObjectSnapshot snapshot) {
         session.run(Neo4jSnapshotQuery.OBJECTS_AND_ATTRIBUTES).forEachRemaining(row -> {
             ObjectState os = Neo4jObjectSnapshotMapper.toObjectState(row);

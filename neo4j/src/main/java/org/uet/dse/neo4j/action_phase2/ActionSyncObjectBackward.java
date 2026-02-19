@@ -8,7 +8,6 @@ public class ActionSyncObjectBackward implements IPluginActionDelegate {
     @Override
     public void performAction(IPluginAction pluginAction) {
         ObjectSyncCoordinator coordinator = new ObjectSyncCoordinator(pluginAction.getSession().system());
-        // Tham số true: Hiện thống kê những gì sẽ được kéo về trước khi thực hiện
         coordinator.syncObjectsBackward(true);
     }
 }
