@@ -7236,3 +7236,214 @@ body:1:10: Undefined operation named `purchase' in expression `BuyLotteryTicket.
 [2026-02-19 16:35:26] ACTION: REALTIME_ERROR | DETAILS: Property values can only be of primitive types or arrays thereof. Encountered: Map{collectionType -> String("Set"), items -> List{String("SE202"), String("CS101"), String("AI303")}}.
 [2026-02-19 16:35:27] ACTION: REALTIME_ERROR | DETAILS: Property values can only be of primitive types or arrays thereof. Encountered: Map{collectionType -> String("Set"), items -> List{String("SE202"), String("CS101"), String("AI303")}}.
 [2026-02-19 16:36:06] ACTION: REALTIME_ERROR | DETAILS: Property values can only be of primitive types or arrays thereof. Encountered: Map{collectionType -> String("Set"), items -> List{String("Stanford"), String("MIT")}}.
+[2026-02-19 16:51:13] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-19 16:51:13] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-19 16:51:13] ACTION: SESSION_CREATE | DETAILS: New session created with key: 02CF35BF
+[2026-02-19 16:51:14] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-19 16:51:14] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 02CF35BF | Ver: unknown
+[2026-02-19 16:51:17] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Bob
+[2026-02-19 16:51:17] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: ProfSmith
+[2026-02-19 16:51:17] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex on Bob: Invalid expression `Female'!
+USE Api:1:0: Undefined variable `Female'.
+
+[2026-02-19 16:51:17] ACTION: LINK_PULL_ERROR | DETAILS: Failed to create link [Ternari]: Cannot invoke "Object.toString()" because "o" is null
+[2026-02-19 16:51:21] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-19 16:51:21] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-19 16:51:21] ACTION: SESSION_CREATE | DETAILS: New session created with key: 16C0BDAC
+[2026-02-19 16:51:21] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-19 16:51:21] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 16C0BDAC | Ver: unknown
+[2026-02-19 16:51:24] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Bob
+[2026-02-19 16:51:24] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: ProfSmith
+[2026-02-19 16:51:24] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex on Bob: Invalid expression `Female'!
+USE Api:1:0: Undefined variable `Female'.
+
+[2026-02-19 16:51:24] ACTION: LINK_PULL_ERROR | DETAILS: Failed to create link [Ternari]: Cannot invoke "Object.toString()" because "o" is null
+[2026-02-19 16:51:30] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex on Bob: Invalid expression `Female'!
+USE Api:1:0: Undefined variable `Female'.
+
+[2026-02-19 16:51:30] ACTION: LINK_PULL_ERROR | DETAILS: Failed to create link [Ternari]: Cannot invoke "Object.toString()" because "o" is null
+[2026-02-19 16:51:32] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 0 objects, 0 links updated.
+[2026-02-19 16:52:04] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex on Bob: Invalid expression `Female'!
+USE Api:1:0: Undefined variable `Female'.
+
+[2026-02-19 16:52:04] ACTION: LINK_PULL_ERROR | DETAILS: Failed to create link [Ternari]: Cannot invoke "Object.toString()" because "o" is null
+[2026-02-19 16:52:05] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 0 objects, 0 links updated.
+[2026-02-19 16:52:48] ACTION: CLEANUP | DETAILS: Deep deleted object: Bob
+[2026-02-19 16:52:48] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-19 16:52:50] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: Bob
+[2026-02-19 16:52:51] ACTION: LINK_PULL_ERROR | DETAILS: Failed to create link [Ternari]: Cannot invoke "Object.toString()" because "o" is null
+[2026-02-19 16:53:23] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-19 16:53:24] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex on ProfSmith: Invalid expression `Male'!
+USE Api:1:0: Undefined variable `Male'.
+
+[2026-02-19 16:53:24] ACTION: LINK_PULL_ERROR | DETAILS: Failed to create link [Ternari]: Cannot invoke "Object.toString()" because "o" is null
+[2026-02-19 16:53:33] ACTION: REALTIME | DETAILS: Service restarted with new frequency.
+[2026-02-19 16:53:47] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-19 16:53:47] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex on ProfSmith: Invalid expression `Male'!
+USE Api:1:0: Undefined variable `Male'.
+
+[2026-02-19 16:53:47] ACTION: LINK_PULL_ERROR | DETAILS: Failed to create link [Ternari]: Cannot invoke "Object.toString()" because "o" is null
+[2026-02-19 16:55:25] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex on ProfSmith: Invalid expression `Male'!
+USE Api:1:0: Undefined variable `Male'.
+
+[2026-02-19 16:55:25] ACTION: LINK_PULL_ERROR | DETAILS: Failed to create link [Ternari]: Cannot invoke "Object.toString()" because "o" is null
+[2026-02-19 16:55:26] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 0 objects, 0 links updated.
+[2026-02-19 16:55:44] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-19 16:55:44] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-19 16:55:45] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Bob
+[2026-02-19 16:55:45] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex on ProfSmith: Invalid expression `Male'!
+USE Api:1:0: Undefined variable `Male'.
+
+[2026-02-19 16:55:45] ACTION: LINK_PULL_ERROR | DETAILS: Failed to create link [Ternari]: Cannot invoke "Object.toString()" because "o" is null
+[2026-02-19 16:55:56] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-19 16:55:56] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex on Bob: Invalid expression `Male'!
+USE Api:1:0: Undefined variable `Male'.
+
+[2026-02-19 16:55:56] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex on ProfSmith: Invalid expression `Male'!
+USE Api:1:0: Undefined variable `Male'.
+
+[2026-02-19 16:55:56] ACTION: LINK_PULL_ERROR | DETAILS: Failed to create link [Ternari]: Cannot invoke "Object.toString()" because "o" is null
+[2026-02-19 16:56:08] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-19 16:56:08] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex on Bob: Invalid expression `Male'!
+USE Api:1:0: Undefined variable `Male'.
+
+[2026-02-19 16:56:08] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex on ProfSmith: Invalid expression `Male'!
+USE Api:1:0: Undefined variable `Male'.
+
+[2026-02-19 16:56:08] ACTION: LINK_PULL_ERROR | DETAILS: Failed to create link [Ternari]: Cannot invoke "Object.toString()" because "o" is null
+[2026-02-19 16:56:39] ACTION: REALTIME_ERROR | DETAILS: Property values can only be of primitive types or arrays thereof. Encountered: Map{collectionType -> String("Set"), items -> List{String("SE202"), String("CS101"), String("AI303")}}.
+[2026-02-19 16:57:26] ACTION: REALTIME_ERROR | DETAILS: Property values can only be of primitive types or arrays thereof. Encountered: Map{collectionType -> String("Set"), items -> List{String("SE202"), String("CS101"), String("AI303")}}.
+[2026-02-19 17:10:14] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-19 17:10:14] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-19 17:10:14] ACTION: SESSION_CREATE | DETAILS: New session created with key: 0AA05537
+[2026-02-19 17:10:14] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-19 17:10:14] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 0AA05537 | Ver: unknown
+[2026-02-19 17:10:23] ACTION: PUSH_START | DETAILS: User neo4j [Key: 0AA05537] (audreycolar) initiated sync for model: Employee
+[2026-02-19 17:10:23] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-19 17:10:23] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-19 17:10:28] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -493773417
+[2026-02-19 17:10:28] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-02-19 17:10:28] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 0AA05537] (audreycolar)
+[2026-02-19 17:10:38] ACTION: PULL_ENUM | DETAILS: Created Enum: ContractType
+[2026-02-19 17:10:38] ACTION: PULL_ENUM | DETAILS: Created Enum: Gender
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: Professor::canSupervise
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: Professor::getSalaryAdvantage
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: Professor::isSenior
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: University::getStudents
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: University::fires
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: University::getProfessors
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: University::getEmployeeCount
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: University::hasFullTimeEmployees
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: University::getTotalSalaryExpense
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: University::getEmployeesByContract
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: Employment::passedProbation
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: Employment::isPermanent
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: Employment::getEmployeeName
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: Employment::getDurationYears
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: Employment::isTemporary
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: Employment::getUniversityName
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: Student::isWorking
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: Student::canGraduate
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: Person::getAnnualSalary
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: Person::hasContract
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: Person::getContract
+[2026-02-19 17:10:38] ACTION: PULL_OP | DETAILS: Created signature: Person::isEligibleForPromotion
+[2026-02-19 17:10:39] ACTION: PULL_OP | DETAILS: Created signature: Person::isEmployed
+[2026-02-19 17:10:39] ACTION: PULL_ASSOC | DETAILS: Restored: DemoAssociation
+[2026-02-19 17:10:39] ACTION: PULL_ASSOC | DETAILS: Restored: DemoAggregation
+[2026-02-19 17:10:39] ACTION: PULL_ASSOC | DETAILS: Restored: WorksFor
+[2026-02-19 17:10:39] ACTION: PULL_TERNARY | DETAILS: Restored: Ternari with 3 ends.
+[2026-02-19 17:10:39] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-02-19 17:10:39] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-02-19 17:11:01] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-19 17:11:01] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-19 17:11:01] ACTION: SESSION_CREATE | DETAILS: New session created with key: 818429FC
+[2026-02-19 17:11:01] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-19 17:11:01] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 818429FC | Ver: unknown
+[2026-02-19 17:11:09] ACTION: PULL_ENUM | DETAILS: Created Enum: ContractType
+[2026-02-19 17:11:09] ACTION: PULL_ENUM | DETAILS: Created Enum: Gender
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: Professor::canSupervise
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: Professor::getSalaryAdvantage
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: Professor::isSenior
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: University::getStudents
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: University::fires
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: University::getProfessors
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: University::getEmployeeCount
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: University::hasFullTimeEmployees
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: University::getTotalSalaryExpense
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: University::getEmployeesByContract
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: Employment::passedProbation
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: Employment::isPermanent
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: Employment::getEmployeeName
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: Employment::getDurationYears
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: Employment::isTemporary
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: Employment::getUniversityName
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: Student::isWorking
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: Student::canGraduate
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: Person::getAnnualSalary
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: Person::hasContract
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: Person::getContract
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: Person::isEligibleForPromotion
+[2026-02-19 17:11:09] ACTION: PULL_OP | DETAILS: Created signature: Person::isEmployed
+[2026-02-19 17:11:09] ACTION: PULL_ASSOC | DETAILS: Restored: DemoAssociation
+[2026-02-19 17:11:09] ACTION: PULL_ASSOC | DETAILS: Restored: DemoAggregation
+[2026-02-19 17:11:09] ACTION: PULL_ASSOC | DETAILS: Restored: WorksFor
+[2026-02-19 17:11:09] ACTION: PULL_TERNARY | DETAILS: Restored: Ternari with 3 ends.
+[2026-02-19 17:11:09] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-02-19 17:11:09] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-02-19 17:11:37] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-19 17:11:37] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-19 17:11:38] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: MIT
+[2026-02-19 17:11:42] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-19 17:11:44] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Stanford
+[2026-02-19 17:11:57] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-19 17:11:59] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Bob
+[2026-02-19 17:12:12] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-19 17:12:42] ACTION: REALTIME_ERROR | DETAILS: Property values can only be of primitive types or arrays thereof. Encountered: Map{collectionType -> String("Set"), items -> List{String("SE202"), String("CS101"), String("AI303")}}.
+[2026-02-19 17:13:43] ACTION: CLEANUP | DETAILS: Deep deleted object: Bob
+[2026-02-19 17:13:43] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-19 17:13:44] ACTION: OBJECT_PULL_DELETE | DETAILS: Removed object from USE: Bob
+[2026-02-19 17:13:51] ACTION: REALTIME | DETAILS: Service restarted with new frequency.
+[2026-02-19 17:14:19] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-19 17:14:20] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Bob
+[2026-02-19 17:14:28] ACTION: REALTIME | DETAILS: Service restarted with new frequency.
+[2026-02-19 17:36:35] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-19 17:36:35] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-19 17:36:35] ACTION: SESSION_CREATE | DETAILS: New session created with key: E002CBA7
+[2026-02-19 17:36:35] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-19 17:36:35] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: E002CBA7 | Ver: unknown
+[2026-02-19 17:36:45] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-19 17:36:45] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-19 17:36:45] ACTION: SESSION_CREATE | DETAILS: New session created with key: C7AC2349
+[2026-02-19 17:36:45] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-19 17:36:45] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: C7AC2349 | Ver: unknown
+[2026-02-19 17:37:03] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Stanford
+[2026-02-19 17:37:03] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Bob
+[2026-02-19 17:37:03] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: MIT
+[2026-02-19 17:37:04] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 3 objects, 0 links updated.
+[2026-02-19 17:37:09] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Stanford
+[2026-02-19 17:37:09] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Bob
+[2026-02-19 17:37:09] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: MIT
+[2026-02-19 17:37:11] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 3 objects, 0 links updated.
+[2026-02-19 17:41:23] ACTION: CLEANUP | DETAILS: Deep deleted object: Stanford
+[2026-02-19 17:41:23] ACTION: CLEANUP | DETAILS: Deep deleted object: Bob
+[2026-02-19 17:41:23] ACTION: CLEANUP | DETAILS: Deep deleted object: MIT
+[2026-02-19 17:41:23] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-19 17:44:34] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-19 17:44:34] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-19 17:44:34] ACTION: SESSION_CREATE | DETAILS: New session created with key: BC0B3FA5
+[2026-02-19 17:44:34] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-19 17:44:34] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: BC0B3FA5 | Ver: unknown
+[2026-02-19 17:44:45] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-19 17:44:45] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-19 17:44:45] ACTION: SESSION_CREATE | DETAILS: New session created with key: 7A6887B2
+[2026-02-19 17:44:45] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-19 17:44:45] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 7A6887B2 | Ver: unknown
+[2026-02-19 17:46:01] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-19 17:46:07] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Stanford
+[2026-02-19 17:46:07] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Bob
+[2026-02-19 17:46:07] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: MIT
+[2026-02-19 17:46:07] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex on Bob: Assignment of attribute value failed!
+[2026-02-19 17:46:08] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 3 objects, 0 links updated.
+[2026-02-19 17:46:35] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex on Bob: Assignment of attribute value failed!
+[2026-02-19 17:46:36] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 0 objects, 0 links updated.

@@ -200,40 +200,37 @@ public class ObjectPullService {
         return sb.toString();
     }
 
+
     private void syncAttribute(MObject useObj, MAttribute attrDef, ObjectState dbState) throws Exception {
         String objName = useObj.name();
         String attrName = attrDef.name();
 
-        Object dbData = dbState.getRawValue(attrName);
+        Object dbValue = dbState.primitiveValues.get(attrName);
+        org.tzi.use.uml.ocl.type.Type typeDef = attrDef.type();
 
-        if (dbData == null) {
-            dbData = dbState.primitiveValues.get(attrName);
+        if ("Object".equals(dbValue)) {
+            Object treeData = dbState.getRawValue(attrName);
+            if (treeData != null) {
+                String oclExpr = reconstructOclExpression(treeData, typeDef);
+                systemApi.setAttributeValue(objName, attrName, oclExpr);
+                return;
+            }
         }
 
-        if (dbData != null && !dbData.equals("Undefined")) {
-            String oclExpression = reconstructOclExpression(dbData, attrDef.type());
-            systemApi.setAttributeValue(objName, attrName, oclExpression);
-            return;
+        if (typeDef.isKindOfCollection(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID)) {
+            if (dbValue != null && !"Undefined".equals(dbValue)) {
+                systemApi.setAttributeValue(objName, attrName, dbValue.toString());
+                return;
+            }
         }
 
-        if (dbState.primitiveValues.containsKey(attrName)) {
-            Object val = dbState.primitiveValues.get(attrName);
-            String oclVal = UmlTypeTranslator.toOclLiteral(val);
-            systemApi.setAttributeValue(objName, attrName, oclVal);
-            return;
+        if (dbValue != null && !"Undefined".equals(dbValue)) {
+            String oclLiteral = org.uet.dse.neo4j.sync.helper.UmlTypeTranslator.toOclLiteral(dbValue);
+            systemApi.setAttributeValue(objName, attrName, oclLiteral);
+        } else {
+            resetIfDefined(useObj, attrDef, objName, attrName);
         }
-
-        // Kiểm tra trong Map Reference cũ
-        if (dbState.objectReferences.containsKey(attrName)) {
-            List<String> refs = dbState.objectReferences.get(attrName);
-            String oclRef = formatToOclReference(refs);
-            systemApi.setAttributeValue(objName, attrName, oclRef);
-            return;
-        }
-
-        resetIfDefined(useObj, attrDef, objName, attrName);
     }
-
     private String reconstructOclExpression(Object data, org.tzi.use.uml.ocl.type.Type expectedType) {
         if (data == null || data.equals("Undefined") || data.equals("null")) {
             return "Undefined";

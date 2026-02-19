@@ -8,11 +8,12 @@ public class ValueMapper {
     public static Object mapUseValue(Value value) {
         if (value == null || value.isUndefined()) return null;
 
-        // XỬ LÝ ENUM (Chiều PUSH)
+
         if (value instanceof org.tzi.use.uml.ocl.value.EnumValue) {
-            // Trả về tên của literal (ví dụ: "Male")
-            return ((org.tzi.use.uml.ocl.value.EnumValue) value).value();
+            String literal = ((org.tzi.use.uml.ocl.value.EnumValue) value).value();
+            return "#" + literal;
         }
+
 
 //        if (value instanceof CollectionValue) {
 //            CollectionValue cv = (CollectionValue) value;

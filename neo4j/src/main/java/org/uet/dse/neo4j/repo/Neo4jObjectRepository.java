@@ -2,6 +2,7 @@ package org.uet.dse.neo4j.repo;
 
 import org.neo4j.driver.*;
 import org.uet.dse.neo4j.repo.query.Neo4jObjectQuery;
+import org.uet.dse.neo4j.sync.helper.OclSerializer;
 
 import java.util.*;
 
@@ -46,13 +47,10 @@ public class Neo4jObjectRepository {
             valueForNeo4j = "Undefined";
         } else if (isObjRef) {
             valueForNeo4j = "Object";
-        } else if (isNested) {
-            valueForNeo4j = "Nested";
-        } else if (isColl && value instanceof Map) {
-            valueForNeo4j = ((Map<String, Object>) value).get("items");
         } else {
-            valueForNeo4j = value;
+            valueForNeo4j = OclSerializer.serialize(value);
         }
+
 
 
         tx.run(Neo4jObjectQuery.DELETE_ATTRIBUTE_VALUE, Map.of("vId", valNodeId));
