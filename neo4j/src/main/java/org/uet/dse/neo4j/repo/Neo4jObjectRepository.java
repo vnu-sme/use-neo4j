@@ -39,6 +39,22 @@ public class Neo4jObjectRepository {
 
         boolean isObjRef = (boolean) metadata.get("isObjectReference");
         boolean isNested = (boolean) metadata.get("isNestedCollection");
+        boolean isColl = (boolean) metadata.get("isCollection");
+
+        Object valueForNeo4j;
+        if (value == null || "Undefined".equals(value)) {
+            valueForNeo4j = "Undefined";
+        } else if (isObjRef) {
+            valueForNeo4j = "Object";
+        } else if (isNested) {
+            valueForNeo4j = "Nested";
+        } else if (isColl && value instanceof Map) {
+            valueForNeo4j = ((Map<String, Object>) value).get("items");
+        } else {
+            valueForNeo4j = value;
+        }
+
+
         tx.run(Neo4jObjectQuery.DELETE_ATTRIBUTE_VALUE, Map.of("vId", valNodeId));
         tx.run(Neo4jObjectQuery.CREATE_ATTRIBUTE_VALUE, Values.parameters(
                 "objName", objName,
@@ -57,7 +73,8 @@ public class Neo4jObjectRepository {
             pushNestedStructure(tx, valNodeId, (Map<String, Object>) value, isObjRef);
         }
         else if (isObjRef && value != null && !"Undefined".equals(value)) {
-            createObjectReferences(tx, valNodeId, value);
+            Object refData = (value instanceof Map) ? ((Map<String, Object>) value).get("items") : value;
+            createObjectReferences(tx, valNodeId, refData);
         }
 
 //        if (isObjectReference(metadata, value)) {
@@ -83,12 +100,13 @@ public class Neo4jObjectRepository {
 
                 pushNestedStructure(tx, nestedId, subColl, isObjRef);
             } else {
-                if (isObjRef && item != null) {
+                if (isObjRef && item != null && !"Undefined".equals(item)) {
                     tx.run(Neo4jObjectQuery.CREATE_OBJECT_REFERENCE_FROM_ANY,
                             Map.of("srcId", parentId, "tId", item.toString(), "idx", i));
                 } else {
                     tx.run(Neo4jObjectQuery.SET_PRIMITIVE_VALUE_ON_NODE,
                             Map.of("nId", parentId, "val", item != null ? item : "null"));
+
                 }
             }
         }

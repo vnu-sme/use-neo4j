@@ -7149,3 +7149,90 @@ body:1:10: Undefined operation named `purchase' in expression `BuyLotteryTicket.
 [2026-02-19 16:15:11] ACTION: ATTR_ERROR | DETAILS: Failed to sync salary on Bob: Assignment of attribute value failed!
 [2026-02-19 16:15:11] ACTION: ATTR_ERROR | DETAILS: Failed to sync stud on Bob: Assignment of attribute value failed!
 [2026-02-19 16:15:11] ACTION: LINK_PULL_ERROR | DETAILS: Failed to create link [Ternari]: Unknown association named `Ternari'.
+[2026-02-19 16:17:38] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-19 16:17:38] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: ProfSmith
+[2026-02-19 16:17:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync age on Bob: Assignment of attribute value failed!
+[2026-02-19 16:17:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync codes on Bob: Assignment of attribute value failed!
+[2026-02-19 16:17:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync codesBag on Bob: Assignment of attribute value failed!
+[2026-02-19 16:17:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync nested on Bob: Assignment of attribute value failed!
+[2026-02-19 16:17:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync nestedDiff on Bob: Assignment of attribute value failed!
+[2026-02-19 16:17:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync salary on Bob: Assignment of attribute value failed!
+[2026-02-19 16:17:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync stud on Bob: Assignment of attribute value failed!
+[2026-02-19 16:17:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync age on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:17:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync codes on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:17:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync codesBag on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:17:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync nested on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:17:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync nestedDiff on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:17:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync salary on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:17:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:17:38] ACTION: ATTR_ERROR | DETAILS: Failed to sync stud on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:17:38] ACTION: LINK_PULL_ERROR | DETAILS: Failed to create link [Ternari]: Unknown association named `Ternari'.
+[2026-02-19 16:17:45] ACTION: REALTIME_ERROR | DETAILS: Property values can only be of primitive types or arrays thereof. Encountered: Map{collectionType -> String("Set"), items -> List{String("SE202"), String("CS101"), String("AI303")}}.
+[2026-02-19 16:30:06] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-19 16:30:06] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-19 16:30:06] ACTION: SESSION_CREATE | DETAILS: New session created with key: 5592B533
+[2026-02-19 16:30:06] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-19 16:30:06] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 5592B533 | Ver: unknown
+[2026-02-19 16:30:09] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Bob
+[2026-02-19 16:30:09] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: ProfSmith
+[2026-02-19 16:30:09] ACTION: ATTR_ERROR | DETAILS: Failed to sync age on Bob: Assignment of attribute value failed!
+[2026-02-19 16:30:09] ACTION: ATTR_ERROR | DETAILS: Failed to sync codes on Bob: Assignment of attribute value failed!
+[2026-02-19 16:30:09] ACTION: ATTR_ERROR | DETAILS: Failed to sync codesBag on Bob: Assignment of attribute value failed!
+[2026-02-19 16:30:09] ACTION: ATTR_ERROR | DETAILS: Failed to sync nested on Bob: Assignment of attribute value failed!
+[2026-02-19 16:30:09] ACTION: ATTR_ERROR | DETAILS: Failed to sync nestedDiff on Bob: Assignment of attribute value failed!
+[2026-02-19 16:30:09] ACTION: ATTR_ERROR | DETAILS: Failed to sync salary on Bob: Assignment of attribute value failed!
+[2026-02-19 16:30:09] ACTION: ATTR_ERROR | DETAILS: Failed to sync stud on Bob: Assignment of attribute value failed!
+[2026-02-19 16:30:09] ACTION: ATTR_ERROR | DETAILS: Failed to sync age on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:09] ACTION: ATTR_ERROR | DETAILS: Failed to sync codes on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:09] ACTION: ATTR_ERROR | DETAILS: Failed to sync codesBag on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:09] ACTION: ATTR_ERROR | DETAILS: Failed to sync nested on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:09] ACTION: ATTR_ERROR | DETAILS: Failed to sync nestedDiff on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:09] ACTION: ATTR_ERROR | DETAILS: Failed to sync salary on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:09] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:09] ACTION: ATTR_ERROR | DETAILS: Failed to sync stud on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:09] ACTION: LINK_PULL_ERROR | DETAILS: Failed to create link [Ternari]: Cannot invoke "Object.toString()" because "o" is null
+[2026-02-19 16:30:13] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-19 16:30:13] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-19 16:30:13] ACTION: SESSION_CREATE | DETAILS: New session created with key: 2FB580F3
+[2026-02-19 16:30:13] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-19 16:30:13] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 2FB580F3 | Ver: unknown
+[2026-02-19 16:30:16] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Bob
+[2026-02-19 16:30:16] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: ProfSmith
+[2026-02-19 16:30:16] ACTION: ATTR_ERROR | DETAILS: Failed to sync age on Bob: Assignment of attribute value failed!
+[2026-02-19 16:30:16] ACTION: ATTR_ERROR | DETAILS: Failed to sync codes on Bob: Assignment of attribute value failed!
+[2026-02-19 16:30:16] ACTION: ATTR_ERROR | DETAILS: Failed to sync codesBag on Bob: Assignment of attribute value failed!
+[2026-02-19 16:30:16] ACTION: ATTR_ERROR | DETAILS: Failed to sync nested on Bob: Assignment of attribute value failed!
+[2026-02-19 16:30:16] ACTION: ATTR_ERROR | DETAILS: Failed to sync nestedDiff on Bob: Assignment of attribute value failed!
+[2026-02-19 16:30:16] ACTION: ATTR_ERROR | DETAILS: Failed to sync salary on Bob: Assignment of attribute value failed!
+[2026-02-19 16:30:16] ACTION: ATTR_ERROR | DETAILS: Failed to sync stud on Bob: Assignment of attribute value failed!
+[2026-02-19 16:30:16] ACTION: ATTR_ERROR | DETAILS: Failed to sync age on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:16] ACTION: ATTR_ERROR | DETAILS: Failed to sync codes on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:16] ACTION: ATTR_ERROR | DETAILS: Failed to sync codesBag on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:16] ACTION: ATTR_ERROR | DETAILS: Failed to sync nested on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:16] ACTION: ATTR_ERROR | DETAILS: Failed to sync nestedDiff on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:16] ACTION: ATTR_ERROR | DETAILS: Failed to sync salary on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:16] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:16] ACTION: ATTR_ERROR | DETAILS: Failed to sync stud on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:16] ACTION: LINK_PULL_ERROR | DETAILS: Failed to create link [Ternari]: Cannot invoke "Object.toString()" because "o" is null
+[2026-02-19 16:30:22] ACTION: ATTR_ERROR | DETAILS: Failed to sync age on Bob: Assignment of attribute value failed!
+[2026-02-19 16:30:22] ACTION: ATTR_ERROR | DETAILS: Failed to sync codes on Bob: Assignment of attribute value failed!
+[2026-02-19 16:30:22] ACTION: ATTR_ERROR | DETAILS: Failed to sync codesBag on Bob: Assignment of attribute value failed!
+[2026-02-19 16:30:22] ACTION: ATTR_ERROR | DETAILS: Failed to sync nested on Bob: Assignment of attribute value failed!
+[2026-02-19 16:30:22] ACTION: ATTR_ERROR | DETAILS: Failed to sync nestedDiff on Bob: Assignment of attribute value failed!
+[2026-02-19 16:30:22] ACTION: ATTR_ERROR | DETAILS: Failed to sync salary on Bob: Assignment of attribute value failed!
+[2026-02-19 16:30:22] ACTION: ATTR_ERROR | DETAILS: Failed to sync stud on Bob: Assignment of attribute value failed!
+[2026-02-19 16:30:22] ACTION: ATTR_ERROR | DETAILS: Failed to sync age on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:22] ACTION: ATTR_ERROR | DETAILS: Failed to sync codes on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:22] ACTION: ATTR_ERROR | DETAILS: Failed to sync codesBag on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:22] ACTION: ATTR_ERROR | DETAILS: Failed to sync nested on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:22] ACTION: ATTR_ERROR | DETAILS: Failed to sync nestedDiff on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:22] ACTION: ATTR_ERROR | DETAILS: Failed to sync salary on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:22] ACTION: ATTR_ERROR | DETAILS: Failed to sync sex on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:22] ACTION: ATTR_ERROR | DETAILS: Failed to sync stud on ProfSmith: Assignment of attribute value failed!
+[2026-02-19 16:30:22] ACTION: LINK_PULL_ERROR | DETAILS: Failed to create link [Ternari]: Cannot invoke "Object.toString()" because "o" is null
+[2026-02-19 16:30:23] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 0 objects, 0 links updated.
+[2026-02-19 16:30:52] ACTION: REALTIME_ERROR | DETAILS: Property values can only be of primitive types or arrays thereof. Encountered: Map{collectionType -> String("Set"), items -> List{String("SE202"), String("CS101"), String("AI303")}}.
+[2026-02-19 16:35:09] ACTION: REALTIME_ERROR | DETAILS: Property values can only be of primitive types or arrays thereof. Encountered: Map{collectionType -> String("Set"), items -> List{String("SE202"), String("CS101"), String("AI303")}}.
+[2026-02-19 16:35:26] ACTION: REALTIME_ERROR | DETAILS: Property values can only be of primitive types or arrays thereof. Encountered: Map{collectionType -> String("Set"), items -> List{String("SE202"), String("CS101"), String("AI303")}}.
+[2026-02-19 16:35:27] ACTION: REALTIME_ERROR | DETAILS: Property values can only be of primitive types or arrays thereof. Encountered: Map{collectionType -> String("Set"), items -> List{String("SE202"), String("CS101"), String("AI303")}}.
+[2026-02-19 16:36:06] ACTION: REALTIME_ERROR | DETAILS: Property values can only be of primitive types or arrays thereof. Encountered: Map{collectionType -> String("Set"), items -> List{String("Stanford"), String("MIT")}}.

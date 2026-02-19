@@ -156,12 +156,10 @@ public class ObjectPushService {
             metadata.put("isNestedCollection", UmlTypeTranslator.getCollectionDepth(attr.type()) > 1);
             metadata.put("isObjectReference", isObjRef);
 
-            Object mappedValue;
-            if (useVal.isUndefined()) {
-                mappedValue = "Undefined";
-            } else {
-                mappedValue = ValueMapper.mapUseValue(useVal);
-            }
+
+
+            Object mappedValue = ValueMapper.mapUseValue(useVal);
+
             objectRepository.setAttributeValueNode(tx, objName, ownerClassName, attr.name(), mappedValue, metadata);
         }
     }

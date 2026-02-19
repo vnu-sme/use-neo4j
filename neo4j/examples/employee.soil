@@ -65,6 +65,8 @@
 !set Bob.salary := 1500.0
 !set Bob.sex := Gender::Male
 
+!set Bob.stud := Set{MIT, Stanford}
+
 !set ProfSmith.codes := Set{'CS101', 'SE202', 'AI303'}
 
 !set ProfSmith.codesBag := Bag{'Login', 'Login', 'Logout'}
