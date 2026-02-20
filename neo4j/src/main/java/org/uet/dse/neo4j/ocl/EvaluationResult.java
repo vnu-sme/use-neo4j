@@ -1,5 +1,7 @@
 package org.uet.dse.neo4j.ocl;
 
+import org.tzi.use.uml.ocl.value.Value;
+
 /**
  * Lớp chứa kết quả thực thi OCL.
  * Sử dụng Builder Pattern để đảm bảo tính Immutability (Bất biến) và Clean Code.
@@ -10,6 +12,7 @@ public class EvaluationResult {
     private final String generatedQuery;
     private final boolean isSuccess;
     private final String errorMessage;
+    public Value fValue;
 
     // Private constructor để bắt buộc dùng Builder hoặc Static Factory
     private EvaluationResult(Builder builder) {
@@ -18,10 +21,12 @@ public class EvaluationResult {
         this.generatedQuery = builder.generatedQuery;
         this.isSuccess = builder.isSuccess;
         this.errorMessage = builder.errorMessage;
+        this.fValue = builder.fValue;
     }
 
     public static EvaluationResult fail(String message) {
         System.out.println(message);
+        return null;
     }
 
     // --- Getters ---
@@ -53,6 +58,13 @@ public class EvaluationResult {
             .build();
     }
 
+    public static EvaluationResult fValue(Value fValue) {
+        return new Builder()
+            .success(true)
+            .fValue(fValue)
+            .build();
+    }
+
     /**
      * Static Factory Method cho trường hợp thất bại kèm query đã sinh ra (để debug).
      */
@@ -73,7 +85,7 @@ public class EvaluationResult {
         private String generatedQuery;
         private boolean isSuccess;
         private String errorMessage;
-
+        private Value fValue;
         public Builder value(String value) {
             this.value = value;
             return this;
@@ -96,6 +108,11 @@ public class EvaluationResult {
 
         public Builder errorMessage(String errorMessage) {
             this.errorMessage = errorMessage;
+            return this;
+        }
+
+        public Builder fValue(Value fValue) {
+            this.fValue = fValue;
             return this;
         }
 

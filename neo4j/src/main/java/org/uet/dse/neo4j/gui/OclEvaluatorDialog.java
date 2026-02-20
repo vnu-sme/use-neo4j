@@ -1,26 +1,37 @@
 package org.uet.dse.neo4j.gui;
 
-import org.tzi.use.api.UseSystemApi;
 import org.tzi.use.main.Session;
+import org.tzi.use.parser.ocl.OCLCompiler;
+import org.tzi.use.uml.mm.MModel;
+import org.tzi.use.uml.ocl.expr.Expression;
 import org.tzi.use.uml.ocl.value.Value;
-import org.uet.dse.neo4j.ocl.EvaluationResult;
+import org.tzi.use.uml.ocl.value.VarBindings;
+import org.tzi.use.uml.sys.MSystemState;
+import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.ocl.IOCLEvaluator;
+import org.uet.dse.neo4j.ocl.NEvaluator;
+import org.uet.dse.neo4j.ocl.mapper.NExpressionRewriter;
+import org.uet.dse.neo4j.ocl.expr.NExpression;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 public class OclEvaluatorDialog extends JDialog {
     private final JTextArea txtExpression;
     private final JTextArea txtResult;
     private final Session useSession;
     private final IOCLEvaluator oclEvaluator;
+    private final MSystemState currentState;
 
 
     public OclEvaluatorDialog(Frame parent, Session session, IOCLEvaluator oclEvaluator) {
         super(parent, "Evaluate OCL expression", false);
         this.useSession = session;
       this.oclEvaluator = oclEvaluator;
+      this.currentState = session.system().state();
 
       setSize(600, 300);
         setLayout(new BorderLayout(10, 10));
@@ -72,7 +83,7 @@ public class OclEvaluatorDialog extends JDialog {
 
         add(pnlLeft, BorderLayout.CENTER);
         add(pnlRight, BorderLayout.EAST);
-        
+
         setLocationRelativeTo(parent);
     }
 
@@ -80,13 +91,39 @@ public class OclEvaluatorDialog extends JDialog {
         String expression = txtExpression.getText().trim();
         if (expression.isEmpty()) return;
 
-        EvaluationResult result = oclEvaluator.evaluate(expression);
+        MModel model = useSession.system().model();
 
-        if (result.isSuccess()) {
-            txtResult.setText(result.getValue() + " : " + result.getType());
+      StringWriter errorWriter = new StringWriter();
+      //core version
+      Expression expr = OCLCompiler.compileExpression(
+          model,
+          useSession.system().state(),
+          expression,
+          "Neo4jPlugin",
+          new PrintWriter(errorWriter),
+          new VarBindings()
+      );
+
+      if (expr == null) {
+        System.out.println("Error parsing ocl to expr");
+      }
+
+      // Rewrite tree -> neo4j version
+      NExpression neo4jExpr = NExpressionRewriter.rewrite(expr);
+      Value result = null;
+      try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().openSession()) {
+        NEvaluator evaluator = new NEvaluator();
+        // eval như bình thường - nhưng chạy trên neo4j
+        result = evaluator.eval(currentState, neo4jExpr);
+      } catch (Exception e) {
+        System.out.println("Error open session to neo4j");
+      }
+
+        if (result != null) {
+            txtResult.setText(result.toStringWithType());
             txtResult.setForeground(new Color(0, 100, 0));
         } else {
-            txtResult.setText("Error: " + result.getErrorMessage());
+            txtResult.setText("Could not evaluate");
             txtResult.setForeground(Color.RED);
         }
     }
