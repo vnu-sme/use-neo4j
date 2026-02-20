@@ -85,7 +85,7 @@ public final class Main {
 		if (Options.doPLUGIN) {
 			// create URL from plugin directory
 			Path pluginDirURL = Options.pluginDir;
-			pluginDirURL = Path.of("/Users/audreycolar/Downloads/use-neo4j/use-assembly/src/main/resources/plugins/officalVersion");
+			pluginDirURL = Path.of("/Users/kiencc/Downloads/thesis/use-neo4j/use-assembly/src/main/resources/plugins/officalVersion");
 			Log.verbose("Plugin path: [" + pluginDirURL + "]");
 			Class<?> mainPluginRuntimeClass = null;
 			try {

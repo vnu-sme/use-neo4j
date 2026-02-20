@@ -1,15 +1,25 @@
 package org.uet.dse.neo4j.action_phase2;
 
+import org.neo4j.driver.Driver;
 import org.tzi.use.gui.main.MainWindow;
+import org.tzi.use.main.Session;
 import org.tzi.use.runtime.gui.IPluginAction;
 import org.tzi.use.runtime.gui.IPluginActionDelegate;
 import org.uet.dse.neo4j.gui.OclEvaluatorDialog;
+import org.uet.dse.neo4j.manager.Neo4jDriverManager;
+import org.uet.dse.neo4j.ocl.Neo4jOCLEvaluator;
 
 public class ActionOpenOclEvaluator implements IPluginActionDelegate {
     @Override
     public void performAction(IPluginAction pluginAction) {
         MainWindow mainWindow = pluginAction.getParent();
-        OclEvaluatorDialog dialog = new OclEvaluatorDialog(mainWindow, pluginAction.getSession());
+        Session session = pluginAction.getSession();
+
+        Driver driver = Neo4jDriverManager.getInstance().getDriver();
+
+        Neo4jOCLEvaluator neo4jEvaluator = new Neo4jOCLEvaluator(session, driver);
+
+        OclEvaluatorDialog dialog = new OclEvaluatorDialog(mainWindow, session, neo4jEvaluator);
         dialog.setVisible(true);
     }
 }

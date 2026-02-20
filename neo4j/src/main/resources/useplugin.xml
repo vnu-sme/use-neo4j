@@ -60,7 +60,7 @@
         </action>
         <action label="OCL evaluator"
                 icon="images/rtl.png"
-                class="org.uet.dse.neo4j.action_phase2.ActionSyncObjectBackward"
+                class="org.uet.dse.neo4j.action_phase2.ActionOpenOclEvaluator"
                 tooltip="Compare between USE and Neo4j"
                 menu="Neo4j Plugin phase 2"
                 menuitem="OCL evaluator"

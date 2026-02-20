@@ -11,14 +11,12 @@ import javax.swing.*;
 public class ActionOpenDashboard implements IPluginActionDelegate {
     @Override
     public void performAction(IPluginAction pluginAction) {
-        // 1. Kiểm tra xem đã kết nối DB chưa
         if (Neo4jDriverManager.getInstance() == null || !Neo4jDriverManager.getInstance().isConnected()) {
             JOptionPane.showMessageDialog(pluginAction.getParent(),
                     "Please connect to Neo4j database first!", "Not Connected", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // 2. Mở cửa sổ Dashboard riêng biệt
         MainWindow mainWindow = pluginAction.getParent();
         Session session = pluginAction.getSession();
 

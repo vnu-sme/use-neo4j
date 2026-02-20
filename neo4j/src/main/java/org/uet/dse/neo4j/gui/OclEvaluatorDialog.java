@@ -3,6 +3,8 @@ package org.uet.dse.neo4j.gui;
 import org.tzi.use.api.UseSystemApi;
 import org.tzi.use.main.Session;
 import org.tzi.use.uml.ocl.value.Value;
+import org.uet.dse.neo4j.ocl.EvaluationResult;
+import org.uet.dse.neo4j.ocl.IOCLEvaluator;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -12,12 +14,15 @@ public class OclEvaluatorDialog extends JDialog {
     private final JTextArea txtExpression;
     private final JTextArea txtResult;
     private final Session useSession;
+    private final IOCLEvaluator oclEvaluator;
 
-    public OclEvaluatorDialog(Frame parent, Session session) {
+
+    public OclEvaluatorDialog(Frame parent, Session session, IOCLEvaluator oclEvaluator) {
         super(parent, "Evaluate OCL expression", false);
         this.useSession = session;
+      this.oclEvaluator = oclEvaluator;
 
-        setSize(600, 300);
+      setSize(600, 300);
         setLayout(new BorderLayout(10, 10));
         ((JComponent) getContentPane()).setBorder(new EmptyBorder(10, 10, 10, 10));
 
@@ -75,19 +80,33 @@ public class OclEvaluatorDialog extends JDialog {
         String expression = txtExpression.getText().trim();
         if (expression.isEmpty()) return;
 
-        try {
-            UseSystemApi api = UseSystemApi.create(useSession);
-            Value resultValue = api.evaluate(expression);
+        EvaluationResult result = oclEvaluator.evaluate(expression);
 
-            if (resultValue != null) {
-                txtResult.setText(resultValue.toString() + " : " + resultValue.type().toString());
-                txtResult.setForeground(new Color(0, 100, 0)); // Màu xanh lá đậm
-            }
-        } catch (Exception e) {
-            txtResult.setText("Error: " + e.getMessage());
+        if (result.isSuccess()) {
+            txtResult.setText(result.getValue() + " : " + result.getType());
+            txtResult.setForeground(new Color(0, 100, 0));
+        } else {
+            txtResult.setText("Error: " + result.getErrorMessage());
             txtResult.setForeground(Color.RED);
         }
     }
+//    private void doEvaluate() {
+//        String expression = txtExpression.getText().trim();
+//        if (expression.isEmpty()) return;
+//
+//        try {
+//            UseSystemApi api = UseSystemApi.create(useSession);
+//            Value resultValue = api.evaluate(expression);
+//
+//            if (resultValue != null) {
+//                txtResult.setText(resultValue.toString() + " : " + resultValue.type().toString());
+//                txtResult.setForeground(new Color(0, 100, 0)); // Màu xanh lá đậm
+//            }
+//        } catch (Exception e) {
+//            txtResult.setText("Error: " + e.getMessage());
+//            txtResult.setForeground(Color.RED);
+//        }
+//    }
 
     private JButton createStyledButton(String text, Color bgColor) {
         JButton btn = new JButton(text);
