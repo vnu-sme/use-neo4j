@@ -26,13 +26,49 @@ public final class AttributeInstance {
     this.nestedStructure = nestedStructure;
   }
 
+  public Object getResolvedValue() {
+    if (value == null) return null;
+
+    switch (type) {
+      case Boolean:
+        return Boolean.parseBoolean(value);
+
+      case Int:
+        return Integer.parseInt(value);
+
+      case Float:
+        return Float.parseFloat(value);
+
+      case Double:
+        return Double.parseDouble(value);
+
+      case String:
+        return value;
+
+      case Void:
+      case None:
+        return null;
+
+      case Object:
+      default:
+        return value; // hoặc resolve entity nếu có context
+    }
+  }
+
+
   public String getValue() {
     return this.value;
   }
 
   public String getName() {
-    return name;
+    if (name == null) return null;
+
+    int idx = name.lastIndexOf("_");
+    if (idx == -1) return name;
+
+    return name.substring(idx + 1);
   }
+
 
   public NType getType() {
     return type;

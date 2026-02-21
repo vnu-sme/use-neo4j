@@ -1,11 +1,7 @@
 package org.uet.dse.neo4j.ocl.expr;
 
 import org.tzi.use.uml.ocl.expr.*;
-import org.tzi.use.uml.ocl.expr.operations.BooleanOperation;
-import org.tzi.use.uml.ocl.expr.operations.OpGeneric;
-import org.tzi.use.uml.ocl.type.TypeFactory;
 import org.tzi.use.uml.ocl.value.IntegerValue;
-import org.tzi.use.uml.ocl.value.UndefinedValue;
 import org.tzi.use.uml.ocl.value.Value;
 import org.uet.dse.neo4j.ocl.NEvalContext;
 

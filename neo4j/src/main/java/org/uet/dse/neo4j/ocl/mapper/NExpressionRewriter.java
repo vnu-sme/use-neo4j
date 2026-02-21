@@ -70,7 +70,7 @@ public class NExpressionRewriter implements ExpressionVisitor {
 
 
         } catch (Exception e) {
-            System.out.println("error reriting decorator");
+            System.out.println("error rewriting decorator");
             firstTime = true;
         }
     }
@@ -82,6 +82,37 @@ public class NExpressionRewriter implements ExpressionVisitor {
                 result = new NExpUndefined(exp);
             }
 
+
+        } catch (Exception e) {
+            System.out.println("error rewriting decorator");
+            firstTime = true;
+        }
+    }
+
+    @Override
+    public void visitAttrOp(ExpAttrOp exp) {
+        try {
+            if (firstTime) {
+                result = new NExpAttrOp(exp);
+
+                ((NExpAttrOp) result).fObjExp = NExpressionRewriter.rewrite(exp.objExp());
+            }
+
+        } catch (Exception e) {
+            System.out.println("error rerwriting decorator");
+            firstTime = true;
+        }
+
+    }
+
+    @Override
+    public void visitConstString(ExpConstString exp) {
+        try {
+            if (firstTime) {
+                result = new NExpConstString(exp);
+            }
+            // Map OpGeneric -> NOpGeneric
+            ((NExpConstString) result).fValue = exp.value();
 
         } catch (Exception e) {
             System.out.println("error reriting decorator");
@@ -235,11 +266,6 @@ public class NExpressionRewriter implements ExpressionVisitor {
     }
 
     @Override
-    public void visitAttrOp(ExpAttrOp exp) {
-
-    }
-
-    @Override
     public void visitBagLiteral(ExpBagLiteral exp) {
 
     }
@@ -266,11 +292,6 @@ public class NExpressionRewriter implements ExpressionVisitor {
 
     @Override
     public void visitConstReal(ExpConstReal exp) {
-
-    }
-
-    @Override
-    public void visitConstString(ExpConstString exp) {
 
     }
 
