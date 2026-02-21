@@ -182,4 +182,5 @@ public class Neo4jObjectRepository {
     private static String attributeDefId(String ownerClassName, String attrName) {
         return ownerClassName + "_" + attrName;
     }
+
 }

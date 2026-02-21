@@ -11,9 +11,9 @@ public class NExpVariable extends NExpression {
 
   public String fVarname;
 
-  public NExpVariable(String varname, Type t, ExpVariable wrapped) {
-    fVarname = varname;
+  public NExpVariable(ExpVariable wrapped) {
     this.wrapped = wrapped;
+    this.fVarname = wrapped.getVarname();
   }
 
   /**

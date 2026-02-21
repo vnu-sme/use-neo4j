@@ -1,5 +1,6 @@
 package org.uet.dse.neo4j.gui;
 
+import org.tzi.use.gui.util.TextComponentWriter;
 import org.tzi.use.main.Session;
 import org.tzi.use.parser.ocl.OCLCompiler;
 import org.tzi.use.uml.mm.MModel;
@@ -7,6 +8,7 @@ import org.tzi.use.uml.ocl.expr.Expression;
 import org.tzi.use.uml.ocl.value.Value;
 import org.tzi.use.uml.ocl.value.VarBindings;
 import org.tzi.use.uml.sys.MSystemState;
+import org.tzi.use.util.TeeWriter;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.ocl.IOCLEvaluator;
 import org.uet.dse.neo4j.ocl.NEvaluator;
@@ -93,15 +95,18 @@ public class OclEvaluatorDialog extends JDialog {
 
         MModel model = useSession.system().model();
 
-      StringWriter errorWriter = new StringWriter();
+      StringWriter msgWriter = new StringWriter();
+      PrintWriter out = new PrintWriter(new TeeWriter(
+          new TextComponentWriter(txtResult), msgWriter), true);
+
       //core version
       Expression expr = OCLCompiler.compileExpression(
           model,
           useSession.system().state(),
           expression,
           "Neo4jPlugin",
-          new PrintWriter(errorWriter),
-          new VarBindings()
+          out,
+          useSession.system().varBindings()
       );
 
       if (expr == null) {
@@ -111,13 +116,10 @@ public class OclEvaluatorDialog extends JDialog {
       // Rewrite tree -> neo4j version
       NExpression neo4jExpr = NExpressionRewriter.rewrite(expr);
       Value result = null;
-      try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().openSession()) {
         NEvaluator evaluator = new NEvaluator();
         // eval như bình thường - nhưng chạy trên neo4j
         result = evaluator.eval(currentState, neo4jExpr);
-      } catch (Exception e) {
-        System.out.println("Error open session to neo4j");
-      }
+
 
         if (result != null) {
             txtResult.setText(result.toStringWithType());

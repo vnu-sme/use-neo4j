@@ -3,11 +3,16 @@ package org.uet.dse.neo4j.ocl;
 import org.neo4j.driver.*;
 import org.tzi.use.uml.ocl.expr.EvalContext;
 import org.tzi.use.uml.ocl.expr.Expression;
+import org.tzi.use.uml.ocl.type.Type;
 import org.tzi.use.uml.ocl.value.Value;
 import org.tzi.use.uml.ocl.value.VarBindings;
 import org.tzi.use.uml.sys.MSystemState;
 import org.tzi.use.util.Log;
+import org.uet.dse.neo4j.mm.object.node.DomainObject;
 import org.uet.dse.neo4j.ocl.expr.NExpression;
+import org.uet.dse.neo4j.ocl.type.NObjectType;
+import org.uet.dse.neo4j.ocl.value.NObjectValue;
+import org.uet.dse.neo4j.repo.service.DomainObjectService;
 
 import java.io.PrintWriter;
 import java.util.*;
@@ -19,7 +24,7 @@ public class NEvalContext {
   private final MSystemState currentState; // default state
   private final VarBindings fVarBindings;
   private int fNesting;   // for indentation during trace
-
+  private DomainObjectService domainObjectService = new DomainObjectService();
 
   public NEvalContext(MSystemState currentState, VarBindings globalBindings) {
     this.currentState = currentState;
@@ -69,8 +74,10 @@ public class NEvalContext {
    *
    * @return value for name binding or null if not bound
    */
-  org.tzi.use.uml.ocl.value.Value getVarValue(String name) {
-    return fVarBindings.getValue(name);
+  public org.tzi.use.uml.ocl.value.Value getVarValue(String name) {
+    DomainObject domainObject = domainObjectService.getObject(name);
+    Type t = new NObjectType(domainObject.getClassName());
+    return new NObjectValue(t, domainObjectService.getObject(name));
   }
 
   public void enter(NExpression expr) {

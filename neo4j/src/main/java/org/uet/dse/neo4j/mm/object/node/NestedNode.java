@@ -1,4 +1,6 @@
-package org.uet.dse.neo4j.mm.object;
+package org.uet.dse.neo4j.mm.object.node;
+
+import org.uet.dse.neo4j.mm.object.common.ObjectReference;
 
 import java.util.List;
 

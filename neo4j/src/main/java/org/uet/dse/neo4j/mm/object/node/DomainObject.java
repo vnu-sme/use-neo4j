@@ -1,11 +1,13 @@
-package org.uet.dse.neo4j.mm.object;
+package org.uet.dse.neo4j.mm.object.node;
 
 import java.util.List;
 import java.util.Objects;
 
 public final class DomainObject {
 
+    //treated as name
     private final String id;
+
     private final String className;
     private final List<AttributeInstance> attributes;
 

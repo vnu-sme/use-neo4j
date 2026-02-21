@@ -1,9 +1,7 @@
 package org.uet.dse.neo4j.ocl.mapper;
 
 import org.tzi.use.uml.ocl.expr.*;
-import org.uet.dse.neo4j.ocl.expr.NExpStdOp;
-import org.uet.dse.neo4j.ocl.expr.NExprConstInteger;
-import org.uet.dse.neo4j.ocl.expr.NExpression;
+import org.uet.dse.neo4j.ocl.expr.*;
 import org.uet.dse.neo4j.ocl.operation.NOpRegistry;
 
 public class NExpressionRewriter implements ExpressionVisitor {
@@ -62,7 +60,35 @@ public class NExpressionRewriter implements ExpressionVisitor {
         }
 
     }
-    
+
+    @Override
+    public void visitVariable(ExpVariable exp) {
+        try {
+            if (firstTime) {
+                result = new NExpVariable(exp);
+            }
+
+
+        } catch (Exception e) {
+            System.out.println("error reriting decorator");
+            firstTime = true;
+        }
+    }
+
+    @Override
+    public void visitUndefined(ExpUndefined exp) {
+        try {
+            if (firstTime) {
+                result = new NExpUndefined(exp);
+            }
+
+
+        } catch (Exception e) {
+            System.out.println("error reriting decorator");
+            firstTime = true;
+        }
+    }
+
     @Override
     public void visitNavigation(ExpNavigation exp) {
 
@@ -141,15 +167,6 @@ public class NExpressionRewriter implements ExpressionVisitor {
     @Override
     public void visitTupleSelectOp(ExpTupleSelectOp exp) {
 
-    }
-
-    @Override
-    public void visitUndefined(ExpUndefined exp) {
-
-    }
-
-    @Override
-    public void visitVariable(ExpVariable exp) {
     }
 
     @Override

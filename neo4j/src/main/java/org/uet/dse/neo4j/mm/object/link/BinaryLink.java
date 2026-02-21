@@ -1,4 +1,4 @@
-package org.uet.dse.neo4j.mm.object;
+package org.uet.dse.neo4j.mm.object.link;
 
 public final class BinaryLink {
 

@@ -7488,3 +7488,108 @@ USE Api:1:0: Undefined variable `Male'.
 [2026-02-21 00:20:28] ACTION: SESSION_CREATE | DETAILS: New session created with key: 6EB087BA
 [2026-02-21 00:20:28] ACTION: REALTIME | DETAILS: Deep Scan Service Started
 [2026-02-21 00:20:28] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 6EB087BA | Ver: unknown
+[2026-02-21 11:53:53] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-21 11:53:54] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-21 11:53:54] ACTION: SESSION_CREATE | DETAILS: New session created with key: 44019541
+[2026-02-21 11:53:54] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-21 11:53:54] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 44019541 | Ver: unknown
+[2026-02-21 12:02:43] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-21 12:02:43] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-21 12:02:43] ACTION: SESSION_CREATE | DETAILS: New session created with key: 95DCE8D3
+[2026-02-21 12:02:43] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-21 12:02:43] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 95DCE8D3 | Ver: unknown
+[2026-02-21 12:03:23] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-21 12:03:23] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-21 12:03:23] ACTION: SESSION_CREATE | DETAILS: New session created with key: 283964AC
+[2026-02-21 12:03:23] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-21 12:03:23] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 283964AC | Ver: unknown
+[2026-02-21 12:09:40] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-21 12:09:40] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-21 12:09:40] ACTION: SESSION_CREATE | DETAILS: New session created with key: ADE2B463
+[2026-02-21 12:09:40] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-21 12:09:40] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: ADE2B463 | Ver: unknown
+[2026-02-21 12:14:04] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Book
+[2026-02-21 12:14:04] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Member
+[2026-02-21 12:14:04] ACTION: PUSH_START | DETAILS: User neo4j [Key: ADE2B463] (kiencc) initiated sync for model: LibrarySystem
+[2026-02-21 12:14:04] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 2147216844
+[2026-02-21 12:14:04] ACTION: PUSH_SUCCESS | DETAILS: Model LibrarySystem is now synchronized.
+[2026-02-21 12:14:04] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: ADE2B463] (kiencc)
+[2026-02-21 12:14:10] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-21 12:22:38] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-21 12:22:38] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-21 12:22:38] ACTION: SESSION_CREATE | DETAILS: New session created with key: D1A8C323
+[2026-02-21 12:22:38] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-21 12:22:38] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: D1A8C323 | Ver: unknown
+[2026-02-21 12:23:06] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: b2
+[2026-02-21 12:23:06] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 1 objects, 0 links updated.
+[2026-02-21 12:31:28] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-21 12:31:28] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-21 12:31:28] ACTION: SESSION_CREATE | DETAILS: New session created with key: C8432D78
+[2026-02-21 12:31:28] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-21 12:31:28] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: C8432D78 | Ver: unknown
+[2026-02-21 12:31:34] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: b2
+[2026-02-21 12:31:35] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 1 objects, 0 links updated.
+[2026-02-21 12:35:04] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-21 12:35:04] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-21 12:35:04] ACTION: SESSION_CREATE | DETAILS: New session created with key: 61B4BF87
+[2026-02-21 12:35:04] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-21 12:35:04] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 61B4BF87 | Ver: unknown
+[2026-02-21 12:35:11] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: b2
+[2026-02-21 12:35:12] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 1 objects, 0 links updated.
+[2026-02-21 12:49:18] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-21 12:49:18] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-21 12:49:18] ACTION: SESSION_CREATE | DETAILS: New session created with key: EBD920D2
+[2026-02-21 12:49:18] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-21 12:49:18] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: EBD920D2 | Ver: unknown
+[2026-02-21 12:49:29] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: b2
+[2026-02-21 12:49:29] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 1 objects, 0 links updated.
+[2026-02-21 13:09:37] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-21 13:09:37] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-21 13:09:37] ACTION: SESSION_CREATE | DETAILS: New session created with key: D06D43D9
+[2026-02-21 13:09:37] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-21 13:09:37] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: D06D43D9 | Ver: unknown
+[2026-02-21 13:09:45] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: b2
+[2026-02-21 13:09:46] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 1 objects, 0 links updated.
+[2026-02-21 15:59:11] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-21 15:59:11] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-21 15:59:11] ACTION: SESSION_CREATE | DETAILS: New session created with key: 70C1DDDD
+[2026-02-21 15:59:11] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-21 15:59:11] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 70C1DDDD | Ver: unknown
+[2026-02-21 15:59:20] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: b2
+[2026-02-21 15:59:21] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 1 objects, 0 links updated.
+[2026-02-21 16:00:39] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-21 16:00:39] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-21 16:00:39] ACTION: SESSION_CREATE | DETAILS: New session created with key: A168DBE1
+[2026-02-21 16:00:39] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-21 16:00:39] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: A168DBE1 | Ver: unknown
+[2026-02-21 16:00:51] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: b2
+[2026-02-21 16:00:52] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 1 objects, 0 links updated.
+[2026-02-21 16:05:13] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-21 16:05:13] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-21 16:05:13] ACTION: SESSION_CREATE | DETAILS: New session created with key: 45CCB3B2
+[2026-02-21 16:05:13] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-21 16:05:13] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 45CCB3B2 | Ver: unknown
+[2026-02-21 16:05:18] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: b2
+[2026-02-21 16:05:19] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 1 objects, 0 links updated.
+[2026-02-21 16:12:19] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-21 16:12:19] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-21 16:12:19] ACTION: SESSION_CREATE | DETAILS: New session created with key: C67F6568
+[2026-02-21 16:12:19] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-21 16:12:19] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: C67F6568 | Ver: unknown
+[2026-02-21 16:12:26] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: b2
+[2026-02-21 16:12:26] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 1 objects, 0 links updated.
+[2026-02-21 16:15:51] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-21 16:15:51] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-21 16:15:51] ACTION: SESSION_CREATE | DETAILS: New session created with key: 81400C8C
+[2026-02-21 16:15:51] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-21 16:15:51] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 81400C8C | Ver: unknown
+[2026-02-21 16:15:57] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: b2
+[2026-02-21 16:15:59] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 1 objects, 0 links updated.
+[2026-02-21 16:19:38] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-21 16:19:38] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-21 16:19:38] ACTION: SESSION_CREATE | DETAILS: New session created with key: 948E7685
+[2026-02-21 16:19:38] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-21 16:19:38] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 948E7685 | Ver: unknown
+[2026-02-21 16:19:46] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: b2
+[2026-02-21 16:19:46] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 1 objects, 0 links updated.
+[2026-02-21 16:21:39] ACTION: SYNC | DETAILS: Object & Link sync completed.
