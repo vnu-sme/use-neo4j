@@ -8,6 +8,8 @@ import org.tzi.use.runtime.gui.IPluginActionDelegate;
 import org.uet.dse.neo4j.gui.OclEvaluatorDialog;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.ocl.NEvaluator;
+import org.uet.dse.neo4j.tgg.engine.NRuleCollectionManager;
+import org.uet.dse.rtlplus.Main;
 
 public class ActionOpenOclEvaluator implements IPluginActionDelegate {
     @Override
@@ -17,6 +19,9 @@ public class ActionOpenOclEvaluator implements IPluginActionDelegate {
 
         NEvaluator neo4jEvaluator = new NEvaluator();
 
+        System.out.println(Main.getTggRuleCollection().toString());
+        NRuleCollectionManager st = new NRuleCollectionManager();
+        st.iterateThroughMRuleCollection();
         OclEvaluatorDialog dialog = new OclEvaluatorDialog(mainWindow, session, neo4jEvaluator);
         dialog.setVisible(true);
     }

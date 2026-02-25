@@ -37,7 +37,7 @@ import org.tzi.use.util.StringUtil;
  * @author Mark Richters
  * @author Lars Hamann
  */
-class MLinkImpl implements MLink {
+public class MLinkImpl implements MLink {
 	/** The type of this link */
     private final MAssociation fAssociation;
 

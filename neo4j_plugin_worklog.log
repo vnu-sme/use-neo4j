@@ -7752,3 +7752,55 @@ USE Api:1:0: Undefined variable `Male'.
 [2026-02-24 16:20:25] ACTION: SYNC | DETAILS: Object & Link sync completed.
 [2026-02-24 16:20:26] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: ProfSmith
 [2026-02-24 16:20:40] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-25 22:51:22] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-25 22:51:22] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-25 22:51:22] ACTION: SESSION_CREATE | DETAILS: New session created with key: 525D18AC
+[2026-02-25 22:51:22] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-25 22:51:22] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 525D18AC | Ver: unknown
+[2026-02-25 22:51:25] ACTION: ERROR | DETAILS: Class missing for object: Stanford
+[2026-02-25 22:51:25] ACTION: ERROR | DETAILS: Class missing for object: ProfSmith
+[2026-02-25 22:51:25] ACTION: ERROR | DETAILS: Class missing for object: MIT
+[2026-02-25 22:51:35] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Professor
+[2026-02-25 22:51:35] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: University
+[2026-02-25 22:51:35] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Employment
+[2026-02-25 22:51:35] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: ContractType
+[2026-02-25 22:51:35] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Gender
+[2026-02-25 22:51:35] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Student
+[2026-02-25 22:51:35] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Person
+[2026-02-25 22:51:35] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: C1Assoc
+[2026-02-25 22:51:35] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: C2Aggreg
+[2026-02-25 22:51:35] ACTION: PUSH_START | DETAILS: User neo4j [Key: 525D18AC] (kiencc) initiated sync for model: Families2Persons
+[2026-02-25 22:51:38] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 550404427
+[2026-02-25 22:51:38] ACTION: PUSH_SUCCESS | DETAILS: Model Families2Persons is now synchronized.
+[2026-02-25 22:51:38] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 525D18AC] (kiencc)
+[2026-02-25 22:55:44] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-25 22:55:49] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-25 22:55:53] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-25 22:55:57] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-25 22:56:02] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-25 22:56:08] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-25 22:56:12] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-25 22:56:14] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-25 22:56:18] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-25 22:56:21] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-25 22:56:47] ACTION: REALTIME | DETAILS: Service restarted with new frequency.
+[2026-02-25 22:56:55] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: fm
+[2026-02-25 22:56:55] ACTION: LINK_PULL_ERROR | DETAILS: Failed to create link [FR2PR_FamilyRegister]: Link creation failed!
+[2026-02-25 22:56:55] ACTION: LINK_PULL_ERROR | DETAILS: Failed to create link [FR2PR_PersonRegister]: Link creation failed!
+[2026-02-25 22:56:56] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 1 objects, 2 links updated.
+[2026-02-25 23:01:06] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-26 00:29:17] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-26 00:29:17] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-26 00:29:17] ACTION: SESSION_CREATE | DETAILS: New session created with key: 09D83277
+[2026-02-26 00:29:17] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-26 00:29:17] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 09D83277 | Ver: unknown
+[2026-02-26 01:41:20] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-26 01:41:20] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-26 01:41:20] ACTION: SESSION_CREATE | DETAILS: New session created with key: C7DD8316
+[2026-02-26 01:41:20] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-26 01:41:20] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: C7DD8316 | Ver: unknown
+[2026-02-26 01:49:50] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-26 01:49:50] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-26 01:49:50] ACTION: SESSION_CREATE | DETAILS: New session created with key: FF263CED
+[2026-02-26 01:49:50] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-26 01:49:50] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: FF263CED | Ver: unknown

@@ -39,7 +39,7 @@ import com.google.common.collect.Maps;
  * 
  * @author  Mark Richters
  */
-class MAssociationImpl extends MClassifierImpl implements MAssociation {
+public class MAssociationImpl extends MClassifierImpl implements MAssociation {
     
 	private List<MAssociationEnd> fAssociationEnds;
     
