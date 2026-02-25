@@ -1,6 +1,7 @@
 package org.uet.dse.neo4j.action_phase2;
 
 import org.neo4j.driver.Driver;
+import org.tzi.use.api.UseSystemApi;
 import org.tzi.use.gui.main.MainWindow;
 import org.tzi.use.main.Session;
 import org.tzi.use.runtime.gui.IPluginAction;
@@ -20,7 +21,7 @@ public class ActionOpenOclEvaluator implements IPluginActionDelegate {
         NEvaluator neo4jEvaluator = new NEvaluator();
 
         System.out.println(Main.getTggRuleCollection().toString());
-        NRuleCollectionManager st = new NRuleCollectionManager();
+        NRuleCollectionManager st = new NRuleCollectionManager(UseSystemApi.create(pluginAction.getSession().system(), true));
         st.iterateThroughMRuleCollection();
         OclEvaluatorDialog dialog = new OclEvaluatorDialog(mainWindow, session, neo4jEvaluator);
         dialog.setVisible(true);

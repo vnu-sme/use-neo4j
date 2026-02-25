@@ -7804,3 +7804,110 @@ USE Api:1:0: Undefined variable `Male'.
 [2026-02-26 01:49:50] ACTION: SESSION_CREATE | DETAILS: New session created with key: FF263CED
 [2026-02-26 01:49:50] ACTION: REALTIME | DETAILS: Deep Scan Service Started
 [2026-02-26 01:49:50] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: FF263CED | Ver: unknown
+[2026-02-26 02:07:18] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-26 02:07:18] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-26 02:07:18] ACTION: SESSION_CREATE | DETAILS: New session created with key: E2A65C21
+[2026-02-26 02:07:18] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-26 02:07:18] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: E2A65C21 | Ver: unknown
+[2026-02-26 02:20:11] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-26 02:20:11] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-26 02:20:11] ACTION: SESSION_CREATE | DETAILS: New session created with key: 4641CF2B
+[2026-02-26 02:20:11] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-26 02:20:11] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 4641CF2B | Ver: unknown
+[2026-02-26 02:47:43] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-26 02:47:43] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-26 02:47:43] ACTION: SESSION_CREATE | DETAILS: New session created with key: 5793B506
+[2026-02-26 02:47:43] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-26 02:47:43] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 5793B506 | Ver: unknown
+[2026-02-26 02:48:10] ACTION: PULL_OP_ERROR | DETAILS: Failed to define op [Mother2Female_backTrafo] on class [RuleCollection]: Invalid type expression `Object'.
+[2026-02-26 02:48:10] ACTION: PULL_OP_ERROR | DETAILS: Failed to define op [Mother2Female_forwTrafo] on class [RuleCollection]: Invalid type expression `Object'.
+[2026-02-26 02:48:10] ACTION: PULL_OP_ERROR | DETAILS: Failed to define op [Mother2Female_integration] on class [RuleCollection]: Invalid type expression `Object'.
+[2026-02-26 02:48:10] ACTION: PULL_OP_ERROR | DETAILS: Failed to define op [Daughter2Female_integration] on class [RuleCollection]: Invalid type expression `Object'.
+[2026-02-26 02:48:10] ACTION: PULL_OP_ERROR | DETAILS: Failed to define op [Father2Male_coEvol] on class [RuleCollection]: Invalid type expression `Object'.
+[2026-02-26 02:48:10] ACTION: PULL_OP_ERROR | DETAILS: Failed to define op [Father2Male_forwTrafo] on class [RuleCollection]: Invalid type expression `Object'.
+[2026-02-26 02:48:10] ACTION: PULL_OP_ERROR | DETAILS: Failed to define op [Register2Register_integration] on class [RuleCollection]: Invalid type expression `Object'.
+[2026-02-26 02:48:10] ACTION: PULL_OP_ERROR | DETAILS: Failed to define op [Son2Male_backTrafo] on class [RuleCollection]: Invalid type expression `Object'.
+[2026-02-26 02:48:10] ACTION: PULL_OP_ERROR | DETAILS: Failed to define op [Mother2Female_coEvol] on class [RuleCollection]: Invalid type expression `Object'.
+[2026-02-26 02:48:10] ACTION: PULL_OP | DETAILS: Created signature: RuleCollection::Register2Register_coEvol
+[2026-02-26 02:48:10] ACTION: PULL_OP_ERROR | DETAILS: Failed to define op [Son2Male_coEvol] on class [RuleCollection]: Invalid type expression `Object'.
+[2026-02-26 02:48:10] ACTION: PULL_OP_ERROR | DETAILS: Failed to define op [Son2Male_integration] on class [RuleCollection]: Invalid type expression `Object'.
+[2026-02-26 02:48:10] ACTION: PULL_OP_ERROR | DETAILS: Failed to define op [Daughter2Female_backTrafo] on class [RuleCollection]: Invalid type expression `Object'.
+[2026-02-26 02:48:10] ACTION: PULL_OP_ERROR | DETAILS: Failed to define op [Daughter2Female_forwTrafo] on class [RuleCollection]: Invalid type expression `Object'.
+[2026-02-26 02:48:10] ACTION: PULL_OP_ERROR | DETAILS: Failed to define op [Register2Register_backTrafo] on class [RuleCollection]: Invalid type expression `Object'.
+[2026-02-26 02:48:10] ACTION: PULL_OP_ERROR | DETAILS: Failed to define op [Register2Register_forwTrafo] on class [RuleCollection]: Invalid type expression `Object'.
+[2026-02-26 02:48:10] ACTION: PULL_OP_ERROR | DETAILS: Failed to define op [Son2Male_forwTrafo] on class [RuleCollection]: Invalid type expression `Object'.
+[2026-02-26 02:48:10] ACTION: PULL_OP_ERROR | DETAILS: Failed to define op [Father2Male_backTrafo] on class [RuleCollection]: Invalid type expression `Object'.
+[2026-02-26 02:48:10] ACTION: PULL_OP_ERROR | DETAILS: Failed to define op [Daughter2Female_coEvol] on class [RuleCollection]: Invalid type expression `Object'.
+[2026-02-26 02:48:10] ACTION: PULL_OP_ERROR | DETAILS: Failed to define op [Father2Male_integration] on class [RuleCollection]: Invalid type expression `Object'.
+[2026-02-26 02:48:10] ACTION: PULL_ASSOC | DETAILS: Restored: FM2FP_Family
+[2026-02-26 02:48:10] ACTION: PULL_ASSOC | DETAILS: Restored: FM2MP_Family
+[2026-02-26 02:48:10] ACTION: PULL_ASSOC | DETAILS: Restored: Daughters
+[2026-02-26 02:48:10] ACTION: PULL_ASSOC | DETAILS: Restored: Father
+[2026-02-26 02:48:10] ACTION: PULL_ASSOC | DETAILS: Restored: Mother
+[2026-02-26 02:48:10] ACTION: PULL_ASSOC | DETAILS: Restored: Sons
+[2026-02-26 02:48:10] ACTION: PULL_ASSOC | DETAILS: Restored: D2FP_FamilyMember
+[2026-02-26 02:48:10] ACTION: PULL_ASSOC | DETAILS: Restored: F2MP_FamilyMember
+[2026-02-26 02:48:10] ACTION: PULL_ASSOC | DETAILS: Restored: M2FP_FamilyMember
+[2026-02-26 02:48:10] ACTION: PULL_ASSOC | DETAILS: Restored: S2MP_FamilyMember
+[2026-02-26 02:48:10] ACTION: PULL_ASSOC | DETAILS: Restored: FR2PR_FamilyRegister
+[2026-02-26 02:48:10] ACTION: PULL_ASSOC | DETAILS: Restored: FamilyRegistration
+[2026-02-26 02:48:10] ACTION: PULL_ASSOC | DETAILS: Restored: D2FP_Female
+[2026-02-26 02:48:10] ACTION: PULL_ASSOC | DETAILS: Restored: FM2FP_Female
+[2026-02-26 02:48:10] ACTION: PULL_ASSOC | DETAILS: Restored: M2FP_Female
+[2026-02-26 02:48:10] ACTION: PULL_ASSOC | DETAILS: Restored: F2MP_Male
+[2026-02-26 02:48:10] ACTION: PULL_ASSOC | DETAILS: Restored: FM2MP_Male
+[2026-02-26 02:48:10] ACTION: PULL_ASSOC | DETAILS: Restored: S2MP_Male
+[2026-02-26 02:48:10] ACTION: PULL_ASSOC | DETAILS: Restored: FR2PR_PersonRegister
+[2026-02-26 02:48:10] ACTION: PULL_ASSOC | DETAILS: Restored: PersonRegistration
+[2026-02-26 02:48:10] ACTION: PULL_CONST | DETAILS: Applied: Register2Register_coEvol::Register2Register_coEvol_pre
+[2026-02-26 02:48:10] ACTION: PULL_CONST | DETAILS: Applied: Register2Register_coEvol::Register2Register_coEvol_post
+[2026-02-26 02:48:32] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: FamilyRegister
+[2026-02-26 02:48:32] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: S2MP
+[2026-02-26 02:48:32] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: D2FP
+[2026-02-26 02:48:32] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: FR2PR
+[2026-02-26 02:48:32] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Male
+[2026-02-26 02:48:32] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: FM2FP
+[2026-02-26 02:48:32] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: M2FP
+[2026-02-26 02:48:32] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: F2MP
+[2026-02-26 02:48:32] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: FM2MP
+[2026-02-26 02:48:32] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: FamilyMember
+[2026-02-26 02:48:32] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: PersonRegister
+[2026-02-26 02:48:32] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Family
+[2026-02-26 02:48:32] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Female
+[2026-02-26 02:48:32] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: RuleCollection
+[2026-02-26 02:48:32] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Person
+[2026-02-26 02:48:32] ACTION: PUSH_START | DETAILS: User neo4j [Key: 5793B506] (kiencc) initiated sync for model: Families2Persons
+[2026-02-26 02:48:33] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1137740384
+[2026-02-26 02:48:33] ACTION: PUSH_SUCCESS | DETAILS: Model Families2Persons is now synchronized.
+[2026-02-26 02:48:33] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 5793B506] (kiencc)
+[2026-02-26 02:52:45] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: FamilyRegister
+[2026-02-26 02:52:45] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: S2MP
+[2026-02-26 02:52:45] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: D2FP
+[2026-02-26 02:52:45] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: FR2PR
+[2026-02-26 02:52:45] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Male
+[2026-02-26 02:52:45] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: FM2FP
+[2026-02-26 02:52:45] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: M2FP
+[2026-02-26 02:52:45] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: F2MP
+[2026-02-26 02:52:45] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: FM2MP
+[2026-02-26 02:52:45] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: FamilyMember
+[2026-02-26 02:52:45] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: PersonRegister
+[2026-02-26 02:52:45] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Family
+[2026-02-26 02:52:45] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Female
+[2026-02-26 02:52:45] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: RuleCollection
+[2026-02-26 02:52:45] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Person
+[2026-02-26 02:52:45] ACTION: PUSH_START | DETAILS: User neo4j [Key: 5793B506] (kiencc) initiated sync for model: Families2Persons
+[2026-02-26 02:52:46] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -673682707
+[2026-02-26 02:52:46] ACTION: PUSH_SUCCESS | DETAILS: Model Families2Persons is now synchronized.
+[2026-02-26 02:52:46] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 5793B506] (kiencc)
+[2026-02-26 02:52:53] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-26 02:53:35] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-26 02:53:55] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: f2mp
+[2026-02-26 02:53:55] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: fm2mp
+[2026-02-26 02:53:55] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: rc
+[2026-02-26 02:53:55] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: pr
+[2026-02-26 02:53:55] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: mp
+[2026-02-26 02:53:55] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: father
+[2026-02-26 02:53:55] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: fm
+[2026-02-26 02:53:55] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: fr2pr
+[2026-02-26 02:53:55] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: fr
+[2026-02-26 02:53:56] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 9 objects, 9 links updated.
