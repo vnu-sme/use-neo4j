@@ -7663,3 +7663,92 @@ USE Api:1:0: Undefined variable `Male'.
 [2026-02-21 18:08:04] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: b2
 [2026-02-21 18:08:04] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: b3
 [2026-02-21 18:08:05] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 2 objects, 0 links updated.
+[2026-02-24 15:57:54] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-24 15:57:54] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-24 15:57:54] ACTION: SESSION_CREATE | DETAILS: New session created with key: CEC7C9BE
+[2026-02-24 15:57:54] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-24 15:57:54] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: CEC7C9BE | Ver: unknown
+[2026-02-24 15:58:11] ACTION: PUSH_START | DETAILS: User neo4j [Key: CEC7C9BE] (kiencc) initiated sync for model: Employee
+[2026-02-24 15:58:12] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-24 15:58:12] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-24 15:58:14] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -493773417
+[2026-02-24 15:58:14] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-02-24 15:58:14] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: CEC7C9BE] (kiencc)
+[2026-02-24 16:06:19] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-24 16:06:19] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-24 16:06:19] ACTION: SESSION_CREATE | DETAILS: New session created with key: 7BD355A1
+[2026-02-24 16:06:19] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-24 16:06:19] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 7BD355A1 | Ver: unknown
+[2026-02-24 16:06:30] ACTION: PULL_ENUM | DETAILS: Created Enum: ContractType
+[2026-02-24 16:06:30] ACTION: PULL_ENUM | DETAILS: Created Enum: Gender
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: Professor::canSupervise
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: Professor::getSalaryAdvantage
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: Professor::isSenior
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: University::getStudents
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: University::fires
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: University::getEmployeeCount
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: University::getProfessors
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: University::hasFullTimeEmployees
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: University::getTotalSalaryExpense
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: University::getEmployeesByContract
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: Employment::passedProbation
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: Employment::isPermanent
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: Employment::getEmployeeName
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: Employment::getDurationYears
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: Employment::isTemporary
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: Employment::getUniversityName
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: Student::isWorking
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: Student::canGraduate
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: Person::getAnnualSalary
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: Person::hasContract
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: Person::getContract
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: Person::isEligibleForPromotion
+[2026-02-24 16:06:30] ACTION: PULL_OP | DETAILS: Created signature: Person::isEmployed
+[2026-02-24 16:06:30] ACTION: PULL_ASSOC | DETAILS: Restored: DemoAssociation
+[2026-02-24 16:06:30] ACTION: PULL_ASSOC | DETAILS: Restored: DemoAggregation
+[2026-02-24 16:06:30] ACTION: PULL_ASSOC | DETAILS: Restored: WorksFor
+[2026-02-24 16:06:30] ACTION: PULL_TERNARY | DETAILS: Restored: Ternari with 3 ends.
+[2026-02-24 16:06:30] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-02-24 16:06:30] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-02-24 16:11:51] ACTION: PULL_ENUM | DETAILS: Created Enum: ContractType
+[2026-02-24 16:11:51] ACTION: PULL_ENUM | DETAILS: Created Enum: Gender
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: Professor::canSupervise
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: Professor::getSalaryAdvantage
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: Professor::isSenior
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: University::getStudents
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: University::fires
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: University::getEmployeeCount
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: University::getProfessors
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: University::hasFullTimeEmployees
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: University::getTotalSalaryExpense
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: University::getEmployeesByContract
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: Employment::passedProbation
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: Employment::isPermanent
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: Employment::getEmployeeName
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: Employment::getDurationYears
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: Employment::isTemporary
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: Employment::getUniversityName
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: Student::isWorking
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: Student::canGraduate
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: Person::getAnnualSalary
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: Person::hasContract
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: Person::getContract
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: Person::isEligibleForPromotion
+[2026-02-24 16:11:51] ACTION: PULL_OP | DETAILS: Created signature: Person::isEmployed
+[2026-02-24 16:11:51] ACTION: PULL_ASSOC | DETAILS: Restored: DemoAssociation
+[2026-02-24 16:11:51] ACTION: PULL_ASSOC | DETAILS: Restored: DemoAggregation
+[2026-02-24 16:11:51] ACTION: PULL_ASSOC | DETAILS: Restored: WorksFor
+[2026-02-24 16:11:51] ACTION: PULL_TERNARY | DETAILS: Restored: Ternari with 3 ends.
+[2026-02-24 16:11:51] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-02-24 16:11:51] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-02-24 16:15:04] ACTION: REALTIME | DETAILS: Service restarted with new frequency.
+[2026-02-24 16:15:15] ACTION: REALTIME | DETAILS: Service restarted with new frequency.
+[2026-02-24 16:18:49] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-24 16:18:49] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-24 16:18:50] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: MIT
+[2026-02-24 16:19:02] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-24 16:19:02] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: Stanford
+[2026-02-24 16:20:25] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-24 16:20:25] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-24 16:20:26] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: ProfSmith
+[2026-02-24 16:20:40] ACTION: SYNC | DETAILS: Object & Link sync completed.

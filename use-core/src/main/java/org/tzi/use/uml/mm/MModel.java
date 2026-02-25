@@ -28,6 +28,7 @@ import org.tzi.use.uml.ocl.type.EnumType;
 import org.tzi.use.util.StringUtil;
 import org.tzi.use.util.collections.CollectionUtil;
 
+import java.io.File;
 import java.util.*;
 
 /**

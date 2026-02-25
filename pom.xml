@@ -15,6 +15,7 @@
         <module>use-core</module>
         <module>use-gui</module>
         <module>use-assembly</module>
+        <module>validator</module>
 
         <!--
                 <module>use-validator</module>
