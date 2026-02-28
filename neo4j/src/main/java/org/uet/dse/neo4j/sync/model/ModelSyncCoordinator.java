@@ -21,8 +21,8 @@ import org.uet.dse.neo4j.model.FullModelSnapshot;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.phase2.WorkLogManager;
 import org.uet.dse.neo4j.sync.lock.LockManager;
-import org.uet.dse.neo4j.sync.object.ObjectSyncCoordinator;
 import org.uet.dse.neo4j.sync.helper.UmlTypeTranslator;
+import org.uet.dse.neo4j.sync.model.simpleDomain.KusakabeModelDiff;
 import org.uet.dse.neo4j.sync.object.ObjectSyncHelper;
 
 import javax.swing.*;
@@ -38,14 +38,15 @@ public class ModelSyncCoordinator {
     private final MainWindow mainWindow;
     private final UseModelApi modelApi;
 
-    private final ModelSnapshotCompare modelSnapshotCompare;
+    private final ModelSnapshotsAnalyzer modelSnapshotsAnalyzer;
 
     public ModelSyncCoordinator(Session session, MainWindow mainWindow, MModel useModel, UseModelApi modelApi) {
         this.useSession = session;
         this.mainWindow = mainWindow;
         this.useModel = useModel;
         this.modelApi = modelApi;
-        this.modelSnapshotCompare = new ModelSnapshotCompare(useModel);
+        //configured
+        this.modelSnapshotsAnalyzer = new ModelIncrementalCompare(useModel);
     }
 
     public ModelSyncCoordinator(Session session, MainWindow mainWindow) {
@@ -53,7 +54,7 @@ public class ModelSyncCoordinator {
         this.mainWindow = mainWindow;
         this.useModel = session.system().model();
         this.modelApi = new UseModelApi(session.system().model());
-        this.modelSnapshotCompare = new ModelSnapshotCompare(useModel);
+        this.modelSnapshotsAnalyzer = new ModelSnapshotCompareV1(useModel);
     }
 
     public ModelSyncCoordinator(Session session) {
@@ -61,7 +62,7 @@ public class ModelSyncCoordinator {
         this.mainWindow = null;
         this.useModel = session.system().model();
         this.modelApi = new UseModelApi(session.system().model());
-        this.modelSnapshotCompare = new ModelSnapshotCompare(useModel);
+        this.modelSnapshotsAnalyzer = new ModelSnapshotCompareV1(useModel);
     }
 
     public MModel getUseModel() {
@@ -72,8 +73,8 @@ public class ModelSyncCoordinator {
         return modelApi;
     }
 
-    public ModelSnapshotCompare getModelSnapshotCompare() {
-        return this.modelSnapshotCompare;
+    public ModelSnapshotsAnalyzer getModelSnapshotsAnalyzer() {
+        return this.modelSnapshotsAnalyzer;
     }
 
     public void syncForward() {
@@ -83,43 +84,33 @@ public class ModelSyncCoordinator {
 
         //lock db while working
         LockManager.LockResult lock = LockManager.acquireLock(userIdentifier);
-        if (!lock.success) {
-            JOptionPane.showMessageDialog(null,
-                    "Database is currently LOCKED by:\n" + lock.owner +
-                            "\nPlease wait until they finish or the lock expires.",
-                    "Sync Blocked", JOptionPane.WARNING_MESSAGE);
-
-            Neo4jAuditLogService.log("LOCK_DENIED", "DATABASE", "Ticket", "Sync attempt blocked by: " + lock.owner);
-            return;
-        }
+        if(!checkLock(lock)) return;
         try {
-            ModelDiff diff = modelSnapshotCompare.compareWithNeo4j();
+            //bug
+            ModelDiff diff = modelSnapshotsAnalyzer.compareWithNeo4j();
 
             if (diff.hasDifference()) {
-                JTextArea textArea = new JTextArea(diff.generateForwardReport());
-                textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
-                textArea.setEditable(false);
-                JScrollPane scrollPane = new JScrollPane(textArea);
-                scrollPane.setPreferredSize(new Dimension(600, 450));
-
-                int res = JOptionPane.showConfirmDialog(null, scrollPane,
-                        "Push Model to Neo4j - Review Changes", JOptionPane.OK_CANCEL_OPTION);
-
-                if (res != JOptionPane.OK_OPTION) {
-                    WorkLogManager.getInstance().log("SYNC_CANCEL", "User cancelled sync after reviewing diff.");
-                    return;
-                }
-
-                //delete strategy
-                if (!diff.neo4jOnlyClasses.isEmpty()) {
-                    handleDeletionStrategy(diff.neo4jOnlyClasses);
-                    Neo4jAuditLogService.log("CLEANUP", "MODEL", diff.neo4jOnlyClasses.toString(), "Removing obsolete classes from Database.");
-                }
+                JOptionPane.showMessageDialog(
+                    null,
+                    "The model is in conflict.",
+                    "Conflict Detected",
+                    JOptionPane.WARNING_MESSAGE
+                );
             }
 
-            //overwrite and add stuff that is in USE but not neo4j
-            ModelPushService modelPushService = new ModelPushService(this.modelApi);
-            modelPushService.pushModelToNeo4j();
+
+            ModelSnapshotsAnalyzer baseBean = new ModelSnapshotCompareV1(this.useModel);
+            boolean freeForAllPushItAll = baseBean.checkBlankWorkingSpace();
+
+            if (freeForAllPushItAll) {
+                //overwrite and add stuff that is in USE but not neo4j
+                CoreModelPushService coreModelPushService = new CoreModelPushService(this.modelApi);
+                coreModelPushService.pushModelToNeo4j();
+            } else {
+                IncrementalModelPushService incrementalModelPushService = new IncrementalModelPushService(this.modelApi);
+                incrementalModelPushService.pushModelToNeo4j(diff);
+
+            }
 
             WorkLogManager.getInstance().log("SYNC_FORWARD_SUCCESS", "Model pushed by: " + userIdentifier);
             JOptionPane.showMessageDialog(null, "Synchronization to Neo4j completed successfully!");
@@ -132,6 +123,31 @@ public class ModelSyncCoordinator {
             LockManager.releaseLock();
         }
     }
+
+    private boolean checkLock(LockManager.LockResult lock) {
+        if (!lock.success) {
+            JOptionPane.showMessageDialog(null,
+                "Database is currently LOCKED by:\n" + lock.owner +
+                    "\nPlease wait until they finish or the lock expires.",
+                "Sync Blocked", JOptionPane.WARNING_MESSAGE);
+
+            Neo4jAuditLogService.log("LOCK_DENIED", "DATABASE", "Ticket", "Sync attempt blocked by: " + lock.owner);
+            return false;
+        }
+        return true;
+    }
+
+    private int showModelDiffBox(JTextArea textArea) {
+        textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        textArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setPreferredSize(new Dimension(600, 450));
+
+        return JOptionPane.showConfirmDialog(null, scrollPane,
+            "Push Model to Neo4j - Review Changes", JOptionPane.OK_CANCEL_OPTION);
+    }
+
+
 
     public void syncBackward() {
         String user = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
@@ -778,7 +794,7 @@ public class ModelSyncCoordinator {
 
             if (isQuickSyncCheck()) return "All Synced";
 
-            ModelDiff diff = modelSnapshotCompare.compareWithNeo4j();
+            ModelDiff diff = modelSnapshotsAnalyzer.compareWithNeo4j();
             if (diff == null || !diff.hasDifference()) return "All Synced";
 
             return String.format("%d New, %d Missing, %d Mismatch",
@@ -1168,23 +1184,6 @@ public class ModelSyncCoordinator {
         return fullSnapshot;
     }
 
-
-    public void proposeModelSync() {
-        ModelDiff diff = modelSnapshotCompare.compareWithNeo4j();
-        if (!diff.hasDifference()) {
-            JOptionPane.showMessageDialog(null, "Model is already up-to-date.");
-            return;
-        }
-
-        String summary = diff.generateForwardReport();
-        int confirm = JOptionPane.showConfirmDialog(null, "Do you want to broadcast this change to the team?", "Propose Change", JOptionPane.YES_NO_OPTION);
-
-        if (confirm == JOptionPane.YES_OPTION) {
-            // Gửi đề xuất lên Neo4j
-            ConsensusService.getInstance().submitModelProposal(summary);
-            JOptionPane.showMessageDialog(null, "Proposal sent! Waiting for team consensus.");
-        }
-    }
 
     /**
      * Thực hiện Pull dữ liệu từ DB về Java mà không hiển thị bảng Diff Preview.

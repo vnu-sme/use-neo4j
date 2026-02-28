@@ -8,6 +8,12 @@
 
 !insert (o1, o2) into Connect
 
+!insert (p1,u1,s1) into Ternari
+
+!create e1:Employment
+
+!insert (p1, u1) into Employment
+
 !set o1.coli := Set{1, 5, 9}
 
 !set o1.name := 'huhu'

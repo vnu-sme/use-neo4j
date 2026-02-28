@@ -146,6 +146,7 @@ association Ternari between
     Student[1] role prte
 end
 
+
 associationclass Employment between
     Person[1] role person
     University[1] role university

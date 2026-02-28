@@ -2,7 +2,7 @@ package org.uet.dse.neo4j.gui;
 
 import org.tzi.use.uml.mm.MClass;
 import org.uet.dse.neo4j.sync.model.ModelDiff;
-import org.uet.dse.neo4j.sync.model.ModelPushService;
+import org.uet.dse.neo4j.sync.model.CoreModelPushService;
 import org.uet.dse.neo4j.sync.model.ModelSyncCoordinator;
 import org.uet.dse.neo4j.sync.object.ObjectDiff;
 import org.uet.dse.neo4j.sync.object.ObjectSyncCoordinator;
@@ -34,7 +34,7 @@ public class SyncDetailDialog extends JDialog {
         // 1. THỐNG KÊ CHI TIẾT (Deep Check)
         if (type.equals("Model")) {
             // Lấy Diff từ Model Coordinator
-            ModelDiff diff = modelCoord.getModelSnapshotCompare().compareWithNeo4j();
+            ModelDiff diff = modelCoord.getModelSnapshotsAnalyzer().compareWithNeo4j();
 
             // Những thứ chỉ có ở Java (Cần đẩy lên DB)
             diff.javaOnlyClasses.forEach(c ->
@@ -145,14 +145,14 @@ public class SyncDetailDialog extends JDialog {
                 String name = extractNameFromLabel(label);
 
                 if (syncType.equals("Model")) {
-                    ModelPushService modelPushService = new ModelPushService(modelCoord.getModelApi());
+                    CoreModelPushService coreModelPushService = new CoreModelPushService(modelCoord.getModelApi());
                     if (label.contains("[JAVA ONLY]")) {
                         // Java có, DB thiếu -> Push Class
                         MClass mClass = modelCoord.getUseModel().getClass(name);
-                        modelPushService.pushSingleClass(mClass);
+                        coreModelPushService.pushSingleClass(mClass);
                     } else if (label.contains("[DB ONLY]")) {
                         // DB có, Java thiếu -> Pull Class
-                        modelPushService.pullSingleClass(name);
+                        coreModelPushService.pullSingleClass(name);
                     }
                 } else if (syncType.equals("Object")) {
                     if (label.contains("[JAVA ONLY]")) {

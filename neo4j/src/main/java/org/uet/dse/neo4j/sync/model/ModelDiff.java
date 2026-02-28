@@ -7,6 +7,8 @@ import java.util.*;
  * includes:
  * - class
  * - associations
+ *
+ * //big bug: hasnt carefully handle operations, invariants, mismatched atributes, enum
  */
 public class ModelDiff {
     public List<String> javaOnlyClasses = new ArrayList<>();

@@ -7911,3 +7911,27 @@ USE Api:1:0: Undefined variable `Male'.
 [2026-02-26 02:53:55] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: fr2pr
 [2026-02-26 02:53:55] ACTION: OBJECT_PULL_CREATE | DETAILS: Created object: fr
 [2026-02-26 02:53:56] ACTION: OBJECT_PULL_SUCCESS | DETAILS: Sync Complete: 9 objects, 9 links updated.
+[2026-02-27 01:01:37] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-27 01:01:38] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-27 01:01:38] ACTION: SESSION_CREATE | DETAILS: New session created with key: 87EEE92B
+[2026-02-27 01:01:38] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-27 01:01:38] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 87EEE92B | Ver: unknown
+[2026-02-27 01:01:46] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: FM2MP
+[2026-02-27 01:01:46] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: FamilyRegister
+[2026-02-27 01:01:46] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: FamilyMember
+[2026-02-27 01:01:46] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: PersonRegister
+[2026-02-27 01:01:46] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: FR2PR
+[2026-02-27 01:01:47] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Family
+[2026-02-27 01:01:47] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Male
+[2026-02-27 01:01:47] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Female
+[2026-02-27 01:01:47] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: RuleCollection
+[2026-02-27 01:01:47] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: Person
+[2026-02-27 01:01:47] ACTION: CLEANUP | DETAILS: Deep cascade delete finished for: F2MP
+[2026-02-27 01:01:47] ACTION: PUSH_START | DETAILS: User neo4j [Key: 87EEE92B] (kiencc) initiated sync for model: Employee
+[2026-02-27 01:01:47] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: ContractType
+[2026-02-27 01:01:47] ACTION: PUSH_ENUM | DETAILS: Pushed enumeration: Gender
+[2026-02-27 01:01:48] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -493773417
+[2026-02-27 01:01:49] ACTION: PUSH_SUCCESS | DETAILS: Model Employee is now synchronized.
+[2026-02-27 01:01:49] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 87EEE92B] (kiencc)
+[2026-02-27 01:02:06] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-27 01:08:57] ACTION: SYNC | DETAILS: Object & Link sync completed.

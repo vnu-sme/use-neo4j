@@ -9,7 +9,7 @@ import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.phase2.WorkLogManager;
 import org.uet.dse.neo4j.sync.lock.LockManager;
 import org.uet.dse.neo4j.sync.model.ModelDiff;
-import org.uet.dse.neo4j.sync.model.ModelPushService;
+import org.uet.dse.neo4j.sync.model.CoreModelPushService;
 import org.uet.dse.neo4j.sync.model.ModelSyncCoordinator;
 
 public class RealtimeModelSyncCoordinator extends ModelSyncCoordinator {
@@ -38,7 +38,7 @@ public class RealtimeModelSyncCoordinator extends ModelSyncCoordinator {
         }
 
         try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().openSession()) {
-            ModelDiff diff = getModelSnapshotCompare().compareWithNeo4j();
+            ModelDiff diff = getModelSnapshotsAnalyzer().compareWithNeo4j();
 
             if (diff.hasDifference()) {
 
@@ -98,10 +98,10 @@ public class RealtimeModelSyncCoordinator extends ModelSyncCoordinator {
                 WorkLogManager.getInstance().log("AUTO_CLEANUP", "Removed obsolete elements: " + diff.neo4jOnlyClasses);
             }
 
-            ModelPushService modelPushService = new ModelPushService(getModelApi());
-            modelPushService.pushModelToNeo4j();
+            CoreModelPushService coreModelPushService = new CoreModelPushService(getModelApi());
+            coreModelPushService.pushModelToNeo4j();
             //might be obsoleted
-            modelPushService.updateModelVersion(session, userIdentifier);
+            coreModelPushService.updateModelVersion(session, userIdentifier);
 
             System.out.println("Real-time Sync: Database matches USE model.");
 

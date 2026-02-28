@@ -7,10 +7,11 @@ import org.uet.dse.neo4j.model.FullModelSnapshot;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ModelSnapshotCompare {
+//must fixing bug of missing in checking invariants, operations
+public class ModelSnapshotCompareV1 implements ModelSnapshotsAnalyzer {
     private MModel useModel;
 
-    public ModelSnapshotCompare(MModel useModel) {
+    public ModelSnapshotCompareV1(MModel useModel) {
         this.useModel = useModel;
     }
 
@@ -30,6 +31,8 @@ public class ModelSnapshotCompare {
 
         return diff;
     }
+
+
 
     private void compareClasses(FullModelSnapshot javaSnap, FullModelSnapshot neoSnap, ModelDiff diff) {
         diffKeys(

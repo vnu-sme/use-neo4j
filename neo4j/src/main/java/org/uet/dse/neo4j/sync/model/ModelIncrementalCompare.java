@@ -1,0 +1,141 @@
+package org.uet.dse.neo4j.sync.model;
+
+import org.neo4j.driver.Record;
+import org.neo4j.driver.Session;
+import org.neo4j.driver.Value;
+import org.tzi.use.uml.mm.MModel;
+import org.uet.dse.neo4j.manager.Neo4jDriverManager;
+import org.uet.dse.neo4j.sync.model.simpleDomain.KusakabeAssociationDiff;
+import org.uet.dse.neo4j.sync.model.simpleDomain.KusakabeClassDiff;
+import org.uet.dse.neo4j.sync.model.simpleDomain.KusakabeModelDiff;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+public class ModelIncrementalCompare implements ModelSnapshotsAnalyzer{
+  private MModel useModel;
+
+  public ModelIncrementalCompare(MModel useModel) {
+    this.useModel = useModel;
+  }
+
+  @Override
+  public ModelDiff compareWithNeo4j() {
+    KusakabeClassDiff classDiff = analyzeClass();
+    KusakabeAssociationDiff assocDiff = analyzeAssociation();
+
+    if (classDiff.merged != null || classDiff.merged.size() > 0 || assocDiff != null || assocDiff.merged.size() > 0) {
+      System.out.println("Noticed some conflicted diff");
+    }
+
+    KusakabeModelDiff modelDiff = new KusakabeModelDiff();
+    modelDiff.classDiff = classDiff;
+    modelDiff.associationDiff = assocDiff;
+
+    return modelDiff;
+  }
+
+
+
+  private KusakabeClassDiff analyzeClass() {
+    List<String> allClassOnUse = useModel.classes().stream().map(c -> c.name()).collect(Collectors.toList());
+    
+    String analyzingQuery = generateCheckKusakabeClassCheckerQuery(allClassOnUse);
+
+    Map<String, Object> params = Map.of(
+        "classNames", allClassOnUse
+    );
+
+    KusakabeClassDiff kusakabeClassDiff = new KusakabeClassDiff();
+
+    try (Session session = Neo4jDriverManager.getInstance().openSession()) {
+
+      long start = System.currentTimeMillis();
+
+      Record record = session.run(analyzingQuery, params).single();
+
+      long duration = System.currentTimeMillis() - start;
+
+      System.out.println("Query executed in " + duration + " ms");
+
+      List<String> found = record.get("found")
+          .asList(Value::asString)
+          .stream()
+          .filter(Objects::nonNull)
+          .toList();
+
+      List<String> notFound = record.get("notFound")
+          .asList(Value::asString)
+          .stream()
+          .filter(Objects::nonNull)
+          .toList();
+
+      kusakabeClassDiff.isolated = notFound;
+      kusakabeClassDiff.merged = found;
+    }
+
+    return kusakabeClassDiff;
+  }
+
+  private String generateCheckKusakabeClassCheckerQuery(List<String> allClassOnUse) {
+    return """
+        UNWIND $classNames AS name
+        OPTIONAL MATCH (n {name: name})-[:InstanceOf]->(c)
+        WHERE c:NodeAbstractClass 
+           OR c:NodeConcreteClass 
+           OR c:NodeAssociationClass
+           OR c:NodeEnumeration
+        WITH name, count(n) AS cnt
+        RETURN
+            collect(CASE WHEN cnt > 0 THEN name END) AS found,
+            collect(CASE WHEN cnt = 0 THEN name END) AS notFound
+        """;
+  }
+
+  private KusakabeAssociationDiff analyzeAssociation() {
+    List<String> allAccocNames = useModel.associations().stream().map(a -> a.name()).toList();
+
+    String query = generateCheckKusakabeAssociationCheckerQuery();
+
+    Map<String, Object> params = Map.of(
+        "associationNames", allAccocNames
+    );
+
+    KusakabeAssociationDiff kusakabeAssocDiff = new KusakabeAssociationDiff();
+    try (Session session = Neo4jDriverManager.getInstance().openSession()) {
+
+      Record record = session.run(query, params).single();
+
+      List<String> found = record.get("found")
+          .asList(Value::asString)
+          .stream()
+          .filter(Objects::nonNull)
+          .toList();
+
+      List<String> notFound = record.get("notFound")
+          .asList(Value::asString)
+          .stream()
+          .filter(Objects::nonNull)
+          .toList();
+
+      kusakabeAssocDiff.isolated = notFound;
+      kusakabeAssocDiff.merged = found;
+    }
+    return kusakabeAssocDiff;
+  }
+
+  private String generateCheckKusakabeAssociationCheckerQuery() {
+    return """
+        UNWIND $associationNames AS assocName
+        OPTIONAL MATCH ()-[r:AssociateWith|Aggregates|ComposeOf 
+            {associationName: assocName}]->()
+        WITH assocName, count(r) AS cnt
+        RETURN
+            collect(CASE WHEN cnt > 0 THEN assocName END) AS found,
+            collect(CASE WHEN cnt = 0 THEN assocName END) AS notFound
+        """;
+  }
+
+}
