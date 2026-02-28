@@ -240,6 +240,7 @@ public class MModel extends MModelElementImpl {
 
 		// check for role name conflicts: for each class the set of
 		// navigable classes must have unique role names
+		/**
 		for (MClass cls : assoc.associatedClasses()) {
 			Map<String, ? extends MNavigableElement> aends = cls
 					.navigableEnds();
@@ -280,6 +281,7 @@ public class MModel extends MModelElementImpl {
 				}
 			}
 
+
 			// tests if the rolenames are already used in one of the subclasses
 			for (MClass subCls : CollectionUtil
 					.<MClassifier, MClass> downCastUnsafe(cls.allChildren())) {
@@ -299,6 +301,7 @@ public class MModel extends MModelElementImpl {
                 }
 			}
 		}
+		*/
 
 		// for each class register the association and the
 		// reachable association ends

@@ -26,6 +26,7 @@ public class ModelIncrementalCompare implements ModelSnapshotsAnalyzer{
     KusakabeClassDiff classDiff = analyzeClass();
     KusakabeAssociationDiff assocDiff = analyzeAssociation();
 
+    //should do further investigation here. this version requires internal traning do not specify anything merged that is new
     if (classDiff.merged != null || classDiff.merged.size() > 0 || assocDiff != null || assocDiff.merged.size() > 0) {
       System.out.println("Noticed some conflicted diff");
     }
@@ -42,7 +43,7 @@ public class ModelIncrementalCompare implements ModelSnapshotsAnalyzer{
   private KusakabeClassDiff analyzeClass() {
     List<String> allClassOnUse = useModel.classes().stream().map(c -> c.name()).collect(Collectors.toList());
     
-    String analyzingQuery = generateCheckKusakabeClassCheckerQuery(allClassOnUse);
+    String analyzingQuery = generateCheckKusakabeClassCheckerQuery();
 
     Map<String, Object> params = Map.of(
         "classNames", allClassOnUse
@@ -79,18 +80,19 @@ public class ModelIncrementalCompare implements ModelSnapshotsAnalyzer{
     return kusakabeClassDiff;
   }
 
-  private String generateCheckKusakabeClassCheckerQuery(List<String> allClassOnUse) {
+  private String generateCheckKusakabeClassCheckerQuery() {
     return """
+      
         UNWIND $classNames AS name
+        
         OPTIONAL MATCH (n {name: name})-[:InstanceOf]->(c)
-        WHERE c:NodeAbstractClass 
-           OR c:NodeConcreteClass 
-           OR c:NodeAssociationClass
-           OR c:NodeEnumeration
-        WITH name, count(n) AS cnt
+        WHERE c:MetaNode AND c.name IN ["NodeAbstractClass", "NodeConcreteClass", "NodeAssociationClass", "NodeEnumeration"]
+        
+        WITH name, count(c) > 0 AS exists
+        
         RETURN
-            collect(CASE WHEN cnt > 0 THEN name END) AS found,
-            collect(CASE WHEN cnt = 0 THEN name END) AS notFound
+            collect(CASE WHEN exists THEN name END) AS found,
+            collect(CASE WHEN NOT exists THEN name END) AS notFound
         """;
   }
 
@@ -136,6 +138,12 @@ public class ModelIncrementalCompare implements ModelSnapshotsAnalyzer{
             collect(CASE WHEN cnt > 0 THEN assocName END) AS found,
             collect(CASE WHEN cnt = 0 THEN assocName END) AS notFound
         """;
+  }
+
+  @Override
+  public ModelDiff compareWithNeo4j(MModel incrementalModel) {
+    this.useModel = incrementalModel;
+    return compareWithNeo4j();
   }
 
 }

@@ -46,7 +46,39 @@ import java.util.List;
  * @author  Mark Richters
  */
 public class ASTAssociationEnd extends ASTAnnotatable {
-    protected Token fName;
+  public Token getfName() {
+    return fName;
+  }
+
+  public ASTMultiplicity getfMultiplicity() {
+    return fMultiplicity;
+  }
+
+  public Token getfRolename() {
+    return fRolename;
+  }
+
+  public boolean isfOrdered() {
+    return fOrdered;
+  }
+
+  public List<Token> getSubsetsRolename() {
+    return subsetsRolename;
+  }
+
+  public ASTElemVarsDeclaration getDeriveParameter() {
+    return deriveParameter;
+  }
+
+  public ASTExpression getDerivedExpression() {
+    return derivedExpression;
+  }
+
+  public MAssociationEnd getmAend() {
+    return mAend;
+  }
+
+  protected Token fName;
     protected ASTMultiplicity fMultiplicity;
     protected Token fRolename;  // optional: may be null!
     protected boolean fOrdered;

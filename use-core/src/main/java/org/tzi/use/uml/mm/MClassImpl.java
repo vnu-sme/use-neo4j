@@ -49,7 +49,7 @@ public class MClassImpl extends MClassifierImpl implements MClass {
      */
     private Set<MProtocolStateMachine> ownedProtocolStateMachines = Collections.emptySet();
     
-    MClassImpl(String name, boolean isAbstract) {
+    public MClassImpl(String name, boolean isAbstract) {
         super(name, isAbstract);
         fNavigableElements = new HashMap<String, MNavigableElement>();
     }

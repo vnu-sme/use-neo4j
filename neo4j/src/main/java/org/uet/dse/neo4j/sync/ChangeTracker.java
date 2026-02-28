@@ -55,22 +55,22 @@ public class ChangeTracker {
      * Kích hoạt bộ giám sát tổng thể
      */
     public static void startMonitoring(MainWindow mainWindow, org.tzi.use.main.Session session, JLabel lblModel, JLabel lblObj) {
-        scheduler.scheduleAtFixedRate(() -> {
-            try {
-                if (Neo4jDriverManager.getInstance().isConnected()) {
-                    // 1. HEARTBEAT: Giữ trạng thái ONLINE
-                    ConsensusService.getInstance().heartbeat();
-
-                    // 2. DASHBOARD STATUS: Cập nhật đèn báo Xanh/Đỏ
-                    updateUIStatus(session, lblModel, lblObj);
-
-                    // 3. COLLABORATION: Kiểm tra Bỏ phiếu/Đề xuất
-                    checkForConsensusEvents(mainWindow, session);
-                }
-            } catch (Exception e) {
-                // Log im lặng để không làm phiền người dùng khi mất mạng
-            }
-        }, 0, 5, TimeUnit.SECONDS);
+//        scheduler.scheduleAtFixedRate(() -> {
+//            try {
+//                if (Neo4jDriverManager.getInstance().isConnected()) {
+//                    // 1. HEARTBEAT: Giữ trạng thái ONLINE
+//                    ConsensusService.getInstance().heartbeat();
+//
+//                    // 2. DASHBOARD STATUS: Cập nhật đèn báo Xanh/Đỏ
+//                    updateUIStatus(session, lblModel, lblObj);
+//
+//                    // 3. COLLABORATION: Kiểm tra Bỏ phiếu/Đề xuất
+//                    checkForConsensusEvents(mainWindow, session);
+//                }
+//            } catch (Exception e) {
+//                // Log im lặng để không làm phiền người dùng khi mất mạng
+//            }
+//        }, 0, 5, TimeUnit.SECONDS);
     }
 
     private static void updateUIStatus(org.tzi.use.main.Session session, JLabel lblModel, JLabel lblObj) {

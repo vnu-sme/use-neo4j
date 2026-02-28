@@ -28,10 +28,14 @@ public class IncrementalModelPushService extends CoreModelPushService implements
   }
 
   @Override
-  public void pushModelToNeo4j(ModelDiff modelDiff) {
+  public void pushModelToNeo4j(ModelDiff modelDiff, MModel inputModel) {
     KusakabeModelDiff kusakabeModelDiff = (KusakabeModelDiff) modelDiff;
-
-    MModel allUseModel = modelApi.getModel();
+    MModel allUseModel;
+    if (inputModel == null) {
+      allUseModel = modelApi.getModel();
+    } else {
+      allUseModel = inputModel;
+    }
 
     String currentUser = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
 

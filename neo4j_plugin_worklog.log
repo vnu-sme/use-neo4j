@@ -7935,3 +7935,224 @@ USE Api:1:0: Undefined variable `Male'.
 [2026-02-27 01:01:49] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 87EEE92B] (kiencc)
 [2026-02-27 01:02:06] ACTION: SYNC | DETAILS: Object & Link sync completed.
 [2026-02-27 01:08:57] ACTION: SYNC | DETAILS: Object & Link sync completed.
+[2026-02-28 18:29:41] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-28 18:29:41] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-28 18:29:41] ACTION: SESSION_CREATE | DETAILS: New session created with key: 177D62C4
+[2026-02-28 18:29:41] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-28 18:29:41] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 177D62C4 | Ver: unknown
+[2026-02-28 18:29:49] ACTION: PUSH_START | DETAILS: User neo4j [Key: 177D62C4] (kiencc) initiated sync for model: BWTest
+[2026-02-28 18:29:50] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1378009483
+[2026-02-28 18:29:50] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 18:29:50] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 177D62C4] (kiencc)
+[2026-02-28 18:34:57] ACTION: PUSH_START | DETAILS: User neo4j [Key: 177D62C4] (kiencc) initiated sync for model: BWTest
+[2026-02-28 18:34:57] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1378009483
+[2026-02-28 18:34:57] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 18:34:57] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 177D62C4] (kiencc)
+[2026-02-28 18:37:06] ACTION: PUSH_START | DETAILS: User neo4j [Key: 177D62C4] (kiencc) initiated sync for model: BWTest
+[2026-02-28 18:37:06] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -2123990325
+[2026-02-28 18:37:06] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 18:37:08] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 177D62C4] (kiencc)
+[2026-02-28 18:38:07] ACTION: PUSH_START | DETAILS: User neo4j [Key: 177D62C4] (kiencc) initiated sync for model: BWTest
+[2026-02-28 18:38:07] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -764807478
+[2026-02-28 18:38:07] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 18:38:07] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 177D62C4] (kiencc)
+[2026-02-28 18:44:42] ACTION: PUSH_START | DETAILS: User neo4j [Key: 177D62C4] (kiencc) initiated sync for model: BWTest
+[2026-02-28 18:44:42] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -764807478
+[2026-02-28 18:44:42] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 18:44:42] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 177D62C4] (kiencc)
+[2026-02-28 18:45:24] ACTION: PUSH_START | DETAILS: User neo4j [Key: 177D62C4] (kiencc) initiated sync for model: BWTest
+[2026-02-28 18:45:24] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1214730849
+[2026-02-28 18:45:24] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 18:45:24] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 177D62C4] (kiencc)
+[2026-02-28 18:46:30] ACTION: PUSH_START | DETAILS: User neo4j [Key: 177D62C4] (kiencc) initiated sync for model: BWTest
+[2026-02-28 18:46:30] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 2079708987
+[2026-02-28 18:46:30] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 18:46:30] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 177D62C4] (kiencc)
+[2026-02-28 18:47:10] ACTION: PUSH_START | DETAILS: User neo4j [Key: 177D62C4] (kiencc) initiated sync for model: BWTest
+[2026-02-28 18:47:10] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: -1812746309
+[2026-02-28 18:47:10] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 18:47:10] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 177D62C4] (kiencc)
+[2026-02-28 18:48:55] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-28 18:48:55] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-28 18:48:55] ACTION: SESSION_CREATE | DETAILS: New session created with key: 4ACB7B11
+[2026-02-28 18:48:55] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-28 18:48:55] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 4ACB7B11 | Ver: unknown
+[2026-02-28 18:52:10] ACTION: PUSH_START | DETAILS: User neo4j [Key: 4ACB7B11] (kiencc) initiated sync for model: BWTest
+[2026-02-28 18:52:10] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 2133562543
+[2026-02-28 18:52:10] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 18:52:10] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 4ACB7B11] (kiencc)
+[2026-02-28 18:52:37] ACTION: REALTIME | DETAILS: Service restarted with new frequency.
+[2026-02-28 18:54:27] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-28 18:54:27] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-28 18:54:27] ACTION: SESSION_CREATE | DETAILS: New session created with key: AEA449A2
+[2026-02-28 18:54:27] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-28 18:54:27] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: AEA449A2 | Ver: unknown
+[2026-02-28 18:55:42] ACTION: PUSH_START | DETAILS: User neo4j [Key: AEA449A2] (kiencc) initiated sync for model: BWTest
+[2026-02-28 18:55:55] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-28 18:55:55] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-28 18:55:55] ACTION: SESSION_CREATE | DETAILS: New session created with key: 066C18A1
+[2026-02-28 18:55:55] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-28 18:55:55] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 066C18A1 | Ver: unknown
+[2026-02-28 19:08:00] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-28 19:08:00] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-28 19:08:00] ACTION: SESSION_CREATE | DETAILS: New session created with key: 75B8AEB3
+[2026-02-28 19:08:00] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-28 19:08:00] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 75B8AEB3 | Ver: unknown
+[2026-02-28 19:12:52] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-28 19:12:52] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-28 19:12:52] ACTION: SESSION_CREATE | DETAILS: New session created with key: 76645DD6
+[2026-02-28 19:12:52] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-28 19:12:52] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 76645DD6 | Ver: unknown
+[2026-02-28 19:13:37] ACTION: PUSH_START | DETAILS: User neo4j [Key: 76645DD6] (kiencc) initiated sync for model: BWTest
+[2026-02-28 19:13:37] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1746107612
+[2026-02-28 19:13:37] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 19:13:37] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 76645DD6] (kiencc)
+[2026-02-28 19:33:53] ACTION: PULL_ENUM | DETAILS: Created Enum: Gender
+[2026-02-28 19:33:53] ACTION: PULL_ENUM | DETAILS: Created Enum: ContractType
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: Professor::canSupervise
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: Professor::getSalaryAdvantage
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: Professor::isSenior
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: Student::isWorking
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: Student::canGraduate
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: University::getStudents
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: University::fires
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: University::getEmployeeCount
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: University::getProfessors
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: University::hasFullTimeEmployees
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: University::getTotalSalaryExpense
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: University::getEmployeesByContract
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: Employment::passedProbation
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: Employment::isPermanent
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: Employment::getEmployeeName
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: Employment::getDurationYears
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: Employment::isTemporary
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: Employment::getUniversityName
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: Person::getAnnualSalary
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: Person::hasContract
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: Person::getContract
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: Person::isEligibleForPromotion
+[2026-02-28 19:33:53] ACTION: PULL_OP | DETAILS: Created signature: Person::isEmployed
+[2026-02-28 19:33:53] ACTION: PULL_ASSOC | DETAILS: Restored: DemoAssociation
+[2026-02-28 19:33:53] ACTION: PULL_ASSOC | DETAILS: Restored: DemoAggregation
+[2026-02-28 19:33:53] ACTION: PULL_ASSOC | DETAILS: Restored: WorksFor
+[2026-02-28 19:33:53] ACTION: PULL_TERNARY | DETAILS: Restored: Ternari with 3 ends.
+[2026-02-28 19:33:53] ACTION: PULL_CONST | DETAILS: Applied: fires::firePre
+[2026-02-28 19:33:53] ACTION: PULL_CONST | DETAILS: Applied: fires::firePost
+[2026-02-28 20:43:00] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-28 20:43:00] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-28 20:43:00] ACTION: SESSION_CREATE | DETAILS: New session created with key: F70649E5
+[2026-02-28 20:43:00] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-28 20:43:00] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: F70649E5 | Ver: unknown
+[2026-02-28 20:49:28] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-28 20:49:28] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-28 20:49:28] ACTION: SESSION_CREATE | DETAILS: New session created with key: 368D986A
+[2026-02-28 20:49:28] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-28 20:49:28] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 368D986A | Ver: unknown
+[2026-02-28 20:58:49] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-28 20:58:49] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-28 20:58:49] ACTION: SESSION_CREATE | DETAILS: New session created with key: 16CF2587
+[2026-02-28 20:58:49] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-28 20:58:49] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 16CF2587 | Ver: unknown
+[2026-02-28 21:02:25] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-28 21:02:25] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-28 21:02:25] ACTION: SESSION_CREATE | DETAILS: New session created with key: 9867C2F5
+[2026-02-28 21:02:25] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-28 21:02:25] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 9867C2F5 | Ver: unknown
+[2026-02-28 21:11:41] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-28 21:11:41] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-28 21:11:41] ACTION: SESSION_CREATE | DETAILS: New session created with key: BA4CB42F
+[2026-02-28 21:11:41] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-28 21:11:41] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: BA4CB42F | Ver: unknown
+[2026-02-28 21:15:49] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-28 21:15:49] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-28 21:15:49] ACTION: SESSION_CREATE | DETAILS: New session created with key: 579CB712
+[2026-02-28 21:15:49] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-28 21:15:49] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 579CB712 | Ver: unknown
+[2026-02-28 21:22:35] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-28 21:22:35] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-28 21:22:35] ACTION: SESSION_CREATE | DETAILS: New session created with key: 494E056E
+[2026-02-28 21:22:35] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-28 21:22:35] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 494E056E | Ver: unknown
+[2026-02-28 21:24:57] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-28 21:24:57] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-28 21:24:57] ACTION: SESSION_CREATE | DETAILS: New session created with key: 051BDAB4
+[2026-02-28 21:24:57] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-28 21:24:57] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 051BDAB4 | Ver: unknown
+[2026-02-28 21:32:22] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-28 21:32:22] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-28 21:32:23] ACTION: SESSION_CREATE | DETAILS: New session created with key: 95B2B6C1
+[2026-02-28 21:32:23] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-28 21:32:23] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 95B2B6C1 | Ver: unknown
+[2026-02-28 21:34:29] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-28 21:34:29] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-28 21:34:29] ACTION: SESSION_CREATE | DETAILS: New session created with key: 783ACB86
+[2026-02-28 21:34:29] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-28 21:34:29] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 783ACB86 | Ver: unknown
+[2026-02-28 21:36:42] ACTION: SYNC_FORWARD_ERROR | DETAILS: Cannot invoke "org.tzi.use.uml.mm.MModel.classes()" because "this.useModel" is null
+[2026-02-28 21:37:23] ACTION: SYNC_FORWARD_ERROR | DETAILS: Cannot invoke "org.tzi.use.uml.mm.MModel.classes()" because "this.useModel" is null
+[2026-02-28 21:37:27] ACTION: SYNC_FORWARD_ERROR | DETAILS: Cannot invoke "org.tzi.use.uml.mm.MModel.classes()" because "this.useModel" is null
+[2026-02-28 21:38:42] ACTION: SYNC_FORWARD_ERROR | DETAILS: Cannot invoke "org.tzi.use.uml.mm.MModel.classes()" because "this.useModel" is null
+[2026-02-28 21:39:00] ACTION: SYNC_FORWARD_ERROR | DETAILS: Cannot invoke "org.tzi.use.uml.mm.MModel.classes()" because "this.useModel" is null
+[2026-02-28 21:39:48] ACTION: SYNC_FORWARD_ERROR | DETAILS: Cannot invoke "org.tzi.use.uml.mm.MModel.classes()" because "this.useModel" is null
+[2026-02-28 21:40:17] ACTION: SYNC_FORWARD_ERROR | DETAILS: Cannot invoke "org.tzi.use.uml.mm.MModel.classes()" because "this.useModel" is null
+[2026-02-28 21:41:08] ACTION: SYNC_FORWARD_ERROR | DETAILS: Cannot invoke "org.tzi.use.uml.mm.MModel.classes()" because "this.useModel" is null
+[2026-02-28 21:42:35] ACTION: SYNC_FORWARD_ERROR | DETAILS: Cannot invoke "org.tzi.use.uml.mm.MModel.classes()" because "this.useModel" is null
+[2026-02-28 21:42:58] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-28 21:42:58] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-28 21:42:58] ACTION: SESSION_CREATE | DETAILS: New session created with key: 6BD99842
+[2026-02-28 21:42:58] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-28 21:42:58] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 6BD99842 | Ver: unknown
+[2026-02-28 21:43:29] ACTION: PUSH_START | DETAILS: User neo4j [Key: 6BD99842] (kiencc) initiated sync for model: BWTest
+[2026-02-28 21:43:29] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1378009483
+[2026-02-28 21:43:29] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 21:43:29] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 6BD99842] (kiencc)
+[2026-02-28 21:45:47] ACTION: PUSH_START | DETAILS: User neo4j [Key: 6BD99842] (kiencc) initiated sync for model: BWTest
+[2026-02-28 21:45:55] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1378009483
+[2026-02-28 21:45:55] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 21:45:55] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 6BD99842] (kiencc)
+[2026-02-28 21:46:48] ACTION: PUSH_START | DETAILS: User neo4j [Key: 6BD99842] (kiencc) initiated sync for model: BWTest
+[2026-02-28 21:46:48] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1378009483
+[2026-02-28 21:46:48] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 21:46:48] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 6BD99842] (kiencc)
+[2026-02-28 21:47:42] ACTION: PUSH_START | DETAILS: User neo4j [Key: 6BD99842] (kiencc) initiated sync for model: BWTest
+[2026-02-28 21:50:45] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1378009483
+[2026-02-28 21:50:45] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 21:50:45] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 6BD99842] (kiencc)
+[2026-02-28 21:50:48] ACTION: PUSH_START | DETAILS: User neo4j [Key: 6BD99842] (kiencc) initiated sync for model: BWTest
+[2026-02-28 21:50:48] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1378009483
+[2026-02-28 21:50:48] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 21:50:48] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 6BD99842] (kiencc)
+[2026-02-28 21:51:24] ACTION: PUSH_START | DETAILS: User neo4j [Key: 6BD99842] (kiencc) initiated sync for model: BWTest
+[2026-02-28 21:51:24] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1378009483
+[2026-02-28 21:51:24] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 21:51:24] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 6BD99842] (kiencc)
+[2026-02-28 21:52:44] ACTION: PUSH_START | DETAILS: User neo4j [Key: 6BD99842] (kiencc) initiated sync for model: BWTest
+[2026-02-28 21:52:44] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1378009483
+[2026-02-28 21:52:44] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 21:52:44] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 6BD99842] (kiencc)
+[2026-02-28 21:52:49] ACTION: PUSH_START | DETAILS: User neo4j [Key: 6BD99842] (kiencc) initiated sync for model: BWTest
+[2026-02-28 21:52:49] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1378009483
+[2026-02-28 21:52:49] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 21:52:49] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 6BD99842] (kiencc)
+[2026-02-28 21:53:03] ACTION: PUSH_START | DETAILS: User neo4j [Key: 6BD99842] (kiencc) initiated sync for model: BWTest
+[2026-02-28 21:53:04] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1378009483
+[2026-02-28 21:53:04] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 21:53:04] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 6BD99842] (kiencc)
+[2026-02-28 21:53:21] ACTION: PUSH_START | DETAILS: User neo4j [Key: 6BD99842] (kiencc) initiated sync for model: BWTest
+[2026-02-28 21:53:21] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1378009483
+[2026-02-28 21:53:21] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 21:53:21] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 6BD99842] (kiencc)
+[2026-02-28 21:53:57] ACTION: PUSH_START | DETAILS: User neo4j [Key: 6BD99842] (kiencc) initiated sync for model: BWTest
+[2026-02-28 21:53:57] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1378009483
+[2026-02-28 21:53:57] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 21:53:57] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 6BD99842] (kiencc)
+[2026-02-28 22:13:45] ACTION: PUSH_START | DETAILS: User neo4j [Key: 6BD99842] (kiencc) initiated sync for model: BWTest
+[2026-02-28 22:14:04] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml1]
+[2026-02-28 22:14:04] ACTION: SCHEMA_INIT | DETAILS: Metamodel nodes initialized for DB: uml1
+[2026-02-28 22:14:04] ACTION: SESSION_CREATE | DETAILS: New session created with key: 4073BDCE
+[2026-02-28 22:14:04] ACTION: REALTIME | DETAILS: Deep Scan Service Started
+[2026-02-28 22:14:04] ACTION: CONNECTION_SUCCESS | DETAILS: DB: uml1 | Key: 4073BDCE | Ver: unknown
+[2026-02-28 22:14:39] ACTION: PUSH_START | DETAILS: User neo4j [Key: 4073BDCE] (kiencc) initiated sync for model: BWTest
+[2026-02-28 22:14:39] ACTION: VERSION_UPDATE | DETAILS: Model version updated. Hash: 1378009483
+[2026-02-28 22:14:39] ACTION: PUSH_SUCCESS | DETAILS: Model BWTest is now synchronized.
+[2026-02-28 22:14:39] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: 4073BDCE] (kiencc)

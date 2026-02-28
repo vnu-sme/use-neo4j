@@ -35,8 +35,20 @@ import java.util.List;
  */
 public class ASTAssociation extends ASTClassifier {
     private Token fKind;
-    
-    private Token fName;
+
+	public Token getfName() {
+		return fName;
+	}
+
+	public Token getfKind() {
+		return fKind;
+	}
+
+	public List<ASTAssociationEnd> getfAssociationEnds() {
+		return fAssociationEnds;
+	}
+
+	private Token fName;
     
     private List<ASTAssociationEnd> fAssociationEnds;
 

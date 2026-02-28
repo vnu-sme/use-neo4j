@@ -1,6 +1,7 @@
 package org.uet.dse.neo4j.sync.model;
 
 import org.neo4j.driver.Session;
+import org.tzi.use.uml.mm.MModel;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 
 public interface ModelSnapshotsAnalyzer {
@@ -13,13 +14,17 @@ public interface ModelSnapshotsAnalyzer {
         LIMIT 1
         """;
 
-      return session.readTransaction(tx -> tx.run(query).hasNext());
+      return !session.readTransaction(tx -> tx.run(query).hasNext());
     } catch (Exception e) {
       System.out.println("error here");
+      return null;
     }
-    return null;
   }
+
   ModelDiff compareWithNeo4j();
 
+  default ModelDiff compareWithNeo4j(MModel incrementalModel) {
+    return null;
+  }
 
 }

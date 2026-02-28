@@ -45,6 +45,43 @@ public class ASTModel extends ASTAnnotatable {
     private final List<ASTDataType> fDataTypes;
     private final List<ASTClass> fClasses;
     private final List<ASTAssociationClass> fAssociationClasses;
+
+    public List<ASTAssociation> getfAssociations() {
+        return fAssociations;
+    }
+
+    public Token getfName() {
+        return fName;
+    }
+
+    public List<ASTEnumTypeDefinition> getfEnumTypeDefs() {
+        return fEnumTypeDefs;
+    }
+
+    public List<ASTDataType> getfDataTypes() {
+        return fDataTypes;
+    }
+
+    public List<ASTClass> getfClasses() {
+        return fClasses;
+    }
+
+    public List<ASTAssociationClass> getfAssociationClasses() {
+        return fAssociationClasses;
+    }
+
+    public List<ASTSignal> getSignals() {
+        return signals;
+    }
+
+    public List<ASTConstraintDefinition> getfConstraints() {
+        return fConstraints;
+    }
+
+    public List<ASTPrePost> getfPrePosts() {
+        return fPrePosts;
+    }
+
     private final List<ASTAssociation> fAssociations;
     private final List<ASTSignal> signals;
     private final List<ASTConstraintDefinition> fConstraints;

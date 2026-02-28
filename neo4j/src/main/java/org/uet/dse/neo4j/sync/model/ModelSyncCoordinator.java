@@ -54,7 +54,7 @@ public class ModelSyncCoordinator {
         this.mainWindow = mainWindow;
         this.useModel = session.system().model();
         this.modelApi = new UseModelApi(session.system().model());
-        this.modelSnapshotsAnalyzer = new ModelSnapshotCompareV1(useModel);
+        this.modelSnapshotsAnalyzer = new ModelIncrementalCompare(useModel);
     }
 
     public ModelSyncCoordinator(Session session) {
@@ -62,7 +62,7 @@ public class ModelSyncCoordinator {
         this.mainWindow = null;
         this.useModel = session.system().model();
         this.modelApi = new UseModelApi(session.system().model());
-        this.modelSnapshotsAnalyzer = new ModelSnapshotCompareV1(useModel);
+        this.modelSnapshotsAnalyzer = new ModelIncrementalCompare(useModel);
     }
 
     public MModel getUseModel() {
@@ -88,20 +88,27 @@ public class ModelSyncCoordinator {
         try {
             //bug
             ModelDiff diff = modelSnapshotsAnalyzer.compareWithNeo4j();
+            //assums that model name doesnt matter
+            KusakabeModelDiff kusakabeModelDiff = (KusakabeModelDiff) diff;
 
-            if (diff.hasDifference()) {
+            if (kusakabeModelDiff.hasConflict()) {
                 JOptionPane.showMessageDialog(
                     null,
                     "The model is in conflict.",
                     "Conflict Detected",
                     JOptionPane.WARNING_MESSAGE
                 );
+                return;
             }
 
 
             ModelSnapshotsAnalyzer baseBean = new ModelSnapshotCompareV1(this.useModel);
-            boolean freeForAllPushItAll = baseBean.checkBlankWorkingSpace();
+            Boolean freeForAllPushItAll = baseBean.checkBlankWorkingSpace();
 
+            if (freeForAllPushItAll == null) {
+                JOptionPane.showMessageDialog(null, "Bug");
+                return;
+            }
             if (freeForAllPushItAll) {
                 //overwrite and add stuff that is in USE but not neo4j
                 CoreModelPushService coreModelPushService = new CoreModelPushService(this.modelApi);
@@ -1208,6 +1215,61 @@ public class ModelSyncCoordinator {
 
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+
+    public void syncForwardIncrementalCase(MModel incrementalModel) {
+        //get user identification
+        String userIdentifier = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
+        Neo4jAuditLogService.log("START", "MODEL_SYNC", "Global", "User initiated manual model synchronization.");
+
+        //lock db while working
+        LockManager.LockResult lock = LockManager.acquireLock(userIdentifier);
+        if(!checkLock(lock)) return;
+        try {
+            //bug
+            ModelDiff diff = modelSnapshotsAnalyzer.compareWithNeo4j(incrementalModel);
+            //assums that model name doesnt matter
+            KusakabeModelDiff kusakabeModelDiff = (KusakabeModelDiff) diff;
+
+            if (kusakabeModelDiff.hasConflict()) {
+                JOptionPane.showMessageDialog(
+                    null,
+                    "The model is in conflict.",
+                    "Conflict Detected",
+                    JOptionPane.WARNING_MESSAGE
+                );
+                return;
+            }
+
+
+            ModelSnapshotsAnalyzer baseBean = new ModelSnapshotCompareV1(this.useModel);
+            Boolean freeForAllPushItAll = baseBean.checkBlankWorkingSpace();
+
+            if (freeForAllPushItAll == null) {
+                JOptionPane.showMessageDialog(null, "Bug");
+                return;
+            }
+            if (freeForAllPushItAll) {
+                //overwrite and add stuff that is in USE but not neo4j
+                CoreModelPushService coreModelPushService = new CoreModelPushService(this.modelApi);
+                coreModelPushService.pushModelToNeo4j();
+            } else {
+                IncrementalModelPushService incrementalModelPushService = new IncrementalModelPushService(this.modelApi);
+                incrementalModelPushService.pushModelToNeo4j(diff, incrementalModel);
+
+            }
+
+            WorkLogManager.getInstance().log("SYNC_FORWARD_SUCCESS", "Model pushed by: " + userIdentifier);
+            JOptionPane.showMessageDialog(null, "Synchronization to Neo4j completed successfully!");
+
+        } catch (Exception e) {
+            WorkLogManager.getInstance().log("SYNC_FORWARD_ERROR", e.getMessage());
+            JOptionPane.showMessageDialog(null, "Sync failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        } finally {
+            LockManager.releaseLock();
         }
     }
 
