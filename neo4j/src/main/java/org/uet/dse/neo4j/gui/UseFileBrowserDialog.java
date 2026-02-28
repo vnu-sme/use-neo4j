@@ -33,7 +33,6 @@ public class UseFileBrowserDialog extends JDialog {
     private final MainWindow mainWindow;
     public UseFileBrowserDialog(MainWindow parent, PrintWriter logWriter, Session session) {
         super(parent, "USE File Browser & Compiler", true);
-      this.txtResult = new JTextArea();
       this.session = session;
       this.logWriter = logWriter;
       this.mainWindow = parent;

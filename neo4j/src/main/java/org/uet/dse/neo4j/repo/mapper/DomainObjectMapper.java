@@ -1,6 +1,7 @@
 package org.uet.dse.neo4j.repo.mapper;
 
 import org.neo4j.driver.Record;
+import org.neo4j.driver.Value;
 import org.neo4j.driver.types.Node;
 import org.uet.dse.neo4j.mm.core.common.NCollectionType;
 import org.uet.dse.neo4j.mm.core.common.NType;
@@ -44,7 +45,26 @@ public class DomainObjectMapper {
         boolean isCollection = node.get("isCollection").asBoolean(false);
         boolean isNested = node.get("isNestedCollection").asBoolean(false);
         String collectionType = node.get("collectionType").asString("");
-        String value = node.get("value").asString("");
+        Value raw = node.get("value");
+
+        String value = null;
+
+        if (raw != null && !raw.isNull()) {
+
+            switch (raw.type().name()) {
+
+                case "STRING" -> value = raw.asString();
+
+                case "INTEGER" -> value = String.valueOf(raw.asLong());
+
+                case "FLOAT" -> value = String.valueOf(raw.asDouble());
+
+                case "BOOLEAN" -> value = String.valueOf(raw.asBoolean());
+
+                default -> value = raw.toString(); // fallback an toàn
+            }
+        }
+
 
         return new AttributeInstance(
                 name,

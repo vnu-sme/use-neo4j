@@ -9,7 +9,7 @@ public interface ModelSnapshotsAnalyzer {
     try(Session session = Neo4jDriverManager.getInstance().openSession()) {
       String query = """
         MATCH (n)
-        WHERE NOT n:MetaNode
+        WHERE NOT n:MetaNode OR n:DbLock OR n:ModelVersion
         RETURN n
         LIMIT 1
         """;

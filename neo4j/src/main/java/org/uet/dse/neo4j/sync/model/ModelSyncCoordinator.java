@@ -115,7 +115,7 @@ public class ModelSyncCoordinator {
                 coreModelPushService.pushModelToNeo4j();
             } else {
                 IncrementalModelPushService incrementalModelPushService = new IncrementalModelPushService(this.modelApi);
-                incrementalModelPushService.pushModelToNeo4j(diff);
+                incrementalModelPushService.pushModelToNeo4j(diff, this.useModel);
 
             }
 
