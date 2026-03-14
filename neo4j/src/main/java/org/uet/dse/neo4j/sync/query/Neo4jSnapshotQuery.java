@@ -4,7 +4,8 @@ public class Neo4jSnapshotQuery {
     private Neo4jSnapshotQuery() {}
 
     public static final String CLASSES_AND_FEATURES =
-            "MATCH (meta:MetaNode) WHERE meta.name IN " +
+        "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(meta:MetaNode) " +
+            "MATCH (inst)-[:InstanceOf]->(meta)  WHERE meta.name IN " +
                     "  ['NodeConcreteClass','NodeAbstractClass','NodeAssociationClass','NodeEnumeration'] " +
                     "MATCH (inst)-[:InstanceOf]->(meta) " +
                     "WITH inst, meta, labels(inst)[0] AS classType " +
@@ -55,23 +56,28 @@ public class Neo4jSnapshotQuery {
                     "       inst.value AS enumValues, attrs, invariants, ops, acSrc, acTgt";
 
     public static final String GENERALIZATIONS =
+        "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(meta:MetaNode) " +
+            "MATCH (c)-[:InstanceOf]->(meta) " +
             "MATCH (c)-[:Extends]->(p) RETURN c.name AS child, p.name AS parent";
 
     public static final String BINARY_ASSOCIATIONS =
+        "MATCH (m:ManageModel {name: $modelName})-[:DEFINES_METAMODEL]->(meta:MetaNode) " +
+            "MATCH (s)-[:InstanceOf]->(meta) " +
             "MATCH (s)-[r]->(t) " +
                     "WHERE type(r) IN ['AssociateWith','ComposeOf','Aggregates'] " +
                     "RETURN r.associationName AS name, type(r) AS type, " +
                     "       s.name AS src, r.sourceClassrole AS sRole, r.sourceMultiplicity AS sMult, " +
                     "       t.name AS tgt, r.targerClassrole   AS tRole, r.targetMultiplicity AS tMult";
 
-    public static final String TERNARY_ASSOCIATIONS =
+    public static final String TERNARY_ASSOCIATIONSold =
+
             "MATCH (c)-[r]->(hub)-[:InstanceOf]->(:MetaNode {name: 'NodeTernaryAssociation'}) " +
                     "WHERE r.isTernary = true " +
                     "RETURN hub.name AS assocName, " +
                     "       collect({cls: c.name, role: r.sourceClassrole, " +
                     "                mult: r.sourceMultiplicity, idx: r.index, type: type(r)}) AS participants";
 
-    public static final String OBJECTS_AND_ATTRIBUTES =
+    public static final String OBJECTS_AND_ATTRIBUTESold =
             "MATCH (o)-[:ObjectInstanceOf]->(cls) " +
                     "OPTIONAL MATCH (o)-[:ObjectHasAttribute]->(val:AttributeValue)-[:InstanceOf]->(attrDef) " +
                     "OPTIONAL MATCH (val)-[r:objectReference]->(target) " +
@@ -84,7 +90,7 @@ public class Neo4jSnapshotQuery {
                     "         idx:   r.index " +
                     "       }) AS data";
 
-    public static final String BINARY_LINKS =
+    public static final String BINARY_LINKS_old =
             "MATCH (a)-[r]->(b) " +
                     "WHERE type(r) STARTS WITH 'Link' " +
                     "  AND NOT coalesce(r.isTernary,        false) " +
@@ -92,9 +98,61 @@ public class Neo4jSnapshotQuery {
                     "RETURN r.name AS assocName, type(r) AS label, " +
                     "       a.use_id AS src, b.use_id AS tgt";
 
-    public  static final String LINK_OBJECTS =
+    public  static final String LINK_OBJECTSold =
             "MATCH (lo)-[:ObjectInstanceOf]->(ac:AssociationClass) " +
                     "MATCH (lo)-[r]->(p) WHERE r.isLinkObjectPart = true " +
                     "RETURN lo.use_id AS loName, ac.name AS acName, " +
                     "       collect({p: p.use_id, idx: r.index}) AS parts";
+    ///
+
+
+    // 1. TERNARY ASSOCIATIONS (Chỉ lấy Hub thuộc về Model đã chọn)
+    public static final String TERNARY_ASSOCIATIONS =
+        "MATCH (m:ManageModel {name: $modelName})-[:DEFINES_METAMODEL]->(meta:MetaNode {name: 'NodeTernaryAssociation'}) " +
+            "MATCH (hub)-[:InstanceOf]->(meta) " +
+            "MATCH (c)-[r]->(hub) " +
+            "WHERE r.isTernary = true " +
+            "RETURN hub.name AS assocName, " +
+            "       collect({cls: c.name, role: r.sourceClassrole, " +
+            "                mult: r.sourceMultiplicity, idx: r.index, type: type(r)}) AS participants";
+
+    // 2. OBJECTS AND ATTRIBUTES (Chỉ lấy Object thuộc về các Class của Model đã chọn)
+    public static final String OBJECTS_AND_ATTRIBUTES =
+        "MATCH (m:ManageModel {name: $modelName})-[:DEFINES_METAMODEL]->(meta:MetaNode) " +
+            "WHERE meta.name IN ['NodeConcreteClass', 'NodeAssociationClass'] " +
+            "MATCH (cls)-[:InstanceOf]->(meta) " +
+            "MATCH (o)-[:ObjectInstanceOf]->(cls) " +
+            "OPTIONAL MATCH (o)-[:ObjectHasAttribute]->(val:AttributeValue)-[:InstanceOf]->(attrDef) " +
+            "OPTIONAL MATCH (val)-[r:objectReference]->(target) " +
+            "RETURN o.use_id AS name, cls.name AS className, " +
+            "       collect({ " +
+            "         attr:  attrDef.attrName, " +
+            "         type:  val.type, " +
+            "         value: val.value, " +
+            "         ref:   target.use_id, " +
+            "         idx:   r.index " +
+            "       }) AS data";
+
+    // 3. BINARY LINKS (Chỉ lấy Link nối giữa các Object thuộc phạm vi Model đã chọn)
+    public static final String BINARY_LINKS =
+        "MATCH (m:ManageModel {name: $modelName})-[:DEFINES_METAMODEL]->(meta:MetaNode) " +
+            "WHERE meta.name IN ['NodeConcreteClass', 'NodeAssociationClass'] " +
+            "MATCH (cls)-[:InstanceOf]->(meta) " +
+            "MATCH (o)-[:ObjectInstanceOf]->(cls) " + // Tìm object thuộc model
+            "MATCH (o)-[r]->(b) " + // Tìm link xuất phát từ object đó
+            "WHERE type(r) STARTS WITH 'Link' " +
+            "  AND NOT coalesce(r.isTernary,        false) " +
+            "  AND NOT coalesce(r.isLinkObjectPart, false) " +
+            "RETURN r.name AS assocName, type(r) AS label, " +
+            "       o.use_id AS src, b.use_id AS tgt";
+
+    // 4. LINK OBJECTS (Chỉ lấy LinkObject của AssociationClass thuộc Model đã chọn)
+    public  static final String LINK_OBJECTS =
+        "MATCH (m:ManageModel {name: $modelName})-[:DEFINES_METAMODEL]->(meta:MetaNode {name: 'NodeAssociationClass'}) " +
+            "MATCH (ac)-[:InstanceOf]->(meta) " +
+            "MATCH (lo)-[:ObjectInstanceOf]->(ac) " + // Tìm instance của AssocClass
+            "MATCH (lo)-[r]->(p) WHERE r.isLinkObjectPart = true " +
+            "RETURN lo.use_id AS loName, ac.name AS acName, " +
+            "       collect({p: p.use_id, idx: r.index}) AS parts";
+
 }

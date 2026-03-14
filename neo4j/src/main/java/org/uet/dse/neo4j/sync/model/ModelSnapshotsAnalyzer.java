@@ -21,9 +21,15 @@ public interface ModelSnapshotsAnalyzer {
     }
   }
 
-  ModelDiff compareWithNeo4j();
+  default ModelDiff compareWithNeo4j() {
+    return null;
+  }
 
   default ModelDiff compareWithNeo4j(MModel incrementalModel) {
+    return null;
+  }
+
+  default ModelDiff compareWithNeo4j(String modelName) {
     return null;
   }
 

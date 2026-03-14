@@ -15,10 +15,10 @@ public class ModelSnapshotCompareV1 implements ModelSnapshotsAnalyzer {
         this.useModel = useModel;
     }
 
-    public ModelDiff compareWithNeo4j() {
+    public ModelDiff compareWithNeo4j(String modelName) {
         Neo4jModelSnapshotUtils neo4JModelSnapshotUtils = new Neo4jModelSnapshotUtils();
         USEModelSnapshotUtils useModelSnapshotUtils = new USEModelSnapshotUtils(useModel);
-        FullModelSnapshot neoSnap = neo4JModelSnapshotUtils.getFullModelSnapshotFromNeo4j();
+        FullModelSnapshot neoSnap = neo4JModelSnapshotUtils.getFullModelSnapshotFromNeo4j(modelName);
         FullModelSnapshot javaSnap = useModelSnapshotUtils.getFullModelSnapshotFromUSE();
 
         return compareWithNeo4j(neoSnap, javaSnap);

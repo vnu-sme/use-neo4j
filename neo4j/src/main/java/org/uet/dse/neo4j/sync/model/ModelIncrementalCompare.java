@@ -7,6 +7,7 @@ import org.tzi.use.uml.mm.MModel;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.sync.model.simpleDomain.KusakabeAssociationDiff;
 import org.uet.dse.neo4j.sync.model.simpleDomain.KusakabeClassDiff;
+import org.uet.dse.neo4j.sync.model.simpleDomain.KusakabeEnumDiff;
 import org.uet.dse.neo4j.sync.model.simpleDomain.KusakabeModelDiff;
 
 import java.util.List;
@@ -25,6 +26,8 @@ public class ModelIncrementalCompare implements ModelSnapshotsAnalyzer{
   public ModelDiff compareWithNeo4j() {
     KusakabeClassDiff classDiff = analyzeClass();
     KusakabeAssociationDiff assocDiff = analyzeAssociation();
+    KusakabeEnumDiff enumDiff = analyzeEnum();
+
 
     //should do further investigation here. this version requires internal traning do not specify anything merged that is new
     if (classDiff.merged != null || classDiff.merged.size() > 0 || assocDiff != null || assocDiff.merged.size() > 0) {
@@ -34,11 +37,58 @@ public class ModelIncrementalCompare implements ModelSnapshotsAnalyzer{
     KusakabeModelDiff modelDiff = new KusakabeModelDiff();
     modelDiff.classDiff = classDiff;
     modelDiff.associationDiff = assocDiff;
+    modelDiff.enumDiff = enumDiff;
 
     return modelDiff;
   }
 
+  private KusakabeEnumDiff analyzeEnum() {
+    List<String> allEnumNames = useModel.enumTypes().stream()
+        .map(e -> e.name())
+        .collect(Collectors.toList());
 
+    String query = generateCheckKusakabeEnumCheckerQuery();
+    Map<String, Object> params = Map.of(
+        "modelName", useModel.name(),
+        "enumNames", allEnumNames
+    );
+
+    KusakabeEnumDiff diff = new KusakabeEnumDiff();
+
+    try (Session session = Neo4jDriverManager.getInstance().openSession()) {
+      Record record = session.run(query, params).single();
+      List<String> found = record.get("found")
+          .asList(Value::asString)
+          .stream()
+          .filter(Objects::nonNull)
+          .toList();
+
+      List<String> notFound = record.get("notFound")
+          .asList(Value::asString)
+          .stream()
+          .filter(Objects::nonNull)
+          .toList();
+
+      diff.isolated = notFound;
+      diff.merged = found;
+    }
+
+    return diff;
+  }
+  private String generateCheckKusakabeEnumCheckerQuery() {
+    return """
+        UNWIND $enumNames AS name
+        
+        OPTIONAL MATCH (m:ManageModel {name: $modelName})-[:DEFINES_METAMODEL]->(meta:MetaNode {name: 'NodeEnumeration'})
+        OPTIONAL MATCH (inst {name: name})-[:InstanceOf]->(meta)
+        
+        WITH name, count(inst) > 0 AS exists
+        
+        RETURN
+            collect(CASE WHEN exists THEN name END) AS found,
+            collect(CASE WHEN NOT exists THEN name END) AS notFound
+        """;
+  }
 
   private KusakabeClassDiff analyzeClass() {
     List<String> allClassOnUse = useModel.classes().stream().map(c -> c.name()).collect(Collectors.toList());

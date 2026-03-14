@@ -8,6 +8,7 @@ import java.util.Map;
 public class FullModelSnapshot {
     public Map<String, ClassState> classes = new HashMap<>();
     public Map<String, AssociationState> associations = new HashMap<>();
+    public String modelName;
 
     public List<Map<String, Object>> ternaryAssociations = new ArrayList<>();
 

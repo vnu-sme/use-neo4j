@@ -34,7 +34,7 @@ public class SyncDetailDialog extends JDialog {
         // 1. THỐNG KÊ CHI TIẾT (Deep Check)
         if (type.equals("Model")) {
             // Lấy Diff từ Model Coordinator
-            ModelDiff diff = modelCoord.getModelSnapshotsAnalyzer().compareWithNeo4j();
+            ModelDiff diff = modelCoord.getModelSnapshotsAnalyzer().compareWithNeo4j("null");
 
             // Những thứ chỉ có ở Java (Cần đẩy lên DB)
             diff.javaOnlyClasses.forEach(c ->

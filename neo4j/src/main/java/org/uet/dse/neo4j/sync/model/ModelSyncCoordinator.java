@@ -14,6 +14,7 @@ import org.tzi.use.uml.ocl.expr.VarDecl;
 import org.tzi.use.uml.sys.MSystem;
 import org.tzi.use.util.NullPrintWriter;
 import org.uet.dse.neo4j.collaboration.ConsensusService;
+import org.uet.dse.neo4j.gui.ModelExplorerDialog;
 import org.uet.dse.neo4j.manager.Neo4jAuditLogService;
 import org.uet.dse.neo4j.model.AssociationState;
 import org.uet.dse.neo4j.model.ClassState;
@@ -103,7 +104,7 @@ public class ModelSyncCoordinator {
 
 
             ModelSnapshotsAnalyzer baseBean = new ModelSnapshotCompareV1(this.useModel);
-            Boolean freeForAllPushItAll = baseBean.checkBlankWorkingSpace();
+            Boolean freeForAllPushItAll = true;//baseBean.checkBlankWorkingSpace();
 
             if (freeForAllPushItAll == null) {
                 JOptionPane.showMessageDialog(null, "Bug");
@@ -157,6 +158,11 @@ public class ModelSyncCoordinator {
 
 
     public void syncBackward() {
+        ModelExplorerDialog explorer = new ModelExplorerDialog(mainWindow);
+        explorer.setVisible(true);
+
+        String selectedModelName = explorer.getSelectedModelName();
+        if (selectedModelName == null) return;
         String user = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
         LockManager.LockResult lock = LockManager.acquireLock(user);
         if (!lock.success) {
@@ -166,7 +172,7 @@ public class ModelSyncCoordinator {
 
         SwingUtilities.invokeLater(() -> {
             try {
-                FullModelSnapshot fullModelSnapshot = getFullModelSnapshotFromNeo4j();
+                FullModelSnapshot fullModelSnapshot = getFullModelSnapshotFromNeo4j(selectedModelName);
                 Map<String, ClassState> dbSnapshot = fullModelSnapshot.classes;
                 if (dbSnapshot.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "No model found in Database.");
@@ -177,7 +183,7 @@ public class ModelSyncCoordinator {
 
                 //create new model
                 ModelFactory factory = new ModelFactory();
-                MModel newModel = factory.createModel(actualModelName);
+                MModel newModel = factory.createModel(selectedModelName);
 
                 ModelPullService modelPullService = new ModelPullService();
                 modelPullService.pullModelFromNeo4jAfterSnapshotComparing(newModel, fullModelSnapshot);
@@ -220,7 +226,7 @@ public class ModelSyncCoordinator {
 
     public ModelDiff compareWithNeo4jObsolete() {
         ModelDiff diff = new ModelDiff();
-        FullModelSnapshot neoSnap = getFullModelSnapshotFromNeo4j();
+        FullModelSnapshot neoSnap = getFullModelSnapshotFromNeo4j(null);
         FullModelSnapshot javaSnap = getFullModelSnapshotFromUSE();
 
         for (String className : javaSnap.classes.keySet()) {
@@ -813,9 +819,9 @@ public class ModelSyncCoordinator {
         }
     }
 
-    private FullModelSnapshot getFullModelSnapshotFromNeo4j() {
+    private FullModelSnapshot getFullModelSnapshotFromNeo4j(String modelName) {
         Neo4jModelSnapshotUtils neo4JModelSnapshotUtils = new Neo4jModelSnapshotUtils();
-        return neo4JModelSnapshotUtils.getFullModelSnapshotFromNeo4j();
+        return neo4JModelSnapshotUtils.getFullModelSnapshotFromNeo4j(modelName);
     }
 
     private FullModelSnapshot getFullModelSnapshotFromNeo4jObsolete() {
@@ -1198,7 +1204,7 @@ public class ModelSyncCoordinator {
      */
     public void syncBackwardSilent() {
         try {
-            FullModelSnapshot dbSnapshot = getFullModelSnapshotFromNeo4j();
+            FullModelSnapshot dbSnapshot = getFullModelSnapshotFromNeo4j(null);
             if (dbSnapshot.isEmpty()) return;
 
             String actualModelName = getModelNameFromDb();
