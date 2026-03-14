@@ -16,12 +16,12 @@ public class GUIHelper {
     }
 
     public static boolean showSyncPreview(ObjectDiff diff, String title) {
-        String report = title.contains("Forward") ? diff.generateForwardReport() : diff.generateBackwardReport();
+        String report = "fuckoff";//title.contains("Forward") ? diff.generateForwardReport() : diff.generateBackwardReport();
         JTextArea textArea = new JTextArea(report);
         textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
         textArea.setEditable(false);
         int res = JOptionPane.showConfirmDialog(null, new JScrollPane(textArea),
-                "Sync Preview: " + title, JOptionPane.OK_CANCEL_OPTION);
+                "Sync Preview: " + "fuckoff", JOptionPane.OK_CANCEL_OPTION);
         return res == JOptionPane.OK_OPTION;
     }
 }

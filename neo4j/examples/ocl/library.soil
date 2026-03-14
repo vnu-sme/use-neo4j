@@ -26,4 +26,4 @@
 check
 
 
-b1.borrower.isDefined() implies b1.isAvailable = false
+p.age > 80 implies p.isEmergency = true

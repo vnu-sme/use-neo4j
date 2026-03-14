@@ -128,7 +128,7 @@ public class Neo4jModelRepository {
                 .toList();
 
         withSession(session -> session.run(
-                MetaNodeCypherBuilder.buildMerge(descriptors)
+            MetaNodeCypherBuilder.buildInitializeScript("TEST model kiencc", descriptors)
         ));
     }
 

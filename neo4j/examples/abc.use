@@ -12,3 +12,28 @@ attributes
     codes: Set(String)
     codesBag: Bag(Set(String))
 end
+
+class A {
+ a1
+ a2
+ a3
+}
+
+class b {
+ b1
+ b2
+}
+
+tong = a_classA + a_classB = 3 + 2 = 5
+
+b > a
+
+class b {
+ b1
+ b2
+ a1
+ a2
+ a3
+}
+
+tong = a_classA + a_classB + a_classA = 3+2+3 = 8
