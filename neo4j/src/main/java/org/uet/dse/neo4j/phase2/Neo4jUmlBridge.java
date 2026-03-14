@@ -65,7 +65,7 @@ public class Neo4jUmlBridge {
     private void syncCoreEntities(Session session, MModel model) {
         // Sync Enums
         for (org.tzi.use.uml.ocl.type.EnumType e : model.enumTypes()) {
-            repo.upsertEnumeration(e.name(), e.getLiterals());
+            repo.upsertEnumeration(e.name(), e.getLiterals(), model.name());
             logger.log("PUSH_ENUM", "Pushed enumeration: " + e.name());
         }
 
@@ -97,10 +97,10 @@ public class Neo4jUmlBridge {
     private void syncAssociations(MModel model) {
         for (MAssociation assoc : model.associations()) {
             if (assoc.associationEnds().size() > 2) {
-                repo.upsertTernaryAssociation(assoc);
+                repo.upsertTernaryAssociation(assoc, model.name());
             }
             else if (assoc instanceof MAssociationClass) {
-                repo.createAssociationClassStructure((MAssociationClass) assoc);
+                repo.createAssociationClassStructure((MAssociationClass) assoc, model.name());
             } else {
                 repo.createAssociationEdge(assoc);
             }
@@ -162,7 +162,7 @@ public class Neo4jUmlBridge {
             opNode.setBody(body);
             opNode.setQuery(isQuery);
 
-            repo.createInstanceNode(opNode, "Operation");
+            repo.createInstanceNode(opNode, "Operation", modelApi.getModel().name());
             repo.createStructuralEdge(cls.name(), opNode.getName(), "HasOperation");
 
             TypeMapper.handleTypeReference(repo, opNode.getName(), op.resultType(), true);
@@ -187,7 +187,7 @@ public class Neo4jUmlBridge {
                     paramNode.setCollectionType(NCollectionType.None);
                 }
 
-                repo.createInstanceNode(paramNode, "Param");
+                repo.createInstanceNode(paramNode, "Param", modelApi.getModel().name());
                 repo.createStructuralEdge(opNode.getName(), paramNode.getName(), "HasParam");
 
                 TypeMapper.handleTypeReference(repo, paramNode.getName(), param.type(), false);
@@ -232,7 +232,7 @@ public class Neo4jUmlBridge {
         classNode.setHasParent(!cls.parents().isEmpty());
         classNode.setHasChildren(!cls.children().isEmpty());
 
-        repo.createInstanceNode(classNode, cls.name());
+        repo.createInstanceNode(classNode, cls.name(), modelApi.getModel().name());
     }
 
     /**
@@ -271,7 +271,7 @@ public class Neo4jUmlBridge {
             }
 
 
-            repo.createInstanceNode(nodeAttr, "Attribute");
+            repo.createInstanceNode(nodeAttr, "Attribute", modelApi.getModel().name());
             repo.createStructuralEdge(cls.name(), nodeAttr.getName(), "HasAttribute");
 
             TypeMapper.handleTypeReference(repo, nodeAttr.getName(), ultimateBaseType, false);
@@ -297,7 +297,7 @@ public class Neo4jUmlBridge {
         nestedNode.setCollectionName(UmlTypeTranslator.getCollectionType(currentType));
         nestedNode.setNestedCollection(stillNested);
 
-        repo.createInstanceNode(nestedNode, "NestedCollection");
+        repo.createInstanceNode(nestedNode, "NestedCollection", modelApi.getModel().name());
 
         repo.createStructuralEdge(parentId, nestedNode.getName(), "HasNestedCollection");
 
@@ -326,7 +326,7 @@ public class Neo4jUmlBridge {
             invNode.setExistential(inv.isExistential());
             invNode.setIndex(index);
 
-            repo.createInstanceNode(invNode, "ClassInvariant");
+            repo.createInstanceNode(invNode, "ClassInvariant", modelApi.getModel().name());
             repo.createStructuralEdge(cls.name(), invNode.getName(), "HasInvariant");
 
             index++;
@@ -347,7 +347,7 @@ public class Neo4jUmlBridge {
             preNode.setExpression(pre.expression().toString());
             preNode.setIndex(preIdx++);
 
-            repo.createInstanceNode(preNode, "PreCondition");
+            repo.createInstanceNode(preNode, "PreCondition", modelApi.getModel().name());
             repo.createStructuralEdge(opId, preNode.getName(), "HasPreCondition");
         }
 
@@ -360,7 +360,7 @@ public class Neo4jUmlBridge {
             postNode.setExpression(post.expression().toString());
             postNode.setIndex(postIdx++);
 
-            repo.createInstanceNode(postNode, "PostCondition");
+            repo.createInstanceNode(postNode, "PostCondition", modelApi.getModel().name());
             repo.createStructuralEdge(opId, postNode.getName(), "HasPostCondition");
         }
     }

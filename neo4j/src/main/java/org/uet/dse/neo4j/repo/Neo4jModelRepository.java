@@ -57,14 +57,15 @@ public class Neo4jModelRepository {
         });
     }
 
-    public void createAssociationClassStructure(MAssociationClass ac) {
+    public void createAssociationClassStructure(MAssociationClass ac, String modelName) {
         MAssociationEnd src = ac.associationEnds().get(0);
         MAssociationEnd tgt = ac.associationEnds().get(1);
 
         withSession(session -> session.run(
                 Neo4jModelQuery.UPSERT_ASSOCIATION_CLASS_STRUCTURE,
                 Values.parameters(
-                        "srcName", src.cls().name(),
+                    "modelName", modelName,
+                    "srcName", src.cls().name(),
                         "tgtName", tgt.cls().name(),
                         "acName", ac.name(),
                         "sRole", src.name(),
@@ -75,7 +76,7 @@ public class Neo4jModelRepository {
         ));
     }
 
-    public void upsertTernaryAssociation(MAssociation assoc) {
+    public void upsertTernaryAssociation(MAssociation assoc, String modelName) {
         List<MAssociationEnd> ends = assoc.associationEnds();
         String assocName = assoc.name();
 
@@ -90,7 +91,8 @@ public class Neo4jModelRepository {
                 session.run(
                         Neo4jModelQuery.upsertTernarySpoke(assocName, edgeLabel),
                         Values.parameters(
-                                "clsName", end.cls().name(),
+                            "modelName", modelName,
+                            "clsName", end.cls().name(),
                                 "name", assocName,
                                 "idx", i,
                                 "role", end.name(),
@@ -101,14 +103,15 @@ public class Neo4jModelRepository {
         });
     }
 
-    public void createInstanceNode(AbstractMetaNode node, String dynamicLabel) {
+    public void createInstanceNode(AbstractMetaNode node, String dynamicLabel, String modelName) {
         Map<String, Object> props = node.toPropertyMap();
         requireNameProperty(props, dynamicLabel);
 
         withSession(session -> session.run(
                 Neo4jModelQuery.upsertInstanceNode(dynamicLabel),
                 Values.parameters(
-                        "metaName", node.getMetaName(),
+                    "modelName", modelName,
+                    "metaName", node.getMetaName(),
                         "id", node.getName(),
                         "props", props
                 )
@@ -128,18 +131,18 @@ public class Neo4jModelRepository {
                 .toList();
 
         withSession(session -> session.run(
-            MetaNodeCypherBuilder.buildInitializeScript("TEST model kiencc", descriptors)
+            MetaNodeCypherBuilder.buildInitializeScript("MedicalSystem", descriptors)
         ));
     }
 
-    public void upsertEnumeration(String enumName, List<String> literals) {
+    public void upsertEnumeration(String enumName, List<String> literals, String modelName) {
         NodeEnumeration nodeEnum = new NodeEnumeration();
         nodeEnum.setName(enumName);
         nodeEnum.setValues(literals);
 
         withSession(session -> session.run(
                 CypherQueryBuilder.buildUpsertEnumerationQuery(nodeEnum.getName()),
-                Values.parameters("name", nodeEnum.getName(), "values", nodeEnum.getValues())
+                Values.parameters("modelName", modelName, "name", nodeEnum.getName(), "values", nodeEnum.getValues())
         ));
     }
 

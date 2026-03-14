@@ -62,7 +62,7 @@ public class IncrementalModelPushService extends CoreModelPushService implements
   public void syncCoreEntities(Session session, MModel model, KusakabeModelDiff diff) {
     for (org.tzi.use.uml.ocl.type.EnumType e : model.enumTypes()) {
       if (isContaining(e.name(), diff.classDiff.isolated)) {
-        repo.upsertEnumeration(e.name(), e.getLiterals());
+        repo.upsertEnumeration(e.name(), e.getLiterals(), model.name());
         logger.log("PUSH_ENUM", "Pushed enumeration: " + e.name());
       }
     }
@@ -111,9 +111,9 @@ public class IncrementalModelPushService extends CoreModelPushService implements
     for (MAssociation assoc : allUseModel.associations()) {
       if (isContaining(assoc.name(), kusakabeModelDiff.associationDiff.isolated)) {
         if (assoc.associationEnds().size() > 2) {
-          repo.upsertTernaryAssociation(assoc);
+          repo.upsertTernaryAssociation(assoc, modelApi.getModel().name());
         } else if (assoc instanceof MAssociationClass) {
-          repo.createAssociationClassStructure((MAssociationClass) assoc);
+          repo.createAssociationClassStructure((MAssociationClass) assoc, modelApi.getModel().name());
         } else {
           repo.createAssociationEdge(assoc);
         }
