@@ -24,7 +24,7 @@ public class IncrementalModelPushService extends CoreModelPushService implements
     this.modelApi = modelApi;
     this.repo = new Neo4jModelRepository();
     // Khởi tạo metamodel trước khi push
-    this.repo.initializeMetamodel();
+    this.repo.initializeMetamodel(modelApi.getModel().name());
   }
 
   @Override
@@ -42,7 +42,7 @@ public class IncrementalModelPushService extends CoreModelPushService implements
     logger.log("PUSH_START", "User " + currentUser + " initiated sync for model: " + allUseModel.name());
 
     try (Session session = Neo4jDriverManager.getInstance().openSession()) {
-      repo.initializeMetamodel();
+      repo.initializeMetamodel(inputModel.name());
 
       this.syncCoreEntities(session, allUseModel, kusakabeModelDiff);
       this.syncInheritance(session, allUseModel, kusakabeModelDiff);

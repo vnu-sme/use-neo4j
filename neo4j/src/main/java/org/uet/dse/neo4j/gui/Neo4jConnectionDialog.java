@@ -178,7 +178,7 @@ public class Neo4jConnectionDialog extends JDialog {
 
 			// init metamodel schema structure
 			Neo4jModelRepository repo = new Neo4jModelRepository();
-			repo.initializeMetamodel();
+			repo.initializeMetamodel(this.useSession.system().model().name());
 
 			WorkLogManager.getInstance().log("SCHEMA_INIT", "Metamodel nodes initialized for DB: " + dbName);
 

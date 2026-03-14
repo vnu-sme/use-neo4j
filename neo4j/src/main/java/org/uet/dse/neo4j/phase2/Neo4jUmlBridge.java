@@ -32,35 +32,35 @@ public class Neo4jUmlBridge {
         this.modelApi = modelApi;
         this.repo = new Neo4jModelRepository();
         // Khởi tạo metamodel trước khi push
-        this.repo.initializeMetamodel();
+        this.repo.initializeMetamodel(modelApi.getModel().name());
     }
 
 
-    /**
-     * refactored
-     */
-    public void pushModelToNeo4j() {
-        MModel model = modelApi.getModel();
-        String currentUser = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
-
-        logger.log("PUSH_START", "User " + currentUser + " initiated sync for model: " + model.name());
-
-        try (Session session = Neo4jDriverManager.getInstance().openSession()) {
-            repo.initializeMetamodel();
-
-            syncCoreEntities(session, model);
-            syncInheritance(session, model);
-            syncStructuralDetails(session, model);
-            syncAssociations(model);
-
-            updateModelVersion(session, currentUser);
-            logger.log("PUSH_SUCCESS", "Model " + model.name() + " is now synchronized.");
-
-        } catch (Exception e) {
-            logger.log("PUSH_ERROR", "Failed to push model: " + e.getMessage());
-            throw e;
-        }
-    }
+//    /**
+//     * refactored
+//     */
+//    public void pushModelToNeo4j() {
+//        MModel model = modelApi.getModel();
+//        String currentUser = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
+//
+//        logger.log("PUSH_START", "User " + currentUser + " initiated sync for model: " + model.name());
+//
+//        try (Session session = Neo4jDriverManager.getInstance().openSession()) {
+//            repo.initializeMetamodel();
+//
+//            syncCoreEntities(session, model);
+//            syncInheritance(session, model);
+//            syncStructuralDetails(session, model);
+//            syncAssociations(model);
+//
+//            updateModelVersion(session, currentUser);
+//            logger.log("PUSH_SUCCESS", "Model " + model.name() + " is now synchronized.");
+//
+//        } catch (Exception e) {
+//            logger.log("PUSH_ERROR", "Failed to push model: " + e.getMessage());
+//            throw e;
+//        }
+//    }
 
     private void syncCoreEntities(Session session, MModel model) {
         // Sync Enums

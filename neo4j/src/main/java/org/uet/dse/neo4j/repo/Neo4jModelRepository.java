@@ -125,13 +125,13 @@ public class Neo4jModelRepository {
         ));
     }
 
-    public void initializeMetamodel() {
+    public void initializeMetamodel(String modelName) {
         List<MetaNodeDescriptor> descriptors = MetaNodeRegistry.ALL.stream()
                 .map(MetaNodeDescriptor::from)
                 .toList();
 
         withSession(session -> session.run(
-            MetaNodeCypherBuilder.buildInitializeScript("MedicalSystem", descriptors)
+            MetaNodeCypherBuilder.buildInitializeScript(modelName, descriptors)
         ));
     }
 

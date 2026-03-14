@@ -32,7 +32,7 @@ public class CoreModelPushService {
         this.modelApi = modelApi;
         this.repo = new Neo4jModelRepository();
         // Khởi tạo metamodel trước khi push
-        this.repo.initializeMetamodel();
+        this.repo.initializeMetamodel(modelApi.getModel().name());
     }
 
     public void pushModelToNeo4j() {
@@ -42,7 +42,7 @@ public class CoreModelPushService {
         logger.log("PUSH_START", "User " + currentUser + " initiated sync for model: " + model.name());
 
         try (Session session = Neo4jDriverManager.getInstance().openSession()) {
-            repo.initializeMetamodel();
+            repo.initializeMetamodel(model.name());
 
             syncCoreEntities(session, model);
             syncInheritance(session, model);
