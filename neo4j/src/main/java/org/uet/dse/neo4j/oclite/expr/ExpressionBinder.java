@@ -18,9 +18,9 @@ public class ExpressionBinder {
     }
 
     public ExpressionNode bind(ASTNode node) {
-        if (node instanceof ASTLiteral) {
-            return new ConstantExpression(((ASTLiteral) node).value);
-        }
+//        if (node instanceof ASTLiteral) {
+//            return new ConstantExpression(((ASTLiteral) node).value);
+//        }
 
         //p1
         if (node instanceof ASTVar) {
@@ -43,10 +43,21 @@ public class ExpressionBinder {
             }
         }
 
+//        if (node instanceof ASTBinary) {
+//            ASTBinary bin = (ASTBinary) node;
+//            ExpressionNode left = bind(bin.left);
+//            ExpressionNode right = bind(bin.right);
+//            return new BinaryExpression(left, bin.op, right);
+//        }
         if (node instanceof ASTBinary) {
             ASTBinary bin = (ASTBinary) node;
             ExpressionNode left = bind(bin.left);
             ExpressionNode right = bind(bin.right);
+
+            if (bin.op.equals(">") && (bin.right instanceof ASTStringLiteral)) {
+                throw new RuntimeException("nah");
+            }
+
             return new BinaryExpression(left, bin.op, right);
         }
 
@@ -62,6 +73,20 @@ public class ExpressionBinder {
             return new CollectionOperationExpression(sourceNode, colOp.opName, bindedArgs);
         }
 
+        if (node instanceof ASTIntegerLiteral) {
+            return new ConstantExpression(((ASTIntegerLiteral) node).value);
+        }
+
+        if (node instanceof ASTStringLiteral) {
+            return new ConstantExpression(((ASTStringLiteral) node).value);
+        }
+
+        if (node instanceof ASTNullLiteral) {
+            // Trả về một ConstantExpression chứa giá trị null thực sự của Java
+            return new ConstantExpression(null);
+        }
+
         throw new RuntimeException("Không hỗ trợ chuyển đổi Node: " + node.getClass().getSimpleName());
     }
+
 }

@@ -69,14 +69,25 @@ public class ASTVisitor extends OCLBaseVisitor<ASTNode> {
     }
 
     @Override
-    public ASTNode visitLiteral(OCLParser.LiteralContext ctx) {
+    public ASTNode visitLiteral(LiteralContext ctx) {
         String text = ctx.getText();
-        if (ctx.Number() != null) return new ASTLiteral(Double.parseDouble(text));
-        if (ctx.StringLiteral() != null) return new ASTLiteral(text.replace("'", ""));
-        if (text.equals("true")) return new ASTLiteral(true);
-        if (text.equals("false")) return new ASTLiteral(false);
-        if (text.equals("null")) return new ASTLiteral(null);
-        if (text.equals("self")) return new ASTVar("self");
+
+        if (ctx.Number() != null) {
+            if (text.contains(".")) {
+                return new ASTRealLiteral(Double.parseDouble(text));
+            } else {
+                return new ASTIntegerLiteral(Long.parseLong(text));
+            }
+        }
+
+        if (ctx.StringLiteral() != null) {
+            return new ASTStringLiteral(text.substring(1, text.length() - 1));
+        }
+
+        if (text.equals("true")) return new ASTBooleanLiteral(true);
+        if (text.equals("false")) return new ASTBooleanLiteral(false);
+        if (text.equals("null")) return new ASTNullLiteral();
+
         return null;
     }
 }
