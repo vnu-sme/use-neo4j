@@ -1,5 +1,8 @@
 package org.uet.dse.neo4j.gui;
 
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.tzi.use.gui.util.TextComponentWriter;
 import org.tzi.use.main.Session;
 import org.tzi.use.parser.ocl.OCLCompiler;
@@ -8,16 +11,25 @@ import org.tzi.use.uml.ocl.expr.Expression;
 import org.tzi.use.uml.ocl.value.Value;
 import org.tzi.use.uml.sys.MSystemState;
 import org.tzi.use.util.TeeWriter;
+import org.uet.dse.neo4j.OCLLexer;
+import org.uet.dse.neo4j.OCLParser;
 import org.uet.dse.neo4j.ocl.IOCLEvaluator;
 import org.uet.dse.neo4j.ocl.NEvaluator;
 import org.uet.dse.neo4j.ocl.mapper.NExpressionRewriter;
 import org.uet.dse.neo4j.ocl.expr.NExpression;
+import org.uet.dse.neo4j.oclite.ast.ASTNode;
+import org.uet.dse.neo4j.oclite.ast.ASTVisitor;
+import org.uet.dse.neo4j.oclite.expr.ExecutionContext;
+import org.uet.dse.neo4j.oclite.expr.ExpressionBinder;
+import org.uet.dse.neo4j.oclite.expr.ExpressionNode;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 public class OclEvaluatorDialog extends JDialog {
     private final JTextArea txtExpression;
@@ -97,30 +109,54 @@ public class OclEvaluatorDialog extends JDialog {
       PrintWriter out = new PrintWriter(new TeeWriter(
           new TextComponentWriter(txtResult), msgWriter), true);
 
-      //core version
-      Expression expr = OCLCompiler.compileExpression(
-          model,
-          useSession.system().state(),
-          expression,
-          "Neo4jPlugin",
-          out,
-          useSession.system().varBindings()
-      );
+//      //core version
+//      Expression expr = OCLCompiler.compileExpression(
+//          model,
+//          useSession.system().state(),
+//          expression,
+//          "Neo4jPlugin",
+//          out,
+//          useSession.system().varBindings()
+//      );
+//
+//      if (expr == null) {
+//        System.out.println("Error parsing ocl to expr");
+//      }
+//
+//      // Rewrite tree -> neo4j version
+//      NExpression neo4jExpr = NExpressionRewriter.rewrite(expr);
+//      Value result = null;
+//        NEvaluator evaluator = new NEvaluator();
+//        // eval như bình thường - nhưng chạy trên neo4j
+//        result = evaluator.eval(currentState, neo4jExpr);
 
-      if (expr == null) {
-        System.out.println("Error parsing ocl to expr");
+      CharStream stream = CharStreams.fromString(expression);
+      OCLLexer lexer = new OCLLexer(stream);
+      CommonTokenStream tokens = new CommonTokenStream(lexer);
+      OCLParser parser = new OCLParser(tokens);
+      OCLParser.ExpressionContext parseTree = parser.expression();
+
+      ASTVisitor astBuilder = new ASTVisitor();
+      ASTNode astTree = astBuilder.visit(parseTree);
+
+      String modelName = this.useSession.system().model().name();
+      if (modelName == null) {
+        throw new RuntimeException("Dont know which model is being worked on");
       }
 
-      // Rewrite tree -> neo4j version
-      NExpression neo4jExpr = NExpressionRewriter.rewrite(expr);
-      Value result = null;
-        NEvaluator evaluator = new NEvaluator();
-        // eval như bình thường - nhưng chạy trên neo4j
-        result = evaluator.eval(currentState, neo4jExpr);
+      ExpressionBinder binder = new ExpressionBinder(modelName);
+      ExpressionNode execTree = binder.bind(astTree);
 
+
+      ExecutionContext context = new ExecutionContext(modelName);
+
+      Object result = execTree.evaluate(context);
+
+      System.out.println("--- 3. Kết quả thực thi OCL ---");
+      System.out.println("Result: " + result);
 
         if (result != null) {
-            txtResult.setText(result.toStringWithType());
+            txtResult.setText(result.toString());
             txtResult.setForeground(new Color(0, 100, 0));
         } else {
             txtResult.setText("Could not evaluate");
