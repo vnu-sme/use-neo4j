@@ -121,6 +121,11 @@ public class ExpressionBinder {
                 return new SelectExpression(sourceNode, itAST.iteratorName, bodyNode);
             }
         }
+        if (node instanceof ASTNot) {
+            ASTNot notAST = (ASTNot) node;
+            ExpressionNode innerExec = bind(notAST.expression);
+            return new NotExpression(innerExec);
+        }
 
 
         throw new RuntimeException("Không hỗ trợ chuyển đổi Node: " + node.getClass().getSimpleName());

@@ -115,4 +115,9 @@ public class ASTVisitor extends OCLBaseVisitor<ASTNode> {
             (ASTExpression) visit(ctx.right)
         );
     }
+    @Override
+    public ASTNode visitNotExp(OCLParser.NotExpContext ctx) {
+        ASTExpression inner = (ASTExpression) visit(ctx.expression());
+        return new ASTNot(inner);
+    }
 }

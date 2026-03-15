@@ -13,6 +13,7 @@ expression
     | left=expression op=('*' | '/') right=expression                #MultiplicativeExp
     | left=expression op=('+' | '-') right=expression                #AdditiveExp
     | left=expression op=('=' | '<>' | '<' | '>') right=expression  #ComparisonExp
+    | op='not' expression                                           #NotExp
     | left=expression op=('and' | 'or') right=expression            #LogicalExp
     | left=expression op='implies' right=expression                 #LogicalImpliesExp
     ;
@@ -21,7 +22,7 @@ primary
     : literal                                      #LiteralExpr
     | Identifier                                   #IdExpr
     | primary '.' Identifier                       #NavigationExpr
-    | primary '->' Identifier '(' Identifier '|' expression ')' #IteratorExpr // THÊM DÒNG NÀY
+    | primary '->' Identifier '(' Identifier '|' expression ')' #IteratorExpr
     | primary '->' Identifier '(' argList? ')'     #CollectionOpExpr
     | '(' expression ')'                           #ParenExpr
     ;
