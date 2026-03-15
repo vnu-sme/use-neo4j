@@ -12,17 +12,16 @@ public class ASTVisitor extends OCLBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitOclFile(OCLParser.OclFileContext ctx) {
+        if (!ctx.declaration().isEmpty()) {
+            return visit(ctx.declaration(0));
+        }
+
+        if (!ctx.expression().isEmpty()) {
+            return visit(ctx.expression(0));
+        }
         return null;
     }
 
-    @Override
-    public ASTNode visitDeclaration(OCLParser.DeclarationContext ctx) {
-        return new ASTContext(
-            ctx.className.getText(),
-            ctx.invName != null ? ctx.invName.getText() : null,
-            (ASTExpression) visit(ctx.expression())
-        );
-    }
 
     @Override
     public ASTNode visitLogicalExp(OCLParser.LogicalExpContext ctx) {
@@ -135,5 +134,13 @@ public class ASTVisitor extends OCLBaseVisitor<ASTNode> {
         }
 
         return new ASTMethodCall(source, methodName, args);
+    }
+
+    @Override
+    public ASTNode visitDeclaration(OCLParser.DeclarationContext ctx) {
+        String className = ctx.className.getText();
+        String invName = ctx.invName != null ? ctx.invName.getText() : "UnnamedInv";
+        ASTExpression expr = (ASTExpression) visit(ctx.expression());
+        return new ASTContext(className, invName, expr);
     }
 }

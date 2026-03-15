@@ -43,6 +43,9 @@ public class ExpressionBinder {
         if (node instanceof ASTVar) {
             String varName = ((ASTVar) node).name;
 
+            if (varName.equals("self") || isLocalVar(varName)) {
+                return new VariableExpression(varName);
+            }
             if (isLocalVar(varName)) {
                 return new VariableExpression(varName);
             }
@@ -69,8 +72,15 @@ public class ExpressionBinder {
                     throw new RuntimeException("Lỗi: allInstances() chỉ được gọi trên một Class.");
                 }
             }
+            String mName = mc.methodName;
+            if (mName.equals("isDefined")) {
+                return new IsDefinedExpression(sourceExec, true);
+            }
+            else if (mName.equals("isUndefined")) {
+                return new IsDefinedExpression(sourceExec, false);
+            }
 
-            // Sau này có thể thêm các hàm khác như .oclIsTypeOf(), .oclAsType()...
+
         }
 
         //(.)
