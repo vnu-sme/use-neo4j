@@ -119,6 +119,8 @@ public class ExpressionBinder {
 
             if (itAST.operation.equals("select")) {
                 return new SelectExpression(sourceNode, itAST.iteratorName, bodyNode);
+            } else if (itAST.operation.equalsIgnoreCase("forAll")) {
+                return new ForAllExpression(sourceNode, itAST.iteratorName, bodyNode);
             }
         }
         if (node instanceof ASTNot) {
