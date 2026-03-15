@@ -61,7 +61,7 @@ public class Neo4jSnapshotQuery {
             "MATCH (c)-[:Extends]->(p) RETURN c.name AS child, p.name AS parent";
 
     public static final String BINARY_ASSOCIATIONS =
-        "MATCH (m:ManageModel {name: $modelName})-[:DEFINES_METAMODEL]->(meta:MetaNode) " +
+        "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(meta:MetaNode) " +
             "MATCH (s)-[:InstanceOf]->(meta) " +
             "MATCH (s)-[r]->(t) " +
                     "WHERE type(r) IN ['AssociateWith','ComposeOf','Aggregates'] " +
@@ -108,7 +108,7 @@ public class Neo4jSnapshotQuery {
 
     // 1. TERNARY ASSOCIATIONS (Chỉ lấy Hub thuộc về Model đã chọn)
     public static final String TERNARY_ASSOCIATIONS =
-        "MATCH (m:ManageModel {name: $modelName})-[:DEFINES_METAMODEL]->(meta:MetaNode {name: 'NodeTernaryAssociation'}) " +
+        "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(meta:MetaNode {name: 'NodeTernaryAssociation'}) " +
             "MATCH (hub)-[:InstanceOf]->(meta) " +
             "MATCH (c)-[r]->(hub) " +
             "WHERE r.isTernary = true " +
@@ -118,7 +118,7 @@ public class Neo4jSnapshotQuery {
 
     // 2. OBJECTS AND ATTRIBUTES (Chỉ lấy Object thuộc về các Class của Model đã chọn)
     public static final String OBJECTS_AND_ATTRIBUTES =
-        "MATCH (m:ManageModel {name: $modelName})-[:DEFINES_METAMODEL]->(meta:MetaNode) " +
+        "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(meta:MetaNode) " +
             "WHERE meta.name IN ['NodeConcreteClass', 'NodeAssociationClass'] " +
             "MATCH (cls)-[:InstanceOf]->(meta) " +
             "MATCH (o)-[:ObjectInstanceOf]->(cls) " +
@@ -135,7 +135,7 @@ public class Neo4jSnapshotQuery {
 
     // 3. BINARY LINKS (Chỉ lấy Link nối giữa các Object thuộc phạm vi Model đã chọn)
     public static final String BINARY_LINKS =
-        "MATCH (m:ManageModel {name: $modelName})-[:DEFINES_METAMODEL]->(meta:MetaNode) " +
+        "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(meta:MetaNode) " +
             "WHERE meta.name IN ['NodeConcreteClass', 'NodeAssociationClass'] " +
             "MATCH (cls)-[:InstanceOf]->(meta) " +
             "MATCH (o)-[:ObjectInstanceOf]->(cls) " + // Tìm object thuộc model
@@ -148,7 +148,7 @@ public class Neo4jSnapshotQuery {
 
     // 4. LINK OBJECTS (Chỉ lấy LinkObject của AssociationClass thuộc Model đã chọn)
     public  static final String LINK_OBJECTS =
-        "MATCH (m:ManageModel {name: $modelName})-[:DEFINES_METAMODEL]->(meta:MetaNode {name: 'NodeAssociationClass'}) " +
+        "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(meta:MetaNode {name: 'NodeAssociationClass'}) " +
             "MATCH (ac)-[:InstanceOf]->(meta) " +
             "MATCH (lo)-[:ObjectInstanceOf]->(ac) " + // Tìm instance của AssocClass
             "MATCH (lo)-[r]->(p) WHERE r.isLinkObjectPart = true " +

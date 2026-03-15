@@ -13,6 +13,6 @@ public class NavigationExpression implements ExpressionNode {
     @Override
     public Object evaluate(ExecutionContext ctx) {
         Object startNode = source.evaluate(ctx);
-        return ctx.resolveNavigation(startNode, relationshipType);
+        return ctx.resolveNavigation(startNode, name);
     }
 }

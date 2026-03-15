@@ -21,8 +21,8 @@ public class ActionOpenOclEvaluator implements IPluginActionDelegate {
         NEvaluator neo4jEvaluator = new NEvaluator();
 
         System.out.println(Main.getTggRuleCollection().toString());
-        NRuleCollectionManager st = new NRuleCollectionManager(UseSystemApi.create(pluginAction.getSession().system(), true));
-        st.iterateThroughMRuleCollection();
+//        NRuleCollectionManager st = new NRuleCollectionManager(UseSystemApi.create(pluginAction.getSession().system(), true));
+//        st.iterateThroughMRuleCollection();
         OclEvaluatorDialog dialog = new OclEvaluatorDialog(mainWindow, session, neo4jEvaluator);
         dialog.setVisible(true);
     }

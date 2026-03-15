@@ -16,12 +16,16 @@ public class BinaryExpression implements ExpressionNode {
         Object rVal = right.evaluate(ctx);
 
         if (op.equals("=")) {
+            if (lVal == null || rVal == null) return lVal == rVal;
+
+            // Xử lý so sánh số (10.0 = 10)
             if (lVal instanceof Number && rVal instanceof Number) {
-                return ((Number) lVal).doubleValue() == ((Number) rVal).doubleValue();
+                return Double.compare(((Number) lVal).doubleValue(), ((Number) rVal).doubleValue()) == 0;
             }
+
             return java.util.Objects.equals(lVal, rVal);
         }
-        // others
+        // ...
         return null;
     }
 }

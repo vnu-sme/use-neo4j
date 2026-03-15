@@ -13,16 +13,14 @@ import java.util.Map;
 
 public class Neo4jRepository {
     private String modelName;
-    private Driver driver;
 
     public Neo4jRepository(String modelName) {
-        this.driver = Neo4jDriverManager.getInstance().getDriver();
         this.modelName = modelName;
     }
 
 
     public Node findNodeById(String name) {
-        try (Session session = driver.session()) {
+        try (Session session = Neo4jDriverManager.getInstance().openSession()) {
             return session.executeRead(tx -> {
                 String cypher = "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->()<-[:InstanceOf]-(cls) " +
                     "MATCH (obj {use_id: $name})-[:ObjectInstanceOf]->(cls) " +
@@ -32,9 +30,34 @@ public class Neo4jRepository {
             });
         }
     }
+    public Object getAttributeValue(Node sourceNode, String attrName) {
+        try (Session session = Neo4jDriverManager.getInstance().openSession()) {
+            return session.executeRead(tx -> {
+                String cypher =
+                    "MATCH (o) WHERE id(o) = $id " +
+                        "MATCH (o)-[:ObjectHasAttribute]->(val:AttributeValue) " +
+                        "WHERE val.name ENDS WITH $suffix " +
+                        "RETURN val.value AS value";
+
+                Result res = tx.run(cypher, Values.parameters(
+                    "id", sourceNode.id(),
+                    "suffix", "_" + attrName
+                ));
+
+                if (res.hasNext()) {
+                    Value val = res.next().get("value");
+                    if (val.isNull()) return null;
+                    if (val.type().name().equals("INTEGER")) return val.asDouble();
+                    if (val.type().name().equals("FLOAT")) return val.asDouble();
+                    return val.asObject();
+                }
+                return null;
+            });
+        }
+    }
 
     public boolean isVariableExist(String varName) {
-        try (Session session = driver.session()) {
+        try (Session session = Neo4jDriverManager.getInstance().openSession()) {
             return session.executeRead(tx -> {
                 String cypher =
                     "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(meta:MetaNode) " +
@@ -51,17 +74,21 @@ public class Neo4jRepository {
 
 
     public boolean isRelationship(ExpressionNode sourceNode, String name) {
-
         String sourceClassName = getClassNameOfExpression(sourceNode);
         if (sourceClassName == null) return false;
 
-        try (Session session = driver.session()) {
+        try (Session session = Neo4jDriverManager.getInstance().openSession()) {
             return session.executeRead(tx -> {
+
                 String cypher =
                     "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->()<-[:InstanceOf]-(cls {name: $clsName}) " +
-                        "MATCH (cls)-[r]->(tgt) " +
+                        "MATCH (cls)-[r]-(tgt) " +
                         "WHERE type(r) IN ['AssociateWith', 'ComposeOf', 'Aggregates'] " +
-                        "  AND (r.associationName = $targetName OR r.targerClassrole = $targetName) " +
+                        "AND ( " +
+                        "  (startNode(r) = cls AND (r.targerClassrole = $targetName OR r.associationName = $targetName)) " +
+                        "  OR " +
+                        "  (endNode(r) = cls AND (r.sourceClassrole = $targetName OR r.associationName = $targetName)) " +
+                        ") " +
                         "RETURN count(r) > 0 AS isRel";
 
                 Result res = tx.run(cypher, Values.parameters(
@@ -84,7 +111,7 @@ public class Neo4jRepository {
     }
 
     private String findClassNameByObjectId(String objId) {
-        try (Session session = driver.session()) {
+        try (Session session = Neo4jDriverManager.getInstance().openSession()) {
             return session.executeRead(tx -> {
                 String cypher = "MATCH (o {use_id: $id})-[:ObjectInstanceOf]->(cls) RETURN cls.name";
                 Result res = tx.run(cypher, Map.of("id", objId));
@@ -93,7 +120,7 @@ public class Neo4jRepository {
         }
     }
     public Object findAttributeValue(Node ownerNode, String attrName) {
-        try (Session session = driver.session()) {
+        try (Session session = Neo4jDriverManager.getInstance().openSession()) {
             return session.executeRead(tx -> {
                 String cypher =
                     "MATCH (o) WHERE id(o) = $id " +
@@ -111,34 +138,31 @@ public class Neo4jRepository {
         }
     }
 
-    public Collection<Object> findRelatedNodes(Node source, String relationshipType) {
-        try (Session session = driver.session()) {
+    public List<Node> findRelatedNodes(Node startNode, String relationshipType) {
+        try (Session session = Neo4jDriverManager.getInstance().openSession()) {
             return session.executeRead(tx -> {
+
                 String cypher =
                     "MATCH (s) WHERE id(s) = $id " +
-                        "MATCH (s)-[r]->(t) " +
-                        "WHERE (type(r) = $relType " +
-                        "   OR r.targetRole = $relType " +
-                        "   OR r.associationName = $relType " +
-                        "   OR type(r) = 'Link_' + $relType) " +
-                        "AND EXISTS { " +
-                        "  MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(meta:MetaNode) " +
-                        "  MATCH (cls)-[:InstanceOf]->(meta) " +
-                        "  MATCH (t)-[:ObjectInstanceOf]->(cls) " +
-                        "} " +
+                        "MATCH (s)-[r]-(t) " +
+                        "WHERE type(r) STARTS WITH 'Link' " +
+                        "AND ( " +
+                        "  (startNode(r) = s AND (r.targetRole = $relType OR r.name = $relType)) " +
+                        "  OR " +
+                        "  (endNode(r) = s AND (r.sourceRole = $relType OR r.name = $relType)) " +
+                        ") " +
                         "RETURN t";
 
                 Result res = tx.run(cypher, Values.parameters(
-                    "id", source.id(),
-                    "relType", relationshipType,
-                    "modelName", this.modelName
+                    "id", startNode.id(),
+                    "relType", relationshipType
                 ));
 
-                List<Object> relatedNodes = new ArrayList<>();
+                List<Node> nodes = new ArrayList<>();
                 while (res.hasNext()) {
-                    relatedNodes.add(res.next().get("t").asNode());
+                    nodes.add(res.next().get("t").asNode());
                 }
-                return relatedNodes;
+                return nodes;
             });
         }
     }

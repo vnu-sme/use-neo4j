@@ -18,7 +18,7 @@ public class ObjectSnapshotCompare {
         Neo4jObjectSnapshotUtils neo4jObjectSnapshotUtils = new Neo4jObjectSnapshotUtils();
         USEObjectSnapshotUtils useObjectSnapshotUtils = new USEObjectSnapshotUtils(system);
         FullObjectSnapshot javaSnap = useObjectSnapshotUtils.getJavaObjectSnapshot();
-        FullObjectSnapshot neoSnap = neo4jObjectSnapshotUtils.getNeo4jObjectSnapshot();
+        FullObjectSnapshot neoSnap = neo4jObjectSnapshotUtils.getNeo4jObjectSnapshot(system.model().name());
         ObjectDiff diff = new ObjectDiff();
         diff.javaSnapshot  = javaSnap;
         diff.neo4jSnapshot = neoSnap;

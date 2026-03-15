@@ -79,7 +79,7 @@ public class ModelIncrementalCompare implements ModelSnapshotsAnalyzer{
     return """
         UNWIND $enumNames AS name
         
-        OPTIONAL MATCH (m:ManageModel {name: $modelName})-[:DEFINES_METAMODEL]->(meta:MetaNode {name: 'NodeEnumeration'})
+        OPTIONAL MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(meta:MetaNode {name: 'NodeEnumeration'})
         OPTIONAL MATCH (inst {name: name})-[:InstanceOf]->(meta)
         
         WITH name, count(inst) > 0 AS exists

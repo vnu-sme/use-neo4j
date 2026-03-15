@@ -4,27 +4,17 @@ import java.lang.reflect.Field;
 import org.neo4j.driver.types.Node;
 
 public class PropertyExpression implements ExpressionNode {
-    private ExpressionNode source;
+    private ExpressionNode sourceNode;
     private String propertyName;
 
     public PropertyExpression(ExpressionNode source, String propertyName) {
-        this.source = source;
+        this.sourceNode = source;
         this.propertyName = propertyName;
     }
 
     @Override
     public Object evaluate(ExecutionContext ctx) {
-        Object obj = source.evaluate(ctx);
-        if (obj instanceof Node) {
-            Node neo4jNode = (Node) obj;
-            var value = neo4jNode.get(propertyName);
-            if (value.isNull()) return null;
-
-            if (value.type().name().equals("INTEGER")) return value.asLong();
-            if (value.type().name().equals("FLOAT")) return value.asDouble();
-            if (value.type().name().equals("STRING")) return value.asString();
-            return value.asObject();
-        }
-        return null;
+        Object source = sourceNode.evaluate(ctx); // return Node (:Member {use_id: "m1"})
+        return ctx.resolveProperty(source, propertyName); // return value 10.0
     }
 }

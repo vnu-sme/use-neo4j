@@ -1,6 +1,7 @@
 package org.uet.dse.neo4j.oclite.expr;
 
 import org.neo4j.driver.types.Node;
+import org.uet.dse.neo4j.model.ObjectState;
 import org.uet.dse.neo4j.oclite.Neo4jRepository;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -40,52 +41,6 @@ public class ExecutionContext {
         return repo.findNodeById(name);
     }
 
-    public Object resolveNavigation(Object source, String relationshipType) {
-        if (source == null) return Collections.emptyList();
-
-        if (source instanceof Node) {
-            return repo.findRelatedNodes((Node) source, relationshipType);
-        }
-
-        if (source instanceof Collection) {
-            Collection<?> collection = (Collection<?>) source;
-            return collection.stream()
-                .filter(item -> item instanceof Node)
-                .flatMap(item -> repo.findRelatedNodes((Node) item, relationshipType).stream())
-                .distinct()
-                .collect(Collectors.toList());
-        }
-
-        return Collections.emptyList();
-    }
-
-    public Object resolveProperty(Object source, String propertyName) {
-        if (source == null) return null;
-
-        if (source instanceof Node) {
-            Object attrValue = repo.findAttributeValue((Node) source, propertyName);
-            if (attrValue != null) return attrValue;
-
-            Node node = (Node) source;
-            var value = node.get(propertyName);
-            if (!value.isNull()) {
-                if (value.type().name().equals("INTEGER")) return value.asLong();
-                if (value.type().name().equals("FLOAT")) return value.asDouble();
-                return value.asObject();
-            }
-            return null;
-        }
-
-        if (source instanceof Collection) {
-            return ((Collection<?>) source).stream()
-                .map(item -> resolveProperty(item, propertyName))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-        }
-
-        return null;
-    }
-
     public Object resolveCollectionOperation(Object source, String opName, List<Object> args) {
         if (!(source instanceof Collection)) {
             source = source == null ? Collections.emptyList() : Collections.singletonList(source);
@@ -104,5 +59,45 @@ public class ExecutionContext {
 
     public String getModelName() {
         return modelName;
+    }
+
+    public Object resolveProperty(Object source, String propertyName) {
+        if (source == null) return null;
+
+        if (source instanceof Collection) {
+            Collection<?> collection = (Collection<?>) source;
+
+            List<Object> results = collection.stream()
+                .map(item -> resolveProperty(item, propertyName))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+            if (results.size() == 1) return results.get(0);
+            return results;
+        }
+
+        if (source instanceof Node) {
+            return repo.getAttributeValue((Node) source, propertyName);
+        }
+
+
+        return null;
+    }
+
+    public Object resolveNavigation(Object source, String relationshipType) {
+        if (source == null) return Collections.emptyList();
+
+        if (source instanceof Collection) {
+            return ((Collection<?>) source).stream()
+                .flatMap(item -> ((Collection<?>) resolveNavigation(item, relationshipType)).stream())
+                .distinct()
+                .collect(Collectors.toList());
+        }
+
+        if (source instanceof Node) {
+            return repo.findRelatedNodes((Node) source, relationshipType);
+        }
+
+        return Collections.emptyList();
     }
 }
