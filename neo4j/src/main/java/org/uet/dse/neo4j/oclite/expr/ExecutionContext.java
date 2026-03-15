@@ -171,11 +171,21 @@ public class ExecutionContext {
                   .orElse(null);
             }
           }
-            default:
+          case "first": {
+            if (collection.isEmpty()) return null;
+
+            if (collection instanceof List) {
+              return ((List<?>) collection).get(0);
+            }
+            return collection.iterator().next();
+          }
+
+          default:
                 throw new RuntimeException("Not yet supported: " + opName);
 
         }
     }
+
 
     private boolean isSameObject(Object a, Object b) {
         if (a == b) return true;
