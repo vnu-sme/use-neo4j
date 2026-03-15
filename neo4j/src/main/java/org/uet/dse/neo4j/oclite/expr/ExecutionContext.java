@@ -203,6 +203,9 @@ public class ExecutionContext {
             }
             return uniqueList;
           }
+          case "flatten": {
+            return flatten(collection);
+          }
 
 
           default:
@@ -228,4 +231,16 @@ public class ExecutionContext {
         if (obj == null) return Collections.emptyList();
         return Collections.singletonList(obj);
     }
+
+  private List<Object> flatten(Collection<?> col) {
+    List<Object> result = new ArrayList<>();
+    for (Object item : col) {
+      if (item instanceof Collection) {
+        result.addAll(flatten((Collection<?>) item));
+      } else if (item != null) {
+        result.add(item);
+      }
+    }
+    return result;
+  }
 }
