@@ -72,14 +72,14 @@ public class ExpressionBinder {
         if (node instanceof ASTNullLiteral) {
             return new ConstantExpression(null);
         }
-        // Trong file ExpressionBinder.java
+
         if (node instanceof ASTCollectionOp) {
             ASTCollectionOp colAST = (ASTCollectionOp) node;
             ExpressionNode sourceNode = bind(colAST.source);
 
             List<ExpressionNode> bindedArgs = new ArrayList<>();
             for (ASTNode arg : colAST.args) {
-                bindedArgs.add(bind(arg));
+                bindedArgs.add((ExpressionNode) bind(arg));
             }
 
             return new CollectionOpExpression(sourceNode, colAST.opName, bindedArgs);

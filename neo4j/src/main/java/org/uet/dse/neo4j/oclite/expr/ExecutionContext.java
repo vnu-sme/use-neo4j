@@ -95,22 +95,15 @@ public class ExecutionContext {
             collection = Collections.singletonList(source);
         }
 
-        switch (opName.toLowerCase()) {
+        switch (opName) {
             case "size":
                 return (double) collection.size();
-
-            case "isempty":
-                return collection.isEmpty();
-
-            case "notempty":
-                return !collection.isEmpty();
-
-            case "includes":
-                Object target = args.get(0);
-                return collection.contains(target);
 
             default:
                 throw new RuntimeException("Not yet supported: " + opName);
         }
     }
+
+
+
 }
