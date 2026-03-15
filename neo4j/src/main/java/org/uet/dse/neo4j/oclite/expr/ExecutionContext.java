@@ -105,11 +105,26 @@ public class ExecutionContext {
             case "isNotEmpty":
                 return !collection.isEmpty();
 
+            case "includes":
+                if (args.isEmpty()) return false;
+                Object t1 = args.get(0);
+                return collection.stream().anyMatch(item -> isSameObject(item, t1));
             default:
                 throw new RuntimeException("Not yet supported: " + opName);
+
         }
     }
 
+    private boolean isSameObject(Object a, Object b) {
+        if (a == b) return true;
+        if (a == null || b == null) return false;
+
+        if (a instanceof org.neo4j.driver.types.Node && b instanceof org.neo4j.driver.types.Node) {
+            return ((org.neo4j.driver.types.Node) a).id() == ((org.neo4j.driver.types.Node) b).id();
+        }
+
+        return Objects.equals(a, b);
+    }
 
 
 }
