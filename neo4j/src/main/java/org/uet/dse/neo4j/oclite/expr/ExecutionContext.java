@@ -115,6 +115,14 @@ public class ExecutionContext {
                 Object t2 = args.get(0);
                 return collection.stream().noneMatch(item -> isSameObject(item, t2));
             }
+            case "includesAll": {
+                if (args.isEmpty()) return true;
+                Collection<?> targetCol = convertToCollection(args.get(0));
+
+                return targetCol.stream().allMatch(t ->
+                    collection.stream().anyMatch(s -> isSameObject(s, t))
+                );
+            }
             default:
                 throw new RuntimeException("Not yet supported: " + opName);
 
@@ -132,5 +140,9 @@ public class ExecutionContext {
         return Objects.equals(a, b);
     }
 
-
+    private Collection<?> convertToCollection(Object obj) {
+        if (obj instanceof Collection) return (Collection<?>) obj;
+        if (obj == null) return Collections.emptyList();
+        return Collections.singletonList(obj);
+    }
 }
