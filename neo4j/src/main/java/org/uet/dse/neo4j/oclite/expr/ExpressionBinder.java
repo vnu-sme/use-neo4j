@@ -6,15 +6,32 @@ import org.uet.dse.neo4j.oclite.ast.*;
 
 import org.uet.dse.neo4j.oclite.ast.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ExpressionBinder {
     private String modelName;
+    private final Deque<Set<String>> scopeStack = new ArrayDeque<>();
     private Neo4jRepository neo4jRepository;
     public ExpressionBinder(String modelName) {
         this.neo4jRepository = new Neo4jRepository(modelName);
         this.modelName = modelName;
+        scopeStack.push(new HashSet<>());
+    }
+    private void enterScope(String varName) {
+        Set<String> newScope = new HashSet<>();
+        newScope.add(varName);
+        scopeStack.push(newScope);
+    }
+
+    private void exitScope() {
+        scopeStack.pop();
+    }
+
+    private boolean isLocalVar(String name) {
+        for (Set<String> scope : scopeStack) {
+            if (scope.contains(name)) return true;
+        }
+        return false;
     }
 
     public ExpressionNode bind(ASTNode node) {
@@ -25,6 +42,10 @@ public class ExpressionBinder {
         //p1
         if (node instanceof ASTVar) {
             String varName = ((ASTVar) node).name;
+
+            if (isLocalVar(varName)) {
+                return new VariableExpression(varName);
+            }
             if (neo4jRepository.isVariableExist(varName)) {
                 return new VariableExpression(varName);
             }
@@ -92,8 +113,9 @@ public class ExpressionBinder {
         if (node instanceof ASTIterator) {
             ASTIterator itAST = (ASTIterator) node;
             ExpressionNode sourceNode = bind(itAST.source);
-
+            enterScope(itAST.iteratorName);
             ExpressionNode bodyNode = bind(itAST.body);
+            exitScope();
 
             if (itAST.operation.equals("select")) {
                 return new SelectExpression(sourceNode, itAST.iteratorName, bodyNode);

@@ -30,7 +30,7 @@ public class BinaryExpression implements ExpressionNode {
             return calculateNumbers(lVal, rVal, op);
         }
 
-        if (op.equals("and") || op.equals("or")) {
+        if (op.equals("and") || op.equals("or") || op.equals("implies")) {
             return evaluateLogic(lVal, rVal, op);
         }
 
@@ -83,9 +83,14 @@ public class BinaryExpression implements ExpressionNode {
         Boolean b1 = (a instanceof Boolean) ? (Boolean) a : false;
         Boolean b2 = (b instanceof Boolean) ? (Boolean) b : false;
 
-        if (operator.equals("and")) return b1 && b2;
-        if (operator.equals("or"))  return b1 || b2;
+      return switch (op) {
+        case "and" -> b1 && b2;
+        case "or" -> b1 || b2;
+        case "implies" ->
+          //A implies B  <=>  !A or B
+            !b1 || b2;
+        default -> false;
+      };
 
-        return false;
     }
 }

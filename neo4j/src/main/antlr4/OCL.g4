@@ -14,6 +14,7 @@ expression
     | left=expression op=('+' | '-') right=expression                #AdditiveExp
     | left=expression op=('=' | '<>' | '<' | '>') right=expression  #ComparisonExp
     | left=expression op=('and' | 'or') right=expression            #LogicalExp
+    | left=expression op='implies' right=expression                 #LogicalImpliesExp
     ;
 
 primary

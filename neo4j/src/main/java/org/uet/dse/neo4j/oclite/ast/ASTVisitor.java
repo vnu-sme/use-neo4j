@@ -107,4 +107,12 @@ public class ASTVisitor extends OCLBaseVisitor<ASTNode> {
 
         return new ASTIterator(source, op, var, body);
     }
+    @Override
+    public ASTNode visitLogicalImpliesExp(OCLParser.LogicalImpliesExpContext ctx) {
+        return new ASTBinary(
+            (ASTExpression) visit(ctx.left),
+            "implies",
+            (ASTExpression) visit(ctx.right)
+        );
+    }
 }
