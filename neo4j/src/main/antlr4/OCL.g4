@@ -12,7 +12,7 @@ expression
     : primary                                                       #PrimaryExp
     | left=expression op=('*' | '/') right=expression                #MultiplicativeExp
     | left=expression op=('+' | '-') right=expression                #AdditiveExp
-    | left=expression op=('=' | '<>' | '<' | '>') right=expression  #ComparisonExp
+    | left=expression op=('=' | '<>' | '<' | '>' | '>=' | '<=') right=expression #ComparisonExp
     | op='not' expression                                           #NotExp
     | left=expression op=('and' | 'or') right=expression            #LogicalExp
     | left=expression op='implies' right=expression                 #LogicalImpliesExp
