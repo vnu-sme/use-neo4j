@@ -123,6 +123,20 @@ public class ExecutionContext {
                     collection.stream().anyMatch(s -> isSameObject(s, t))
                 );
             }
+
+            case "union": {
+                if (args.isEmpty()) return collection;
+                Collection<?> targetCol = convertToCollection(args.get(0));
+
+                List<Object> result = new ArrayList<>(collection);
+                for (Object t : targetCol) {
+                    if (result.stream().noneMatch(item -> isSameObject(item, t))) {
+                        result.add(t);
+                    }
+                }
+                return result;
+            }
+
             default:
                 throw new RuntimeException("Not yet supported: " + opName);
 
