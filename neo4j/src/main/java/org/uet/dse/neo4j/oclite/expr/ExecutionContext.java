@@ -194,6 +194,16 @@ public class ExecutionContext {
             }
             return last;
           }
+          case "asSet": {
+            List<Object> uniqueList = new ArrayList<>();
+            for (Object item : collection) {
+              if (uniqueList.stream().noneMatch(existing -> isSameObject(existing, item))) {
+                uniqueList.add(item);
+              }
+            }
+            return uniqueList;
+          }
+
 
           default:
                 throw new RuntimeException("Not yet supported: " + opName);
