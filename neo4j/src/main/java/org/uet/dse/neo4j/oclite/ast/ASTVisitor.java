@@ -97,4 +97,14 @@ public class ASTVisitor extends OCLBaseVisitor<ASTNode> {
       };
 
     }
+
+    @Override
+    public ASTNode visitIteratorExpr(OCLParser.IteratorExprContext ctx) {
+        ASTExpression source = (ASTExpression) visit(ctx.primary());
+        String op = ctx.Identifier(0).getText();
+        String var = ctx.Identifier(1).getText(); // f
+        ASTExpression body = (ASTExpression) visit(ctx.expression());
+
+        return new ASTIterator(source, op, var, body);
+    }
 }

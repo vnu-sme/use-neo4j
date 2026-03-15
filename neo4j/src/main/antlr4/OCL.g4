@@ -20,6 +20,7 @@ primary
     : literal                                      #LiteralExpr
     | Identifier                                   #IdExpr
     | primary '.' Identifier                       #NavigationExpr
+    | primary '->' Identifier '(' Identifier '|' expression ')' #IteratorExpr // THÊM DÒNG NÀY
     | primary '->' Identifier '(' argList? ')'     #CollectionOpExpr
     | '(' expression ')'                           #ParenExpr
     ;

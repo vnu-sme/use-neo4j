@@ -27,3 +27,5 @@ check
 
 
 p.age > 80 implies p.isEmergency = true
+
+!insert (m2, b1) into Borrowing

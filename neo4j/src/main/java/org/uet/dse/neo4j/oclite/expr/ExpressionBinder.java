@@ -69,6 +69,10 @@ public class ExpressionBinder {
             return new ConstantExpression(((ASTStringLiteral) node).value);
         }
 
+        if (node instanceof ASTBooleanLiteral) {
+            return new ConstantExpression(((ASTBooleanLiteral)node).value);
+        }
+
         if (node instanceof ASTNullLiteral) {
             return new ConstantExpression(null);
         }
@@ -83,6 +87,17 @@ public class ExpressionBinder {
             }
 
             return new CollectionOpExpression(sourceNode, colAST.opName, bindedArgs);
+        }
+
+        if (node instanceof ASTIterator) {
+            ASTIterator itAST = (ASTIterator) node;
+            ExpressionNode sourceNode = bind(itAST.source);
+
+            ExpressionNode bodyNode = bind(itAST.body);
+
+            if (itAST.operation.equals("select")) {
+                return new SelectExpression(sourceNode, itAST.iteratorName, bodyNode);
+            }
         }
 
 
