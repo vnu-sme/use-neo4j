@@ -46,10 +46,31 @@ public class ExpressionBinder {
             if (isLocalVar(varName)) {
                 return new VariableExpression(varName);
             }
+
+            if (neo4jRepository.checkClassExistsInDb(varName)) {
+                return new TypeExpression(varName);
+            }
             if (neo4jRepository.isVariableExist(varName)) {
                 return new VariableExpression(varName);
             }
             throw new RuntimeException("Semantic Error: Đối tượng '" + varName + "' không tồn tại trong Neo4j.");
+        }
+
+        if (node instanceof ASTMethodCall) {
+            ASTMethodCall mc = (ASTMethodCall) node;
+            ExpressionNode sourceExec = bind(mc.source);
+
+            if (mc.methodName.equalsIgnoreCase("allInstances")) {
+                // Kiểm tra xem vế trước có phải là một Class không
+                if (sourceExec instanceof TypeExpression) {
+                    String className = ((TypeExpression) sourceExec).getTypeName();
+                    return new AllInstancesExpression(className);
+                } else {
+                    throw new RuntimeException("Lỗi: allInstances() chỉ được gọi trên một Class.");
+                }
+            }
+
+            // Sau này có thể thêm các hàm khác như .oclIsTypeOf(), .oclAsType()...
         }
 
         //(.)

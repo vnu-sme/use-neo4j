@@ -21,6 +21,7 @@ expression
 primary
     : literal                                      #LiteralExpr
     | Identifier                                   #IdExpr
+    | primary '.' Identifier '(' argList? ')'     #MethodCallExpr
     | primary '.' Identifier                       #NavigationExpr
     | primary '->' Identifier '(' Identifier '|' expression ')' #IteratorExpr
     | primary '->' Identifier '(' argList? ')'     #CollectionOpExpr

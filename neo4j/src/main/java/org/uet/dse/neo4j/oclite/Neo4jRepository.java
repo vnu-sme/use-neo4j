@@ -166,4 +166,45 @@ public class Neo4jRepository {
             });
         }
     }
+
+    public List<Node> findAllInstancesOfClass(String className) {
+        try (Session session = Neo4jDriverManager.getInstance().openSession()) {
+            return session.executeRead(tx -> {
+                String cypher =
+                    "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->()<-[:InstanceOf]-(cls {name: $className}) " +
+                        "MATCH (obj)-[:ObjectInstanceOf]->(cls) " +
+                        "RETURN obj";
+
+                Result res = tx.run(cypher, Values.parameters(
+                    "modelName", this.modelName,
+                    "className", className
+                ));
+
+                List<Node> instances = new ArrayList<>();
+                while (res.hasNext()) {
+                    instances.add(res.next().get("obj").asNode());
+                }
+                return instances;
+            });
+        }
+    }
+
+    public boolean checkClassExistsInDb(String className) {
+        try (Session session = Neo4jDriverManager.getInstance().openSession()) {
+            return session.executeRead(tx -> {
+                String cypher =
+                    "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(meta:MetaNode) " +
+                        "WHERE meta.name IN ['NodeConcreteClass', 'NodeAbstractClass', 'NodeAssociationClass'] " +
+                        "MATCH (cls {name: $className})-[:InstanceOf]->(meta) " +
+                        "RETURN count(cls) > 0 AS exists";
+
+                Result res = tx.run(cypher, Values.parameters(
+                    "modelName", this.modelName,
+                    "className", className
+                ));
+
+                return res.single().get("exists").asBoolean();
+            });
+        }
+    }
 }

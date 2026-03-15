@@ -243,4 +243,8 @@ public class ExecutionContext {
     }
     return result;
   }
+
+  public Object resolveAllInstances(String className) {
+    return repo.findAllInstancesOfClass(className);
+  }
 }

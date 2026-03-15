@@ -120,4 +120,20 @@ public class ASTVisitor extends OCLBaseVisitor<ASTNode> {
         ASTExpression inner = (ASTExpression) visit(ctx.expression());
         return new ASTNot(inner);
     }
+
+    @Override
+    public ASTNode visitMethodCallExpr(OCLParser.MethodCallExprContext ctx) {
+        ASTExpression source = (ASTExpression) visit(ctx.primary());
+
+        String methodName = ctx.Identifier().getText();
+
+        List<ASTExpression> args = new ArrayList<>();
+        if (ctx.argList() != null) {
+            for (OCLParser.ExpressionContext argCtx : ctx.argList().expression()) {
+                args.add((ASTExpression) visit(argCtx));
+            }
+        }
+
+        return new ASTMethodCall(source, methodName, args);
+    }
 }
