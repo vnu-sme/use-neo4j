@@ -6,7 +6,7 @@ import org.tzi.use.gui.main.MainWindow;
 import org.tzi.use.main.Session;
 import org.tzi.use.uml.mm.MModel;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
-import org.uet.dse.neo4j.phase2.WorkLogManager;
+import org.uet.dse.neo4j.manager.WorkLogManager;
 import org.uet.dse.neo4j.sync.lock.LockManager;
 import org.uet.dse.neo4j.sync.model.ModelDiff;
 import org.uet.dse.neo4j.sync.model.CoreModelPushService;

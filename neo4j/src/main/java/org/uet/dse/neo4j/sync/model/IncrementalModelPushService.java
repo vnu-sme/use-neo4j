@@ -5,8 +5,7 @@ import org.tzi.use.api.UseModelApi;
 import org.tzi.use.graph.DirectedGraph;
 import org.tzi.use.uml.mm.*;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
-import org.uet.dse.neo4j.mm.core.node.NodeClassInvariant;
-import org.uet.dse.neo4j.phase2.WorkLogManager;
+import org.uet.dse.neo4j.manager.WorkLogManager;
 import org.uet.dse.neo4j.repo.Neo4jModelRepository;
 import org.uet.dse.neo4j.sync.model.simpleDomain.KusakabeModelDiff;
 

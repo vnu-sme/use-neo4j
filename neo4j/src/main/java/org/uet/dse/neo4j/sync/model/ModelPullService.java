@@ -13,7 +13,7 @@ import org.tzi.use.util.NullPrintWriter;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.model.ClassState;
 import org.uet.dse.neo4j.model.FullModelSnapshot;
-import org.uet.dse.neo4j.phase2.WorkLogManager;
+import org.uet.dse.neo4j.manager.WorkLogManager;
 import org.uet.dse.neo4j.sync.helper.UmlTypeTranslator;
 
 import java.io.PrintWriter;

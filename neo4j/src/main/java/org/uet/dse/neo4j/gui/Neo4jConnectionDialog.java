@@ -4,8 +4,8 @@ import org.tzi.use.gui.main.MainWindow;
 import org.tzi.use.main.Session;
 import org.uet.dse.neo4j.config.Neo4jDefaultConnectionConfig;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
-import org.uet.dse.neo4j.phase2.SessionManager;
-import org.uet.dse.neo4j.phase2.WorkLogManager;
+import org.uet.dse.neo4j.manager.SessionManager;
+import org.uet.dse.neo4j.manager.WorkLogManager;
 import org.uet.dse.neo4j.realtime.Neo4jRealTimeService;
 import org.uet.dse.neo4j.repo.Neo4jModelRepository;
 

@@ -4437,11 +4437,11 @@ body:1:10: Undefined operation named `purchase' in expression `BuyLotteryTicket.
 [2026-02-01 23:32:34] ACTION: SYNC_FORWARD_SUCCESS | DETAILS: Model pushed by: neo4j [Key: BF6A6A73] (audreycolar)
 [2026-02-02 00:29:49] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml2]
 [2026-02-02 00:29:51] ACTION: CONNECTION_ERROR | DETAILS: The database is not currently available to serve your request, refer to the database logs for more details. Retrying your request at a later time may succeed.
-[2026-02-02 00:32:13] ACTION: CONNECTION_ERROR | DETAILS: Cannot invoke "org.uet.dse.neo4j.phase2.SessionManager.getUserDisplayName()" because the return value of "org.uet.dse.neo4j.manager.Neo4jDriverManager.getSessionManager()" is null
-[2026-02-02 00:32:23] ACTION: CONNECTION_ERROR | DETAILS: Cannot invoke "org.uet.dse.neo4j.phase2.SessionManager.getUserDisplayName()" because the return value of "org.uet.dse.neo4j.manager.Neo4jDriverManager.getSessionManager()" is null
-[2026-02-02 00:32:58] ACTION: CONNECTION_ERROR | DETAILS: Cannot invoke "org.uet.dse.neo4j.phase2.SessionManager.getUserDisplayName()" because the return value of "org.uet.dse.neo4j.manager.Neo4jDriverManager.getSessionManager()" is null
-[2026-02-02 00:33:04] ACTION: CONNECTION_ERROR | DETAILS: Cannot invoke "org.uet.dse.neo4j.phase2.SessionManager.getUserDisplayName()" because the return value of "org.uet.dse.neo4j.manager.Neo4jDriverManager.getSessionManager()" is null
-[2026-02-02 00:33:36] ACTION: CONNECTION_ERROR | DETAILS: Cannot invoke "org.uet.dse.neo4j.phase2.SessionManager.getUserDisplayName()" because the return value of "org.uet.dse.neo4j.manager.Neo4jDriverManager.getSessionManager()" is null
+[2026-02-02 00:32:13] ACTION: CONNECTION_ERROR | DETAILS: Cannot invoke "org.uet.dse.neo4j.manager.SessionManager.getUserDisplayName()" because the return value of "org.uet.dse.neo4j.manager.Neo4jDriverManager.getSessionManager()" is null
+[2026-02-02 00:32:23] ACTION: CONNECTION_ERROR | DETAILS: Cannot invoke "org.uet.dse.neo4j.manager.SessionManager.getUserDisplayName()" because the return value of "org.uet.dse.neo4j.manager.Neo4jDriverManager.getSessionManager()" is null
+[2026-02-02 00:32:58] ACTION: CONNECTION_ERROR | DETAILS: Cannot invoke "org.uet.dse.neo4j.manager.SessionManager.getUserDisplayName()" because the return value of "org.uet.dse.neo4j.manager.Neo4jDriverManager.getSessionManager()" is null
+[2026-02-02 00:33:04] ACTION: CONNECTION_ERROR | DETAILS: Cannot invoke "org.uet.dse.neo4j.manager.SessionManager.getUserDisplayName()" because the return value of "org.uet.dse.neo4j.manager.Neo4jDriverManager.getSessionManager()" is null
+[2026-02-02 00:33:36] ACTION: CONNECTION_ERROR | DETAILS: Cannot invoke "org.uet.dse.neo4j.manager.SessionManager.getUserDisplayName()" because the return value of "org.uet.dse.neo4j.manager.Neo4jDriverManager.getSessionManager()" is null
 [2026-02-02 00:36:02] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: uml2]
 [2026-02-02 00:36:05] ACTION: CONNECTION_ERROR | DETAILS: The database is not currently available to serve your request, refer to the database logs for more details. Retrying your request at a later time may succeed.
 [2026-02-02 00:36:14] ACTION: CONNECTION | DETAILS: Connected to bolt://127.0.0.1:7687 [DB: use-test]

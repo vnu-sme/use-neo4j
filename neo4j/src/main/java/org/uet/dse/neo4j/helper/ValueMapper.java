@@ -14,16 +14,6 @@ public class ValueMapper {
             return "#" + literal;
         }
 
-
-//        if (value instanceof CollectionValue) {
-//            CollectionValue cv = (CollectionValue) value;
-//            List<Object> list = new ArrayList<>();
-//            for (Value v : cv.collection()) {
-//                list.add(mapUseValue(v));
-//            }
-//            return list;
-//        }
-
         if (value instanceof CollectionValue) {
             CollectionValue cv = (CollectionValue) value;
             Map<String, Object> collectionNode = new HashMap<>();

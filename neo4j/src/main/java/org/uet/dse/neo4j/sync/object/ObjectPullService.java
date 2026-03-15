@@ -11,14 +11,13 @@ import org.tzi.use.uml.sys.MSystem;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.model.LinkState;
 import org.uet.dse.neo4j.model.ObjectState;
-import org.uet.dse.neo4j.phase2.WorkLogManager;
+import org.uet.dse.neo4j.manager.WorkLogManager;
 import org.uet.dse.neo4j.repo.query.Neo4jObjectQuery;
 import org.uet.dse.neo4j.sync.helper.UmlTypeTranslator;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ObjectPullService {
     private final UseSystemApi systemApi;

@@ -1,32 +1,19 @@
 package org.uet.dse.neo4j.sync.object;
 
-import org.neo4j.driver.*;
-import org.neo4j.driver.Record;
 import org.tzi.use.api.UseSystemApi;
-import org.tzi.use.uml.mm.MAssociationEnd;
-import org.tzi.use.uml.mm.MAttribute;
-import org.tzi.use.uml.ocl.value.Value;
 import org.tzi.use.uml.sys.*;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
-import org.uet.dse.neo4j.model.FullObjectSnapshot;
-import org.uet.dse.neo4j.model.LinkState;
-import org.uet.dse.neo4j.model.ObjectState;
-import org.uet.dse.neo4j.helper.ValueMapper;
-import org.uet.dse.neo4j.phase2.WorkLogManager;
+import org.uet.dse.neo4j.manager.WorkLogManager;
 import org.uet.dse.neo4j.repo.Neo4jModelRepository;
 import org.uet.dse.neo4j.repo.Neo4jObjectRepository;
 import org.uet.dse.neo4j.repo.Neo4jVersionRepository;
 import org.uet.dse.neo4j.sync.helper.GUIHelper;
 import org.uet.dse.neo4j.sync.lock.LockManager;
-import org.uet.dse.neo4j.sync.helper.UmlTypeTranslator;
 import org.uet.dse.neo4j.sync.feedback.SyncFeedbackHandler;
 import org.uet.dse.neo4j.sync.feedback.object.AutoPullFeedbackHandler;
 import org.uet.dse.neo4j.sync.feedback.object.AutoSyncFeedbackHandler;
 import org.uet.dse.neo4j.sync.feedback.object.ManualPullFeedbackHandler;
 import org.uet.dse.neo4j.sync.feedback.object.ManualSyncFeedbackHandler;
-
-import java.util.*;
-import java.util.List;
 
 public class ObjectSyncCoordinator {
     //changes from user /plugin

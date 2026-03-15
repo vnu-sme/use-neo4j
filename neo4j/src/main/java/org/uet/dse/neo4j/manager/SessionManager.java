@@ -1,6 +1,4 @@
-package org.uet.dse.neo4j.phase2;
-
-import org.uet.dse.neo4j.manager.Neo4jDriverManager;
+package org.uet.dse.neo4j.manager;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

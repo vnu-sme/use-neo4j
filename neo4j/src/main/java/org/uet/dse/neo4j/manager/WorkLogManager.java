@@ -1,4 +1,4 @@
-package org.uet.dse.neo4j.phase2;
+package org.uet.dse.neo4j.manager;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;

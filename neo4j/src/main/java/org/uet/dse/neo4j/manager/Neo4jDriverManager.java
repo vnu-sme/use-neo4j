@@ -1,8 +1,6 @@
 package org.uet.dse.neo4j.manager;
 
 import org.neo4j.driver.*;
-import org.uet.dse.neo4j.phase2.SessionManager;
-import org.uet.dse.neo4j.phase2.WorkLogManager;
 
 import java.util.HashMap;
 import java.util.Map;

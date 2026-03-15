@@ -4,7 +4,7 @@ import org.tzi.use.main.Session;
 import org.tzi.use.main.ChangeEvent;
 import org.tzi.use.main.ChangeListener;
 import org.uet.dse.neo4j.config.SyncConfig;
-import org.uet.dse.neo4j.phase2.WorkLogManager;
+import org.uet.dse.neo4j.manager.WorkLogManager;
 import org.uet.dse.neo4j.sync.object.ObjectDiff;
 import org.uet.dse.neo4j.sync.object.ObjectSyncCoordinator;
 import org.uet.dse.neo4j.sync.RealtimeModelSyncCoordinator;
@@ -18,7 +18,6 @@ public class Neo4jRealTimeService implements ChangeListener, Session.EvaluatedSt
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private ScheduledExecutorService pollScheduler = Executors.newScheduledThreadPool(2);
 
-    // Lưu dấu vân tay của trạng thái Object local lần cuối cùng được đồng bộ
     private long lastLocalStateFingerprint = 0L;
 
     private Neo4jRealTimeService(Session session) {

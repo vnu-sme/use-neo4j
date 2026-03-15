@@ -2,7 +2,6 @@ package org.uet.dse.neo4j.manager;
 
 import org.neo4j.driver.Session;
 import org.neo4j.driver.Values;
-import org.uet.dse.neo4j.phase2.SessionManager;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

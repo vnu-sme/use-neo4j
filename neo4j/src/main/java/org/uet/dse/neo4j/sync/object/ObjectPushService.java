@@ -7,9 +7,8 @@ import org.tzi.use.uml.ocl.value.Value;
 import org.tzi.use.uml.sys.*;
 import org.uet.dse.neo4j.helper.ValueMapper;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
-import org.uet.dse.neo4j.phase2.WorkLogManager;
+import org.uet.dse.neo4j.manager.WorkLogManager;
 import org.uet.dse.neo4j.repo.Neo4jObjectRepository;
-import org.uet.dse.neo4j.repo.Neo4jSideRepository;
 import org.uet.dse.neo4j.sync.helper.UmlTypeTranslator;
 
 import java.util.*;

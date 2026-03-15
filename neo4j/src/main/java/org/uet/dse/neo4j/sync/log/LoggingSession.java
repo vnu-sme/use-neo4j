@@ -2,7 +2,7 @@ package org.uet.dse.neo4j.sync.log;
 
 import org.neo4j.driver.*;
 import org.neo4j.driver.Record;
-import org.uet.dse.neo4j.phase2.WorkLogManager;
+import org.uet.dse.neo4j.manager.WorkLogManager;
 
 import java.util.Map;
 import java.util.Set;

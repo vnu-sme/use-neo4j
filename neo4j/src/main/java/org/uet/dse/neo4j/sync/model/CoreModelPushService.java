@@ -12,11 +12,10 @@ import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.mm.core.common.NCollectionType;
 import org.uet.dse.neo4j.mm.core.common.NType;
 import org.uet.dse.neo4j.mm.core.node.*;
-import org.uet.dse.neo4j.phase2.WorkLogManager;
+import org.uet.dse.neo4j.manager.WorkLogManager;
 import org.uet.dse.neo4j.query.builder.CypherQueryBuilder;
 import org.uet.dse.neo4j.repo.Neo4jModelRepository;
 import org.uet.dse.neo4j.sync.helper.UmlTypeTranslator;
-import org.uet.dse.neo4j.sync.model.simpleDomain.KusakabeModelDiff;
 import org.uet.dse.neo4j.sync.object.ObjectSyncHelper;
 
 import java.util.Iterator;
