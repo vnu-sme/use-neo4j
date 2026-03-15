@@ -136,7 +136,41 @@ public class ExecutionContext {
                 }
                 return result;
             }
+            case "intersection": {
+                if (args.isEmpty()) return Collections.emptyList();
+                Collection<?> targetCol = convertToCollection(args.get(0));
 
+                return collection.stream()
+                    .filter(s -> targetCol.stream().anyMatch(t -> isSameObject(s, t)))
+                    .distinct()
+                    .collect(Collectors.toList());
+            }
+
+          case "at": {
+            if (args.isEmpty()) return null;
+
+            Object idxObj = args.get(0);
+            if (!(idxObj instanceof Number)) {
+              throw new RuntimeException("position must be a natural number");
+            }
+
+            int oclIndex = ((Number) idxObj).intValue();
+            int javaIndex = oclIndex - 1;
+
+            if (javaIndex < 0 || javaIndex >= collection.size()) {
+              System.out.println("index out of bounds: " + oclIndex);
+              return null;
+            }
+
+            if (collection instanceof List) {
+              return ((List<?>) collection).get(javaIndex);
+            } else {
+              return collection.stream()
+                  .skip(javaIndex)
+                  .findFirst()
+                  .orElse(null);
+            }
+          }
             default:
                 throw new RuntimeException("Not yet supported: " + opName);
 
