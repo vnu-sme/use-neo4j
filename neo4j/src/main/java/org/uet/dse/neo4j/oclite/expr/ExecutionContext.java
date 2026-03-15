@@ -180,6 +180,21 @@ public class ExecutionContext {
             return collection.iterator().next();
           }
 
+          case "last": {
+            if (collection.isEmpty()) return null;
+
+            if (collection instanceof List) {
+              List<?> list = (List<?>) collection;
+              return list.get(list.size() - 1);
+            }
+
+            Object last = null;
+            for (Object item : collection) {
+              last = item;
+            }
+            return last;
+          }
+
           default:
                 throw new RuntimeException("Not yet supported: " + opName);
 
