@@ -117,12 +117,17 @@ public class ExpressionBinder {
             ExpressionNode bodyNode = bind(itAST.body);
             exitScope();
 
-            if (itAST.operation.equals("select")) {
-                return new SelectExpression(sourceNode, itAST.iteratorName, bodyNode);
-            } else if (itAST.operation.equalsIgnoreCase("forAll")) {
-                return new ForAllExpression(sourceNode, itAST.iteratorName, bodyNode);
-            } else if (itAST.operation.equalsIgnoreCase("exists")) {
-                return new ExistsExpression(sourceNode, itAST.iteratorName, bodyNode);
+            switch (itAST.operation.toLowerCase()) {
+                case "select":
+                    return new SelectExpression(sourceNode, itAST.iteratorName, bodyNode);
+                case "forAll":
+                    return new ForAllExpression(sourceNode, itAST.iteratorName, bodyNode);
+                case "exists":
+                    return new ExistsExpression(sourceNode, itAST.iteratorName, bodyNode);
+                case "collect":
+                    return new CollectExpression(sourceNode, itAST.iteratorName, bodyNode);
+                default:
+                    throw new RuntimeException("Chưa hỗ trợ Iterator: " + itAST.operation);
             }
         }
         if (node instanceof ASTNot) {
