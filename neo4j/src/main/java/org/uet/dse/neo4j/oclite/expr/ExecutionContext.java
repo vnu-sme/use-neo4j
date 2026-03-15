@@ -109,6 +109,12 @@ public class ExecutionContext {
                 if (args.isEmpty()) return false;
                 Object t1 = args.get(0);
                 return collection.stream().anyMatch(item -> isSameObject(item, t1));
+
+            case "excludes": {
+                if (args.isEmpty()) return true;
+                Object t2 = args.get(0);
+                return collection.stream().noneMatch(item -> isSameObject(item, t2));
+            }
             default:
                 throw new RuntimeException("Not yet supported: " + opName);
 
