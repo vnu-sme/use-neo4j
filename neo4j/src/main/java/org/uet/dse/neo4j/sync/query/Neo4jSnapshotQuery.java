@@ -123,12 +123,14 @@ public class Neo4jSnapshotQuery {
             "MATCH (cls)-[:InstanceOf]->(meta) " +
             "MATCH (o)-[:ObjectInstanceOf]->(cls) " +
             "OPTIONAL MATCH (o)-[:ObjectHasAttribute]->(val:AttributeValue)-[:InstanceOf]->(attrDef) " +
-            "OPTIONAL MATCH (val)-[r:objectReference]->(target) " +
+            "OPTIONAL MATCH (val)-[r:objectReference|HasReferenceValue]->(target) " +
             "RETURN o.use_id AS name, cls.name AS className, " +
             "       collect({ " +
             "         attr:  attrDef.attrName, " +
             "         type:  val.type, " +
-            "         value: val.value, " +
+            "         value:   val.value, " +
+            "         isColl:  val.isCollection, " +
+            "         isObjRef: val.isObjRef, " +
             "         ref:   target.use_id, " +
             "         idx:   r.index " +
             "       }) AS data";

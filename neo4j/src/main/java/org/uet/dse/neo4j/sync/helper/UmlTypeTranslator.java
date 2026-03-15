@@ -8,49 +8,60 @@ import java.util.Map;
 
 public class UmlTypeTranslator {
 
-    /**
-     * ĐỊNH DẠNG GIÁ TRỊ (VALUE -> OCL): Chuyển giá trị thô sang biểu thức OCL hợp lệ
-     */
-    public static String toOclLiteral(Object value) {
-        if (value == null || value.toString().equals("null")) return "Undefined";
+    public static String toTypedOclLiteral(Object value, Type type) {
+        if (value == null || value.toString().equalsIgnoreCase("null") || value.toString().equals("Undefined")) {
+            return "Undefined";
+        }
 
-        // Xử lý danh sách (Set{...})
-        if (value instanceof List) {
+        if (type.isKindOfCollection(VoidHandling.EXCLUDE_VOID)) {
+            if (!(value instanceof List)) return getCollectionType(type) + "{}";
+
             List<?> list = (List<?>) value;
-            if (list.isEmpty()) return "Set{}";
-            StringBuilder sb = new StringBuilder("Set{");
+            Type elemType = ((CollectionType) type).elemType();
+            String header = getCollectionType(type);
+
+            StringBuilder sb = new StringBuilder(header).append("{");
             for (int i = 0; i < list.size(); i++) {
-                sb.append(toOclLiteral(list.get(i)));
+                sb.append(toTypedOclLiteral(list.get(i), elemType));
                 if (i < list.size() - 1) sb.append(", ");
             }
             return sb.append("}").toString();
         }
 
-        // Xử lý số thực (Double -> Real)
-        if (value instanceof Double || value instanceof Float) {
-            String s = value.toString();
+        String rawString = value.toString().replace("'", "").trim();
+
+        if (type.isTypeOfBoolean()) {
+            return rawString.toLowerCase().equals("true") ? "true" : "false";
+        }
+
+        if (type.isTypeOfEnum()) {
+            String enumLiteral = rawString.replace("#", "");
+            return type.shortName() + "::" + enumLiteral;
+        }
+
+        if (type.isKindOfClass(VoidHandling.EXCLUDE_VOID)) {
+            return rawString;
+        }
+
+        if (type.isTypeOfInteger()) {
+            return rawString.replaceAll("[^0-9\\-]", "");
+        }
+
+        if (type.isTypeOfReal()) {
+            String s = rawString.replaceAll("[^0-9.\\-]", "");
             return s.contains(".") ? s : s + ".0";
         }
 
-        // Xử lý Boolean
-        if (value instanceof Boolean) return value.toString().toLowerCase();
-
-        // Xử lý Số nguyên
-        if (value instanceof Integer || value instanceof Long) return value.toString();
-
-        // Xử lý String (Bọc nháy đơn) - Kiểm tra tránh bọc 2 lần
-        String s = value.toString();
-        if (s.startsWith("'") && s.endsWith("'")) return s;
-        return "'" + s + "'";
+        return "'" + rawString + "'";
     }
 
-    /**
-     * JAVA -> NEO4J: Dùng các hàm isTypeOf... của interface Type
-     */
+    public static String toOclLiteral(Object value) {
+        return toTypedOclLiteral(value, org.tzi.use.uml.ocl.type.TypeFactory.mkString());
+    }
+
     public static String toDatabaseType(Type type) {
         if (type == null || type.isTypeOfVoidType()) return "Void";
 
-        // Nếu là tập hợp, ta lấy kiểu phần tử bên trong để lưu type định nghĩa
         if (type.isKindOfCollection(VoidHandling.EXCLUDE_VOID) && type instanceof CollectionType) {
             return toDatabaseType(((CollectionType) type).elemType());
         }
@@ -60,13 +71,9 @@ public class UmlTypeTranslator {
         if (type.isTypeOfString())  return "String";
         if (type.isTypeOfBoolean()) return "Boolean";
 
-        // Nếu là Class hoặc Enum, shortName() sẽ trả về tên định danh (vd: "Person")
         return type.shortName();
     }
 
-    /**
-     * NEO4J -> JAVA: Ánh xạ chuỗi từ DB về từ khóa mà OCLCompiler hiểu
-     */
     public static String toUmlTypeString(String dbType) {
         if (dbType == null || dbType.equalsIgnoreCase("Void")) {
             // TRẢ VỀ NULL: Trong USE API, để tạo hàm Void, tham số returnType phải truyền vào null
@@ -78,14 +85,11 @@ public class UmlTypeTranslator {
             case "Double": return "Real";
             case "String": return "String";
             case "Boolean": return "Boolean";
-            default:       return dbType; // Trả về tên Class/Enum nguyên bản
+            default:       return dbType;
         }
     }
 
-    /**
-     * MỚI: Tái tạo chuỗi OCL Type đầy đủ (xử lý cả Collection)
-     * @param props Map thuộc tính của Attribute/Param lấy từ Neo4j
-     */
+
     public static String reconstructFullTypeString(Map<String, Object> props) {
         Object typeObj = props.get("type");
         if (typeObj == null) return "String";
@@ -99,7 +103,6 @@ public class UmlTypeTranslator {
         boolean isNested = (boolean) props.getOrDefault("isNestedCollection", false);
         String rootCollType = (String) props.getOrDefault("collectionType", "Set");
 
-        // TRƯỜNG HỢP: LỒNG NHAU (Bất kể độ sâu)
         if (isNested) {
             Object chainObj = props.get("nestedChain");
             if (chainObj instanceof List) {
@@ -125,37 +128,9 @@ public class UmlTypeTranslator {
             }
         }
 
-        // TRƯỜNG HỢP: TẬP HỢP ĐƠN
         return String.format("%s(%s)", rootCollType, umlBase);
     }
-    public static String reconstructNestedTypeString(Map<String, Object> props, List<String> nestedTypes) {
-        String baseType = (String) props.get("type");
-        String umlBase = toUmlTypeString(baseType);
 
-        boolean isColl = (boolean) props.get("isCollection");
-        boolean isNested = (boolean) props.get("isNestedCollection");
-
-        if (!isColl) return umlBase;
-
-        // Nếu không lồng nhau
-        if (!isNested) {
-            return props.get("collectionType") + "(" + umlBase + ")";
-        }
-
-        // Nếu lồng nhau: Duyệt ngược từ trong ra ngoài
-        // Ví dụ nestedTypes: ["Sequence"], rootCollType: "Set" -> Set(Sequence(Integer))
-        String result = umlBase;
-        for (int i = nestedTypes.size() - 1; i >= 0; i--) {
-            result = nestedTypes.get(i) + "(" + result + ")";
-        }
-        result = props.get("collectionType") + "(" + result + ")";
-
-        return result;
-    }
-
-    /**
-     * Lấy loại tập hợp cụ thể (Set, Sequence, Bag, OrderedSet)
-     */
     public static String getCollectionType(Type type) {
         if (type == null || !type.isKindOfCollection(VoidHandling.EXCLUDE_VOID)) {
             return "None";
@@ -167,10 +142,7 @@ public class UmlTypeTranslator {
         return "Set";
     }
 
-    /**
-     * Bóc tách đệ quy để lấy kiểu dữ liệu cuối cùng bên trong các lớp tập hợp
-     * Ví dụ: Set(Sequence(Person)) -> Person
-     */
+
     public static Type getUltimateBaseType(Type type) {
         if (type.isKindOfCollection(VoidHandling.EXCLUDE_VOID) && type instanceof CollectionType) {
             return getUltimateBaseType(((CollectionType) type).elemType());
@@ -178,9 +150,6 @@ public class UmlTypeTranslator {
         return type;
     }
 
-    /**
-     * Tính độ sâu của tập hợp
-     */
     public static int getCollectionDepth(Type type) {
         int depth = 0;
         Type current = type;

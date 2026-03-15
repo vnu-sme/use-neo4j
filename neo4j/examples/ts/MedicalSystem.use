@@ -17,6 +17,8 @@ attributes
     email : String
     dateOfBirth : String
     emergencyContacts : Set(Person)
+    kk : OrderedSet(Set(Set(Bag(Set(Person)))))
+    nono : Set(Integer)
 end
 
 class Doctor < Person
@@ -31,6 +33,7 @@ attributes
     patientQueue : Sequence(Patient)
     assignedNurses : Set(Nurse)
     collaborationHistory : Sequence(Set(Doctor))
+    favNurse: Nurse
 operations
     prescribe(p : Patient, m : Medication, quantity : Integer)
     getChiefResident() : Doctor

@@ -96,8 +96,46 @@ public class ObjectSnapshotCompare {
                 .filter(right::containsKey)
                 .collect(Collectors.toSet());
     }
-
     private List<String> findObjectMismatchDetails(ObjectState javaObj, ObjectState neoObj) {
+        List<String> details = new ArrayList<>();
+
+        // So sánh Primitive Values
+        Set<String> allAttrKeys = new HashSet<>(javaObj.primitiveValues.keySet());
+        allAttrKeys.addAll(neoObj.primitiveValues.keySet());
+
+        for (String attr : allAttrKeys) {
+            Object v1 = javaObj.primitiveValues.get(attr);
+            Object v2 = neoObj.primitiveValues.get(attr);
+            if (!javaObj.isEqualValue(v1, v2)) {
+                details.add(String.format("Attr '%s' mismatch: Java(%s) vs DB(%s)",
+                    attr, formatVal(v1), formatVal(v2)));
+            }
+        }
+
+        // So sánh Object References
+        Set<String> allRefKeys = new HashSet<>(javaObj.objectReferences.keySet());
+        allRefKeys.addAll(neoObj.objectReferences.keySet());
+
+        for (String role : allRefKeys) {
+            Object r1 = javaObj.objectReferences.get(role);
+            Object r2 = neoObj.objectReferences.get(role);
+            if (!javaObj.isEqualValue(r1, r2)) {
+                details.add(String.format("Ref '%s' mismatch: Java(%s) vs DB(%s)",
+                    role, formatVal(r1), formatVal(r2)));
+            }
+        }
+
+        return details;
+    }
+
+    private String formatVal(Object val) {
+        if (val == null) return "null";
+        if (val instanceof List) {
+            return "[" + ((List<?>) val).stream().map(Object::toString).collect(java.util.stream.Collectors.joining(", ")) + "]";
+        }
+        return val.toString();
+    }
+    private List<String> findObjectMismatchDetailsold(ObjectState javaObj, ObjectState neoObj) {
         List<String> details = new ArrayList<>();
 
         diffPrimitiveValues(javaObj, neoObj, details);

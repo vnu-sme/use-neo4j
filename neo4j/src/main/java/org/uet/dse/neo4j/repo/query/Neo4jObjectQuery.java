@@ -123,4 +123,10 @@ public class Neo4jObjectQuery {
                     "  leafVal: leaf.value, " +
                     "  refs: [(leaf)-[r:objectReference]->(t) | {id: t.use_id, idx: r.index}] " +
                     "}) as attrs";
+
+    //TODO: not yet cover manage node
+    public static final String CREATE_REFERENCE_VALUE_EDGE =
+        "MATCH (src {name: $valNodeId}), (target {use_id: $targetId}) " +
+            "MERGE (src)-[r:HasReferenceValue]->(target) " +
+            "SET r.index = $idx";
 }

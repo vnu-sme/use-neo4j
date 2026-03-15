@@ -44,24 +44,33 @@ public class USEObjectSnapshotUtils {
 
         for (MAttribute attr : obj.cls().allAttributes()) {
             Value useVal = obj.state(state).attributeValue(attr);
-
-            String dbType = UmlTypeTranslator.toDatabaseType(attr.type());
-            os.attributeTypes.put(attr.name(), dbType);
-
             Object mapped = ValueMapper.mapUseValue(useVal);
 
-            // D. Phân loại vào Primitive hoặc Reference (Hành vi cũ để phục vụ so sánh Diff)
-            classifyAttributeValue(os, attr, mapped);
+            Object normalizedValue = normalizeJavaValue(mapped);
 
-            os.setRawValue(attr.name(), mapped);
             if (isObjectReferenceType(attr.type())) {
-                if (mapped instanceof List) os.objectReferences.put(attr.name(), (List<String>) mapped);
-                else if (mapped != null) os.objectReferences.put(attr.name(), Collections.singletonList(mapped.toString()));
+
+                if (normalizedValue instanceof List) {
+                    os.objectReferences.put(attr.name(), (List<String>) normalizedValue);
+                } else if (normalizedValue != null) {
+                    os.objectReferences.put(attr.name(), Collections.singletonList(normalizedValue.toString()));
+                }
             } else {
-                os.primitiveValues.put(attr.name(), mapped);
+                os.primitiveValues.put(attr.name(), normalizedValue);
             }
         }
         return os;
+    }
+
+    private Object normalizeJavaValue(Object val) {
+        if (val instanceof Map) {
+            Map<?, ?> map = (Map<?, ?>) val;
+            if (map.containsKey("items")) {
+                List<?> items = (List<?>) map.get("items");
+                return items.stream().map(this::normalizeJavaValue).collect(java.util.stream.Collectors.toList());
+            }
+        }
+        return val;
     }
 
     private boolean isObjectReferenceType(org.tzi.use.uml.ocl.type.Type type) {
@@ -103,88 +112,4 @@ public class USEObjectSnapshotUtils {
         if (maxKind == 1) return "LinkAggregates";
         return "LinkAssociateWith";
     }
-
-
-
-    private void collectObjects(MSystemState state, FullObjectSnapshot snapshot) {
-        for (MObject obj : state.allObjects()) {
-            snapshot.objects.put(obj.name(), buildObjectState(obj, state));
-        }
-    }
-
-
-    private void classifyAttributeValue(ObjectState os, MAttribute attr, Object mapped) {
-        if (mapped == null || mapped.equals("Undefined")) return;
-
-        if (isObjectReferenceType(attr.type())) {
-            // Nếu là kiểu tham chiếu đối tượng
-            if (mapped instanceof Map) {
-                // Nếu là Nested Collection chứa Object, ta bóc tách các ID để so sánh nhanh
-                List<String> allIds = extractAllObjectIds(mapped);
-                os.objectReferences.put(attr.name(), allIds);
-            } else if (mapped instanceof List) {
-                os.objectReferences.put(attr.name(), (List<String>) mapped);
-            } else {
-                os.objectReferences.put(attr.name(), Collections.singletonList(mapped.toString()));
-            }
-        } else {
-            // Nếu là kiểu nguyên thủy
-            os.primitiveValues.put(attr.name(), mapped);
-        }
-    }
-
-
-    /**
-     * Helper: Duyệt cây dữ liệu để lấy toàn bộ ID object phục vụ việc so sánh Diff nhanh
-     */
-    private List<String> extractAllObjectIds(Object mapped) {
-        java.util.List<String> ids = new java.util.ArrayList<>();
-        if (mapped instanceof Map) {
-            List<Object> items = (List<Object>) ((Map<?, ?>) mapped).get("items");
-            for (Object item : items) ids.addAll(extractAllObjectIds(item));
-        } else if (mapped != null && !mapped.equals("Undefined")) {
-            ids.add(mapped.toString());
-        }
-        return ids;
-    }
-
-    private void putObjectReference(ObjectState os, String attrName, Object mapped) {
-        if (mapped instanceof List) {
-            os.objectReferences.put(attrName, (List<String>) mapped);
-        } else if (mapped != null) {
-            os.objectReferences.put(attrName, Collections.singletonList(mapped.toString()));
-        }
-    }
-
-
-    private void collectLinks(MSystemState state, FullObjectSnapshot snapshot) {
-        for (MLink link : state.allLinks()) {
-            LinkState ls = buildLinkState(link);
-            snapshot.links.put(ls.getIdentity(), ls);
-        }
-    }
-
-    /**
-     * Resolves the edge label for a link.
-     * LinkObjects and ternary links always use the plain association label.
-     * Binary links are promoted to Aggregates or ComposeOf when the association
-     * ends carry an aggregation kind.
-     */
-//    private String resolveLinkEdgeLabel(MLink link) {
-//        if (link instanceof MLinkObject || link.linkedObjects().size() > 2) {
-//            return "LinkAssociateWith";
-//        }
-//        return resolveBinaryEdgeLabel(link.association());
-//    }
-
-//    private String resolveBinaryEdgeLabel(MAssociation assoc) {
-//        int maxKind = assoc.associationEnds().stream()
-//                .mapToInt(MAssociationEnd::aggregationKind)
-//                .max()
-//                .orElse(0);
-//
-//        if (maxKind == 2) return "LinkComposeOf";
-//        if (maxKind == 1) return "LinkAggregates";
-//        return "LinkAssociateWith";
-//    }
 }
