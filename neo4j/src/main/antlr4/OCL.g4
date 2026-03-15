@@ -9,11 +9,11 @@ oclFile : (declaration | expression)* EOF ;
 declaration : 'context' className=Identifier 'inv' invName=Identifier? ':' expression ;
 
 expression
-    : left=expression op=('and' | 'or') right=expression            #LogicalExp
-    | left=expression op=('=' | '<>' | '<' | '>') right=expression  #ComparisonExp
-    | left=expression op=('+' | '-') right=expression                #AdditiveExp
+    : primary                                                       #PrimaryExp
     | left=expression op=('*' | '/') right=expression                #MultiplicativeExp
-    | primary                                                       #PrimaryExp
+    | left=expression op=('+' | '-') right=expression                #AdditiveExp
+    | left=expression op=('=' | '<>' | '<' | '>') right=expression  #ComparisonExp
+    | left=expression op=('and' | 'or') right=expression            #LogicalExp
     ;
 
 primary

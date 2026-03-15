@@ -3,11 +3,13 @@ package org.uet.dse.neo4j.oclite.expr;
 import java.util.Objects;
 
 public class BinaryExpression implements ExpressionNode {
-    private ExpressionNode left, right;
-    private String op;
+    private final ExpressionNode left, right;
+    private final String op;
 
     public BinaryExpression(ExpressionNode l, String op, ExpressionNode r) {
-        this.left = l; this.op = op; this.right = r;
+        this.left = l;
+        this.op = op;
+        this.right = r;
     }
 
     @Override
@@ -15,17 +17,75 @@ public class BinaryExpression implements ExpressionNode {
         Object lVal = left.evaluate(ctx);
         Object rVal = right.evaluate(ctx);
 
-        if (op.equals("=")) {
-            if (lVal == null || rVal == null) return lVal == rVal;
-
-            // Xử lý so sánh số (10.0 = 10)
-            if (lVal instanceof Number && rVal instanceof Number) {
-                return Double.compare(((Number) lVal).doubleValue(), ((Number) rVal).doubleValue()) == 0;
-            }
-
-            return java.util.Objects.equals(lVal, rVal);
+        if (op.equals("=") || op.equals("<>")) {
+            boolean isEqual = compareEquals(lVal, rVal);
+            return op.equals("=") ? isEqual : !isEqual;
         }
-        // ...
+
+        if (op.equals(">") || op.equals("<") || op.equals(">=") || op.equals("<=")) {
+            return compareNumbers(lVal, rVal, op);
+        }
+
+        if (op.equals("+") || op.equals("-") || op.equals("*") || op.equals("/")) {
+            return calculateNumbers(lVal, rVal, op);
+        }
+
+        if (op.equals("and") || op.equals("or")) {
+            return evaluateLogic(lVal, rVal, op);
+        }
+
         return null;
+    }
+
+    private boolean compareEquals(Object a, Object b) {
+        if (a == null && b == null) return true;
+        if (a == null || b == null) return false;
+
+        if (a instanceof Number && b instanceof Number) {
+            return Double.compare(((Number) a).doubleValue(), ((Number) b).doubleValue()) == 0;
+        }
+        return Objects.equals(a, b);
+    }
+
+    private Object compareNumbers(Object a, Object b, String operator) {
+        if (!(a instanceof Number) || !(b instanceof Number)) return false;
+
+        double n1 = ((Number) a).doubleValue();
+        double n2 = ((Number) b).doubleValue();
+
+        switch (operator) {
+            case ">":  return n1 > n2;
+            case "<":  return n1 < n2;
+            case ">=": return n1 >= n2;
+            case "<=": return n1 <= n2;
+        }
+        return false;
+    }
+
+    private Object calculateNumbers(Object a, Object b, String operator) {
+        if (!(a instanceof Number) || !(b instanceof Number)) return null;
+
+        double n1 = ((Number) a).doubleValue();
+        double n2 = ((Number) b).doubleValue();
+
+        switch (operator) {
+            case "+": return n1 + n2;
+            case "-": return n1 - n2;
+            case "*": return n1 * n2;
+            case "/":
+                if (n2 == 0) throw new ArithmeticException("Lỗi chia cho 0");
+                return n1 / n2;
+        }
+        return null;
+    }
+
+    private Object evaluateLogic(Object a, Object b, String operator) {
+        Boolean b1 = (a instanceof Boolean) ? (Boolean) a : false;
+        Boolean b2 = (b instanceof Boolean) ? (Boolean) b : false;
+
+        if (operator.equals("and")) return b1 && b2;
+        if (operator.equals("or"))  return b1 || b2;
+
+        return false;
     }
 }

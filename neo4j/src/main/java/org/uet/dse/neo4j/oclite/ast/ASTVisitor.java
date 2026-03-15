@@ -68,9 +68,14 @@ public class ASTVisitor extends OCLBaseVisitor<ASTNode> {
         return visit(ctx.expression());
     }
 
+
     @Override
     public ASTNode visitLiteral(LiteralContext ctx) {
         String text = ctx.getText();
+
+        if (text.equals("null")) {
+            return new ASTNullLiteral();
+        }
 
         if (ctx.Number() != null) {
             if (text.contains(".")) {
@@ -84,10 +89,12 @@ public class ASTVisitor extends OCLBaseVisitor<ASTNode> {
             return new ASTStringLiteral(text.substring(1, text.length() - 1));
         }
 
-        if (text.equals("true")) return new ASTBooleanLiteral(true);
-        if (text.equals("false")) return new ASTBooleanLiteral(false);
-        if (text.equals("null")) return new ASTNullLiteral();
+      return switch (text) {
+        case "true" -> new ASTBooleanLiteral(true);
+        case "false" -> new ASTBooleanLiteral(false);
+        case "self" -> new ASTVar("self");
+        default -> null;
+      };
 
-        return null;
     }
 }

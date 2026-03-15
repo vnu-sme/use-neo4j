@@ -41,22 +41,6 @@ public class ExecutionContext {
         return repo.findNodeById(name);
     }
 
-    public Object resolveCollectionOperation(Object source, String opName, List<Object> args) {
-        if (!(source instanceof Collection)) {
-            source = source == null ? Collections.emptyList() : Collections.singletonList(source);
-        }
-
-        Collection<?> col = (Collection<?>) source;
-        switch (opName.toLowerCase()) {
-            case "size": return (long) col.size();
-            case "isempty": return col.isEmpty();
-            case "notempty": return !col.isEmpty();
-            case "includes": return col.contains(args.get(0));
-            default:
-                throw new UnsupportedOperationException("Chưa hỗ trợ hàm tập hợp: " + opName);
-        }
-    }
-
     public String getModelName() {
         return modelName;
     }
@@ -99,5 +83,34 @@ public class ExecutionContext {
         }
 
         return Collections.emptyList();
+    }
+
+    public Object resolveCollectionOperation(Object source, String opName, List<Object> args) {
+        Collection<?> collection;
+        if (source instanceof Collection) {
+            collection = (Collection<?>) source;
+        } else if (source == null) {
+            collection = Collections.emptyList();
+        } else {
+            collection = Collections.singletonList(source);
+        }
+
+        switch (opName.toLowerCase()) {
+            case "size":
+                return (double) collection.size();
+
+            case "isempty":
+                return collection.isEmpty();
+
+            case "notempty":
+                return !collection.isEmpty();
+
+            case "includes":
+                Object target = args.get(0);
+                return collection.contains(target);
+
+            default:
+                throw new RuntimeException("Not yet supported: " + opName);
+        }
     }
 }

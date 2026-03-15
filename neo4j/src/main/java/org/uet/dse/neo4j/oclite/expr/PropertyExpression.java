@@ -15,6 +15,7 @@ public class PropertyExpression implements ExpressionNode {
     @Override
     public Object evaluate(ExecutionContext ctx) {
         Object source = sourceNode.evaluate(ctx); // return Node (:Member {use_id: "m1"})
+        if (source == null) return null;
         return ctx.resolveProperty(source, propertyName); // return value 10.0
     }
 }
