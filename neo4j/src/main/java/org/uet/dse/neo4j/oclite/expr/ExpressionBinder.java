@@ -126,6 +126,8 @@ public class ExpressionBinder {
                     return new ExistsExpression(sourceNode, itAST.iteratorName, bodyNode);
                 case "collect":
                     return new CollectExpression(sourceNode, itAST.iteratorName, bodyNode);
+                case "any":
+                    return new AnyExpression(sourceNode, itAST.iteratorName, bodyNode);
                 default:
                     throw new RuntimeException("Chưa hỗ trợ Iterator: " + itAST.operation);
             }
