@@ -99,6 +99,12 @@ public class ExecutionContext {
             case "size":
                 return (double) collection.size();
 
+            case "isEmpty":
+                return collection.isEmpty();
+
+            case "isNotEmpty":
+                return !collection.isEmpty();
+
             default:
                 throw new RuntimeException("Not yet supported: " + opName);
         }
