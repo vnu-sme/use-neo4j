@@ -40,9 +40,10 @@ public class Neo4jObjectSnapshotMapper {
                     refGroups.computeIfAbsent(attrName, k -> new TreeMap<>());
                     int index = (idxObj != null) ? ((Number) idxObj).intValue() : 0;
                     refGroups.get(attrName).put(index, refId);
-                } else if (!os.objectReferences.containsKey(attrName)) {
-                    os.objectReferences.put(attrName, new ArrayList<>());
                 }
+//                else if (!os.objectReferences.containsKey(attrName)) {
+//                    os.objectReferences.put(attrName, new ArrayList<>());
+//                }
             } else {
                 if (isColl && valueOnNode != null && !valueOnNode.equals("COLLECTION_EMPTY")) {
                     os.primitiveValues.put(attrName, decodePrimitiveCollection(valueOnNode.toString()));

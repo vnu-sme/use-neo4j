@@ -34,6 +34,9 @@ attributes
     assignedNurses : Set(Nurse)
     collaborationHistory : Sequence(Set(Doctor))
     favNurse: Nurse
+
+    hotNurse: Set(Set(Nurse))
+    gd: Set(Gender)
 operations
     prescribe(p : Patient, m : Medication, quantity : Integer)
     getChiefResident() : Doctor

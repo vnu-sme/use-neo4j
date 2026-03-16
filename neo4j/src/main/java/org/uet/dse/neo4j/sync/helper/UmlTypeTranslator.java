@@ -9,17 +9,28 @@ import java.util.Map;
 public class UmlTypeTranslator {
 
     public static String toTypedOclLiteral(Object value, Type type) {
-        if (value == null || value.toString().equalsIgnoreCase("null") || value.toString().equals("Undefined")) {
+        if (value == null ||
+            value.toString().equalsIgnoreCase("null") ||
+            value.toString().equals("Undefined")) {
             return "Undefined";
         }
 
+        if (value.toString().equals("COLLECTION_EMPTY")) {
+            return getCollectionType(type) + "{}";
+        }
+
         if (type.isKindOfCollection(VoidHandling.EXCLUDE_VOID)) {
-            if (!(value instanceof List)) return getCollectionType(type) + "{}";
+            if (!(value instanceof List)) {
+                List<String> decoded = decodePipedStringToList(value.toString());
+                if (decoded.isEmpty()) return "Undefined";
+                value = decoded;
+            }
 
             List<?> list = (List<?>) value;
+            if (list.isEmpty()) return "Undefined";
+
             Type elemType = ((CollectionType) type).elemType();
             String header = getCollectionType(type);
-
             StringBuilder sb = new StringBuilder(header).append("{");
             for (int i = 0; i < list.size(); i++) {
                 sb.append(toTypedOclLiteral(list.get(i), elemType));
@@ -55,6 +66,19 @@ public class UmlTypeTranslator {
         return "'" + rawString + "'";
     }
 
+    private static List<String> decodePipedStringToList(String raw) {
+        if (raw == null || raw.trim().isEmpty() ||
+            raw.equals("COLLECTION_EMPTY") ||
+            raw.equals("COLLECTION_DATA") ||
+            raw.equals("Undefined")) {
+            return java.util.Collections.emptyList();
+        }
+
+        return java.util.Arrays.stream(raw.split("\\s*\\|\\s*"))
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .collect(java.util.stream.Collectors.toList());
+    }
     public static String toOclLiteral(Object value) {
         return toTypedOclLiteral(value, org.tzi.use.uml.ocl.type.TypeFactory.mkString());
     }

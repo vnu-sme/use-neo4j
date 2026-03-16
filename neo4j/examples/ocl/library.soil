@@ -23,6 +23,8 @@
 !set b3.isAvailable := false
 
 
+Set{Set{n3},Set{n1,n2}}
+
 check
 
 

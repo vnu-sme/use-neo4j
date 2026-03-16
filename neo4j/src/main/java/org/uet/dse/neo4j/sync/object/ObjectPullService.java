@@ -178,12 +178,18 @@ public class ObjectPullService {
 
     Object dbValue = null;
 
+    boolean existsInDb = false;
     if (dbState.objectReferences.containsKey(attrName)) {
       dbValue = dbState.objectReferences.get(attrName);
+      existsInDb = true;
+    } else if (dbState.primitiveValues.containsKey(attrName)) {
+      dbValue = dbState.primitiveValues.get(attrName);
+      existsInDb = true;
     }
 
-    else if (dbState.primitiveValues.containsKey(attrName)) {
-      dbValue = dbState.primitiveValues.get(attrName);
+    if (!existsInDb || dbValue == null || "Undefined".equals(dbValue)) {
+      resetIfDefined(useObj, attrDef, objName, attrName);
+      return;
     }
 
 
@@ -194,10 +200,10 @@ public class ObjectPullService {
 
     String oclExpression = UmlTypeTranslator.toTypedOclLiteral(dbValue, typeDef);
 
-    try {
+    if ("Undefined".equals(oclExpression)) {
+      resetIfDefined(useObj, attrDef, objName, attrName);
+    } else {
       systemApi.setAttributeValue(objName, attrName, oclExpression);
-    } catch (Exception e) {
-      System.err.println("Sync Failed: " + attrName + " = " + oclExpression);
     }
   }
 
