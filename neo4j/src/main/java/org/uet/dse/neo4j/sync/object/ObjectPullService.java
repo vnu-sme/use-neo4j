@@ -134,9 +134,7 @@ public class ObjectPullService {
     });
   }
 
-  /**
-   * sorts participant rows by their stored index, then extracts object names. index ordering preserves the original association-end order from the model.
-   */
+
   private String[] extractTernaryParticipants(Record rec) {
     return rec.get("participants").asList(org.neo4j.driver.Value::asMap).stream().sorted(Comparator.comparingInt(p -> ((Number) p.get("idx")).intValue())).map(p -> (String) p.get("obj")).toArray(String[]::new);
   }

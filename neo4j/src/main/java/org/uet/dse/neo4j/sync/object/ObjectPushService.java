@@ -165,10 +165,11 @@ public class ObjectPushService {
 
     private boolean isObjectReferenceType(org.tzi.use.uml.ocl.type.Type type) {
         if (type.isKindOfClass(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID)) return true;
+
         if (type.isKindOfCollection(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID)) {
-            return ((org.tzi.use.uml.ocl.type.CollectionType) type).elemType()
-                    .isKindOfClass(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID);
+            return isObjectReferenceType(((org.tzi.use.uml.ocl.type.CollectionType) type).elemType());
         }
+
         return false;
     }
 

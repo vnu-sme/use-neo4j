@@ -8,119 +8,120 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Neo4jObjectSnapshotMapper {
-    public static ObjectState toObjectState(Record row) {
-        ObjectState os = new ObjectState();
-        os.name = row.get("name").asString();
-        os.className = row.get("className").asString();
 
-        Map<String, TreeMap<Integer, String>> refGroups = new HashMap<>();
-        List<Object> dataList = row.get("data").asList();
+  public static ObjectState toObjectState(Record row) {
+    ObjectState os = new ObjectState();
+    os.name = row.get("name").asString();
+    os.className = row.get("className").asString();
 
-        for (Object d : dataList) {
-            Map<String, Object> item = (Map<String, Object>) d;
-            String attrName = (String) item.get("attr");
-            if (attrName == null) continue;
+    List<Object> dataList = row.get("data").asList();
 
-            os.attributeTypes.put(attrName, (String) item.get("type"));
+    Map<String, Map<List<Integer>, TreeMap<Integer, String>>> refHelper = new HashMap<>();
 
-            boolean isColl = Boolean.TRUE.equals(item.get("isColl"));
-            boolean isObjRef = Boolean.TRUE.equals(item.get("isObjRef"));
+    for (Object d : dataList) {
+      Map<String, Object> item = (Map<String, Object>) d;
+      String attrName = (String) item.get("attr");
+      if (attrName == null)
+        continue;
 
-            Object valueOnNode = item.get("value"); // Giá trị thô từ Neo4j
+      if (!os.attributeTypes.containsKey(attrName)) {
+        os.attributeTypes.put(attrName, (String) item.get("type"));
+      }
 
-            boolean isRefType = Boolean.TRUE.equals(item.get("isObjRef"))
-                || "COLLECTION_DATA".equals(valueOnNode)
-                || "Object".equals(valueOnNode);
+      boolean isObjRef = Boolean.TRUE.equals(item.get("isObjRef")) || Boolean.TRUE.equals(item.get("nestIsObjRef"));
+      boolean isColl = Boolean.TRUE.equals(item.get("isColl"));
+      Object valueOnNode = item.get("value");
+      String refId = (String) item.get("ref");
 
-            String refId = (String) item.get("ref");
-            Object idxObj = item.get("idx");
+      List<Object> rawPath = (List<Object>) item.get("pathIdx");
+      List<Integer> pathIdx = (rawPath == null) ? Collections.emptyList() : rawPath.stream().map(v -> ((Number) v).intValue()).collect(Collectors.toList());
 
-            if (isRefType) {
-                if (refId != null) {
-                    refGroups.computeIfAbsent(attrName, k -> new TreeMap<>());
-                    int index = (idxObj != null) ? ((Number) idxObj).intValue() : 0;
-                    refGroups.get(attrName).put(index, refId);
-                }
-//                else if (!os.objectReferences.containsKey(attrName)) {
-//                    os.objectReferences.put(attrName, new ArrayList<>());
-//                }
+      Integer itemIdx = item.get("idx") != null ? ((Number) item.get("idx")).intValue() : 0;
+
+      if (isObjRef) {
+        if (refId != null) {
+          refHelper.computeIfAbsent(attrName, k -> new HashMap<>()).computeIfAbsent(pathIdx, k -> new TreeMap<>()).put(itemIdx, refId);
+        }
+      } else {
+        if (!os.primitiveValues.containsKey(attrName) || os.primitiveValues.get(attrName) == null) {
+          if (valueOnNode != null && !valueOnNode.toString().equals("NESTED_COLLECTION") && !valueOnNode.toString().equals("Undefined")) {
+            if (isColl) {
+              os.primitiveValues.put(attrName, decodePrimitiveCollection(valueOnNode.toString()));
             } else {
-                if (isColl && valueOnNode != null && !valueOnNode.equals("COLLECTION_EMPTY")) {
-                    os.primitiveValues.put(attrName, decodePrimitiveCollection(valueOnNode.toString()));
-                } else {
-                    os.primitiveValues.put(attrName, valueOnNode);
-                }
+              os.primitiveValues.put(attrName, valueOnNode);
             }
-            if (isObjRef) {
-                if (refId != null) {
-                    refGroups.computeIfAbsent(attrName, k -> new TreeMap<>());
-                    int index = (idxObj != null) ? ((Number) idxObj).intValue() : 0;
-                    refGroups.get(attrName).put(index, refId);
-                }
-            }
-            else {
-                if (isColl) {
-                    if (valueOnNode != null) {
-                        os.primitiveValues.put(attrName, decodePrimitiveCollection(valueOnNode.toString()));
-                    }
-                } else {
-                    os.primitiveValues.put(attrName, valueOnNode);
-                }
-            }
+          }
         }
-
-        refGroups.forEach((attr, map) -> {
-            os.objectReferences.put(attr, new ArrayList<>(map.values()));
-        });
-
-        return os;
+      }
     }
-    private static List<Object> decodePrimitiveCollection(String raw) {
-        if (raw == null || raw.trim().isEmpty() ||
-            raw.equals("COLLECTION_EMPTY") || raw.equals("Undefined") || raw.equals("COLLECTION_DATA")) {
-            return new ArrayList<>();
+
+    refHelper.forEach((attr, pathMap) -> {
+      os.objectReferences.put(attr, reconstructDeepList(pathMap));
+    });
+
+    return os;
+  }
+
+  private static List<Object> reconstructDeepList(Map<List<Integer>, TreeMap<Integer, String>> pathMap) {
+    if (pathMap.containsKey(Collections.emptyList()) && pathMap.size() == 1) {
+      return new ArrayList<>(pathMap.get(Collections.emptyList()).values());
+    }
+    TreeMap<Integer, List<Object>> groups = new TreeMap<>();
+    for (var entry : pathMap.entrySet()) {
+      List<Integer> path = entry.getKey();
+      if (path.isEmpty())
+        continue;
+
+      int groupIdx = path.get(0);
+      List<Object> subList = new ArrayList<>(entry.getValue().values());
+      groups.put(groupIdx, subList);
+    }
+
+    return new ArrayList<>(groups.values());
+  }
+
+  private static List<Object> decodePrimitiveCollection(String raw) {
+    if (raw == null || raw.trim().isEmpty() || raw.equals("COLLECTION_EMPTY") || raw.equals("Undefined") || raw.equals("COLLECTION_DATA")) {
+      return new ArrayList<>();
+    }
+
+    String[] parts = raw.split("\\s*\\|\\s*");
+    List<Object> result = new ArrayList<>();
+    for (String p : parts) {
+      p = p.trim();
+      if (p.equals("null"))
+        result.add(null);
+      else {
+        try {
+          if (p.contains("."))
+            result.add(Double.parseDouble(p));
+          else
+            result.add(Long.parseLong(p));
+        } catch (NumberFormatException e) {
+          result.add(p);
         }
-
-        String[] parts = raw.split("\\s*\\|\\s*");
-        List<Object> result = new ArrayList<>();
-        for (String p : parts) {
-            p = p.trim();
-            if (p.equals("null")) {
-                result.add(null);
-            } else {
-                try {
-                    if (p.contains(".")) result.add(Double.parseDouble(p));
-                    else result.add(Long.parseLong(p));
-                } catch (NumberFormatException e) {
-                    result.add(p);
-                }
-            }
-        }
-        return result;
+      }
     }
+    return result;
+  }
 
-    static LinkState toBinaryLink(Record rec) {
-        LinkState ls = new LinkState();
-        ls.assocName   = rec.get("assocName").asString();
-        ls.edgeLabel   = rec.get("label").asString();
-        ls.participants = Arrays.asList(
-                rec.get("src").asString(),
-                rec.get("tgt").asString()
-        );
-        return ls;
-    }
+  static LinkState toBinaryLink(Record rec) {
+    LinkState ls = new LinkState();
+    ls.assocName = rec.get("assocName").asString();
+    ls.edgeLabel = rec.get("label").asString();
+    ls.participants = Arrays.asList(rec.get("src").asString(), rec.get("tgt").asString());
+    return ls;
+  }
 
-    static LinkState toLinkObject(Record rec) {
-        LinkState ls = new LinkState();
-        ls.linkObjectName = rec.get("loName").asString();
-        ls.assocName      = rec.get("acName").asString();
-        ls.edgeLabel      = "LinkAssociateWith";
+  static LinkState toLinkObject(Record rec) {
+    LinkState ls = new LinkState();
+    ls.linkObjectName = rec.get("loName").asString();
+    ls.assocName = rec.get("acName").asString();
+    ls.edgeLabel = "LinkAssociateWith";
 
-        rec.get("parts").asList(v -> v.asMap()).stream()
-                .sorted(Comparator.comparingInt(m -> ((Number) m.get("idx")).intValue()))
-                .map(m -> (String) m.get("p"))
-                .forEach(ls.participants::add);
+    rec.get("parts").asList(v -> v.asMap()).stream().sorted(Comparator.comparingInt(m -> ((Number) m.get("idx")).intValue())).map(m -> (String) m.get("p")).forEach(ls.participants::add);
 
-        return ls;
-    }
+    return ls;
+  }
+
 }

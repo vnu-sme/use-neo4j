@@ -106,7 +106,6 @@ public class Neo4jSnapshotQuery {
     ///
 
 
-    // 1. TERNARY ASSOCIATIONS (Chỉ lấy Hub thuộc về Model đã chọn)
     public static final String TERNARY_ASSOCIATIONS =
         "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(meta:MetaNode {name: 'NodeTernaryAssociation'}) " +
             "MATCH (hub)-[:InstanceOf]->(meta) " +
@@ -116,43 +115,45 @@ public class Neo4jSnapshotQuery {
             "       collect({cls: c.name, role: r.sourceClassrole, " +
             "                mult: r.sourceMultiplicity, idx: r.index, type: type(r)}) AS participants";
 
-    // 2. OBJECTS AND ATTRIBUTES (Chỉ lấy Object thuộc về các Class của Model đã chọn)
     public static final String OBJECTS_AND_ATTRIBUTES =
         "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(meta:MetaNode) " +
             "WHERE meta.name IN ['NodeConcreteClass', 'NodeAssociationClass'] " +
             "MATCH (cls)-[:InstanceOf]->(meta) " +
             "MATCH (o)-[:ObjectInstanceOf]->(cls) " +
             "OPTIONAL MATCH (o)-[:ObjectHasAttribute]->(val:AttributeValue)-[:InstanceOf]->(attrDef) " +
-            "OPTIONAL MATCH (val)-[r:objectReference|HasReferenceValue]->(target) " +
+            "OPTIONAL MATCH path = (val)-[:HasNestedCollectionValue*0..5]->(leaf) " +
+            "OPTIONAL MATCH (leaf)-[r:objectReference|HasReferenceValue]->(target) " +
             "RETURN o.use_id AS name, cls.name AS className, " +
             "       collect({ " +
             "         attr:  attrDef.attrName, " +
             "         type:  val.type, " +
             "         value:   val.value, " +
             "         isColl:  val.isCollection, " +
-            "         isObjRef: val.isObjRef, " +
+//            "         isObjRef: val.isObjRef, " +
+            "  isObjRef:  leaf.isObjRef, " +
+            "  nestIsObjRef:  leaf.isObjRef, " +
+            "  primVals:  leaf.primitiveValues, " +
             "         ref:   target.use_id, " +
+            "         pathIdx:  [rel IN relationships(path) | rel.index], " +
             "         idx:   r.index " +
             "       }) AS data";
 
-    // 3. BINARY LINKS (Chỉ lấy Link nối giữa các Object thuộc phạm vi Model đã chọn)
     public static final String BINARY_LINKS =
         "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(meta:MetaNode) " +
             "WHERE meta.name IN ['NodeConcreteClass', 'NodeAssociationClass'] " +
             "MATCH (cls)-[:InstanceOf]->(meta) " +
-            "MATCH (o)-[:ObjectInstanceOf]->(cls) " + // Tìm object thuộc model
-            "MATCH (o)-[r]->(b) " + // Tìm link xuất phát từ object đó
+            "MATCH (o)-[:ObjectInstanceOf]->(cls) " +
+            "MATCH (o)-[r]->(b) " +
             "WHERE type(r) STARTS WITH 'Link' " +
             "  AND NOT coalesce(r.isTernary,        false) " +
             "  AND NOT coalesce(r.isLinkObjectPart, false) " +
             "RETURN r.name AS assocName, type(r) AS label, " +
             "       o.use_id AS src, b.use_id AS tgt";
 
-    // 4. LINK OBJECTS (Chỉ lấy LinkObject của AssociationClass thuộc Model đã chọn)
     public  static final String LINK_OBJECTS =
         "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(meta:MetaNode {name: 'NodeAssociationClass'}) " +
             "MATCH (ac)-[:InstanceOf]->(meta) " +
-            "MATCH (lo)-[:ObjectInstanceOf]->(ac) " + // Tìm instance của AssocClass
+            "MATCH (lo)-[:ObjectInstanceOf]->(ac) " +
             "MATCH (lo)-[r]->(p) WHERE r.isLinkObjectPart = true " +
             "RETURN lo.use_id AS loName, ac.name AS acName, " +
             "       collect({p: p.use_id, idx: r.index}) AS parts";

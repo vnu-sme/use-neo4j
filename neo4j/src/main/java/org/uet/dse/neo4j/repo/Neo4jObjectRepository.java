@@ -31,7 +31,9 @@ public class Neo4jObjectRepository {
 
     Object valueForNeo4j = "Undefined";
     if (value != null && !"Undefined".equals(value)) {
-      if (isColl && value instanceof Map) {
+      if (isNested) {
+        valueForNeo4j = "NESTED_COLLECTION";
+      } else if (isColl && value instanceof Map) {
         Map<String, Object> collMap = (Map<String, Object>) value;
         List<Object> items = (List<Object>) collMap.get("items");
 
@@ -52,7 +54,10 @@ public class Neo4jObjectRepository {
       }
     }
 
-    tx.run(Neo4jObjectQuery.DELETE_ATTRIBUTE_VALUE, Map.of("vId", valNodeId));
+    //tx.run(Neo4jObjectQuery.DELETE_ATTRIBUTE_VALUE, Map.of("vId", valNodeId));
+    tx.run("MATCH (o {use_id: $objName})-[:ObjectHasAttribute]->(val:AttributeValue {name: $valId}) " +
+        "OPTIONAL MATCH (val)-[:HasNestedCollectionValue*1..5]->(n) " +
+        "DETACH DELETE val, n", Map.of("objName", objName, "valId", valNodeId));
 
     tx.run(Neo4jObjectQuery.CREATE_ATTRIBUTE_VALUE, Values.parameters(
         "objName", objName,
@@ -83,40 +88,63 @@ public class Neo4jObjectRepository {
         }
       }
 
-      if (isNested && value instanceof Map) {
-        pushNestedStructure(tx, valNodeId, (Map<String, Object>) value, isObjRef);
+      if (value != null && !"Undefined".equals(value)) {
+        if (isNested && value instanceof Map) {
+          pushNestedStructure(tx, valNodeId, (Map<String, Object>) value, isObjRef);
+        } else if (isColl && isObjRef && value instanceof Map) {
+          createObjectReferences(tx, valNodeId, ((Map) value).get("items"));
+        } else if (isObjRef && !isColl) {
+          createObjectReferences(tx, valNodeId, value);
+        }
       }
 
-      else if (isObjRef && !isColl && !"Undefined".equals(value)) {
-        createObjectReferences(tx, valNodeId, value);
-      }
+//      if (isNested && value instanceof Map) {
+//        pushNestedStructure(tx, valNodeId, (Map<String, Object>) value, isObjRef);
+//      }
+//
+//      else if (isObjRef && !isColl && !"Undefined".equals(value)) {
+//        createObjectReferences(tx, valNodeId, value);
+//      }
+
+
     }
   }
 
   private void pushNestedStructure(TransactionContext tx, String parentId, Map<String, Object> collMap, boolean isObjRef) {
     List<Object> items = (List<Object>) collMap.get("items");
+    if (items == null) return;
 
     for (int i = 0; i < items.size(); i++) {
       Object item = items.get(i);
 
       if (item instanceof Map) {
         Map<String, Object> subColl = (Map<String, Object>) item;
-        String nestedId = "nested_" + UUID.randomUUID();
+        String childId = "nested_" + UUID.randomUUID();
 
-        tx.run(Neo4jObjectQuery.CREATE_NESTED_NODE, Values.parameters("parentId", parentId, "nId", nestedId, "cName", subColl.get("collectionType"), "isNested", true, "idx", i));
+        // Ghi isObjRef vào từng node NestedCollectionValue
+        tx.run(Neo4jObjectQuery.CREATE_NESTED_COLLECTION_NODE,
+            Values.parameters(
+                "nId", childId,
+                "collType", subColl.get("collectionType"),
+                "isObjRef", isObjRef // TRUYỀN GIÁ TRỊ TỪ METADATA XUỐNG
+            ));
 
-        pushNestedStructure(tx, nestedId, subColl, isObjRef);
-      } else {
-        if (isObjRef && item != null && !"Undefined".equals(item)) {
-          tx.run(Neo4jObjectQuery.CREATE_OBJECT_REFERENCE_FROM_ANY, Map.of("srcId", parentId, "tId", item.toString(), "idx", i));
+        tx.run(Neo4jObjectQuery.CONNECT_NESTED_NODE,
+            Values.parameters("parentId", parentId, "childId", childId, "idx", i));
+
+        pushNestedStructure(tx, childId, subColl, isObjRef);
+      }
+      else if (item != null) {
+        if (isObjRef) {
+          tx.run(Neo4jObjectQuery.CONNECT_NESTED_TO_OBJECT,
+              Values.parameters("nId", parentId, "targetId", item.toString(), "idx", i));
         } else {
-          tx.run(Neo4jObjectQuery.SET_PRIMITIVE_VALUE_ON_NODE, Map.of("nId", parentId, "val", item != null ? item : "null"));
-
+          tx.run(Neo4jObjectQuery.SET_PRIMITIVE_VALUE_ON_NODE,
+              Map.of("nId", parentId, "val", item.toString()));
         }
       }
     }
   }
-
   public boolean checkClassExistsInDb(TransactionContext tx, String className) {
     return tx.run(Neo4jObjectQuery.CHECK_CLASS_EXISTS, Map.of("name", className)).hasNext();
   }

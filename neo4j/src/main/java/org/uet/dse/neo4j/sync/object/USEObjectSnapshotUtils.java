@@ -51,7 +51,7 @@ public class USEObjectSnapshotUtils {
             if (isObjectReferenceType(attr.type())) {
 
                 if (normalizedValue instanceof List) {
-                    os.objectReferences.put(attr.name(), (List<String>) normalizedValue);
+                    os.objectReferences.put(attr.name(), (List<Object>) normalizedValue);
                 } else if (normalizedValue != null) {
                     os.objectReferences.put(attr.name(), Collections.singletonList(normalizedValue.toString()));
                 }
@@ -75,9 +75,11 @@ public class USEObjectSnapshotUtils {
 
     private boolean isObjectReferenceType(org.tzi.use.uml.ocl.type.Type type) {
         if (type.isKindOfClass(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID)) return true;
+
         if (type.isKindOfCollection(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID)) {
-            return ((org.tzi.use.uml.ocl.type.CollectionType) type).elemType().isKindOfClass(org.tzi.use.uml.ocl.type.Type.VoidHandling.EXCLUDE_VOID);
+            return isObjectReferenceType(((org.tzi.use.uml.ocl.type.CollectionType) type).elemType());
         }
+
         return false;
     }
 

@@ -129,4 +129,22 @@ public class Neo4jObjectQuery {
         "MATCH (src {name: $valNodeId}), (target {use_id: $targetId}) " +
             "MERGE (src)-[r:HasReferenceValue]->(target) " +
             "SET r.index = $idx";
+
+
+    // Trong Neo4jObjectQuery.java
+    public static final String CREATE_NESTED_COLLECTION_NODE =
+        "CREATE (n:NestedCollectionValue {name: $nId, collectionType: $collType, isObjRef: $isObjRef})"; // THÊM isObjRef
+
+    public static final String CONNECT_NESTED_NODE =
+        "MATCH (p {name: $parentId}), (c {name: $childId}) " +
+            "CREATE (p)-[r:HasNestedCollectionValue {index: $idx}]->(c)";
+
+    public static final String CONNECT_NESTED_TO_OBJECT =
+        "MATCH (n {name: $nId}), (t {use_id: $targetId}) " +
+            "CREATE (n)-[r:HasReferenceValue {index: $idx}]->(t)";
+
+    public static final String DELETE_NESTED_TREE =
+        "MATCH (o {use_id: $objName})-[:ObjectHasAttribute]->(val:AttributeValue {name: $valId}) " +
+            "OPTIONAL MATCH (val)-[:HasNestedCollectionValue*1..10]->(nested) " +
+            "DETACH DELETE nested";
 }

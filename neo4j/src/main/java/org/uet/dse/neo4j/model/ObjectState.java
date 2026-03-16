@@ -6,14 +6,11 @@ public class ObjectState {
     public String name;
     public String className;
 
-    // attrName -> Giá trị (Primitive hoặc mảng Primitive)
     public Map<String, Object> primitiveValues = new HashMap<>();
 
-    // attrName -> Kiểu dữ liệu thực tế (vd: "Int", "Double", "String", "Sex"...)
     public Map<String, String> attributeTypes = new HashMap<>();
 
-    // attrName -> Danh sách tên Object tham chiếu
-    public Map<String, List<String>> objectReferences = new HashMap<>();
+    public Map<String, List<Object>> objectReferences = new HashMap<>();
 
     private Map<String, Object> rawData = new HashMap<>();
 
