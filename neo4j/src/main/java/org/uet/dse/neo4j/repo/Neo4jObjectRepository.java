@@ -110,7 +110,7 @@ public class Neo4jObjectRepository {
     }
   }
 
-  private void pushNestedStructure(TransactionContext tx, String parentId, Map<String, Object> collMap, boolean isObjRef) {
+  private void pushNestedStructureold(TransactionContext tx, String parentId, Map<String, Object> collMap, boolean isObjRef) {
     List<Object> items = (List<Object>) collMap.get("items");
     if (items == null) return;
 
@@ -143,6 +143,55 @@ public class Neo4jObjectRepository {
               Map.of("nId", parentId, "val", item.toString()));
         }
       }
+    }
+  }
+
+  private void pushNestedStructure(TransactionContext tx, String parentId, Map<String, Object> collMap, boolean isObjRef) {
+    List<Object> items = (List<Object>) collMap.get("items");
+    if (items == null) return;
+
+    // Danh sách để gom các giá trị nguyên thủy ở cấp độ hiện tại
+    List<Object> primitiveLeafItems = new ArrayList<>();
+
+    for (int i = 0; i < items.size(); i++) {
+      Object item = items.get(i);
+
+      if (item instanceof Map) {
+        // --- TRƯỜNG HỢP: MẢNG CON (Lồng tiếp) ---
+        Map<String, Object> subColl = (Map<String, Object>) item;
+        String childId = "nested_" + UUID.randomUUID();
+
+        tx.run(Neo4jObjectQuery.CREATE_NESTED_COLLECTION_NODE,
+            Values.parameters("nId", childId, "collType", subColl.get("collectionType"), "isObjRef", isObjRef));
+
+        tx.run(Neo4jObjectQuery.CONNECT_NESTED_NODE,
+            Values.parameters("parentId", parentId, "childId", childId, "idx", i));
+
+        // Đệ quy đào sâu
+        pushNestedStructure(tx, childId, subColl, isObjRef);
+      }
+      else if (item != null) {
+        // --- TRƯỜNG HỢP: PHẦN TỬ CUỐI (LÁ) ---
+        if (isObjRef) {
+          // Nếu là tham chiếu đối tượng: Nối cạnh (Giữ nguyên logic cũ vì cạnh không bị đè)
+          tx.run(Neo4jObjectQuery.CONNECT_NESTED_TO_OBJECT,
+              Values.parameters("nId", parentId, "targetId", item.toString(), "idx", i));
+        } else {
+          // Nếu là nguyên thủy: Thêm vào danh sách chờ để gộp chuỗi
+          primitiveLeafItems.add(item);
+        }
+      }
+    }
+
+    // SAU VÒNG LẶP: Nếu có giá trị nguyên thủy, gộp chúng lại và SET một lần duy nhất
+    if (!primitiveLeafItems.isEmpty()) {
+      String joinedValues = primitiveLeafItems.stream()
+          .map(Object::toString)
+          .collect(java.util.stream.Collectors.joining(" | "));
+
+      // Ghi chuỗi "1 | 2 | 3" vào thuộc tính value của node hiện tại (parentId)
+      tx.run(Neo4jObjectQuery.SET_PRIMITIVE_VALUE_ON_NODE,
+          Values.parameters("nId", parentId, "val", joinedValues));
     }
   }
   public boolean checkClassExistsInDb(TransactionContext tx, String className) {

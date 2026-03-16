@@ -16,93 +16,107 @@ public class Neo4jObjectSnapshotMapper {
 
     List<Object> dataList = row.get("data").asList();
 
-    Map<String, Map<List<Integer>, TreeMap<Integer, String>>> refHelper = new HashMap<>();
+    Map<String, Map<List<Integer>, Object>> attrStructureHelper = new HashMap<>();
 
     for (Object d : dataList) {
       Map<String, Object> item = (Map<String, Object>) d;
       String attrName = (String) item.get("attr");
-      if (attrName == null)
-        continue;
+      if (attrName == null) continue;
 
-      if (!os.attributeTypes.containsKey(attrName)) {
-        os.attributeTypes.put(attrName, (String) item.get("type"));
-      }
+      os.attributeTypes.putIfAbsent(attrName, (String) item.get("type"));
 
       boolean isObjRef = Boolean.TRUE.equals(item.get("isObjRef")) || Boolean.TRUE.equals(item.get("nestIsObjRef"));
       boolean isColl = Boolean.TRUE.equals(item.get("isColl"));
-      Object valueOnNode = item.get("value");
+      Object leafVal = item.get("leafVal");
       String refId = (String) item.get("ref");
 
       List<Object> rawPath = (List<Object>) item.get("pathIdx");
-      List<Integer> pathIdx = (rawPath == null) ? Collections.emptyList() : rawPath.stream().map(v -> ((Number) v).intValue()).collect(Collectors.toList());
+      List<Integer> pathIdx = (rawPath == null) ? Collections.emptyList() :
+          rawPath.stream().map(v -> ((Number) v).intValue()).collect(Collectors.toList());
 
-      Integer itemIdx = item.get("idx") != null ? ((Number) item.get("idx")).intValue() : 0;
+      attrStructureHelper.putIfAbsent(attrName, new HashMap<>());
 
-      if (isObjRef) {
-        if (refId != null) {
-          refHelper.computeIfAbsent(attrName, k -> new HashMap<>()).computeIfAbsent(pathIdx, k -> new TreeMap<>()).put(itemIdx, refId);
-        }
-      } else {
-        if (!os.primitiveValues.containsKey(attrName) || os.primitiveValues.get(attrName) == null) {
-          if (valueOnNode != null && !valueOnNode.toString().equals("NESTED_COLLECTION") && !valueOnNode.toString().equals("Undefined")) {
-            if (isColl) {
-              os.primitiveValues.put(attrName, decodePrimitiveCollection(valueOnNode.toString()));
-            } else {
-              os.primitiveValues.put(attrName, valueOnNode);
-            }
-          }
-        }
+      if (isObjRef && refId != null) {
+        attrStructureHelper.get(attrName).putIfAbsent(pathIdx, new TreeMap<Integer, String>());
+        int itemIdx = item.get("idx") != null ? ((Number) item.get("idx")).intValue() : 0;
+        ((TreeMap<Integer, String>) attrStructureHelper.get(attrName).get(pathIdx)).put(itemIdx, refId);
+      }
+      else if (!isObjRef && isColl && leafVal != null && !leafVal.toString().equals("NESTED_COLLECTION")) {
+        attrStructureHelper.get(attrName).put(pathIdx, decodePrimitiveCollection(leafVal.toString()));
+      }
+      else if (!isObjRef && !isColl && leafVal != null && !leafVal.toString().equals("NESTED_COLLECTION") && !leafVal.toString().equals("Undefined")) {
+
+        os.primitiveValues.putIfAbsent(attrName, leafVal);
       }
     }
 
-    refHelper.forEach((attr, pathMap) -> {
-      os.objectReferences.put(attr, reconstructDeepList(pathMap));
+    attrStructureHelper.forEach((attrName, pathMap) -> {
+      List<Object> deepList = reconstructDeepListGeneric(pathMap);
+
+      boolean isActuallyRef = !isPrimitiveType(os.attributeTypes.get(attrName));
+
+      if (isActuallyRef) {
+        os.objectReferences.put(attrName, deepList);
+      } else {
+        if (!deepList.isEmpty()) {
+          os.primitiveValues.put(attrName, deepList);
+        }
+      }
     });
 
     return os;
   }
 
-  private static List<Object> reconstructDeepList(Map<List<Integer>, TreeMap<Integer, String>> pathMap) {
-    if (pathMap.containsKey(Collections.emptyList()) && pathMap.size() == 1) {
-      return new ArrayList<>(pathMap.get(Collections.emptyList()).values());
+  private static List<Object> reconstructDeepListGeneric(Map<List<Integer>, Object> pathMap) {
+    if (pathMap.isEmpty()) return Collections.emptyList();
+
+    if (pathMap.size() == 1 && pathMap.containsKey(Collections.emptyList())) {
+      return finalizeCollectionItem(pathMap.get(Collections.emptyList()));
     }
-    TreeMap<Integer, List<Object>> groups = new TreeMap<>();
+
+    TreeMap<Integer, Object> tree = new TreeMap<>();
     for (var entry : pathMap.entrySet()) {
       List<Integer> path = entry.getKey();
-      if (path.isEmpty())
-        continue;
+      if (path.isEmpty()) continue;
 
       int groupIdx = path.get(0);
-      List<Object> subList = new ArrayList<>(entry.getValue().values());
-      groups.put(groupIdx, subList);
+      tree.put(groupIdx, finalizeCollectionItem(entry.getValue()));
     }
+    return new ArrayList<>(tree.values());
+  }
 
-    return new ArrayList<>(groups.values());
+  private static List<Object> finalizeCollectionItem(Object data) {
+    if (data instanceof TreeMap) {
+      return new ArrayList<>(((TreeMap<?, ?>) data).values());
+    } else if (data instanceof List) {
+      return (List<Object>) data;
+    }
+    return Collections.singletonList(data);
+  }
+
+  private static boolean isPrimitiveType(String type) {
+    if (type == null) return false;
+    return Arrays.asList("Int", "Integer", "Double", "Real", "Boolean", "String").contains(type)
+        || type.startsWith("Set(") || type.startsWith("Sequence(");
   }
 
   private static List<Object> decodePrimitiveCollection(String raw) {
     if (raw == null || raw.trim().isEmpty() || raw.equals("COLLECTION_EMPTY") || raw.equals("Undefined") || raw.equals("COLLECTION_DATA")) {
       return new ArrayList<>();
     }
-
-    String[] parts = raw.split("\\s*\\|\\s*");
-    List<Object> result = new ArrayList<>();
-    for (String p : parts) {
-      p = p.trim();
-      if (p.equals("null"))
-        result.add(null);
-      else {
-        try {
-          if (p.contains("."))
-            result.add(Double.parseDouble(p));
-          else
-            result.add(Long.parseLong(p));
-        } catch (NumberFormatException e) {
-          result.add(p);
-        }
-      }
+    return Arrays.stream(raw.split("\\s*\\|\\s*"))
+        .map(s -> s.trim().equals("null") ? null : convertStringToTypedObject(s.trim()))
+        .collect(Collectors.toList());
+  }
+  private static Object convertStringToTypedObject(String s) {
+    try {
+      if (s.contains(".")) return Double.parseDouble(s);
+      return Long.parseLong(s);
+    } catch (Exception e) {
+      if (s.equalsIgnoreCase("true")) return true;
+      if (s.equalsIgnoreCase("false")) return false;
+      return s;
     }
-    return result;
   }
 
   static LinkState toBinaryLink(Record rec) {

@@ -124,19 +124,22 @@ public class Neo4jSnapshotQuery {
             "OPTIONAL MATCH path = (val)-[:HasNestedCollectionValue*0..5]->(leaf) " +
             "OPTIONAL MATCH (leaf)-[r:objectReference|HasReferenceValue]->(target) " +
             "RETURN o.use_id AS name, cls.name AS className, " +
-            "       collect({ " +
-            "         attr:  attrDef.attrName, " +
-            "         type:  val.type, " +
-            "         value:   val.value, " +
-            "         isColl:  val.isCollection, " +
+            "  collect({ " +
+            "  attr:  attrDef.attrName, " +
+            "  type:  val.type, " +
+            "  value:   val.value, " +
+            "  leafVal:   leaf.value, " +
+            "  isColl:  val.isCollection, " +
 //            "         isObjRef: val.isObjRef, " +
             "  isObjRef:  leaf.isObjRef, " +
             "  nestIsObjRef:  leaf.isObjRef, " +
             "  primVals:  leaf.primitiveValues, " +
-            "         ref:   target.use_id, " +
-            "         pathIdx:  [rel IN relationships(path) | rel.index], " +
-            "         idx:   r.index " +
-            "       }) AS data";
+            "  ref:   target.use_id, " +
+            "  pathIdx:  [rel IN relationships(path) | rel.index], " +
+            "  leafCollType: leaf.collectionType, " +
+            "  rootCollType: val.collectionType, " +
+            "  idx:   r.index " +
+            "  }) AS data";
 
     public static final String BINARY_LINKS =
         "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(meta:MetaNode) " +
