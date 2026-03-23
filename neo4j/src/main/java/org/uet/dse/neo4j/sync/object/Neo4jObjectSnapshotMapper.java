@@ -133,8 +133,21 @@ public class Neo4jObjectSnapshotMapper {
     ls.assocName = rec.get("acName").asString();
     ls.edgeLabel = "LinkAssociateWith";
 
-    rec.get("parts").asList(v -> v.asMap()).stream().sorted(Comparator.comparingInt(m -> ((Number) m.get("idx")).intValue())).map(m -> (String) m.get("p")).forEach(ls.participants::add);
+    List<Map<String, Object>> parts = rec.get("parts").asList(v -> v.asMap());
 
+    List<String> sortedParticipants = parts.stream()
+        .sorted((m1, m2) -> {
+          Object idx1 = m1.get("idx");
+          Object idx2 = m2.get("idx");
+          int i1 = (idx1 instanceof Number) ? ((Number) idx1).intValue() : 0;
+          int i2 = (idx2 instanceof Number) ? ((Number) idx2).intValue() : 0;
+          return Integer.compare(i1, i2);
+        })
+        .map(m -> (String) m.get("p"))
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+
+    ls.participants.addAll(sortedParticipants);
     return ls;
   }
 

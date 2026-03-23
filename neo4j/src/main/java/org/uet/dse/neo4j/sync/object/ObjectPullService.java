@@ -10,6 +10,7 @@ import org.tzi.use.uml.ocl.type.Type;
 import org.tzi.use.uml.sys.MObject;
 import org.tzi.use.uml.sys.MSystem;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
+import org.uet.dse.neo4j.model.FullObjectSnapshot;
 import org.uet.dse.neo4j.model.LinkState;
 import org.uet.dse.neo4j.model.ObjectState;
 import org.uet.dse.neo4j.manager.WorkLogManager;
@@ -62,18 +63,65 @@ public class ObjectPullService {
       WorkLogManager.getInstance().log("OBJECT_PULL_DELETE", "Removed object from USE: " + objName);
     }
   }
-
   private void createMissingObjects(ObjectDiff diff) throws Exception {
+    List<String> associationClassQueue = new ArrayList<>();
+
     for (String objName : diff.neo4jOnlyObjects) {
       ObjectState dbObj = diff.neo4jSnapshot.objects.get(objName);
+      if (dbObj == null) continue;
 
-      if (system.model().getClass(dbObj.className) != null) {
-        systemApi.createObject(dbObj.className, objName);
-        WorkLogManager.getInstance().log("OBJECT_PULL_CREATE", "Created object: " + objName);
-      } else {
+      if (system.model().getClass(dbObj.className) == null) {
         WorkLogManager.getInstance().log("ERROR", "Class missing for object: " + objName);
+        continue;
+      }
+
+      try {
+        systemApi.createObject(dbObj.className, objName);
+        WorkLogManager.getInstance().log("OBJECT_PULL_CREATE", "Created normal object: " + objName);
+      } catch (Exception e) {
+        associationClassQueue.add(objName);
       }
     }
+
+    for (String objName : associationClassQueue) {
+      ObjectState dbObj = diff.neo4jSnapshot.objects.get(objName);
+
+      LinkState ls = findLinkStateForLinkObject(diff.neo4jSnapshot, objName);
+
+      if (ls != null && ls.participants != null && !ls.participants.isEmpty()) {
+        try {
+          String[] participants = ls.participants.toArray(new String[0]);
+
+          systemApi.createLinkObject(dbObj.className, objName, participants);
+          WorkLogManager.getInstance().log("OBJECT_PULL_CREATE", "Created LinkObject: " + objName);
+        } catch (Exception e) {
+          WorkLogManager.getInstance().log("ERROR", "Failed to create LinkObject " + objName + ": " + e.getMessage());
+          try {
+            String[] arr = ls.participants.toArray(new String[0]);
+
+            for (int i = 0; i < arr.length / 2; i++) {
+              String temp = arr[i];
+              arr[i] = arr[arr.length - 1 - i];
+              arr[arr.length - 1 - i] = temp;
+            }
+
+            String[] participants = arr;
+            systemApi.createLinkObject(dbObj.className, objName, participants);
+          } catch (Exception exception) {
+            WorkLogManager.getInstance().log("ERROR", "Failed to create LinkObject " + objName + ": " + e.getMessage());
+          }
+        }
+      } else {
+        WorkLogManager.getInstance().log("ERROR", "Cannot create LinkObject " + objName + ": Missing participant links in snapshot.");
+      }
+    }
+  }
+
+  private LinkState findLinkStateForLinkObject(FullObjectSnapshot snapshot, String loName) {
+    return snapshot.links.values().stream()
+        .filter(ls -> loName.equals(ls.linkObjectName))
+        .findFirst()
+        .orElse(null);
   }
 
   private void syncAllObjectAttributes(ObjectDiff diff) {
@@ -151,7 +199,7 @@ public class ObjectPullService {
   // ── Safe creation wrappers ────────────────────────────────────────────────────
 
   /**
-   * Swallows duplicate-link exceptions, which are expected when pulling into a state that already partially exists. All other failures are logged.
+   * swallow duplicatelink exceptions, which are expected when pulling into a state that already partially exists. All other failures are logged.
    */
   private void createLinkSafely(UseSystemApi api, String assocName, String[] participants) {
     try {
