@@ -90,8 +90,8 @@ public class ModelSyncCoordinator {
             ModelDiff diff = modelSnapshotsAnalyzer.compareWithNeo4j();
             //assums that model name doesnt matter
             KusakabeModelDiff kusakabeModelDiff = (KusakabeModelDiff) diff;
-
-            if (kusakabeModelDiff.hasConflict()) {
+            List<String> modelNames = getAllModelNamesFromDb();
+            if (kusakabeModelDiff.hasConflict() && modelNames.contains(useSession.system().model().name())) {
                 JOptionPane.showMessageDialog(
                     null,
                     "The model is in conflict.",
@@ -219,7 +219,32 @@ public class ModelSyncCoordinator {
                 return res.single().get("name").asString();
             }
         }
-        return "UntitledModel"; // Fallback nếu không tìm thấy
+        return "UntitledModel";
+    }
+
+    public List<String> getAllModelNamesFromDb() {
+        List<String> modelNames = new ArrayList<>();
+        String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
+
+        try (org.neo4j.driver.Session session = Neo4jDriverManager.getInstance().getDriver().session(
+            org.neo4j.driver.SessionConfig.forDatabase(dbName))) {
+
+            String cypher = "MATCH (m:ManageModel) RETURN m.name AS name ORDER BY name ASC";
+
+            Result res = session.run(cypher);
+
+            while (res.hasNext()) {
+                Record record = res.next();
+                String name = record.get("name").asString();
+                if (name != null && !name.isEmpty()) {
+                    modelNames.add(name);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching model names: " + e.getMessage());
+        }
+
+        return modelNames;
     }
 
 

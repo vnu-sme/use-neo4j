@@ -74,6 +74,14 @@
                 menuitem="Incremental model update"
                 id="org.uet.dse.neo4j.action_phase2.ActionOpenIncrementalUpdate">
         </action>
+        <action label="Model trafo"
+                icon="images/rtl.png"
+                class="org.uet.dse.neo4j.action_phase2.ActionTggTransformation"
+                tooltip="Model trafo"
+                menu="Neo4j Plugin phase 2"
+                menuitem="Model trafo"
+                id="org.uet.dse.neo4j.action_phase2.ActionTggTransformation">
+        </action>
 
     </actions>
 </plugin>
