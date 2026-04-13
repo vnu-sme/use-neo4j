@@ -19,7 +19,6 @@ checkSource(
 	fr: FamilyRegister
 	fm: Family
 	(fr, fm): FamilyRegistration
-	[fm.name <> Undefined]
 ){
 	father: FamilyMember
 	(fm, father): Father
@@ -47,7 +46,6 @@ checkSource(
 	fr: FamilyRegister
 	fm: Family
 	(fr, fm): FamilyRegistration
-	[fm.name <> Undefined]
 ){
 	mother: FamilyMember
 	(fm, mother): Mother
@@ -75,7 +73,6 @@ checkSource(
 	fr: FamilyRegister
 	fm: Family
 	(fr, fm): FamilyRegistration
-	[fm.name <> Undefined]
 ){
 	son: FamilyMember
 	(fm, son): Sons

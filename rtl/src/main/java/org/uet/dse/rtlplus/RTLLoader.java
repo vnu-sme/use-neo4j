@@ -32,7 +32,7 @@ public class RTLLoader {
 	private MModel model2;
 	private MModel mergedModel;
 	private MModel diagramModel;
-	private MRuleCollection ruleCollection;
+	public MRuleCollection ruleCollection;
 	private String modelName;
 	private StringBuilder useContent = new StringBuilder();
 	
@@ -43,6 +43,9 @@ public class RTLLoader {
 		this.trgModelFile = trgModelFile;
 		this.tggName = tggName;
 		this.logWriter = logWriter;
+	}
+	public MRuleCollection getRuleCollection() {
+		return this.ruleCollection;
 	}
 	
 	public boolean run() {
