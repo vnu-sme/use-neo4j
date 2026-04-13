@@ -1,7 +1,6 @@
 package org.uet.dse.neo4j.gui;
 
 import org.neo4j.driver.Session;
-import org.uet.dse.neo4j.model_trafo.TggCypherGenerator;
 import org.uet.dse.rtlplus.RTLLoader;
 import org.uet.dse.rtlplus.mm.MTggRule;
 
@@ -177,14 +176,7 @@ public class TggTransformationDialog extends JDialog {
             listModel.clear();
             ruleQueriesMap.clear();
 
-            TggCypherGenerator queryGen = new TggCypherGenerator(srcModelName, trgModelName);
 
-            // 1. Sinh query cho từng luật
-            for (MTggRule rule : loader.ruleCollection.getRuleList()) {
-                listModel.addElement(rule.getName());
-                String cypher = queryGen.generateQueriesForRule(rule);
-                ruleQueriesMap.put(rule.getName(), cypher);
-            }
 
             // 2. Hiển thị thông tin tổng quan
             txtCypherPreview.setText("// Select a rule on the left to see its Cypher queries.\n\n" +
