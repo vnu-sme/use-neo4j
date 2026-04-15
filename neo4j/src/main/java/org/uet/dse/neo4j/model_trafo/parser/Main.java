@@ -1,4 +1,4 @@
-package org.uet.dse.neo4j.model_trafo;
+package org.uet.dse.neo4j.model_trafo.parser;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;

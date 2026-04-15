@@ -1,5 +1,7 @@
 package org.uet.dse.neo4j.model_trafo;
 
+import org.uet.dse.neo4j.model_trafo.parser.*;
+
 import java.util.*;
 
 public class CorrMetamodelGenerator {

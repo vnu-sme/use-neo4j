@@ -1,4 +1,4 @@
-package org.uet.dse.neo4j.model_trafo;
+package org.uet.dse.neo4j.model_trafo.parser;
 
 public class CorrDecl implements TGGElement {
     public String nodeARef;   // Ví dụ: fr hoặc fm*

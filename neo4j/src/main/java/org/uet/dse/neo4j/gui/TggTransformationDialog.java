@@ -7,14 +7,15 @@ import org.uet.dse.neo4j.TGGLexer;
 import org.uet.dse.neo4j.TGGParser;
 import org.uet.dse.neo4j.model_trafo.*;
 
-import org.uet.dse.rtlplus.RTLLoader;
+import org.uet.dse.neo4j.model_trafo.parser.TGGBuildVisitor;
+import org.uet.dse.neo4j.model_trafo.parser.TGGRule;
+import org.uet.dse.neo4j.model_trafo.parser.TGGTransformation;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Paths;
@@ -128,7 +129,6 @@ public class TggTransformationDialog extends JDialog {
         pnlBottom.add(pnlButtons, BorderLayout.SOUTH);
         add(pnlBottom, BorderLayout.SOUTH);
 
-        // --- EVENTS ---
         lstRules.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 updatePreview();
@@ -149,7 +149,7 @@ public class TggTransformationDialog extends JDialog {
         if (selected == null) return;
 
         if (selected.equals(">> GLOBAL: Corr Metamodel")) {
-            tabbedPreview.setSelectedIndex(0); // Chuyển sang tab Metamodel
+            tabbedPreview.setSelectedIndex(0);
             txtMetaQueryPreview.setText(metaModelQuery);
             txtMatchQueryPreview.setText("// Not applicable for Metamodel");
             txtExecQueryPreview.setText("// Not applicable for Metamodel");
@@ -177,7 +177,6 @@ public class TggTransformationDialog extends JDialog {
         executingQueries.clear();
 
         try {
-            // BƯỚC 1: Parse file TGG bằng ANTLR
             appendLog("Đang đọc và phân tích cú pháp file TGG: " + tggPath);
             TGGTransformation trans = parseTGG(tggPath);
             appendLog("Phân tích thành công Transformation: " + trans.name);

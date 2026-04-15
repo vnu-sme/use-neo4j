@@ -82,6 +82,14 @@
                 menuitem="Model trafo"
                 id="org.uet.dse.neo4j.action_phase2.ActionTggTransformation">
         </action>
+        <action label="TGG1"
+                icon="images/rtl.png"
+                class="org.uet.dse.neo4j.action_phase2.ActionTggCorrManagement"
+                tooltip="TGG1"
+                menu="Neo4j Plugin phase 2"
+                menuitem="TGG1"
+                id="org.uet.dse.neo4j.action_phase2.ActionTggCorrManagement">
+        </action>
 
     </actions>
 </plugin>
