@@ -171,7 +171,7 @@ public class ModelSyncCoordinator {
 
         SwingUtilities.invokeLater(() -> {
             try {
-                FullModelSnapshot fullModelSnapshot = getFullModelSnapshotFromNeo4j(selectedModelName);
+                FullModelSnapshot fullModelSnapshot = getFullModelSnapshotFromNeo4jObsolete();//getFullModelSnapshotFromNeo4j(selectedModelName);
                 Map<String, ClassState> dbSnapshot = fullModelSnapshot.classes;
                 if (dbSnapshot.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "No model found in Database.");

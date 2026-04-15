@@ -1,8 +1,6 @@
 package org.uet.dse.neo4j.model_trafo;
 
-import java.util.ArrayList;
 import org.uet.dse.neo4j.TGGBaseVisitor;
-import org.uet.dse.neo4j.TGGBaseVisitor.*;
 import org.uet.dse.neo4j.TGGParser;
 
 public class TGGBuildVisitor extends TGGBaseVisitor<Object> {
@@ -25,30 +23,34 @@ public class TGGBuildVisitor extends TGGBaseVisitor<Object> {
     public TGGRule visitRuleSpec(TGGParser.RuleSpecContext ctx) {
         TGGRule rule = new TGGRule();
         rule.name = ctx.ID().getText();
-        rule.source = parseBlock(ctx.sourceBlock().listElements(0), ctx.sourceBlock().listElements(1));
-        rule.target = parseBlock(ctx.targetBlock().listElements(0), ctx.targetBlock().listElements(1));
-        rule.correspondence = parseBlock(ctx.corrBlock().listElements(0), ctx.corrBlock().listElements(1));
+
+        // Sử dụng nhãn trực tiếp từ parser context
+        rule.source = parseBlock(ctx.sourceBlock().lhs, ctx.sourceBlock().rhs);
+        rule.target = parseBlock(ctx.targetBlock().lhs, ctx.targetBlock().rhs);
+        rule.correspondence = parseBlock(ctx.corrBlock().lhs, ctx.corrBlock().rhs);
+
         return rule;
     }
 
-    private TGGBlock parseBlock(TGGParser.ListElementsContext contextCtx, TGGParser.ListElementsContext produceCtx) {
+    private TGGBlock parseBlock(TGGParser.ListElementsContext lhsCtx, TGGParser.ListElementsContext rhsCtx) {
         TGGBlock block = new TGGBlock();
-        if (contextCtx != null) {
-            for (TGGParser.ElementContext e : contextCtx.element()) {
-                Object result = visit(e);
-                if (result instanceof TGGElement) {
-                    block.context.add((TGGElement) result);
-                }
+
+        // Xử lý LHS (Phần trong ngoặc tròn)
+        if (lhsCtx != null) {
+            for (TGGParser.ElementContext e : lhsCtx.element()) {
+                Object res = visit(e);
+                if (res instanceof TGGElement) block.lhs.add((TGGElement) res);
             }
         }
-        if (produceCtx != null) {
-            for (TGGParser.ElementContext e : produceCtx.element()) {
-                Object result = visit(e);
-                if (result instanceof TGGElement) {
-                    block.produce.add((TGGElement) result);
-                }
+
+        // Xử lý RHS (Phần trong ngoặc nhọn)
+        if (rhsCtx != null) {
+            for (TGGParser.ElementContext e : rhsCtx.element()) {
+                Object res = visit(e);
+                if (res instanceof TGGElement) block.rhs.add((TGGElement) res);
             }
         }
+
         return block;
     }
 
@@ -78,15 +80,22 @@ public class TGGBuildVisitor extends TGGBaseVisitor<Object> {
     @Override
     public CorrDecl visitCorrespondenceDecl(TGGParser.CorrespondenceDeclContext ctx) {
         CorrDecl corr = new CorrDecl();
-        // take nodeA, nodeB (maybe  *)
-        corr.nodeA = ctx.idWithStar(0).getText();
-        corr.nodeB = ctx.idWithStar(1).getText();
 
-        // alias info
-        corr.aliasA = ctx.ID(0).getText();
-        corr.aliasB = ctx.ID(1).getText();
-        corr.corrName = ctx.ID(2).getText();
-        corr.corrType = ctx.ID(3).getText();
+        // 1. Lấy tham chiếu Node nguồn và đích (có thể chứa dấu *)
+        // idWithStar(0) tương ứng với phần tử đầu tiên trong cặp ngoặc đầu
+        // idWithStar(1) tương ứng với phần tử thứ hai
+        corr.nodeARef = ctx.idWithStar(0).getText(); // Ví dụ: "fm*"
+        corr.nodeBRef = ctx.idWithStar(1).getText(); // Ví dụ: "mp" (Đã sửa lỗi corr.no)
+
+        // 2. Lấy các Alias trong phần 'as (ID, ID)'
+        // ID(0) là ID đầu tiên xuất hiện bên ngoài idWithStar
+        corr.aliasA = ctx.ID(0).getText(); // Ví dụ: "f"
+        corr.aliasB = ctx.ID(1).getText(); // Ví dụ: "mp"
+
+        // 3. Lấy tên biến quan hệ và kiểu quan hệ trong phần 'in ID : ID'
+        corr.corrName = ctx.ID(2).getText(); // Ví dụ: "f2mp"
+        corr.corrType = ctx.ID(3).getText(); // Ví dụ: "F2MP"
+
         return corr;
     }
 

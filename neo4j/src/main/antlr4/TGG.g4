@@ -16,9 +16,9 @@ ruleSpec : 'rule' ID
            'end';
 
 // component block
-sourceBlock : 'checkSource' '(' listElements? ')' '{' listElements? '}';
-targetBlock : 'checkTarget' '(' listElements? ')' '{' listElements? '}';
-corrBlock   : 'checkCorr'   '(' listElements? ')' '{' listElements? '}';
+sourceBlock : 'checkSource' '(' lhs=listElements? ')' '{' rhs=listElements? '}';
+targetBlock : 'checkTarget' '(' lhs=listElements? ')' '{' rhs=listElements? '}';
+corrBlock   : 'checkCorr'   '(' lhs=listElements? ')' '{' rhs=listElements? '}';
 
 // element list
 listElements : element (element)*;

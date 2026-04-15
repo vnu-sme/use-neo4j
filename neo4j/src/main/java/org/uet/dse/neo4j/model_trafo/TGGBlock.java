@@ -4,6 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TGGBlock {
-    public List<TGGElement> context = new ArrayList<>();   // inside (...)
-    public List<TGGElement> produce = new ArrayList<>();   // inside{...}
+    public List<TGGElement> lhs = new ArrayList<>();   // inside (...)
+    public List<TGGElement> rhs = new ArrayList<>();   // inside{...}
 }
