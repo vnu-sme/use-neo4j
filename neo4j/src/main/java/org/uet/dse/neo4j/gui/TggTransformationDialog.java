@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.uet.dse.neo4j.TGGLexer;
 import org.uet.dse.neo4j.TGGParser;
+import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.model_trafo.*;
 
 import org.uet.dse.neo4j.model_trafo.parser.TGGBuildVisitor;
@@ -16,8 +17,6 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,22 +27,30 @@ public class TggTransformationDialog extends JDialog {
     private JTextField txtSrcUsePath, txtTrgUsePath;
     private JList<String> lstRules;
 
-    // Tách riêng các vùng hiển thị query
     private JTextArea txtMetaQueryPreview;
-    private JTextArea txtMatchQueryPreview;
-    private JTextArea txtExecQueryPreview;
+    private JComboBox<String> cbActiveMode; // Chế độ thực thi chính
 
     private JTextArea txtLog;
     private JButton btnProcess;
     private JTabbedPane tabbedPreview;
 
     private org.tzi.use.main.Session useSession;
-
+    private JComboBox<String> cbMode; // Thêm bộ chọn chế độ
     // Lưu trữ các bộ query
     private String metaModelQuery = "";
-    private Map<String, String> matchingQueries = new HashMap<>();
-    private Map<String, String> executingQueries = new HashMap<>();
+    // Cấu trúc dữ liệu mới: Map<TênLuật, Map<Hướng, Query>>
+    // Hướng: 0-Forward, 1-Backward, 2-Integration
+    private Map<String, Map<Integer, String>> matchStore = new HashMap<>();
+    private Map<String, Map<Integer, String>> execStore = new HashMap<>();
+    // THÊM DÒNG NÀY ĐỂ LƯU TRỮ CẤU TRÚC LUẬT SAU KHI PARSE
+    private TGGTransformation currentTransformation;
 
+    // TextAreas cho Tab Forward
+    private JTextArea txtForwMatch, txtForwExec;
+    // TextAreas cho Tab Backward
+    private JTextArea txtBackMatch, txtBackExec;
+    // TextAreas cho Tab Integration
+    private JTextArea txtIntegMatch, txtIntegExec;
     public TggTransformationDialog(Frame owner, org.tzi.use.main.Session session) {
         super(owner, "TGG Rule Processor & Multi-Target Generator", true);
         this.useSession = session;
@@ -55,87 +62,100 @@ public class TggTransformationDialog extends JDialog {
     }
 
     private void initComponents() {
-        this.txtSourceModel = new JTextField("SourceModel");
-        this.txtTargetModel = new JTextField("TargetModel");
+        this.txtSourceModel = new JTextField("Families");
+        this.txtTargetModel = new JTextField("Persons");
         this.txtTggFilePath = new JTextField();
         this.txtSrcUsePath = new JTextField();
         this.txtTrgUsePath = new JTextField();
 
-        this.lstRules = new JList<>(new DefaultListModel<>());
-
-        // Cấu hình các vùng text preview
+        // 1. Khởi tạo các vùng text hiển thị (Dùng Font Monospaced cho dễ nhìn code)
+        txtForwMatch = createReadOnlyTextArea(); txtForwExec = createReadOnlyTextArea();
+        txtBackMatch = createReadOnlyTextArea(); txtBackExec = createReadOnlyTextArea();
+        txtIntegMatch = createReadOnlyTextArea(); txtIntegExec = createReadOnlyTextArea();
         txtMetaQueryPreview = createReadOnlyTextArea();
-        txtMatchQueryPreview = createReadOnlyTextArea();
-        txtExecQueryPreview = createReadOnlyTextArea();
+        txtLog = new JTextArea(6, 0);
+        txtLog.setBackground(Color.BLACK);
+        txtLog.setForeground(Color.GREEN);
 
-        this.txtLog = new JTextArea(6, 0);
-        this.btnProcess = new JButton("Process TGG");
+        // 2. Cấu hình TabbedPane với 4 Tab chuyên biệt
+        tabbedPreview = new JTabbedPane();
+        tabbedPreview.addTab("0. Corr Metamodel", new JScrollPane(txtMetaQueryPreview));
+        tabbedPreview.addTab("1. Forward (S->T)", createTrafoPanel(txtForwMatch, txtForwExec));
+        tabbedPreview.addTab("2. Backward (T->S)", createTrafoPanel(txtBackMatch, txtBackExec));
+        tabbedPreview.addTab("3. Integration", createTrafoPanel(txtIntegMatch, txtIntegExec));
 
-        setSize(1100, 800);
+        this.lstRules = new JList<>(new DefaultListModel<>());
+        this.btnProcess = new JButton("Process TGG File");
+
+        cbActiveMode = new JComboBox<>(new String[]{"Forward", "Backward", "Integration"});
+
+        setSize(1200, 850);
         setLocationRelativeTo(getOwner());
         setLayout(new BorderLayout(10, 10));
 
-        // --- NORTH: Configuration ---
+        // --- Cấu trúc Layout ---
         JPanel pnlInput = new JPanel(new GridBagLayout());
         pnlInput.setBorder(new CompoundBorder(new EmptyBorder(10, 10, 10, 10), new TitledBorder("Configuration")));
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL; gbc.insets = new Insets(3, 5, 3, 5);
 
-        gbc.gridy = 0; gbc.gridx = 0; pnlInput.add(new JLabel("Source Model Name:"), gbc);
+        gbc.gridy = 0; gbc.gridx = 0; pnlInput.add(new JLabel("Source Model:"), gbc);
         gbc.gridx = 1; gbc.weightx = 1.0; pnlInput.add(txtSourceModel, gbc);
 
-        gbc.gridy = 1; gbc.gridx = 0; gbc.weightx = 0; pnlInput.add(new JLabel("Target Model Name:"), gbc);
-        gbc.gridx = 1; gbc.weightx = 1.0; pnlInput.add(txtTargetModel, gbc);
+        gbc.gridy = 1; gbc.gridx = 0; gbc.weightx = 0; pnlInput.add(new JLabel("Target Model:"), gbc);
+        gbc.gridx = 1; pnlInput.add(txtTargetModel, gbc);
 
-        addFileRow(pnlInput, gbc, 2, "Source Model (.use):", txtSrcUsePath, e -> chooseFile(txtSrcUsePath));
-        addFileRow(pnlInput, gbc, 3, "Target Model (.use):", txtTrgUsePath, e -> chooseFile(txtTrgUsePath));
-        addFileRow(pnlInput, gbc, 4, "TGG Rule File (.tgg):", txtTggFilePath, e -> chooseFile(txtTggFilePath));
+        addFileRow(pnlInput, gbc, 2, "Source (.use):", txtSrcUsePath, e -> chooseFile(txtSrcUsePath));
+        addFileRow(pnlInput, gbc, 3, "Target (.use):", txtTrgUsePath, e -> chooseFile(txtTrgUsePath));
+        addFileRow(pnlInput, gbc, 4, "TGG Rule (.tgg):", txtTggFilePath, e -> chooseFile(txtTggFilePath));
+
+        gbc.gridy = 5; gbc.gridx = 0; pnlInput.add(new JLabel("Execution Mode:"), gbc);
+        gbc.gridx = 1; pnlInput.add(cbActiveMode, gbc);
 
         add(pnlInput, BorderLayout.NORTH);
 
-        // --- CENTER: Split Pane (Rules List | Tabs) ---
-        tabbedPreview = new JTabbedPane();
-        tabbedPreview.addTab("Corr Metamodel", new JScrollPane(txtMetaQueryPreview));
-        tabbedPreview.addTab("Rule Matching", new JScrollPane(txtMatchQueryPreview));
-        tabbedPreview.addTab("Rule Execution", new JScrollPane(txtExecQueryPreview));
-
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        splitPane.setDividerLocation(250);
+        splitPane.setDividerLocation(280);
 
         JPanel pnlLeft = new JPanel(new BorderLayout());
-        pnlLeft.setBorder(new TitledBorder("Rules & Global"));
-        DefaultListModel<String> listModel = (DefaultListModel<String>) lstRules.getModel();
-        listModel.addElement(">> GLOBAL: Corr Metamodel"); // Mục đặc biệt
+        pnlLeft.setBorder(new TitledBorder("Parsed Rules"));
         pnlLeft.add(new JScrollPane(lstRules), BorderLayout.CENTER);
 
         splitPane.setLeftComponent(pnlLeft);
         splitPane.setRightComponent(tabbedPreview);
         add(splitPane, BorderLayout.CENTER);
 
-        // --- SOUTH: Log & Buttons ---
         JPanel pnlBottom = new JPanel(new BorderLayout());
-        txtLog.setEditable(false);
-        txtLog.setBackground(Color.BLACK);
-        txtLog.setForeground(Color.GREEN);
         pnlBottom.add(new JScrollPane(txtLog), BorderLayout.CENTER);
 
-        JPanel pnlButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton btnCancel = new JButton("Cancel");
+        JPanel pnlAction = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton btnCancel = new JButton("Close");
         btnCancel.addActionListener(e -> dispose());
         btnProcess.addActionListener(e -> startProcessing());
-        pnlButtons.add(btnCancel);
-        pnlButtons.add(btnProcess);
-        pnlBottom.add(pnlButtons, BorderLayout.SOUTH);
+        pnlAction.add(btnCancel); pnlAction.add(btnProcess);
+        pnlBottom.add(pnlAction, BorderLayout.SOUTH);
         add(pnlBottom, BorderLayout.SOUTH);
 
+        // --- Event Listener ---
         lstRules.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                updatePreview();
-            }
+            if (!e.getValueIsAdjusting()) updatePreview();
         });
     }
+    private JPanel createTrafoPanel(JTextArea matchArea, JTextArea execArea) {
+        JPanel p = new JPanel(new GridLayout(2, 1, 5, 5));
 
+        JPanel pMatch = new JPanel(new BorderLayout());
+        pMatch.setBorder(new TitledBorder("MATCHING LOGIC (Boolean Check)"));
+        pMatch.add(new JScrollPane(matchArea));
+
+        JPanel pExec = new JPanel(new BorderLayout());
+        pExec.setBorder(new TitledBorder("EXECUTION LOGIC (Create Delta)"));
+        pExec.add(new JScrollPane(execArea));
+
+        p.add(pMatch);
+        p.add(pExec);
+        return p;
+    }
     private JTextArea createReadOnlyTextArea() {
         JTextArea area = new JTextArea();
         area.setEditable(false);
@@ -144,119 +164,92 @@ public class TggTransformationDialog extends JDialog {
         return area;
     }
 
-    private void updatePreview() {
-        String selected = lstRules.getSelectedValue();
-        if (selected == null) return;
-
-        if (selected.equals(">> GLOBAL: Corr Metamodel")) {
-            tabbedPreview.setSelectedIndex(0);
-            txtMetaQueryPreview.setText(metaModelQuery);
-            txtMatchQueryPreview.setText("// Not applicable for Metamodel");
-            txtExecQueryPreview.setText("// Not applicable for Metamodel");
-        } else {
-            tabbedPreview.setSelectedIndex(1); // Chuyển sang tab Matching
-            txtMatchQueryPreview.setText(matchingQueries.getOrDefault(selected, "// Query not generated"));
-            txtExecQueryPreview.setText(executingQueries.getOrDefault(selected, "// Query not generated"));
-        }
-    }
 
     private void startProcessing() {
         String tggPath = txtTggFilePath.getText();
-        String srcModelName = txtSourceModel.getText().trim();
-        String trgModelName = txtTargetModel.getText().trim();
-
-        if (tggPath.isEmpty() || srcModelName.isEmpty() || trgModelName.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Vui lòng nhập tên Model và chọn file .tgg");
+        if (tggPath.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn file .tgg");
             return;
         }
 
-        // Xóa trắng dữ liệu cũ trên giao diện
-        DefaultListModel<String> listModel = (DefaultListModel<String>) lstRules.getModel();
-        listModel.clear();
-        matchingQueries.clear();
-        executingQueries.clear();
-
         try {
-            appendLog("Đang đọc và phân tích cú pháp file TGG: " + tggPath);
-            TGGTransformation trans = parseTGG(tggPath);
-            appendLog("Phân tích thành công Transformation: " + trans.name);
+            appendLog("Đang đọc và phân tích file TGG...");
+            this.currentTransformation = parseTGG(tggPath);
+            appendLog("Phân tích thành công Transformation: " + currentTransformation.name);
 
-            // BƯỚC 2: Sinh Query cho Correspondence Metamodel (Graph trung gian)
-            appendLog("Đang sinh bộ truy vấn Metamodel cho Correspondence Graph...");
-            CorrMetamodelGenerator metaGen = new CorrMetamodelGenerator();
-            // 1. Cho tab Metamodel
-            this.metaModelQuery = metaGen.generateMetaModelQuery(trans, srcModelName, trgModelName);
+            regenerateAllQueries();
 
-            // 2. Cho từng Rule (Matching & Executing)
-            for (TGGRule rule : trans.rules) {
-                // Matching query: Sẽ tìm các node thỏa mãn lhs mà chưa có corr
-                matchingQueries.put(rule.name, metaGen.generateMatchingQuery(rule, srcModelName, trgModelName));
-
-                // Executing query: Sẽ tạo rhs và các link corr sang thực thể thực sự
-                executingQueries.put(rule.name, metaGen.generateExecutionQuery(rule, srcModelName, trgModelName));
-            }
-
-            // BƯỚC 3: Cập nhật danh sách Rule lên GUI
-            listModel.addElement(">> GLOBAL: Corr Metamodel");
-            for (TGGRule rule : trans.rules) {
-                listModel.addElement(rule.name);
-
-                // TẠM THỜI: Sinh placeholder cho Matching và Executing
-                // (Sau này bạn sẽ thay bằng các bộ Generator thực tế cho tầng Object)
-                matchingQueries.put(rule.name, generatePlaceholderMatchQuery(rule, srcModelName, trgModelName));
-                executingQueries.put(rule.name, generatePlaceholderExecQuery(rule));
-            }
-
-            // BƯỚC 4: Hiển thị kết quả đầu tiên
-            lstRules.setSelectedIndex(0);
-            appendLog("Hoàn tất! Đã xử lý " + trans.rules.size() + " quy tắc chuyển đổi.");
-
+            appendLog("Hoàn tất xử lý " + currentTransformation.rules.size() + " quy tắc.");
         } catch (Exception ex) {
-            appendLog("LỖI HỆ THỐNG: " + ex.getMessage());
-            StringWriter sw = new StringWriter();
-            ex.printStackTrace(new PrintWriter(sw));
-            txtLog.append(sw.toString()); // Ghi chi tiết stack trace vào log để debug
+            appendLog("LỖI: " + ex.getMessage());
         }
     }
 
-    // Các hàm bổ trợ để tạo nội dung giả lập (sau này sẽ thay thế bằng logic thật)
-    private String generatePlaceholderMatchQuery(TGGRule rule, String src, String trg) {
-        return String.format("""
-        // Matching Query for Rule: %s
-        // Models: %s (Source), %s (Target)
-        MATCH (sCls {model: '%s'})
-        MATCH (tCls {model: '%s'})
-        WHERE ... 
-        RETURN sCls, tCls
-        """, rule.name, src, trg, src, trg);
+    private void regenerateAllQueries() {
+        String src = txtSourceModel.getText().trim();
+        String trg = txtTargetModel.getText().trim();
+        CorrMetamodelGenerator gen = new CorrMetamodelGenerator();
+
+        this.metaModelQuery = gen.generateMetaModelQuery(currentTransformation, src, trg);
+
+        DefaultListModel<String> listModel = (DefaultListModel<String>) lstRules.getModel();
+        listModel.clear();
+        listModel.addElement(">> GLOBAL: Corr Metamodel");
+
+        for (TGGRule rule : currentTransformation.rules) {
+            listModel.addElement(rule.name);
+
+            // Với MỖI LUẬT, sinh LUÔN cả 3 hướng
+            Map<Integer, String> mQueries = new HashMap<>();
+            Map<Integer, String> eQueries = new HashMap<>();
+
+            for (int mode = 0; mode < 3; mode++) {
+                mQueries.put(mode, gen.generateMatchingQuery(rule, src, trg, mode));
+                eQueries.put(mode, gen.generateExecutionQuery(rule, src, trg));
+            }
+
+            matchStore.put(rule.name, mQueries);
+            execStore.put(rule.name, eQueries);
+        }
+        lstRules.setSelectedIndex(0);
+        updatePreview();
     }
 
-    private String generatePlaceholderExecQuery(TGGRule rule) {
-        return String.format("""
-        // Execution Query for Rule: %s
-        CREATE (corr:Correspondence {rule: '%s'})
-        SET corr.timestamp = timestamp()
-        """, rule.name, rule.name);
+    private void updatePreview() {
+        String sel = lstRules.getSelectedValue();
+        if (sel == null) return;
+
+        if (sel.equals(">> GLOBAL: Corr Metamodel")) {
+            txtMetaQueryPreview.setText(metaModelQuery);
+            tabbedPreview.setSelectedIndex(0);
+        } else {
+            // Đổ data vào cả 3 Tab hướng đồng thời
+            Map<Integer, String> mq = matchStore.get(sel);
+            Map<Integer, String> eq = execStore.get(sel);
+
+            txtForwMatch.setText(mq.get(0)); txtForwExec.setText(eq.get(0));
+            txtBackMatch.setText(mq.get(1)); txtBackExec.setText(eq.get(1));
+            txtIntegMatch.setText(mq.get(2)); txtIntegExec.setText(eq.get(2));
+
+            // Nếu đang ở tab Meta thì nhảy sang Forward cho dễ nhìn
+            if(tabbedPreview.getSelectedIndex() == 0) tabbedPreview.setSelectedIndex(1);
+        }
     }
+
 
     private TGGTransformation parseTGG(String path) throws Exception {
-        // 1. Đọc file từ đường dẫn path
         org.antlr.v4.runtime.CharStream input = CharStreams.fromPath(Paths.get(path));
 
-        // 2. Khởi tạo Lexer và Parser
         TGGLexer lexer = new TGGLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TGGParser parser = new TGGParser(tokens);
 
-        // 3. Xây dựng cây Parse Tree từ rule cao nhất (tggFile)
         ParseTree tree = parser.tggFile();
 
-        // 4. Sử dụng Visitor để chuyển đổi cây thành Object TGGTransformation
         TGGBuildVisitor builder = new TGGBuildVisitor();
         return (TGGTransformation) builder.visit(tree);
     }
 
-    // Các hàm helper giữ nguyên như cũ...
     private void addFileRow(JPanel p, GridBagConstraints gbc, int y, String label, JTextField txt, java.awt.event.ActionListener action) {
         gbc.gridy = y; gbc.gridx = 0; gbc.weightx = 0; p.add(new JLabel(label), gbc);
         gbc.gridx = 1; gbc.weightx = 1.0; p.add(txt, gbc);
@@ -273,4 +266,5 @@ public class TggTransformationDialog extends JDialog {
     private void appendLog(String msg) {
         txtLog.append("> " + msg + "\n");
     }
+
 }

@@ -113,30 +113,94 @@ public class CorrMetamodelGenerator {
         for (TGGElement e : block.rhs) if (e instanceof NodeDecl && ((NodeDecl)e).name.equals(name)) return ((NodeDecl)e).type;
         return null;
     }
-    public String generateMatchingQuery(TGGRule rule, String srcModel, String trgModel) {
+    public String generateMatchingQuery(TGGRule rule, String srcM, String trgM, int mode) {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("// Matching for Rule: %s\n", rule.name));
+        String corrM = srcM + "2" + trgM + "_Corr";
 
-        sb.append("MATCH ");
-        List<String> matches = new ArrayList<>();
-        for (TGGElement e : rule.source.lhs) {
-            if (e instanceof NodeDecl) {
-                NodeDecl n = (NodeDecl) e;
-                matches.add(String.format("(%s:`%s` {model: '%s'})", n.name, n.type, srcModel));
-            } else if (e instanceof EdgeDecl) {
-                EdgeDecl ed = (EdgeDecl) e;
-                matches.add(String.format("(%s)-[:`%s`]->(%s)", ed.src, ed.type, ed.target));
+        sb.append("// --- ATOMIC CHECK FOR RULE: ").append(rule.name).append(" ---\n");
+        sb.append("RETURN EXISTS {\n");
+
+        sb.append("  MATCH (mSrc:ManageModel {name: '").append(srcM).append("'}),\n");
+        sb.append("        (mTrg:ManageModel {name: '").append(trgM).append("'}),\n");
+        sb.append("        (mCorr:ManageModel {name: '").append(corrM).append("'})\n");
+
+        List<String> nodeChecks = new ArrayList<>();
+        List<String> edgeChecks = new ArrayList<>();
+
+        processBlockElements(rule.source.lhs, nodeChecks, edgeChecks, "mSrc");
+        if (mode == 0 || mode == 2) {
+            processBlockElements(rule.source.rhs, nodeChecks, edgeChecks, "mSrc");
+        }
+
+        processBlockElements(rule.target.lhs, nodeChecks, edgeChecks, "mTrg");
+        if (mode == 1 || mode == 2) {
+            processBlockElements(rule.target.rhs, nodeChecks, edgeChecks, "mTrg");
+        }
+
+        for (TGGElement e : rule.correspondence.lhs) {
+            if (e instanceof CorrDecl) {
+                CorrDecl c = (CorrDecl) e;
+                String sNode = c.nodeARef.replace("*", "");
+                String tNode = c.nodeBRef.replace("*", "");
+                edgeChecks.add(String.format("  (%s)-[:AssociateWith]->(%s:`%s`)-[:AssociateWith]->(%s)",
+                    sNode, c.corrName, c.corrType, tNode));
+                edgeChecks.add(String.format("  (mCorr)-[:DefineMetamodels]->(:MetaNode {name:'NodeConcreteClass'})<-[:InstanceOf]-(:`%s` {name:'%s'})<-[:ObjectInstanceOf]-(%s)",
+                    c.corrType, c.corrType, c.corrName));
             }
         }
-        sb.append(String.join(", ", matches)).append("\n");
 
-        sb.append("WHERE NOT EXISTS {\n");
-        sb.append(String.format("  MATCH (%s)-[:CONF_SRC]-(corr)-[:CONF_TGT]-(target)\n",
-            rule.correspondence.rhs.isEmpty() ? "node" : ((CorrDecl)rule.correspondence.rhs.get(0)).nodeARef.replace("*", "")));
-        sb.append("}\n");
-        sb.append("RETURN * LIMIT 100");
+        sb.append("  MATCH \n");
+        sb.append(String.join(",\n", nodeChecks));
+        if (!edgeChecks.isEmpty()) {
+            sb.append(",\n").append(String.join(",\n", edgeChecks));
+        }
+
+        sb.append("\n  WHERE NOT EXISTS {\n");
+        for (TGGElement e : rule.correspondence.rhs) {
+            if (e instanceof CorrDecl) {
+                CorrDecl c = (CorrDecl) e;
+                String sNode = c.nodeARef.replace("*", "");
+                String tNode = c.nodeBRef.replace("*", "");
+                sb.append(String.format("    MATCH (%s)-[:AssociateWith]->(:`%s`)-[:AssociateWith]->(%s)\n",
+                    sNode, c.corrType, tNode));
+            }
+        }
+        sb.append("  }\n");
+
+        appendConstraints(sb, rule);
+
+        sb.append("} AS isExecutable");
 
         return sb.toString();
+    }
+
+    private void processBlockElements(List<TGGElement> elements, List<String> nodes, List<String> edges, String modelVar) {
+        for (TGGElement e : elements) {
+            if (e instanceof NodeDecl) {
+                NodeDecl n = (NodeDecl) e;
+                nodes.add(String.format("  (%s:`%s`)-[:ObjectInstanceOf]->(:NodeConcreteClass)-[:InstanceOf]->({name: 'NodeConcreteClass'})<-[:DefineMetamodels]-(%s)",
+                    n.name, n.type, modelVar));
+            } else if (e instanceof EdgeDecl) {
+                EdgeDecl ed = (EdgeDecl) e;
+                edges.add(String.format("  (%s)-[:AssociateWith {associationName: '%s'}]->(%s)",
+                    ed.src, ed.type, ed.target));
+            }
+        }
+    }
+
+    private void appendConstraints(StringBuilder sb, TGGRule rule) {
+        List<TGGBlock> blocks = Arrays.asList(rule.source, rule.target, rule.correspondence);
+        for (TGGBlock b : blocks) {
+            for (TGGElement e : b.lhs) {
+                if (e instanceof Constraint) {
+                    sb.append("  AND ").append(translateOCL(((Constraint) e).expression)).append("\n");
+                }
+            }
+        }
+    }
+
+    private String translateOCL(String ocl) {
+        return ocl.replace("self.", "").replace("<>", "<>").replace("Undefined", "null");
     }
 
 
