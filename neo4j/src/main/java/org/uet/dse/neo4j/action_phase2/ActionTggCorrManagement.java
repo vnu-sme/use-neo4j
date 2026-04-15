@@ -7,6 +7,7 @@ import org.tzi.use.runtime.gui.IPluginActionDelegate;
 import org.uet.dse.neo4j.gui.TggObjectManagerDialog;
 import org.uet.dse.neo4j.gui.TggTransformationDialog;
 
+
 import javax.swing.*;
 
 public class ActionTggCorrManagement implements IPluginActionDelegate {
