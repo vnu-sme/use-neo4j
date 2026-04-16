@@ -91,5 +91,14 @@
                 id="org.uet.dse.neo4j.action_phase2.ActionTggCorrManagement">
         </action>
 
+        <action label="TGG matching"
+                icon="images/rtl.png"
+                class="org.uet.dse.neo4j.action_phase2.ActionTggMatchingManagement"
+                tooltip="TGG matching"
+                menu="Neo4j Plugin phase 2"
+                menuitem="TGG matching"
+                id="org.uet.dse.neo4j.action_phase2.ActionTggMatchingManagement">
+        </action>
+
     </actions>
 </plugin>

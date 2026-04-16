@@ -5,7 +5,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.uet.dse.neo4j.TGGLexer;
 import org.uet.dse.neo4j.TGGParser;
-import org.uet.dse.neo4j.model_trafo.*;
+import org.uet.dse.neo4j.model_trafo.matching.CorrMetamodelGenerator;
 import org.uet.dse.neo4j.model_trafo.parser.*;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;

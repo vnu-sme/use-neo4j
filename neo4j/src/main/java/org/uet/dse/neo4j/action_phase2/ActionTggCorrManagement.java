@@ -1,13 +1,9 @@
 package org.uet.dse.neo4j.action_phase2;
 
 import org.tzi.use.gui.main.MainWindow;
-import org.tzi.use.main.Session;
 import org.tzi.use.runtime.gui.IPluginAction;
 import org.tzi.use.runtime.gui.IPluginActionDelegate;
 import org.uet.dse.neo4j.gui.TggObjectManagerDialog;
-import org.uet.dse.neo4j.gui.TggTransformationDialog;
-
-
 import javax.swing.*;
 
 public class ActionTggCorrManagement implements IPluginActionDelegate {
@@ -17,7 +13,7 @@ public class ActionTggCorrManagement implements IPluginActionDelegate {
     org.tzi.use.main.Session useSession = pluginAction.getSession();
 
     if (useSession.system().model() == null) {
-      JOptionPane.showMessageDialog(mainWindow, "Vui lòng load model trong USE trước!");
+      JOptionPane.showMessageDialog(mainWindow, "Load USE model first!!!");
       return;
     }
 

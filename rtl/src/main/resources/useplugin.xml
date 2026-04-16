@@ -89,5 +89,6 @@
 			toolbaritem="Validation with classifying terms"
 			id="org.uet.dse.rtlplus.actions.ActionTestWithCT">
 		</action>
+
 	</actions>
 </plugin>

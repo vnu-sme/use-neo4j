@@ -7,6 +7,15 @@ public class TGGTransformation {
     public String name;
     public String direction;
     public List<TGGRule> rules = new ArrayList<>();
+
+    public TGGRule getRule(String ruleName) {
+        for (TGGRule r : rules) {
+            if (r.name.equals(ruleName)) {
+                return r;
+            }
+        }
+        return null;
+    }
 }
 
 
