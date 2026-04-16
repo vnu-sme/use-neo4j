@@ -171,18 +171,25 @@ public class ModelSyncCoordinator {
 
         SwingUtilities.invokeLater(() -> {
             try {
-                FullModelSnapshot fullModelSnapshot = getFullModelSnapshotFromNeo4jObsolete();//getFullModelSnapshotFromNeo4j(selectedModelName);
+                FullModelSnapshot fullModelSnapshot;
+                if (selectedModelName.equals(ModelExplorerDialog.DEFAULT_OPTION)) {
+                    mainWindow.logWriter().println("Neo4j Sync: Pulling from legacy/obsolete snapshot...");
+                    fullModelSnapshot = getFullModelSnapshotFromNeo4jObsolete();
+                } else {
+                    fullModelSnapshot = getFullModelSnapshotFromNeo4j(selectedModelName);
+                }
                 Map<String, ClassState> dbSnapshot = fullModelSnapshot.classes;
                 if (dbSnapshot.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "No model found in Database.");
                     return;
                 }
 
-                String actualModelName = getModelNameFromDb(); // Hàm này đọc từ node ModelVersion
+                String actualModelName = getModelNameFromDb();
 
                 //create new model
                 ModelFactory factory = new ModelFactory();
-                MModel newModel = factory.createModel(selectedModelName);
+                String modelNameToCreate = selectedModelName.equals(ModelExplorerDialog.DEFAULT_OPTION) ? "AllFromNeo4j" : selectedModelName;
+                MModel newModel = factory.createModel(modelNameToCreate);
 
                 ModelPullService modelPullService = new ModelPullService();
                 modelPullService.pullModelFromNeo4jAfterSnapshotComparing(newModel, fullModelSnapshot);

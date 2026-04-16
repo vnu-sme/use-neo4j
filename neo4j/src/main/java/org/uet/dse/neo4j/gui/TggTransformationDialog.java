@@ -5,13 +5,8 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.uet.dse.neo4j.TGGLexer;
 import org.uet.dse.neo4j.TGGParser;
-import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.model_trafo.*;
-
-import org.uet.dse.neo4j.model_trafo.parser.TGGBuildVisitor;
-import org.uet.dse.neo4j.model_trafo.parser.TGGRule;
-import org.uet.dse.neo4j.model_trafo.parser.TGGTransformation;
-
+import org.uet.dse.neo4j.model_trafo.parser.*;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -28,28 +23,23 @@ public class TggTransformationDialog extends JDialog {
     private JList<String> lstRules;
 
     private JTextArea txtMetaQueryPreview;
-    private JComboBox<String> cbActiveMode; // Chế độ thực thi chính
+    private JComboBox<String> cbActiveMode;
 
     private JTextArea txtLog;
     private JButton btnProcess;
     private JTabbedPane tabbedPreview;
 
     private org.tzi.use.main.Session useSession;
-    private JComboBox<String> cbMode; // Thêm bộ chọn chế độ
-    // Lưu trữ các bộ query
+
     private String metaModelQuery = "";
-    // Cấu trúc dữ liệu mới: Map<TênLuật, Map<Hướng, Query>>
-    // Hướng: 0-Forward, 1-Backward, 2-Integration
+
     private Map<String, Map<Integer, String>> matchStore = new HashMap<>();
     private Map<String, Map<Integer, String>> execStore = new HashMap<>();
-    // THÊM DÒNG NÀY ĐỂ LƯU TRỮ CẤU TRÚC LUẬT SAU KHI PARSE
+
     private TGGTransformation currentTransformation;
 
-    // TextAreas cho Tab Forward
     private JTextArea txtForwMatch, txtForwExec;
-    // TextAreas cho Tab Backward
     private JTextArea txtBackMatch, txtBackExec;
-    // TextAreas cho Tab Integration
     private JTextArea txtIntegMatch, txtIntegExec;
     public TggTransformationDialog(Frame owner, org.tzi.use.main.Session session) {
         super(owner, "TGG Rule Processor & Multi-Target Generator", true);
@@ -68,7 +58,6 @@ public class TggTransformationDialog extends JDialog {
         this.txtSrcUsePath = new JTextField();
         this.txtTrgUsePath = new JTextField();
 
-        // 1. Khởi tạo các vùng text hiển thị (Dùng Font Monospaced cho dễ nhìn code)
         txtForwMatch = createReadOnlyTextArea(); txtForwExec = createReadOnlyTextArea();
         txtBackMatch = createReadOnlyTextArea(); txtBackExec = createReadOnlyTextArea();
         txtIntegMatch = createReadOnlyTextArea(); txtIntegExec = createReadOnlyTextArea();
@@ -77,7 +66,6 @@ public class TggTransformationDialog extends JDialog {
         txtLog.setBackground(Color.BLACK);
         txtLog.setForeground(Color.GREEN);
 
-        // 2. Cấu hình TabbedPane với 4 Tab chuyên biệt
         tabbedPreview = new JTabbedPane();
         tabbedPreview.addTab("0. Corr Metamodel", new JScrollPane(txtMetaQueryPreview));
         tabbedPreview.addTab("1. Forward (S->T)", createTrafoPanel(txtForwMatch, txtForwExec));
@@ -93,7 +81,6 @@ public class TggTransformationDialog extends JDialog {
         setLocationRelativeTo(getOwner());
         setLayout(new BorderLayout(10, 10));
 
-        // --- Cấu trúc Layout ---
         JPanel pnlInput = new JPanel(new GridBagLayout());
         pnlInput.setBorder(new CompoundBorder(new EmptyBorder(10, 10, 10, 10), new TitledBorder("Configuration")));
         GridBagConstraints gbc = new GridBagConstraints();
@@ -136,7 +123,6 @@ public class TggTransformationDialog extends JDialog {
         pnlBottom.add(pnlAction, BorderLayout.SOUTH);
         add(pnlBottom, BorderLayout.SOUTH);
 
-        // --- Event Listener ---
         lstRules.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) updatePreview();
         });
@@ -199,13 +185,12 @@ public class TggTransformationDialog extends JDialog {
         for (TGGRule rule : currentTransformation.rules) {
             listModel.addElement(rule.name);
 
-            // Với MỖI LUẬT, sinh LUÔN cả 3 hướng
             Map<Integer, String> mQueries = new HashMap<>();
             Map<Integer, String> eQueries = new HashMap<>();
 
             for (int mode = 0; mode < 3; mode++) {
                 mQueries.put(mode, gen.generateMatchingQuery(rule, src, trg, mode));
-                eQueries.put(mode, gen.generateExecutionQuery(rule, src, trg));
+                eQueries.put(mode, gen.generateExecutionQuery(rule, src, trg, mode));
             }
 
             matchStore.put(rule.name, mQueries);
@@ -223,7 +208,6 @@ public class TggTransformationDialog extends JDialog {
             txtMetaQueryPreview.setText(metaModelQuery);
             tabbedPreview.setSelectedIndex(0);
         } else {
-            // Đổ data vào cả 3 Tab hướng đồng thời
             Map<Integer, String> mq = matchStore.get(sel);
             Map<Integer, String> eq = execStore.get(sel);
 
@@ -231,7 +215,6 @@ public class TggTransformationDialog extends JDialog {
             txtBackMatch.setText(mq.get(1)); txtBackExec.setText(eq.get(1));
             txtIntegMatch.setText(mq.get(2)); txtIntegExec.setText(eq.get(2));
 
-            // Nếu đang ở tab Meta thì nhảy sang Forward cho dễ nhìn
             if(tabbedPreview.getSelectedIndex() == 0) tabbedPreview.setSelectedIndex(1);
         }
     }
@@ -266,5 +249,4 @@ public class TggTransformationDialog extends JDialog {
     private void appendLog(String msg) {
         txtLog.append("> " + msg + "\n");
     }
-
 }

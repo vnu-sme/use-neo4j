@@ -10,6 +10,7 @@ import java.util.List;
 public class ModelExplorerDialog extends JDialog {
     private JComboBox<String> cbModels;
     private String selectedModel = null;
+    public static final String DEFAULT_OPTION = "Default (Legacy Snapshot)"; // Định nghĩa hằng số
 
     public ModelExplorerDialog(Frame parent) {
         super(parent, "Select Model from Neo4j", true);
@@ -17,7 +18,9 @@ public class ModelExplorerDialog extends JDialog {
         setLayout(new BorderLayout(15, 15));
         ((JComponent)getContentPane()).setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        List<String> models = fetchModelNames();
+        List<String> models = new ArrayList<>();
+        models.add(DEFAULT_OPTION);
+        models.addAll(fetchModelNames());
         cbModels = new JComboBox<>(models.toArray(new String[0]));
 
         add(new JLabel("Available models in Repository:"), BorderLayout.NORTH);
