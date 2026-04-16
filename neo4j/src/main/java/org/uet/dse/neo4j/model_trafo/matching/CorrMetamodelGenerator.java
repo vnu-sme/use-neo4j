@@ -212,149 +212,109 @@ public class CorrMetamodelGenerator {
     return ocl.replace("self.", "").replace("<>", "<>").replace("Undefined", "null");
   }
 
-  public String generateExecutionQuery(TGGRule rule, String srcM, String trgM, int mode) {
+  public String generateExecutionQuery(TGGRule rule, String srcM, String trgM, int mode, Map<String, String> candidate) {
     StringBuilder sb = new StringBuilder();
     String corrM = srcM + "2" + trgM + "_Corr";
 
-    sb.append(String.format("// --- EXECUTION (%s) FOR RULE: %s ---\n", getModeName(mode), rule.name));
+    sb.append(String.format("// --- ATOMIC EXECUTION (%s) FOR RULE: %s ---\n", getModeName(mode), rule.name));
 
-    sb.append("MATCH (mSrc:ManageModel {name: '").append(srcM).append("'}),\n");
-    sb.append("      (mTrg:ManageModel {name: '").append(trgM).append("'}),\n");
-    sb.append("      (mCorr:ManageModel {name: '").append(corrM).append("'})\n");
-    sb.append("MATCH (metaNCC:MetaNode {name: 'NodeConcreteClass'})\n");
+    // 1. MATCH các ManageModel mốc
+    sb.append(String.format("MATCH (mSrc:ManageModel {name: '%s'})\n", srcM));
+    sb.append(String.format("MATCH (mTrg:ManageModel {name: '%s'})\n", trgM));
+    sb.append(String.format("MATCH (mCorr:ManageModel {name: '%s'})\n", corrM));
 
-    sb.append("// Match Classes for instantiation\n");
-    Set<String> neededClasses = collectNeededClasses(rule, mode);
-    for (String cls : neededClasses) {
-      String mVar = findModelVarForClass(cls, rule, srcM, trgM, corrM);
-      sb.append(String.format("MATCH (m%s:ManageModel)-[:DefineMetamodels]->(cls_%s:`%s` {name: '%s'})\n",
-          mVar, cls, cls, cls));
+    // 2. MATCH MetaNodes (Mỏ neo để tìm đúng Class của từng Model)
+    // Mỗi ManageModel có một MetaNode tên 'NodeConcreteClass' riêng
+    sb.append("MATCH (mSrc)-[:DefineMetamodels]->(metaS:MetaNode {name: 'NodeConcreteClass'})\n");
+    sb.append("MATCH (mTrg)-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})\n");
+    sb.append("MATCH (mCorr)-[:DefineMetamodels]->(metaC:MetaNode {name: 'NodeConcreteClass'})\n");
+
+    // 3. MATCH TẤT CẢ Class Node xuất hiện trong luật (Sử dụng nhãn :NodeConcreteClass như dump của bạn)
+    Set<String> allClassNames = collectAllClassesInRule(rule);
+    for (String cls : allClassNames) {
+      String metaVar = findMetaVarForClass(cls, rule);
+      // Phải đi qua InstanceOf nối vào đúng MetaNode của Model đó
+      sb.append(String.format("MATCH (cls_%s:NodeConcreteClass {name: '%s'})-[:InstanceOf]->(%s)\n", cls, cls, metaVar));
     }
 
-    sb.append("WITH * \nMATCH \n");
-    List<String> matchPatterns = new ArrayList<>();
-    addMatchPatterns(matchPatterns, rule.source.lhs, "mSrc");
-    addMatchPatterns(matchPatterns, rule.target.lhs, "mTrg");
-    addCorrLhsMatch(matchPatterns, rule.correspondence.lhs);
+    sb.append("WITH * \n// Bind Candidate Objects and Links from Match Step\n");
 
-    if (mode == 0 || mode == 2) addMatchPatterns(matchPatterns, rule.source.rhs, "mSrc");
-    if (mode == 1 || mode == 2) addMatchPatterns(matchPatterns, rule.target.rhs, "mTrg");
+    // 4. MATCH Object bằng use_id và Link bằng elementId
+    for (Map.Entry<String, String> entry : candidate.entrySet()) {
+      String var = entry.getKey();
+      String id = entry.getValue();
 
-    sb.append(String.join(",\n", matchPatterns)).append("\n");
+      if (var.startsWith("e") || var.startsWith("rel")) {
+        // Khóa Link bằng elementId
+        sb.append(String.format("MATCH ()-[%s]-() WHERE elementId(%s) = '%s'\n", var, var, id));
+      } else {
+        // Khóa Object bằng use_id VÀ kiểm tra xem nó có nối tới Class tương ứng không
+        String typeName = findTypeAcrossRule(var, rule);
+        sb.append(String.format("MATCH (%s {use_id: '%s'})-[:ObjectInstanceOf]->(cls_%s)\n", var, id, typeName));
+      }
+    }
 
+    // 5. CREATE: Tạo các thực thể mới (RHS)
     sb.append("CREATE \n");
     List<String> createStmts = new ArrayList<>();
-
     if (mode == 0) addCreateObjectStmts(createStmts, rule.target.rhs, rule);
     if (mode == 1) addCreateObjectStmts(createStmts, rule.source.rhs, rule);
-
     addCorrRhsCreateStmts(createStmts, rule.correspondence.rhs, rule);
-
     sb.append(String.join(",\n", createStmts)).append("\n");
 
-    sb.append("// Link Objects to Metamodel Classes\n");
+    // 6. THIẾT LẬP INSTANCE OF CHO CÁC NODE MỚI (Nối vào cls_ đã MATCH ở trên)
+    sb.append("// Link new Objects to Metamodel Classes\n");
     appendObjectInstanceOfLinks(sb, rule, mode);
 
+    // 7. SET ATTRIBUTES
     for (TGGElement e : rule.correspondence.rhs) {
       if (e instanceof AttributeAssignment) {
         sb.append("SET ").append(((AttributeAssignment) e).code.replace(":=", "=")).append("\n");
       }
     }
 
-    sb.append("RETURN *");
+    sb.append("RETURN 'Transformation Successful' AS Status, *;");
     return sb.toString();
   }
 
-  private void addCreateObjectStmts(List<String> stmts, List<TGGElement> elements, TGGRule rule) {
-    for (TGGElement e : elements) {
-      if (e instanceof NodeDecl) {
-        NodeDecl n = (NodeDecl) e;
-        stmts.add(String.format("  (%s:`%s` {use_id: $id_%s, name: $id_%s, isCorrespondence: false})",
-            n.name, n.type, n.name, n.name));
-      } else if (e instanceof EdgeDecl) {
-        EdgeDecl ed = (EdgeDecl) e;
-        stmts.add(String.format("  (%s)-[:AssociateWith {associationName: '%s'}]->(%s)", ed.src, ed.type, ed.target));
-      }
+  private String findMetaVarForClass(String clsName, TGGRule rule) {
+    for (TGGElement e : rule.correspondence.lhs) {
+      if (e instanceof CorrDecl && ((CorrDecl) e).corrType.equals(clsName)) return "metaC";
     }
+    for (TGGElement e : rule.correspondence.rhs) {
+      if (e instanceof CorrDecl && ((CorrDecl) e).corrType.equals(clsName)) return "metaC";
+    }
+
+    for (TGGElement e : rule.target.lhs) {
+      if (e instanceof NodeDecl && ((NodeDecl) e).type.equals(clsName)) return "metaT";
+    }
+    for (TGGElement e : rule.target.rhs) {
+      if (e instanceof NodeDecl && ((NodeDecl) e).type.equals(clsName)) return "metaT";
+    }
+
+    return "metaS";
   }
 
-  private void addCorrRhsCreateStmts(List<String> stmts, List<TGGElement> elements, TGGRule rule) {
-    for (TGGElement e : elements) {
-      if (e instanceof CorrDecl) {
-        CorrDecl c = (CorrDecl) e;
-        String sNode = c.nodeARef.replace("*", "");
-        String tNode = c.nodeBRef;
-
-        stmts.add(String.format("  (%s:`%s` {use_id: $id_%s, name: $id_%s, isCorrespondence: true})",
-            c.corrName, c.corrType, c.corrName, c.corrName));
-        stmts.add(String.format("  (%s)-[:AssociateWith {associationName: '%s'}]->(%s)", c.corrName, c.corrType + "_" + findTypeAcrossRule(c.nodeARef, rule), sNode));
-        stmts.add(String.format("  (%s)-[:AssociateWith {associationName: '%s'}]->(%s)", c.corrName, c.corrType + "_" + findTypeAcrossRule(c.nodeBRef, rule), tNode));
-      }
-    }
-  }
-
-  private void appendObjectInstanceOfLinks(StringBuilder sb, TGGRule rule, int mode) {
-    List<TGGElement> toLink = new ArrayList<>();
-    if (mode == 0) toLink.addAll(rule.target.rhs);
-    if (mode == 1) toLink.addAll(rule.source.rhs);
-    toLink.addAll(rule.correspondence.rhs);
-
-    for (TGGElement e : toLink) {
-      if (e instanceof NodeDecl) {
-        NodeDecl n = (NodeDecl) e;
-        sb.append(String.format("MERGE (%s)-[:ObjectInstanceOf]->(cls_%s)\n", n.name, n.type));
-      } else if (e instanceof CorrDecl) {
-        CorrDecl c = (CorrDecl) e;
-        sb.append(String.format("MERGE (%s)-[:ObjectInstanceOf]->(cls_%s)\n", c.corrName, c.corrType));
-      }
-    }
-  }
-
-
-  private Set<String> collectNeededClasses(TGGRule rule, int mode) {
+  private Set<String> collectAllClassesInRule(TGGRule rule) {
     Set<String> classes = new HashSet<>();
-    if (mode == 0) for (TGGElement e : rule.target.rhs) if (e instanceof NodeDecl) classes.add(((NodeDecl)e).type);
-    if (mode == 1) for (TGGElement e : rule.source.rhs) if (e instanceof NodeDecl) classes.add(((NodeDecl)e).type);
-    for (TGGElement e : rule.correspondence.rhs) if (e instanceof CorrDecl) classes.add(((CorrDecl)e).corrType);
+    List<TGGBlock> all = Arrays.asList(rule.source, rule.target, rule.correspondence);
+    for (TGGBlock b : all) {
+      for (TGGElement e : b.lhs) {
+        if (e instanceof NodeDecl) classes.add(((NodeDecl)e).type);
+        if (e instanceof CorrDecl) classes.add(((CorrDecl)e).corrType);
+      }
+      for (TGGElement e : b.rhs) {
+        if (e instanceof NodeDecl) classes.add(((NodeDecl)e).type);
+        if (e instanceof CorrDecl) classes.add(((CorrDecl)e).corrType);
+      }
+    }
     return classes;
   }
 
 
 
-  private void addMatchPatterns(List<String> patterns, List<TGGElement> elements, String modelVar) {
-    for (TGGElement e : elements) {
-      if (e instanceof NodeDecl) {
-        NodeDecl n = (NodeDecl) e;
-        patterns.add(String.format("  (%s:`%s` {model: '%s'})", n.name, n.type, modelVar.equals("mSrc") ? "Families" : "Persons"));
-      } else if (e instanceof EdgeDecl) {
-        EdgeDecl ed = (EdgeDecl) e;
-        patterns.add(String.format("  (%s)-[:AssociateWith {associationName: '%s'}]->(%s)", ed.src, ed.type, ed.target));
-      }
-    }
-  }
-
-
   private String getModeName(int mode) {
     return (mode == 0) ? "FORWARD" : (mode == 1) ? "BACKWARD" : "INTEGRATION";
-  }
-
-  private void addCorrLhsMatch(List<String> patterns, List<TGGElement> elements) {
-    for (TGGElement e : elements) {
-      if (e instanceof CorrDecl) {
-        CorrDecl c = (CorrDecl) e;
-
-        String sNodeVar = c.nodeARef.replace("*", "").trim();
-        String tNodeVar = c.nodeBRef.replace("*", "").trim();
-        String corrVar = c.corrName;
-        String corrType = c.corrType;
-
-        patterns.add(String.format("  (%s)-[:AssociateWith]->(%s:`%s` {isCorrespondence: true})-[:AssociateWith]->(%s)",
-            sNodeVar, corrVar, corrType, tNodeVar));
-
-        patterns.add(String.format("  (%s)-[:ObjectInstanceOf]->(cls_%s)",
-            corrVar, corrType));
-      }
-    }
   }
 
   public String generateFindMatchQueryData(TGGRule rule, String srcM, String trgM, int mode) {
@@ -451,19 +411,23 @@ public class CorrMetamodelGenerator {
 
     sb.append(String.format("// --- EXECUTION (%s) FOR RULE: %s ---\n", getModeName(mode), rule.name));
 
-    sb.append("MATCH (mSrc:ManageModel {name: '").append(srcM).append("'}),\n");
-    sb.append("      (mTrg:ManageModel {name: '").append(trgM).append("'}),\n");
-    sb.append("      (mCorr:ManageModel {name: '").append(corrM).append("'})\n");
-    sb.append("MATCH (metaNCC:MetaNode {name: 'NodeConcreteClass'})\n");
+    // 1. MATCH các ManageModel mốc
+    sb.append(String.format("MATCH (mSrc:ManageModel {name: '%s'})\n", srcM));
+    sb.append(String.format("MATCH (mTrg:ManageModel {name: '%s'})\n", trgM));
+    sb.append(String.format("MATCH (mCorr:ManageModel {name: '%s'})\n", corrM));
 
-    Set<String> neededClasses = collectNeededClasses(rule, mode);
-    for (String cls : neededClasses) {
-      String mVar = findModelVarForClass(cls, rule, srcM, trgM, corrM);
-      sb.append(String.format("MATCH (m%s:ManageModel)-[:DefineMetamodels]->(cls_%s {name: '%s'})\n",
-          cls, cls, cls));
+    // 2. MATCH tất cả các Class Node liên quan trong luật (để nối ObjectInstanceOf)
+    sb.append("// Match Classes from Metamodels\n");
+    Set<String> allClassNames = collectAllClassesInRule(rule);
+    for (String cls : allClassNames) {
+      String mVar = findModelVarNameForClass(cls, rule);
+      sb.append(String.format("MATCH (%s)-[:DefineMetamodels]->(cls_%s {name: '%s'})\n", mVar, cls, cls));
     }
 
     sb.append("WITH * \n");
+
+    // 3. MATCH các Object & Link đã chọn từ bước Matching (Candidate)
+    sb.append("// Bind Candidate Objects and Links\n");
     for (Map.Entry<String, String> entry : candidate.entrySet()) {
       String varName = entry.getKey();
       String idValue = entry.getValue();
@@ -475,34 +439,96 @@ public class CorrMetamodelGenerator {
       }
     }
 
+    // 4. CREATE các thành phần mới (RHS)
     sb.append("CREATE \n");
     List<String> createStmts = new ArrayList<>();
 
-    if (mode == 0) addCreateObjectStmts(createStmts, rule.target.rhs, rule); // Forward gen Target
-    if (mode == 1) addCreateObjectStmts(createStmts, rule.source.rhs, rule); // Backward gen Source
+    if (mode == 0) addCreateObjectStmts(createStmts, rule.target.rhs, rule);
+    if (mode == 1) addCreateObjectStmts(createStmts, rule.source.rhs, rule);
 
     addCorrRhsCreateStmts(createStmts, rule.correspondence.rhs, rule);
 
     sb.append(String.join(",\n", createStmts)).append("\n");
 
+    // 5. Nối ObjectInstanceOf cho các thực thể mới tạo
+    sb.append("// Link new Objects to their Metamodel Classes\n");
     appendObjectInstanceOfLinks(sb, rule, mode);
-
-    for (TGGElement e : rule.correspondence.rhs) {
-      if (e instanceof AttributeAssignment) {
-        sb.append("SET ").append(((AttributeAssignment) e).code.replace(":=", "=")).append("\n");
-      }
-    }
 
     sb.append("RETURN 'Transformation Successful' AS Status;");
     return sb.toString();
   }
 
-  private String findModelVarForClass(String clsName, TGGRule rule, String s, String t, String c) {
-    for (TGGElement e : rule.source.lhs) if (e instanceof NodeDecl && ((NodeDecl)e).type.equals(clsName)) return "Src";
-    for (TGGElement e : rule.source.rhs) if (e instanceof NodeDecl && ((NodeDecl)e).type.equals(clsName)) return "Src";
-    for (TGGElement e : rule.target.lhs) if (e instanceof NodeDecl && ((NodeDecl)e).type.equals(clsName)) return "Trg";
-    for (TGGElement e : rule.target.rhs) if (e instanceof NodeDecl && ((NodeDecl)e).type.equals(clsName)) return "Trg";
-    return "Corr";
+  private void addCreateObjectStmts(List<String> stmts, List<TGGElement> elements, TGGRule rule) {
+    for (TGGElement e : elements) {
+      if (e instanceof NodeDecl) {
+        NodeDecl n = (NodeDecl) e;
+        String newId = n.type + "_" + (System.currentTimeMillis() % 1000000);
+        stmts.add(String.format("  (%s:`%s` {use_id: '%s', name: '%s', isCorrespondence: false})",
+            n.name, n.type, newId, newId));
+      } else if (e instanceof EdgeDecl) {
+        EdgeDecl ed = (EdgeDecl) e;
+        // Logic nhận diện link: PersonRegistration, Father, Mother, Sons, Daughters là ComposeOf
+        String typeLower = ed.type.toLowerCase();
+        String label = (typeLower.contains("registration") || typeLower.contains("father") ||
+            typeLower.contains("mother") || typeLower.contains("son") ||
+            typeLower.contains("daughter")) ? "LinkComposeOf" : "LinkAssociateWith";
+
+        stmts.add(String.format("  (%s)-[:%s {name: '%s'}]->(%s)", ed.src, label, ed.type, ed.target));
+      }
+    }
   }
 
+  private void addCorrRhsCreateStmts(List<String> stmts, List<TGGElement> elements, TGGRule rule) {
+    for (TGGElement e : elements) {
+      if (e instanceof CorrDecl) {
+        CorrDecl c = (CorrDecl) e;
+        String sNode = c.nodeARef.replace("*", "");
+        String newId = c.corrType + "_" + (System.currentTimeMillis() % 1000000);
+
+        stmts.add(String.format("  (%s:`%s` {use_id: '%s', name: '%s', isCorrespondence: true})",
+            c.corrName, c.corrType, newId, newId));
+        // Bridge links luôn là LinkAssociateWith
+        stmts.add(String.format("  (%s)-[:LinkAssociateWith {name: '%s'}]->(%s)",
+            c.corrName, c.corrType + "_" + findTypeAcrossRule(c.nodeARef, rule), sNode));
+        stmts.add(String.format("  (%s)-[:LinkAssociateWith {name: '%s'}]->(%s)",
+            c.corrName, c.corrType + "_" + findTypeAcrossRule(c.nodeBRef, rule), c.nodeBRef));
+      }
+    }
+  }
+
+  private void appendObjectInstanceOfLinks(StringBuilder sb, TGGRule rule, int mode) {
+    // Chỉ nối cho những biến được tạo mới trong CREATE
+    if (mode == 0) { // Forward: tạo Target + Corr
+      for (TGGElement e : rule.target.rhs)
+        if (e instanceof NodeDecl) sb.append(String.format("MERGE (%s)-[:ObjectInstanceOf]->(cls_%s)\n", ((NodeDecl)e).name, ((NodeDecl)e).type));
+    } else if (mode == 1) { // Backward: tạo Source + Corr
+      for (TGGElement e : rule.source.rhs)
+        if (e instanceof NodeDecl) sb.append(String.format("MERGE (%s)-[:ObjectInstanceOf]->(cls_%s)\n", ((NodeDecl)e).name, ((NodeDecl)e).type));
+    }
+    for (TGGElement e : rule.correspondence.rhs)
+      if (e instanceof CorrDecl) sb.append(String.format("MERGE (%s)-[:ObjectInstanceOf]->(cls_%s)\n", ((CorrDecl)e).corrName, ((CorrDecl)e).corrType));
+  }
+
+  private String findModelVarNameForClass(String clsName, TGGRule rule) {
+    // Duyệt tìm xem Class thuộc model nào để trả về mSrc, mTrg hoặc mCorr
+    for (TGGElement e : rule.source.lhs) if (e instanceof NodeDecl && ((NodeDecl)e).type.equals(clsName)) return "mSrc";
+    for (TGGElement e : rule.source.rhs) if (e instanceof NodeDecl && ((NodeDecl)e).type.equals(clsName)) return "mSrc";
+    for (TGGElement e : rule.target.lhs) if (e instanceof NodeDecl && ((NodeDecl)e).type.equals(clsName)) return "mTrg";
+    for (TGGElement e : rule.target.rhs) if (e instanceof NodeDecl && ((NodeDecl)e).type.equals(clsName)) return "mTrg";
+    return "mCorr";
+  }
+
+
+
+  private String findModelVarForClass(String clsName, TGGRule rule, String s, String t, String c) {
+    for (TGGBlock b : Arrays.asList(rule.source)) {
+      for (TGGElement e : b.lhs) if (e instanceof NodeDecl && ((NodeDecl)e).type.equals(clsName)) return s;
+      for (TGGElement e : b.rhs) if (e instanceof NodeDecl && ((NodeDecl)e).type.equals(clsName)) return s;
+    }
+    for (TGGBlock b : Arrays.asList(rule.target)) {
+      for (TGGElement e : b.lhs) if (e instanceof NodeDecl && ((NodeDecl)e).type.equals(clsName)) return t;
+      for (TGGElement e : b.rhs) if (e instanceof NodeDecl && ((NodeDecl)e).type.equals(clsName)) return t;
+    }
+    return c;
+  }
 }

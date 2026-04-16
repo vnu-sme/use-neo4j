@@ -190,7 +190,7 @@ public class TggTransformationDialog extends JDialog {
 
             for (int mode = 0; mode < 3; mode++) {
                 mQueries.put(mode, gen.generateMatchingQuery(rule, src, trg, mode));
-                eQueries.put(mode, gen.generateExecutionQuery(rule, src, trg, mode));
+                eQueries.put(mode, gen.generateExecutionQuery(rule, src, trg, mode, null));
             }
 
             matchStore.put(rule.name, mQueries);
