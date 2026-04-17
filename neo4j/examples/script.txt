@@ -3,193 +3,183 @@ CREATE CONSTRAINT UNIQUE_IMPORT_NAME FOR (node:`UNIQUE IMPORT LABEL`) REQUIRE (n
 
 CALL db.awaitIndexes(300);
 
-UNWIND [{_id:833, properties:{name:"FM2MP"}}] AS row
-CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:FM2MP;
-UNWIND [{_id:828, properties:{hasChildren:false, name:"PersonRegister", hasParent:false}}, {_id:853, properties:{name:"pr", use_id:"pr", isCorrespondence:false}}] AS row
+UNWIND [{_id:95, properties:{name:"F2MP"}}] AS row
+CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:NodeConcreteClass:F2MP;
+UNWIND [{_id:68, properties:{hasChildren:false, name:"PersonRegister", hasParent:false}}, {_id:99, properties:{name:"pr1", use_id:"pr1", isCorrespondence:false}}] AS row
 CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:PersonRegister;
-UNWIND [{_id:806, properties:{hasChildren:false, name:"FamilyMember", hasParent:false}}, {_id:855, properties:{name:"father", use_id:"father", isCorrespondence:false}}] AS row
+UNWIND [{_id:87, properties:{hasChildren:false, name:"FamilyMember", hasParent:false}}, {_id:98, properties:{name:"father1", use_id:"father1", isCorrespondence:false}}] AS row
 CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:FamilyMember;
-UNWIND [{_id:810, properties:{modelName:"Persons", modelHash:1378651639, id:"CURRENT", user:"neo4j [Key: 050E31DB] (kiencc)", timestamp:1776312892069}}] AS row
+UNWIND [{_id:71, properties:{modelName:"Families", modelHash:769923152, id:"CURRENT", user:"neo4j [Key: E324DDDC] (kiencc)", timestamp:1776336556088}}] AS row
 CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:ModelVersion;
-UNWIND [{_id:825, properties:{hasChildren:false, name:"Female", hasParent:true}}] AS row
+UNWIND [{_id:65, properties:{hasChildren:false, name:"Female", hasParent:true}}] AS row
 CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:Female;
-UNWIND [{_id:805, properties:{hasChildren:false, name:"Family", hasParent:false}}, {_id:851, properties:{name:"fm", use_id:"fm", isCorrespondence:false}}] AS row
+UNWIND [{_id:52, properties:{uid:"Persons_NodeAbstractClass", name:"NodeAbstractClass", label:"AbstractClass"}}, {_id:53, properties:{uid:"Persons_NodeAttribute", name:"NodeAttribute", label:"Attribute"}}, {_id:54, properties:{uid:"Persons_NodeOperation", name:"NodeOperation", label:"Operation"}}, {_id:55, properties:{uid:"Persons_NodeParam", name:"NodeParam", label:"Param"}}, {_id:56, properties:{uid:"Persons_NodeAssociationClass", name:"NodeAssociationClass", label:"AssociationClass"}}, {_id:57, properties:{uid:"Persons_NodeConcreteClass", name:"NodeConcreteClass", label:"ConcreteClass"}}, {_id:58, properties:{uid:"Persons_NodeEnumeration", name:"NodeEnumeration", label:"Enumeration"}}, {_id:59, properties:{uid:"Persons_NodeClassInvariant", name:"NodeClassInvariant", label:"ClassInvariant"}}, {_id:60, properties:{uid:"Persons_NodePreCondition", name:"NodePreCondition", label:"PreCondition"}}, {_id:61, properties:{uid:"Persons_NodePostCondition", name:"NodePostCondition", label:"PostCondition"}}, {_id:62, properties:{uid:"Persons_NodeTernaryAssociation", name:"NodeTernaryAssociation", label:"TernaryAssociation"}}, {_id:63, properties:{uid:"Persons_NodeNestedCollection", name:"NodeNestedCollection", label:"NestedCollection"}}, {_id:74, properties:{uid:"Families_NodeAbstractClass", name:"NodeAbstractClass", label:"AbstractClass"}}, {_id:75, properties:{uid:"Families_NodeAttribute", name:"NodeAttribute", label:"Attribute"}}, {_id:76, properties:{uid:"Families_NodeOperation", name:"NodeOperation", label:"Operation"}}, {_id:77, properties:{uid:"Families_NodeParam", name:"NodeParam", label:"Param"}}, {_id:78, properties:{uid:"Families_NodeAssociationClass", name:"NodeAssociationClass", label:"AssociationClass"}}, {_id:79, properties:{uid:"Families_NodeConcreteClass", name:"NodeConcreteClass", label:"ConcreteClass"}}, {_id:80, properties:{uid:"Families_NodeEnumeration", name:"NodeEnumeration", label:"Enumeration"}}, {_id:81, properties:{uid:"Families_NodeClassInvariant", name:"NodeClassInvariant", label:"ClassInvariant"}}] AS row
+CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:MetaNode;
+UNWIND [{_id:82, properties:{uid:"Families_NodePreCondition", name:"NodePreCondition", label:"PreCondition"}}, {_id:83, properties:{uid:"Families_NodePostCondition", name:"NodePostCondition", label:"PostCondition"}}, {_id:84, properties:{uid:"Families_NodeTernaryAssociation", name:"NodeTernaryAssociation", label:"TernaryAssociation"}}, {_id:85, properties:{uid:"Families_NodeNestedCollection", name:"NodeNestedCollection", label:"NestedCollection"}}, {_id:92, properties:{name:"NodeConcreteClass", label:"NodeConcreteClass"}}] AS row
+CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:MetaNode;
+UNWIND [{_id:86, properties:{hasChildren:false, name:"Family", hasParent:false}}, {_id:96, properties:{name:"fm1", use_id:"fm1", isCorrespondence:false}}] AS row
 CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:Family;
-UNWIND [{_id:792, properties:{uid:"Families_NodeAbstractClass", name:"NodeAbstractClass", label:"AbstractClass"}}, {_id:793, properties:{uid:"Families_NodeAttribute", name:"NodeAttribute", label:"Attribute"}}, {_id:794, properties:{uid:"Families_NodeOperation", name:"NodeOperation", label:"Operation"}}, {_id:795, properties:{uid:"Families_NodeParam", name:"NodeParam", label:"Param"}}, {_id:796, properties:{uid:"Families_NodeAssociationClass", name:"NodeAssociationClass", label:"AssociationClass"}}, {_id:797, properties:{uid:"Families_NodeConcreteClass", name:"NodeConcreteClass", label:"ConcreteClass"}}, {_id:798, properties:{uid:"Families_NodeEnumeration", name:"NodeEnumeration", label:"Enumeration"}}, {_id:799, properties:{uid:"Families_NodeClassInvariant", name:"NodeClassInvariant", label:"ClassInvariant"}}, {_id:800, properties:{uid:"Families_NodePreCondition", name:"NodePreCondition", label:"PreCondition"}}, {_id:801, properties:{uid:"Families_NodePostCondition", name:"NodePostCondition", label:"PostCondition"}}, {_id:802, properties:{uid:"Families_NodeTernaryAssociation", name:"NodeTernaryAssociation", label:"TernaryAssociation"}}, {_id:803, properties:{uid:"Families_NodeNestedCollection", name:"NodeNestedCollection", label:"NestedCollection"}}, {_id:813, properties:{uid:"Persons_NodeAbstractClass", name:"NodeAbstractClass", label:"AbstractClass"}}, {_id:814, properties:{uid:"Persons_NodeAttribute", name:"NodeAttribute", label:"Attribute"}}, {_id:815, properties:{uid:"Persons_NodeOperation", name:"NodeOperation", label:"Operation"}}, {_id:816, properties:{uid:"Persons_NodeParam", name:"NodeParam", label:"Param"}}, {_id:817, properties:{uid:"Persons_NodeAssociationClass", name:"NodeAssociationClass", label:"AssociationClass"}}, {_id:818, properties:{uid:"Persons_NodeConcreteClass", name:"NodeConcreteClass", label:"ConcreteClass"}}, {_id:819, properties:{uid:"Persons_NodeEnumeration", name:"NodeEnumeration", label:"Enumeration"}}, {_id:820, properties:{uid:"Persons_NodeClassInvariant", name:"NodeClassInvariant", label:"ClassInvariant"}}] AS row
-CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:MetaNode;
-UNWIND [{_id:821, properties:{uid:"Persons_NodePreCondition", name:"NodePreCondition", label:"PreCondition"}}, {_id:822, properties:{uid:"Persons_NodePostCondition", name:"NodePostCondition", label:"PostCondition"}}, {_id:823, properties:{uid:"Persons_NodeTernaryAssociation", name:"NodeTernaryAssociation", label:"TernaryAssociation"}}, {_id:824, properties:{uid:"Persons_NodeNestedCollection", name:"NodeNestedCollection", label:"NestedCollection"}}, {_id:832, properties:{name:"NodeConcreteClass", label:"NodeConcreteClass"}}, {_id:838, properties:{uid:"AllFromNeo4j_NodeAbstractClass", name:"NodeAbstractClass", label:"AbstractClass"}}, {_id:839, properties:{uid:"AllFromNeo4j_NodeAttribute", name:"NodeAttribute", label:"Attribute"}}, {_id:840, properties:{uid:"AllFromNeo4j_NodeOperation", name:"NodeOperation", label:"Operation"}}, {_id:841, properties:{uid:"AllFromNeo4j_NodeParam", name:"NodeParam", label:"Param"}}, {_id:842, properties:{uid:"AllFromNeo4j_NodeAssociationClass", name:"NodeAssociationClass", label:"AssociationClass"}}, {_id:843, properties:{uid:"AllFromNeo4j_NodeConcreteClass", name:"NodeConcreteClass", label:"ConcreteClass"}}, {_id:844, properties:{uid:"AllFromNeo4j_NodeEnumeration", name:"NodeEnumeration", label:"Enumeration"}}, {_id:845, properties:{uid:"AllFromNeo4j_NodeClassInvariant", name:"NodeClassInvariant", label:"ClassInvariant"}}, {_id:846, properties:{uid:"AllFromNeo4j_NodePreCondition", name:"NodePreCondition", label:"PreCondition"}}, {_id:847, properties:{uid:"AllFromNeo4j_NodePostCondition", name:"NodePostCondition", label:"PostCondition"}}, {_id:848, properties:{uid:"AllFromNeo4j_NodeTernaryAssociation", name:"NodeTernaryAssociation", label:"TernaryAssociation"}}, {_id:849, properties:{uid:"AllFromNeo4j_NodeNestedCollection", name:"NodeNestedCollection", label:"NestedCollection"}}] AS row
-CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:MetaNode;
-UNWIND [{_id:827, properties:{hasChildren:true, name:"Person", hasParent:false}}] AS row
+UNWIND [{_id:67, properties:{hasChildren:true, name:"Person", hasParent:false}}] AS row
 CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:Person;
-UNWIND [{_id:807, properties:{hasChildren:false, name:"FamilyRegister", hasParent:false}}, {_id:850, properties:{name:"fr", use_id:"fr", isCorrespondence:false}}] AS row
+UNWIND [{_id:88, properties:{hasChildren:false, name:"FamilyRegister", hasParent:false}}, {_id:97, properties:{name:"fr1", use_id:"fr1", isCorrespondence:false}}] AS row
 CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:FamilyRegister;
-UNWIND [{_id:791, properties:{name:"Families"}}, {_id:812, properties:{name:"Persons"}}, {_id:831, properties:{name:"Families2Persons_Corr"}}, {_id:837, properties:{name:"AllFromNeo4j"}}] AS row
+UNWIND [{_id:100, properties:{name:"fr2pr1", use_id:"fr2pr1", isCorrespondence:true}}] AS row
+CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:FR2PR:Object;
+UNWIND [{_id:51, properties:{name:"Persons"}}, {_id:73, properties:{name:"Families"}}, {_id:91, properties:{name:"Families2Persons_Corr"}}] AS row
 CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:ManageModel;
-UNWIND [{_id:808, properties:{collectionType:"None", isDerived:false, isNestedCollection:false, name:"Family_name", isCollection:false, index:0, type:"String", attrName:"name"}}, {_id:809, properties:{collectionType:"None", isDerived:false, isNestedCollection:false, name:"FamilyMember_name", isCollection:false, index:0, type:"String", attrName:"name"}}, {_id:829, properties:{collectionType:"None", isDerived:false, isNestedCollection:false, name:"Person_birthday", isCollection:false, index:0, type:"String", attrName:"birthday"}}, {_id:830, properties:{collectionType:"None", isDerived:false, isNestedCollection:false, name:"Person_name", isCollection:false, index:1, type:"String", attrName:"name"}}] AS row
+UNWIND [{_id:69, properties:{collectionType:"None", isDerived:false, isNestedCollection:false, name:"Person_birthday", isCollection:false, index:0, type:"String", attrName:"birthday"}}, {_id:70, properties:{collectionType:"None", isDerived:false, isNestedCollection:false, name:"Person_name", isCollection:false, index:1, type:"String", attrName:"name"}}, {_id:89, properties:{collectionType:"None", isDerived:false, isNestedCollection:false, name:"Family_name", isCollection:false, index:0, type:"String", attrName:"name"}}, {_id:90, properties:{collectionType:"None", isDerived:false, isNestedCollection:false, name:"FamilyMember_name", isCollection:false, index:0, type:"String", attrName:"name"}}] AS row
 CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:Attribute;
-UNWIND [{_id:826, properties:{hasChildren:false, name:"Male", hasParent:true}}] AS row
+UNWIND [{_id:94, properties:{name:"FR2PR"}}] AS row
+CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:NodeConcreteClass:FR2PR;
+UNWIND [{_id:66, properties:{hasChildren:false, name:"Male", hasParent:true}}] AS row
 CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:Male;
-UNWIND [{_id:0, properties:{name:"fr2pr", use_id:"fr2pr", isCorrespondence:true}}, {_id:834, properties:{name:"FR2PR"}}] AS row
-CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:FR2PR;
-UNWIND [{_id:835, properties:{name:"F2MP"}}] AS row
-CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:F2MP;
+UNWIND [{_id:93, properties:{name:"FM2MP"}}] AS row
+CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:FM2MP:NodeConcreteClass;
 
-UNWIND [{start: {_id:825}, end: {_id:818}, properties:{}}] AS row
+UNWIND [{start: {_id:65}, end: {_id:57}, properties:{}}] AS row
 MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
 MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
 CREATE (start)-[r:InstanceOf]->(end) SET r += row.properties;
-UNWIND [{start: {_id:850}, end: {_id:807}, properties:{}}] AS row
+UNWIND [{start: {_id:97}, end: {_id:88}, properties:{}}] AS row
 MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
 MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
 CREATE (start)-[r:ObjectInstanceOf]->(end) SET r += row.properties;
-UNWIND [{start: {_id:850}, end: {_id:851}, properties:{isTernary:false, targetRole:"families", name:"FamilyRegistration", sourceRole:"familyRegister"}}] AS row
+UNWIND [{start: {_id:97}, end: {_id:96}, properties:{isTernary:false, targetRole:"families", name:"FamilyRegistration", sourceRole:"familyRegister"}}] AS row
 MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
 MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
 CREATE (start)-[r:LinkAssociateWith]->(end) SET r += row.properties;
-UNWIND [{start: {_id:853}, end: {_id:828}, properties:{}}] AS row
+UNWIND [{start: {_id:99}, end: {_id:68}, properties:{}}] AS row
 MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
 MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
 CREATE (start)-[r:ObjectInstanceOf]->(end) SET r += row.properties;
-UNWIND [{start: {_id:0}, end: {_id:850}, properties:{isCorrespondenceLink:true, associationName:"FR2PR_FamilyRegister", sourceClassName:"FR2PR", targetClassName:"FamilyRegister", isTernary:false}}] AS row
+UNWIND [{start: {_id:100}, end: {_id:99}, properties:{isCorrespondenceLink:true, sourceClassName:"FR2PR", targetClassName:"PersonRegister", isTernary:false, targetRole:"pr", name:"FR2PR_PersonRegister", sourceRole:"fr2pr"}}] AS row
 MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
 MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
 CREATE (start)-[r:LinkAssociateWith]->(end) SET r += row.properties;
-UNWIND [{start: {_id:0}, end: {_id:834}, properties:{}}] AS row
-MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
-MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
-CREATE (start)-[r:ObjectInstanceOf]->(end) SET r += row.properties;
-UNWIND [{start: {_id:805}, end: {_id:808}, properties:{}}] AS row
+UNWIND [{start: {_id:86}, end: {_id:89}, properties:{}}] AS row
 MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
 MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
 CREATE (start)-[r:HasAttribute]->(end) SET r += row.properties;
-UNWIND [{start: {_id:831}, end: {_id:835}, properties:{}}] AS row
-MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
-MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
-CREATE (start)-[r:DefineMetamodels]->(end) SET r += row.properties;
-UNWIND [{start: {_id:831}, end: {_id:834}, properties:{}}] AS row
-MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
-MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
-CREATE (start)-[r:DefineMetamodels]->(end) SET r += row.properties;
-UNWIND [{start: {_id:827}, end: {_id:829}, properties:{}}, {start: {_id:827}, end: {_id:830}, properties:{}}] AS row
+UNWIND [{start: {_id:67}, end: {_id:69}, properties:{}}, {start: {_id:67}, end: {_id:70}, properties:{}}] AS row
 MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
 MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
 CREATE (start)-[r:HasAttribute]->(end) SET r += row.properties;
-UNWIND [{start: {_id:828}, end: {_id:818}, properties:{}}] AS row
+UNWIND [{start: {_id:68}, end: {_id:57}, properties:{}}] AS row
 MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
 MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
 CREATE (start)-[r:InstanceOf]->(end) SET r += row.properties;
-UNWIND [{start: {_id:853}, end: {_id:0}, properties:{isCorrespondenceLink:true, associationName:"FR2PR_FamRegister", sourceClassName:"FR2PR", targetClassName:"PersonRegister", isTernary:false}}] AS row
-MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
-MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
-CREATE (start)-[r:LinkAssociateWith]->(end) SET r += row.properties;
-UNWIND [{start: {_id:833}, end: {_id:832}, properties:{}}] AS row
-MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
-MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
-CREATE (start)-[r:InstanceOf]->(end) SET r += row.properties;
-UNWIND [{start: {_id:834}, end: {_id:832}, properties:{}}] AS row
-MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
-MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
-CREATE (start)-[r:InstanceOf]->(end) SET r += row.properties;
-UNWIND [{start: {_id:835}, end: {_id:832}, properties:{}}] AS row
-MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
-MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
-CREATE (start)-[r:InstanceOf]->(end) SET r += row.properties;
-UNWIND [{start: {_id:806}, end: {_id:809}, properties:{}}] AS row
-MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
-MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
-CREATE (start)-[r:HasAttribute]->(end) SET r += row.properties;
-UNWIND [{start: {_id:855}, end: {_id:806}, properties:{}}] AS row
-MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
-MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
-CREATE (start)-[r:ObjectInstanceOf]->(end) SET r += row.properties;
-UNWIND [{start: {_id:834}, end: {_id:807}, properties:{sourceKind:0, associationName:"FR2PR_FamilyRegister", sourceMultiplicity:"1", sourceClassName:"FR2PR", targetClassName:"FamilyRegister", isTernary:false, targetKind:0, sourceClassrole:"fr2pr", targerClassrole:"fr", targetMultiplicity:"0..1"}}] AS row
+UNWIND [{start: {_id:93}, end: {_id:86}, properties:{associationName:"FM2MP_Family", sourceClassName:"FM2MP", targetClassName:"Family", isTernary:false, sourceClassrole:"fm2mp", targerClassrole:"fm"}}] AS row
 MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
 MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
 CREATE (start)-[r:AssociateWith]->(end) SET r += row.properties;
-UNWIND [{start: {_id:831}, end: {_id:833}, properties:{}}] AS row
+UNWIND [{start: {_id:95}, end: {_id:87}, properties:{associationName:"F2MP_FamilyMember", sourceClassName:"F2MP", targetClassName:"FamilyMember", isTernary:false, sourceClassrole:"f2mp", targerClassrole:"f"}}] AS row
 MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
 MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
-CREATE (start)-[r:DefineMetamodels]->(end) SET r += row.properties;
-UNWIND [{start: {_id:826}, end: {_id:827}, properties:{targetName:"Person", sourceName:"Male"}}] AS row
+CREATE (start)-[r:AssociateWith]->(end) SET r += row.properties;
+UNWIND [{start: {_id:87}, end: {_id:90}, properties:{}}] AS row
+MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
+MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
+CREATE (start)-[r:HasAttribute]->(end) SET r += row.properties;
+UNWIND [{start: {_id:98}, end: {_id:87}, properties:{}}] AS row
+MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
+MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
+CREATE (start)-[r:ObjectInstanceOf]->(end) SET r += row.properties;
+UNWIND [{start: {_id:100}, end: {_id:94}, properties:{}}] AS row
+MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
+MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
+CREATE (start)-[r:ObjectInstanceOf]->(end) SET r += row.properties;
+UNWIND [{start: {_id:100}, end: {_id:97}, properties:{isCorrespondenceLink:true, sourceClassName:"FR2PR", targetClassName:"FamilyRegister", isTernary:false, targetRole:"fr", name:"FR2PR_FamilyRegister", sourceRole:"fr2pr"}}] AS row
+MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
+MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
+CREATE (start)-[r:LinkAssociateWith]->(end) SET r += row.properties;
+UNWIND [{start: {_id:66}, end: {_id:67}, properties:{targetName:"Person", sourceName:"Male"}}] AS row
 MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
 MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
 CREATE (start)-[r:Extends]->(end) SET r += row.properties;
-UNWIND [{start: {_id:835}, end: {_id:826}, properties:{sourceKind:0, associationName:"F2MP_Male", sourceMultiplicity:"1", sourceClassName:"F2MP", targetClassName:"Male", isTernary:false, targetKind:0, sourceClassrole:"f2mp", targerClassrole:"mp", targetMultiplicity:"0..1"}}] AS row
-MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
-MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
-CREATE (start)-[r:AssociateWith]->(end) SET r += row.properties;
-UNWIND [{start: {_id:833}, end: {_id:826}, properties:{sourceKind:0, associationName:"FM2MP_Male", sourceMultiplicity:"1", sourceClassName:"FM2MP", targetClassName:"Male", isTernary:false, targetKind:0, sourceClassrole:"fm2mp", targerClassrole:"mp", targetMultiplicity:"0..1"}}] AS row
-MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
-MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
-CREATE (start)-[r:AssociateWith]->(end) SET r += row.properties;
-UNWIND [{start: {_id:805}, end: {_id:797}, properties:{}}] AS row
+UNWIND [{start: {_id:86}, end: {_id:79}, properties:{}}] AS row
 MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
 MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
 CREATE (start)-[r:InstanceOf]->(end) SET r += row.properties;
-UNWIND [{start: {_id:827}, end: {_id:813}, properties:{}}] AS row
+UNWIND [{start: {_id:93}, end: {_id:66}, properties:{associationName:"FM2MP_Male", sourceClassName:"FM2MP", targetClassName:"Male", isTernary:false, sourceClassrole:"fm2mp", targerClassrole:"mp"}}] AS row
+MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
+MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
+CREATE (start)-[r:AssociateWith]->(end) SET r += row.properties;
+UNWIND [{start: {_id:67}, end: {_id:52}, properties:{}}] AS row
 MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
 MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
 CREATE (start)-[r:InstanceOf]->(end) SET r += row.properties;
-UNWIND [{start: {_id:851}, end: {_id:805}, properties:{}}] AS row
+UNWIND [{start: {_id:96}, end: {_id:86}, properties:{}}] AS row
 MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
 MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
 CREATE (start)-[r:ObjectInstanceOf]->(end) SET r += row.properties;
-UNWIND [{start: {_id:825}, end: {_id:827}, properties:{targetName:"Person", sourceName:"Female"}}] AS row
+UNWIND [{start: {_id:65}, end: {_id:67}, properties:{targetName:"Person", sourceName:"Female"}}] AS row
 MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
 MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
 CREATE (start)-[r:Extends]->(end) SET r += row.properties;
-UNWIND [{start: {_id:834}, end: {_id:828}, properties:{sourceKind:0, associationName:"FR2PR_PersonRegister", sourceMultiplicity:"1", sourceClassName:"FR2PR", targetClassName:"PersonRegister", isTernary:false, targetKind:0, sourceClassrole:"fr2pr", targerClassrole:"pr", targetMultiplicity:"0..1"}}] AS row
-MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
-MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
-CREATE (start)-[r:AssociateWith]->(end) SET r += row.properties;
-UNWIND [{start: {_id:835}, end: {_id:806}, properties:{sourceKind:0, associationName:"F2MP_FamilyMember", sourceMultiplicity:"1", sourceClassName:"F2MP", targetClassName:"FamilyMember", isTernary:false, targetKind:0, sourceClassrole:"f2mp", targerClassrole:"f", targetMultiplicity:"0..1"}}] AS row
-MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
-MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
-CREATE (start)-[r:AssociateWith]->(end) SET r += row.properties;
-UNWIND [{start: {_id:806}, end: {_id:797}, properties:{}}] AS row
+UNWIND [{start: {_id:95}, end: {_id:92}, properties:{}}] AS row
 MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
 MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
 CREATE (start)-[r:InstanceOf]->(end) SET r += row.properties;
-UNWIND [{start: {_id:805}, end: {_id:806}, properties:{sourceKind:2, associationName:"Daughters", sourceMultiplicity:"0..1", sourceClassName:"Family", targetClassName:"FamilyMember", isTernary:false, targetKind:0, sourceClassrole:"familyDaughter", targerClassrole:"daughters", targetMultiplicity:"*"}}, {start: {_id:805}, end: {_id:806}, properties:{sourceKind:2, associationName:"Father", sourceMultiplicity:"0..1", sourceClassName:"Family", targetClassName:"FamilyMember", isTernary:false, targetKind:0, sourceClassrole:"familyFather", targerClassrole:"father", targetMultiplicity:"0..1"}}, {start: {_id:805}, end: {_id:806}, properties:{sourceKind:2, associationName:"Mother", sourceMultiplicity:"0..1", sourceClassName:"Family", targetClassName:"FamilyMember", isTernary:false, targetKind:0, sourceClassrole:"familyMother", targerClassrole:"mother", targetMultiplicity:"0..1"}}, {start: {_id:805}, end: {_id:806}, properties:{sourceKind:2, associationName:"Sons", sourceMultiplicity:"0..1", sourceClassName:"Family", targetClassName:"FamilyMember", isTernary:false, targetKind:0, sourceClassrole:"familySon", targerClassrole:"sons", targetMultiplicity:"*"}}] AS row
+UNWIND [{start: {_id:94}, end: {_id:68}, properties:{associationName:"FR2PR_PersonRegister", sourceClassName:"FR2PR", targetClassName:"PersonRegister", isTernary:false, sourceClassrole:"fr2pr", targerClassrole:"pr"}}] AS row
+MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
+MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
+CREATE (start)-[r:AssociateWith]->(end) SET r += row.properties;
+UNWIND [{start: {_id:86}, end: {_id:87}, properties:{sourceKind:2, associationName:"Daughters", sourceMultiplicity:"0..1", sourceClassName:"Family", targetClassName:"FamilyMember", isTernary:false, targetKind:0, sourceClassrole:"familyDaughter", targerClassrole:"daughters", targetMultiplicity:"*"}}, {start: {_id:86}, end: {_id:87}, properties:{sourceKind:2, associationName:"Father", sourceMultiplicity:"0..1", sourceClassName:"Family", targetClassName:"FamilyMember", isTernary:false, targetKind:0, sourceClassrole:"familyFather", targerClassrole:"father", targetMultiplicity:"0..1"}}, {start: {_id:86}, end: {_id:87}, properties:{sourceKind:2, associationName:"Mother", sourceMultiplicity:"0..1", sourceClassName:"Family", targetClassName:"FamilyMember", isTernary:false, targetKind:0, sourceClassrole:"familyMother", targerClassrole:"mother", targetMultiplicity:"0..1"}}, {start: {_id:86}, end: {_id:87}, properties:{sourceKind:2, associationName:"Sons", sourceMultiplicity:"0..1", sourceClassName:"Family", targetClassName:"FamilyMember", isTernary:false, targetKind:0, sourceClassrole:"familySon", targerClassrole:"sons", targetMultiplicity:"*"}}] AS row
 MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
 MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
 CREATE (start)-[r:ComposeOf]->(end) SET r += row.properties;
-UNWIND [{start: {_id:833}, end: {_id:805}, properties:{sourceKind:0, associationName:"FM2MP_Family", sourceMultiplicity:"1", sourceClassName:"FM2MP", targetClassName:"Family", isTernary:false, targetKind:0, sourceClassrole:"fm2mp", targerClassrole:"fm", targetMultiplicity:"0..1"}}] AS row
-MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
-MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
-CREATE (start)-[r:AssociateWith]->(end) SET r += row.properties;
-UNWIND [{start: {_id:791}, end: {_id:792}, properties:{}}, {start: {_id:791}, end: {_id:793}, properties:{}}, {start: {_id:791}, end: {_id:794}, properties:{}}, {start: {_id:791}, end: {_id:795}, properties:{}}, {start: {_id:791}, end: {_id:796}, properties:{}}, {start: {_id:791}, end: {_id:797}, properties:{}}, {start: {_id:791}, end: {_id:798}, properties:{}}, {start: {_id:791}, end: {_id:799}, properties:{}}, {start: {_id:791}, end: {_id:800}, properties:{}}, {start: {_id:791}, end: {_id:801}, properties:{}}, {start: {_id:791}, end: {_id:802}, properties:{}}, {start: {_id:791}, end: {_id:803}, properties:{}}, {start: {_id:812}, end: {_id:813}, properties:{}}, {start: {_id:812}, end: {_id:814}, properties:{}}, {start: {_id:812}, end: {_id:815}, properties:{}}, {start: {_id:812}, end: {_id:816}, properties:{}}, {start: {_id:812}, end: {_id:817}, properties:{}}, {start: {_id:812}, end: {_id:818}, properties:{}}, {start: {_id:812}, end: {_id:819}, properties:{}}, {start: {_id:812}, end: {_id:820}, properties:{}}] AS row
-MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
-MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
-CREATE (start)-[r:DefineMetamodels]->(end) SET r += row.properties;
-UNWIND [{start: {_id:812}, end: {_id:821}, properties:{}}, {start: {_id:812}, end: {_id:822}, properties:{}}, {start: {_id:812}, end: {_id:823}, properties:{}}, {start: {_id:812}, end: {_id:824}, properties:{}}, {start: {_id:831}, end: {_id:832}, properties:{}}, {start: {_id:837}, end: {_id:838}, properties:{}}, {start: {_id:837}, end: {_id:839}, properties:{}}, {start: {_id:837}, end: {_id:840}, properties:{}}, {start: {_id:837}, end: {_id:841}, properties:{}}, {start: {_id:837}, end: {_id:842}, properties:{}}, {start: {_id:837}, end: {_id:843}, properties:{}}, {start: {_id:837}, end: {_id:844}, properties:{}}, {start: {_id:837}, end: {_id:845}, properties:{}}, {start: {_id:837}, end: {_id:846}, properties:{}}, {start: {_id:837}, end: {_id:847}, properties:{}}, {start: {_id:837}, end: {_id:848}, properties:{}}, {start: {_id:837}, end: {_id:849}, properties:{}}] AS row
-MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
-MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
-CREATE (start)-[r:DefineMetamodels]->(end) SET r += row.properties;
-UNWIND [{start: {_id:807}, end: {_id:805}, properties:{sourceKind:0, associationName:"FamilyRegistration", sourceMultiplicity:"0..1", sourceClassName:"FamilyRegister", targetClassName:"Family", isTernary:false, targetKind:0, sourceClassrole:"familyRegister", targerClassrole:"families", targetMultiplicity:"*"}}] AS row
-MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
-MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
-CREATE (start)-[r:AssociateWith]->(end) SET r += row.properties;
-UNWIND [{start: {_id:826}, end: {_id:818}, properties:{}}] AS row
+UNWIND [{start: {_id:87}, end: {_id:79}, properties:{}}] AS row
 MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
 MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
 CREATE (start)-[r:InstanceOf]->(end) SET r += row.properties;
-UNWIND [{start: {_id:807}, end: {_id:797}, properties:{}}] AS row
+UNWIND [{start: {_id:51}, end: {_id:52}, properties:{}}, {start: {_id:51}, end: {_id:53}, properties:{}}, {start: {_id:51}, end: {_id:54}, properties:{}}, {start: {_id:51}, end: {_id:55}, properties:{}}, {start: {_id:51}, end: {_id:56}, properties:{}}, {start: {_id:51}, end: {_id:57}, properties:{}}, {start: {_id:51}, end: {_id:58}, properties:{}}, {start: {_id:51}, end: {_id:59}, properties:{}}, {start: {_id:51}, end: {_id:60}, properties:{}}, {start: {_id:51}, end: {_id:61}, properties:{}}, {start: {_id:51}, end: {_id:62}, properties:{}}, {start: {_id:51}, end: {_id:63}, properties:{}}, {start: {_id:73}, end: {_id:74}, properties:{}}, {start: {_id:73}, end: {_id:75}, properties:{}}, {start: {_id:73}, end: {_id:76}, properties:{}}, {start: {_id:73}, end: {_id:77}, properties:{}}, {start: {_id:73}, end: {_id:78}, properties:{}}, {start: {_id:73}, end: {_id:79}, properties:{}}, {start: {_id:73}, end: {_id:80}, properties:{}}, {start: {_id:73}, end: {_id:81}, properties:{}}] AS row
+MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
+MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
+CREATE (start)-[r:DefineMetamodels]->(end) SET r += row.properties;
+UNWIND [{start: {_id:73}, end: {_id:82}, properties:{}}, {start: {_id:73}, end: {_id:83}, properties:{}}, {start: {_id:73}, end: {_id:84}, properties:{}}, {start: {_id:73}, end: {_id:85}, properties:{}}, {start: {_id:91}, end: {_id:92}, properties:{}}] AS row
+MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
+MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
+CREATE (start)-[r:DefineMetamodels]->(end) SET r += row.properties;
+UNWIND [{start: {_id:66}, end: {_id:57}, properties:{}}] AS row
 MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
 MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
 CREATE (start)-[r:InstanceOf]->(end) SET r += row.properties;
-UNWIND [{start: {_id:851}, end: {_id:855}, properties:{isTernary:false, targetRole:"father", name:"Father", sourceRole:"familyFather"}}] AS row
+UNWIND [{start: {_id:88}, end: {_id:86}, properties:{sourceKind:0, associationName:"FamilyRegistration", sourceMultiplicity:"0..1", sourceClassName:"FamilyRegister", targetClassName:"Family", isTernary:false, targetKind:0, sourceClassrole:"familyRegister", targerClassrole:"families", targetMultiplicity:"*"}}] AS row
+MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
+MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
+CREATE (start)-[r:AssociateWith]->(end) SET r += row.properties;
+UNWIND [{start: {_id:94}, end: {_id:92}, properties:{}}] AS row
+MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
+MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
+CREATE (start)-[r:InstanceOf]->(end) SET r += row.properties;
+UNWIND [{start: {_id:88}, end: {_id:79}, properties:{}}] AS row
+MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
+MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
+CREATE (start)-[r:InstanceOf]->(end) SET r += row.properties;
+UNWIND [{start: {_id:96}, end: {_id:98}, properties:{isTernary:false, targetRole:"father", name:"Father", sourceRole:"familyFather"}}] AS row
 MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
 MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
 CREATE (start)-[r:LinkComposeOf]->(end) SET r += row.properties;
-UNWIND [{start: {_id:828}, end: {_id:827}, properties:{sourceKind:2, associationName:"PersonRegistration", sourceMultiplicity:"0..1", sourceClassName:"PersonRegister", targetClassName:"Person", isTernary:false, targetKind:0, sourceClassrole:"personRegister", targerClassrole:"persons", targetMultiplicity:"*"}}] AS row
-MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
-MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
-CREATE (start)-[r:ComposeOf]->(end) SET r += row.properties;
-UNWIND [{start: {_id:808}, end: {_id:793}, properties:{}}, {start: {_id:809}, end: {_id:793}, properties:{}}, {start: {_id:829}, end: {_id:814}, properties:{}}, {start: {_id:830}, end: {_id:814}, properties:{}}] AS row
+UNWIND [{start: {_id:93}, end: {_id:92}, properties:{}}] AS row
 MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
 MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
 CREATE (start)-[r:InstanceOf]->(end) SET r += row.properties;
+UNWIND [{start: {_id:95}, end: {_id:66}, properties:{associationName:"F2MP_Male", sourceClassName:"F2MP", targetClassName:"Male", isTernary:false, sourceClassrole:"f2mp", targerClassrole:"mp"}}] AS row
+MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
+MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
+CREATE (start)-[r:AssociateWith]->(end) SET r += row.properties;
+UNWIND [{start: {_id:68}, end: {_id:67}, properties:{sourceKind:2, associationName:"PersonRegistration", sourceMultiplicity:"0..1", sourceClassName:"PersonRegister", targetClassName:"Person", isTernary:false, targetKind:0, sourceClassrole:"personRegister", targerClassrole:"persons", targetMultiplicity:"*"}}] AS row
+MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
+MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
+CREATE (start)-[r:ComposeOf]->(end) SET r += row.properties;
+UNWIND [{start: {_id:69}, end: {_id:53}, properties:{}}, {start: {_id:70}, end: {_id:53}, properties:{}}, {start: {_id:89}, end: {_id:75}, properties:{}}, {start: {_id:90}, end: {_id:75}, properties:{}}] AS row
+MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
+MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
+CREATE (start)-[r:InstanceOf]->(end) SET r += row.properties;
+UNWIND [{start: {_id:94}, end: {_id:88}, properties:{associationName:"FR2PR_FamilyRegister", sourceClassName:"FR2PR", targetClassName:"FamilyRegister", isTernary:false, sourceClassrole:"fr2pr", targerClassrole:"fr"}}] AS row
+MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
+MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
+CREATE (start)-[r:AssociateWith]->(end) SET r += row.properties;
 
 MATCH (n:`UNIQUE IMPORT LABEL`)  WITH n LIMIT 20000 REMOVE n:`UNIQUE IMPORT LABEL` REMOVE n.`UNIQUE IMPORT ID`;
 

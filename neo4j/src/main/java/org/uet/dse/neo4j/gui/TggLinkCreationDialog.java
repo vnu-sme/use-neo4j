@@ -34,9 +34,7 @@ public class TggLinkCreationDialog extends JDialog {
             repo.createCorrLink(
                 txtSrcOID.getText().trim(),
                 txtTrgOID.getText().trim(),
-                txtAssocName.getText().trim(),
-                txtSrcCls.getText().trim(),
-                txtTrgCls.getText().trim()
+                txtAssocName.getText().trim()
             );
             dispose();
         });

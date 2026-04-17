@@ -21,18 +21,22 @@ public class Neo4jDirectObjectRepository {
     }
 
 
-    public void createRegularLink(String srcOid, String tgtOid, String assocName) {
+    public void createRegularLink(String srcOid, String tgtOid, String assocName, String modelName) {
         String query =
-            "MATCH (obj1 {use_id: $srcOid})-[:ObjectInstanceOf]->(cls1)\n" +
-                "MATCH (obj2 {use_id: $tgtOid})-[:ObjectInstanceOf]->(cls2)\n" +
-                "// find Association in Metamodel\n" +
+                "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(metaN:MetaNode {name: 'NodeConcreteClass'})\n" +
+
+                "MATCH (obj1 {use_id: $srcOid})-[:ObjectInstanceOf]->(cls1)-[:InstanceOf]->(metaN)\n" +
+                "MATCH (obj2 {use_id: $tgtOid})-[:ObjectInstanceOf]->(cls2)-[:InstanceOf]->(metaN)\n" +
+
                 "MATCH (metaS)-[r]->(metaT) \n" +
                 "WHERE r.associationName = $assocName \n" +
                 "  AND ((metaS = cls1 AND metaT = cls2) OR (metaS = cls2 AND metaT = cls1))\n" +
+
                 "WITH obj1, obj2, cls1, cls2, r, metaS, metaT, type(r) AS metaType\n" +
                 "WITH CASE WHEN metaS = cls1 THEN obj1 ELSE obj2 END AS sObj,\n" +
                 "     CASE WHEN metaT = cls2 THEN obj2 ELSE obj1 END AS tObj,\n" +
                 "     r, metaType\n" +
+
                 "FOREACH (ignore IN CASE WHEN metaType = 'ComposeOf' THEN [1] ELSE [] END |\n" +
                 "  MERGE (sObj)-[l:LinkComposeOf {name: r.associationName}]->(tObj)\n" +
                 "  SET l.isTernary = false, l.sourceRole = r.sourceClassrole, l.targetRole = r.targerClassrole)\n" +
@@ -44,7 +48,12 @@ public class Neo4jDirectObjectRepository {
                 "  SET l.isTernary = false, l.sourceRole = r.sourceClassrole, l.targetRole = r.targerClassrole)";
 
         try (Session s = Neo4jDriverManager.getInstance().openSession()) {
-            s.run(query, Values.parameters("srcOid", srcOid, "tgtOid", tgtOid, "assocName", assocName));
+            s.run(query, Values.parameters(
+                "srcOid", srcOid,
+                "tgtOid", tgtOid,
+                "assocName", assocName,
+                "modelName", modelName
+            ));
         }
     }
 
@@ -60,7 +69,11 @@ public class Neo4jDirectObjectRepository {
     public List<Map<String, Object>> listRegularLinks() {
         String query = "MATCH (s)-[r]->(t)\n" +
             "WHERE type(r) STARTS WITH 'Link'\n" +
+            "  AND coalesce(r.isCorrespondenceLink, false) = false\n" +
+            "  AND s.isCorrespondence = false\n" +
+            "  AND t.isCorrespondence = false\n" +
             "RETURN r.name AS name, type(r) AS type, s.use_id AS src, t.use_id AS tgt";
+
         try (Session s = Neo4jDriverManager.getInstance().openSession()) {
             return s.run(query).list(r -> r.asMap());
         }

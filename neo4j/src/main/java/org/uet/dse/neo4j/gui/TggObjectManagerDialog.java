@@ -140,7 +140,8 @@ public class TggObjectManagerDialog extends JDialog {
 
         btnAdd.addActionListener(e -> {
             try {
-                repo.createCorrLink(tS.getText(), tT.getText(), tN.getText(), tSC.getText(), tTC.getText());
+                //repo.createCorrLink(tS.getText(), tT.getText(), tN.getText(), tSC.getText(), tTC.getText());
+                repo.createCorrLink(tS.getText(), tT.getText(), tN.getText());
                 appendLog("SUCCESS: Linked [" + tS.getText() + "] -> [" + tT.getText() + "]");
                 refreshLinks();
             } catch (Exception ex) { appendLog("ERROR: " + ex.getMessage()); }
@@ -211,7 +212,7 @@ public class TggObjectManagerDialog extends JDialog {
         });
         btnCreateLink.addActionListener(e -> {
             try {
-                directRepo.createRegularLink(txtSrc.getText(), txtTgt.getText(), txtAssoc.getText());
+                directRepo.createRegularLink(txtSrc.getText(), txtTgt.getText(), txtAssoc.getText(), currentModelName);
                 appendLog("SUCCESS: Linked [" + txtSrc.getText() + "] -> [" + txtTgt.getText() + "]");
                 refreshRegularData();
             } catch (Exception ex) { appendLog("ERROR: " + ex.getMessage()); }
