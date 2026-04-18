@@ -231,7 +231,7 @@ public class TggTransformationConsole extends JDialog {
 
     private void performExecution() {
         String q = txtExecPreview.getText();
-        if (q.trim().isEmpty() || q.startsWith("//")) {
+        if (q.trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please select a candidate tuple first.");
             return;
         }
