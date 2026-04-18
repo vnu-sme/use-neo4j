@@ -12,7 +12,6 @@ public class CorrMetamodelGenerator {
     String corrModel = trans.name + "_Corr";
 
     sb.append("// --- STEP 0: CREATE CORRESPONDENCE METAMODEL ---\n");
-    // 1. Khởi tạo ManageModel và MetaNode mốc
     sb.append(String.format("MERGE (mCorr:ManageModel {name: '%s'})\n", corrModel));
     sb.append("MERGE (metaC:MetaNode {name: 'NodeConcreteClass', label: 'NodeConcreteClass'})\n");
     sb.append("MERGE (mCorr)-[:DefineMetamodels]->(metaC)\n");
@@ -74,7 +73,7 @@ public class CorrMetamodelGenerator {
     }
   }
 
-  public String generateMatchingQuery(TGGRule rule, String srcM, String trgM, int mode) {
+  public String generateMatchingQueryNotManaged(TGGRule rule, String srcM, String trgM, int mode) {
     edgeCounter = 0;
     StringBuilder sb = new StringBuilder();
     String corrM = srcM + "2" + trgM + "_Corr";
@@ -141,20 +140,91 @@ public class CorrMetamodelGenerator {
     return sb.toString();
   }
 
+  public String generateMatchingQuery(TGGRule rule, String srcM, String trgM, int mode) {
+    this.edgeCounter = 0;
+    StringBuilder sb = new StringBuilder();
+    String corrM = srcM + "2" + trgM + "_Corr";
+
+    sb.append("// --- ATOMIC BOOLEAN CHECK (FIXED SYNTAX & PATH) --- \n");
+    sb.append("RETURN EXISTS {\n");
+
+    sb.append(String.format("  MATCH (mSrc:ManageModel {name: '%s'})-[:DefineMetamodels]->(metaS:MetaNode {name: 'NodeConcreteClass'})\n", srcM));
+    sb.append(String.format("  MATCH (mTrg:ManageModel {name: '%s'})-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})\n", trgM));
+    sb.append(String.format("  MATCH (mCorr:ManageModel {name: '%s'})-[:DefineMetamodels]->(metaC:MetaNode {name: 'NodeConcreteClass'})\n", corrM));
+
+    List<String> patterns = new ArrayList<>();
+    List<String> allConditions = new ArrayList<>();
+
+    processObjectBlock(rule.source.lhs, patterns, allConditions, null, "metaS");
+    if (mode == 0 || mode == 2) processObjectBlock(rule.source.rhs, patterns, allConditions, null, "metaS");
+
+    processObjectBlock(rule.target.lhs, patterns, allConditions, null, "metaT");
+    if (mode == 1 || mode == 2) processObjectBlock(rule.target.rhs, patterns, allConditions, null, "metaT");
+
+    for (TGGElement e : rule.correspondence.lhs) {
+      if (e instanceof CorrDecl) {
+        CorrDecl c = (CorrDecl) e;
+        String sNode = c.nodeARef.replace("*", "");
+        String tNode = c.nodeBRef;
+        String e1 = "rel" + (edgeCounter++), e2 = "rel" + (edgeCounter++);
+        String clsVar = "cls_" + c.corrName;
+
+        patterns.add(String.format("(%s)-[%s]-(%s)-[%s]-(%s)", sNode, e1, c.corrName, e2, tNode));
+        allConditions.add(String.format("type(%s) = 'LinkAssociateWith'", e1));
+        allConditions.add(String.format("type(%s) = 'LinkAssociateWith'", e2));
+
+        patterns.add(String.format("(%s)-[:ObjectInstanceOf]->(%s)-[:InstanceOf]->(metaC)", c.corrName, clsVar));
+        allConditions.add(String.format("%s.name = '%s'", clsVar, c.corrType));
+      }
+    }
+
+    //NAC
+    for (TGGElement e : rule.correspondence.rhs) {
+      if (e instanceof CorrDecl) {
+        CorrDecl c = (CorrDecl) e;
+        String sNodeVar = c.nodeARef.replace("*", "");
+
+        allConditions.add(String.format(
+            "NOT EXISTS {\n" +
+                "    MATCH (%s)-[:LinkAssociateWith]-(existingCorr)-[:ObjectInstanceOf]->(clsRHS)-[:InstanceOf]->(metaC)\n" +
+                "    WHERE clsRHS.name = '%s'\n" +
+                "  }", sNodeVar, c.corrType));
+      }
+    }
+
+    appendConstraintsToList(allConditions, rule);
+
+    sb.append("  MATCH ").append(String.join(",\n    ", patterns)).append("\n");
+
+    if (!allConditions.isEmpty()) {
+      sb.append("  WHERE ").append(String.join("\n    AND ", allConditions)).append("\n");
+    }
+
+    sb.append("} AS isMatched");
+
+    return sb.toString();
+  }
 
   private void processObjectBlock(List<TGGElement> elements, List<String> p, List<String> f, List<String> r, String metaVar) {
+    if (elements == null) return;
     for (TGGElement e : elements) {
       if (e instanceof NodeDecl) {
         NodeDecl n = (NodeDecl) e;
         p.add(String.format("(%s)-[:ObjectInstanceOf]->(cls_%s)-[:InstanceOf]->(%s)", n.name, n.name, metaVar));
         f.add(String.format("cls_%s.name = '%s'", n.name, n.type));
-        r.add(n.name + ".use_id AS " + n.name);
+        //r.add(n.name + ".use_id AS " + n.name);
+        if (r != null) {
+          r.add(n.name + ".use_id AS " + n.name);
+        }
       } else if (e instanceof EdgeDecl) {
         EdgeDecl ed = (EdgeDecl) e;
         String eVar = "e" + (edgeCounter++);
         p.add(String.format("(%s)-[%s]-(%s)", ed.src, eVar, ed.target));
         f.add(String.format("%s.name = '%s' AND type(%s) STARTS WITH 'Link'", eVar, ed.type, eVar));
-        r.add(String.format("elementId(%s) AS %s", eVar, eVar));
+        //r.add(String.format("elementId(%s) AS %s", eVar, eVar));
+        if (r != null) {
+          r.add(String.format("elementId(%s) AS %s", eVar, eVar));
+        }
       }
     }
   }
@@ -307,7 +377,7 @@ public class CorrMetamodelGenerator {
     return !rule.source.lhs.isEmpty() ? ((NodeDecl) rule.source.lhs.get(0)).name : "fr";
   }
 
-  public String generateFindMatchQueryData(TGGRule rule, String srcM, String trgM, int mode) {
+  public String generateFindMatchQueryDataNotManaged(TGGRule rule, String srcM, String trgM, int mode) {
     edgeCounter = 0;
     StringBuilder sb = new StringBuilder();
     String corrM = srcM + "2" + trgM + "_Corr";
@@ -341,12 +411,90 @@ public class CorrMetamodelGenerator {
       }
     }
 
+
+
     sb.append("  MATCH ").append(String.join(",\n    ", patterns)).append("\n");
     sb.append("  WHERE ").append(String.join("\n    AND ", filters)).append("\n");
 
     sb.append("  AND NOT EXISTS { MATCH (").append(findAnchor(rule)).append(")-[:LinkAssociateWith]-(:NodeConcreteClass {isCorrespondence:true}) }\n");
     sb.append("RETURN DISTINCT ").append(String.join(", ", returnItems));
     return sb.toString();
+  }
+
+  public String generateFindMatchQueryData(TGGRule rule, String srcM, String trgM, int mode) {
+    this.edgeCounter = 0;
+    StringBuilder sb = new StringBuilder();
+    String corrM = srcM + "2" + trgM + "_Corr";
+
+    sb.append("// --- STEP 1: FETCH MATCHING TUPLES (SYNTAX FIXED) --- \n");
+
+    sb.append(String.format("MATCH (mSrc:ManageModel {name: '%s'})-[:DefineMetamodels]->(metaS:MetaNode {name: 'NodeConcreteClass'})\n", srcM));
+    sb.append(String.format("MATCH (mTrg:ManageModel {name: '%s'})-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})\n", trgM));
+    sb.append(String.format("MATCH (mCorr:ManageModel {name: '%s'})-[:DefineMetamodels]->(metaC:MetaNode {name: 'NodeConcreteClass'})\n", corrM));
+
+    List<String> patterns = new ArrayList<>();
+    List<String> allConditions = new ArrayList<>(); // Danh sách chứa tất cả điều kiện WHERE
+    List<String> returnItems = new ArrayList<>();
+
+    processObjectBlock(rule.source.lhs, patterns, allConditions, returnItems, "metaS");
+    if (mode == 0 || mode == 2) processObjectBlock(rule.source.rhs, patterns, allConditions, returnItems, "metaS");
+
+    processObjectBlock(rule.target.lhs, patterns, allConditions, returnItems, "metaT");
+    if (mode == 1 || mode == 2) processObjectBlock(rule.target.rhs, patterns, allConditions, returnItems, "metaT");
+
+    for (TGGElement e : rule.correspondence.lhs) {
+      if (e instanceof CorrDecl) {
+        CorrDecl c = (CorrDecl) e;
+        String sNode = c.nodeARef.replace("*", "");
+        String tNode = c.nodeBRef;
+        String e1 = "rel" + (edgeCounter++), e2 = "rel" + (edgeCounter++);
+        String clsVar = "cls_" + c.corrName;
+
+        patterns.add(String.format("(%s)-[%s]-(%s)-[%s]-(%s)", sNode, e1, c.corrName, e2, tNode));
+        allConditions.add(String.format("type(%s) = 'LinkAssociateWith'", e1));
+        allConditions.add(String.format("type(%s) = 'LinkAssociateWith'", e2));
+        patterns.add(String.format("(%s)-[:ObjectInstanceOf]->(%s)-[:InstanceOf]->(metaC)", c.corrName, clsVar));
+        allConditions.add(String.format("%s.name = '%s'", clsVar, c.corrType));
+        returnItems.add(c.corrName + ".use_id AS " + c.corrName);
+      }
+    }
+
+    if (patterns.isEmpty()) return "RETURN 'Error: No input patterns' AS Error";
+
+    //NAC
+    for (TGGElement e : rule.correspondence.rhs) {
+      if (e instanceof CorrDecl) {
+        CorrDecl c = (CorrDecl) e;
+        String sNodeVar = c.nodeARef.replace("*", "");
+        allConditions.add(String.format(
+            "NOT EXISTS {\n" +
+                "      MATCH (%s)-[:LinkAssociateWith]-(existingCorr)-[:ObjectInstanceOf]->(clsRHS)-[:InstanceOf]->(metaC)\n" +
+                "      WHERE clsRHS.name = '%s'\n" +
+                "    }", sNodeVar, c.corrType));
+      }
+    }
+
+    appendConstraintsToList(allConditions, rule);
+
+    sb.append("  MATCH ").append(String.join(",\n    ", patterns)).append("\n");
+
+    if (!allConditions.isEmpty()) {
+      sb.append("  WHERE ").append(String.join("\n    AND ", allConditions)).append("\n");
+    }
+
+    sb.append("RETURN DISTINCT ").append(String.join(", ", returnItems));
+    return sb.toString();
+  }
+
+  private void appendConstraintsToList(List<String> conditions, TGGRule rule) {
+    List<TGGBlock> blocks = Arrays.asList(rule.source, rule.target, rule.correspondence);
+    for (TGGBlock b : blocks) {
+      for (TGGElement e : b.lhs) {
+        if (e instanceof Constraint) {
+          conditions.add(translateOCL(((Constraint) e).expression));
+        }
+      }
+    }
   }
 
   public String generateExecutionQuery(TGGRule rule, String srcM, String trgM, int mode, Map<String, String> candidate) {
@@ -416,7 +564,6 @@ public class CorrMetamodelGenerator {
 
 
   private String[] findNodesForEdge(String edgeVar, TGGRule rule) {
-    // Tìm trong Source/Target
     for (TGGBlock b : Arrays.asList(rule.source, rule.target)) {
       for (TGGElement e : b.lhs)
         if (e instanceof EdgeDecl && ("e"+edgeVar.substring(1)).equals(edgeVar)) return new String[]{((EdgeDecl)e).src, ((EdgeDecl)e).target};
@@ -444,7 +591,7 @@ public class CorrMetamodelGenerator {
     return "Unknown";
   }
 
-  private void addCorrRhsCreateStmts(List<String> stmts, List<TGGElement> elements, TGGRule rule) {
+  private void addCorrRhsCreateStmtsl(List<String> stmts, List<TGGElement> elements, TGGRule rule) {
     for (TGGElement e : elements) {
       if (e instanceof CorrDecl) {
         CorrDecl c = (CorrDecl) e;
@@ -458,6 +605,26 @@ public class CorrMetamodelGenerator {
 
         stmts.add(String.format("  (%s)-[:LinkAssociateWith {name: '%s', isCorrespondenceLink: true}]->(%s)", c.corrName, c.corrType + "_" + sCls, sNode));
         stmts.add(String.format("  (%s)-[:LinkAssociateWith {name: '%s', isCorrespondenceLink: true}]->(%s)", c.corrName, c.corrType + "_" + tCls, c.nodeBRef));
+      }
+    }
+  }
+  private void addCorrRhsCreateStmts(List<String> stmts, List<TGGElement> elements, TGGRule rule) {
+    for (TGGElement e : elements) {
+      if (e instanceof CorrDecl) {
+        CorrDecl c = (CorrDecl) e;
+        String sNode = c.nodeARef.replace("*", "");
+        String newId = c.corrType + "_" + (System.currentTimeMillis() % 1000000);
+
+        stmts.add(String.format("  (%s:`%s`:CorrespondenceObject {use_id: '%s', name: '%s', isCorrespondence: true})",
+            c.corrName, c.corrType, newId, newId));
+
+        String sCls = findTypeAcrossRule(c.nodeARef, rule);
+        String tCls = findTypeAcrossRule(c.nodeBRef, rule);
+
+        stmts.add(String.format("  (%s)-[:LinkAssociateWith {name: '%s', isCorrespondenceLink: true}]->(%s)",
+            c.corrName, c.corrType + "_" + sCls, sNode));
+        stmts.add(String.format("  (%s)-[:LinkAssociateWith {name: '%s', isCorrespondenceLink: true}]->(%s)",
+            c.corrName, c.corrType + "_" + tCls, c.nodeBRef));
       }
     }
   }
