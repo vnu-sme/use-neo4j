@@ -3,6 +3,7 @@ package org.uet.dse.neo4j.sync.query;
 public class Neo4jSnapshotQuery {
     private Neo4jSnapshotQuery() {}
 
+    //only retrieve logically one-level node under meta-node of the selected model, so it won't recursing strong enough to take the correspondence graph
     public static final String CLASSES_AND_FEATURES =
         "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(meta:MetaNode) " +
             "MATCH (inst)-[:InstanceOf]->(meta)  WHERE meta.name IN " +
@@ -115,6 +116,7 @@ public class Neo4jSnapshotQuery {
             "       collect({cls: c.name, role: r.sourceClassrole, " +
             "                mult: r.sourceMultiplicity, idx: r.index, type: type(r)}) AS participants";
 
+    //like model, the object also retrieve only one-layer under class model node
     public static final String OBJECTS_AND_ATTRIBUTES =
         "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(meta:MetaNode) " +
             "WHERE meta.name IN ['NodeConcreteClass', 'NodeAssociationClass'] " +
