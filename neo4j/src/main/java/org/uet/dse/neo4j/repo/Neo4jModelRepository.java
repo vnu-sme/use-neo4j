@@ -7,7 +7,9 @@ import org.neo4j.driver.Values;
 import org.tzi.use.uml.mm.MAssociation;
 import org.tzi.use.uml.mm.MAssociationClass;
 import org.tzi.use.uml.mm.MAssociationEnd;
+import org.uet.dse.neo4j.aop.Latest;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
+import org.uet.dse.neo4j.mm.core.node.AbstractClassNode;
 import org.uet.dse.neo4j.mm.core.node.AbstractMetaNode;
 import org.uet.dse.neo4j.mm.core.node.NodeEnumeration;
 import org.uet.dse.neo4j.query.builder.CypherQueryBuilder;
@@ -118,6 +120,22 @@ public class Neo4jModelRepository {
         ));
     }
 
+    public void upsertClassNode(AbstractClassNode node, String dynamicLabel, String modelName) {
+        Map<String, Object> props = node.toPropertyMap();
+        requireNameProperty(props, dynamicLabel);
+
+        withSession(session -> session.run(
+            Neo4jModelQuery.upsertInstanceNode(dynamicLabel),
+            Values.parameters(
+                "modelName", modelName,
+                "metaName", node.getMetaName(),
+                "id", node.getName(),
+                "props", props,
+                "isAbstract", node.isAbstract()
+            )
+        ));
+    }
+
     public void createStructuralEdge(String fromNodeName, String toNodeName, String edgeLabel) {
         withSession(session -> session.run(
                 CypherQueryBuilder.buildStructuralEdgeQuery(edgeLabel),
@@ -135,7 +153,7 @@ public class Neo4jModelRepository {
         ));
     }
 
-    public void upsertEnumeration(String enumName, List<String> literals, String modelName) {
+    public void upsertEnumerationTC(String enumName, List<String> literals, String modelName) {
         NodeEnumeration nodeEnum = new NodeEnumeration();
         nodeEnum.setName(enumName);
         nodeEnum.setValues(literals);
@@ -143,6 +161,18 @@ public class Neo4jModelRepository {
         withSession(session -> session.run(
                 CypherQueryBuilder.buildUpsertEnumerationQuery(nodeEnum.getName()),
                 Values.parameters("modelName", modelName, "name", nodeEnum.getName(), "values", nodeEnum.getValues())
+        ));
+    }
+
+    @Latest
+    public void upsertEnumeration(NodeEnumeration nodeEnumeration, String modelName) {
+        NodeEnumeration nodeEnum = new NodeEnumeration();
+        nodeEnum.setName(nodeEnumeration.getName());
+        nodeEnum.setValues(nodeEnumeration.getValues());
+
+        withSession(session -> session.run(
+            CypherQueryBuilder.buildUpsertEnumerationQuery(nodeEnum.getName()),
+            Values.parameters("modelName", modelName, "name", nodeEnum.getName(), "values", nodeEnum.getValues())
         ));
     }
 

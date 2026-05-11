@@ -87,23 +87,15 @@ public class ModelSyncCoordinator {
         if(!checkLock(lock)) return;
         try {
             //bug
+            //ignore conflict at this point, handling over this for the incremental model update phase, good luck :)
             ModelDiff diff = modelSnapshotsAnalyzer.compareWithNeo4j();
-            //assums that model name doesnt matter
-            KusakabeModelDiff kusakabeModelDiff = (KusakabeModelDiff) diff;
-            List<String> modelNames = getAllModelNamesFromDb();
-            if (kusakabeModelDiff.hasConflict() && modelNames.contains(useSession.system().model().name())) {
-                JOptionPane.showMessageDialog(
-                    null,
-                    "The model is in conflict.",
-                    "Conflict Detected",
-                    JOptionPane.WARNING_MESSAGE
-                );
+
+            //assume that model name doesnt matter, I mean we must assure that the model we are going to push to neo4j has unique name, otherwise it wont be synced
+            if (checkConflictedModel(diff)) {
                 return;
             }
 
-
-            ModelSnapshotsAnalyzer baseBean = new ModelSnapshotCompareV1(this.useModel);
-            Boolean freeForAllPushItAll = true;//baseBean.checkBlankWorkingSpace();
+            final Boolean freeForAllPushItAll = true;//baseBean.checkBlankWorkingSpace();
 
             if (freeForAllPushItAll == null) {
                 JOptionPane.showMessageDialog(null, "Bug");
@@ -112,8 +104,10 @@ public class ModelSyncCoordinator {
             if (freeForAllPushItAll) {
                 //overwrite and add stuff that is in USE but not neo4j
                 CoreModelPushService coreModelPushService = new CoreModelPushService(this.modelApi);
+                //already handle the case of syncing forward different model without stupid overriding
                 coreModelPushService.pushModelToNeo4j();
             } else {
+                //just a testing feature, thats why freeForAllPushItAll is true
                 IncrementalModelPushService incrementalModelPushService = new IncrementalModelPushService(this.modelApi);
                 incrementalModelPushService.pushModelToNeo4j(diff, this.useModel);
 
@@ -129,6 +123,21 @@ public class ModelSyncCoordinator {
         } finally {
             LockManager.releaseLock();
         }
+    }
+
+    private boolean checkConflictedModel(ModelDiff diff) {
+        KusakabeModelDiff kusakabeModelDiff = (KusakabeModelDiff) diff;
+        List<String> modelNames = getAllModelNamesFromDb();
+        if (kusakabeModelDiff.hasConflict() && modelNames.contains(useSession.system().model().name())) {
+            JOptionPane.showMessageDialog(
+                null,
+                "The model is in conflict.",
+                "Conflict Detected",
+                JOptionPane.WARNING_MESSAGE
+            );
+            return true;
+        }
+        return false;
     }
 
     private boolean checkLock(LockManager.LockResult lock) {

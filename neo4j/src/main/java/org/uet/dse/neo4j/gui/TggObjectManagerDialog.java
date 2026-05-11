@@ -16,6 +16,7 @@ public class TggObjectManagerDialog extends JDialog {
     private Neo4jDirectObjectRepository directRepo;
     private String currentModelName;
     private JTextArea txtLog;
+    private JTextArea txtSoilEditor;
 
     public TggObjectManagerDialog(Frame owner, String modelName) {
         super(owner, "TGG Triple Graph Manager (Objects & Links)", false);
@@ -44,7 +45,7 @@ public class TggObjectManagerDialog extends JDialog {
         mainTabs.addTab("1. Correspondence Objects", createObjectPanel());
         mainTabs.addTab("2. AssociateWith Links", createLinkPanel());
         mainTabs.addTab("3. Regular Model Editor", createRegularModelPanel());
-
+        mainTabs.addTab("4. SOIL Import", createSoilImportPanel()); // TAB MỚI
         JPanel pnlStatus = new JPanel(new FlowLayout(FlowLayout.LEFT));
         pnlStatus.add(new JLabel("Active Model Context: " + currentModelName));
 
@@ -279,6 +280,139 @@ public class TggObjectManagerDialog extends JDialog {
             directRepo.deleteRegularObject(id);
             appendLog("DELETED REGULAR: " + id);
             refreshAllData();
+        }
+    }
+    private JPanel createSoilImportPanel() {
+        JPanel main = new JPanel(new BorderLayout(10, 10));
+        main.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Phía trên: Trình soạn thảo SOIL
+        txtSoilEditor = new JTextArea();
+        txtSoilEditor.setFont(new Font("Monospaced", Font.PLAIN, 13));
+        txtSoilEditor.setToolTipText("Dán nội dung file .soil vào đây");
+
+        // Ví dụ mẫu
+        txtSoilEditor.setText("-- Paste your .soil script here\n" +
+            "!new FamilyRegister('fr')\n" +
+            "!new Family('fm')\n" +
+            "!insert (fr,fm) into FamilyRegistration\n");
+
+        JPanel pnlEditor = new JPanel(new BorderLayout());
+        pnlEditor.setBorder(new TitledBorder("SOIL Script Editor"));
+        pnlEditor.add(new JScrollPane(txtSoilEditor), BorderLayout.CENTER);
+
+        // Phía dưới: Nút điều khiển
+        JPanel pnlActions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton btnClear = new JButton("Clear");
+        JButton btnExecute = new JButton("Execute SOIL on Neo4j");
+        btnExecute.setBackground(new Color(0, 102, 204));
+        btnExecute.setForeground(Color.WHITE);
+        btnExecute.setFont(new Font("Arial", Font.BOLD, 13));
+
+        pnlActions.add(btnClear);
+        pnlActions.add(btnExecute);
+
+        main.add(pnlEditor, BorderLayout.CENTER);
+        main.add(pnlActions, BorderLayout.SOUTH);
+
+        // Xử lý sự kiện
+        btnClear.addActionListener(e -> txtSoilEditor.setText(""));
+        btnExecute.addActionListener(e -> processSoilScript());
+
+        return main;
+    }
+
+    private void processSoilScript() {
+        String content = txtSoilEditor.getText();
+        if (content.trim().isEmpty()) return;
+
+        String[] lines = content.split("\n");
+        appendLog("Starting SOIL Import process...");
+
+        int successCount = 0;
+        try {
+            for (String line : lines) {
+                line = line.trim();
+                if (line.isEmpty() || line.startsWith("--")) continue;
+
+                // 1. Xử lý lệnh !new <Class>('<OID>')
+                if (line.startsWith("!new")) {
+                    handleNewCommand(line);
+                    successCount++;
+                }
+                // 2. Xử lý lệnh !insert (<src>, <tgt>) into <Assoc>
+                else if (line.startsWith("!insert")) {
+                    handleInsertCommand(line);
+                    successCount++;
+                }
+                // 3. Xử lý lệnh !set <OID>.<Attr> := <Val>
+                else if (line.startsWith("!set")) {
+                    handleSetCommand(line);
+                    successCount++;
+                }
+            }
+            appendLog("FINISH: Processed " + successCount + " SOIL commands.");
+            refreshAllData();
+            JOptionPane.showMessageDialog(this, "Import hoàn tất " + successCount + " lệnh!");
+        } catch (Exception ex) {
+            appendLog("IMPORT ERROR: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Lỗi khi xử lý SOIL: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void handleNewCommand(String line) {
+        // Regex lấy Class và OID: !new ClassName('oid')
+        java.util.regex.Pattern p = java.util.regex.Pattern.compile("!new\\s+(\\w+)\\s*\\('([^']+)'\\)");
+        java.util.regex.Matcher m = p.matcher(line);
+        if (m.find()) {
+            String cls = m.group(1);
+            String oid = m.group(2);
+
+            // Phân loại: Nếu tên Class có dạng chữ hoa (như FR2PR) hoặc chứa số/kí tự đặc biệt của Corr
+            // Ở đây ta có thể dùng một logic đơn giản: Nếu nó nằm trong danh sách Class của TGG
+            if (cls.equals("FR2PR") || cls.equals("F2MP") || cls.equals("FM2MP") || cls.contains("2")) {
+                // Giả định Source là Families và Target là Persons (có thể cải tiến lấy từ UI)
+                repo.createCorrObject(cls, oid, "Families", "Persons");
+            } else {
+                directRepo.createRegularObject("Families", cls, oid);
+            }
+            appendLog("SOIL: Created " + cls + " [" + oid + "]");
+        }
+    }
+
+    private void handleInsertCommand(String line) {
+        // Regex: !insert (src, tgt) into AssocName
+        java.util.regex.Pattern p = java.util.regex.Pattern.compile("!insert\\s*\\((\\w+),\\s*(\\w+)\\)\\s+into\\s+(\\w+)");
+        java.util.regex.Matcher m = p.matcher(line);
+        if (m.find()) {
+            String src = m.group(1);
+            String tgt = m.group(2);
+            String assoc = m.group(3);
+
+            // Nếu Assoc có chứa tên lớp Corr (như FR2PR_...) -> Dùng repo Corr
+            if (assoc.contains("2") || assoc.startsWith("FR2PR") || assoc.startsWith("F2MP")) {
+                repo.createCorrLink(src, tgt, assoc);
+            } else {
+                directRepo.createRegularLink(src, tgt, assoc, "Families");
+            }
+            appendLog("SOIL: Inserted link " + assoc + " (" + src + " -> " + tgt + ")");
+        }
+    }
+
+    private void handleSetCommand(String line) {
+        // Regex: !set oid.attr := 'val'
+        java.util.regex.Pattern p = java.util.regex.Pattern.compile("!set\\s+(\\w+)\\.(\\w+)\\s*:=\\s*(.+)");
+        java.util.regex.Matcher m = p.matcher(line);
+        if (m.find()) {
+            String oid = m.group(1);
+            String attr = m.group(2);
+            String val = m.group(3).replace("'", "").trim();
+
+            // Thực thi gán thuộc tính trực tiếp vào node có use_id = oid
+            try (org.neo4j.driver.Session s = org.uet.dse.neo4j.manager.Neo4jDriverManager.getInstance().openSession()) {
+                s.run("MATCH (n {use_id: $oid}) SET n.`" + attr + "` = $val", org.neo4j.driver.Values.parameters("oid", oid, "val", val));
+            }
+            appendLog("SOIL: Set attribute [" + attr + "] = " + val + " for OID [" + oid + "]");
         }
     }
 }

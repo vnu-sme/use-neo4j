@@ -66,6 +66,8 @@ public class Neo4jModelQuery {
         );
     }
 
+
+
     public static String upsertEnumerationQuery(String enumName) {
         return String.format("MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(meta:MetaNode {name: 'NodeEnumeration'}) " + "MERGE (e:`%s` {name: $name}) " + "SET e.value = $values " + "MERGE (e)-[:InstanceOf]->(meta)", enumName);
     }

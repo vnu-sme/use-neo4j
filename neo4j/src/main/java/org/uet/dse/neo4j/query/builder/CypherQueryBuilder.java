@@ -11,16 +11,6 @@ public class CypherQueryBuilder {
         );
     }
 
-    public static String buildInstanceCreationQuery(String dynamicLabel) {
-        return String.format(
-                "MATCH (meta:MetaNode {name: $metaName}) " +
-                        "MERGE (inst:`%s` {name: $id}) " +
-                        "SET inst += $props " +
-                        "MERGE (inst)-[:InstanceOf]->(meta)",
-                dynamicLabel
-        );
-    }
-
     /**
      * Sinh query tạo quan hệ cấu trúc giữa 2 node bất kỳ dựa trên thuộc tính 'name'.
      * @param edgeLabel Nhãn của quan hệ (Vd: HasAttribute, HasOperation)

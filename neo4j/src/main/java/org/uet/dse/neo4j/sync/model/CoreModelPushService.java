@@ -7,7 +7,10 @@ import org.tzi.use.graph.DirectedGraph;
 import org.tzi.use.uml.mm.*;
 import org.tzi.use.uml.ocl.type.CollectionType;
 import org.tzi.use.uml.ocl.type.Type;
+import org.uet.dse.neo4j.aop.Latest;
 import org.uet.dse.neo4j.helper.TypeMapper;
+import org.uet.dse.neo4j.loose_coupling.ModelTranslatorFactory;
+import org.uet.dse.neo4j.loose_coupling.UseModelTranslators;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.mm.core.common.NCollectionType;
 import org.uet.dse.neo4j.mm.core.common.NType;
@@ -35,15 +38,17 @@ public class CoreModelPushService {
     }
 
     public void pushModelToNeo4j() {
+        //get session model, the model session model SOT is taken from USE core
         MModel model = modelApi.getModel();
         String currentUser = Neo4jDriverManager.getInstance().getSessionManager().getUserDisplayName();
 
         logger.log("PUSH_START", "User " + currentUser + " initiated sync for model: " + model.name());
 
         try (Session session = Neo4jDriverManager.getInstance().openSession()) {
+            //init meta-meta node, including create management node
             repo.initializeMetamodel(model.name());
 
-            syncCoreEntities(session, model);
+            syncCoreEntities(model);
             syncInheritance(session, model);
             syncStructuralDetails(session, model);
             syncAssociations(model);
@@ -57,17 +62,26 @@ public class CoreModelPushService {
         }
     }
 
-    public void syncCoreEntities(Session session, MModel model) {
+    /**
+     * Sync enums and class
+     */
+    public void syncCoreEntities(MModel model) {
         // Sync Enums
-        for (org.tzi.use.uml.ocl.type.EnumType e : model.enumTypes()) {
-            repo.upsertEnumeration(e.name(), e.getLiterals(), model.name());
-            logger.log("PUSH_ENUM", "Pushed enumeration: " + e.name());
-        }
+        UseModelTranslators translators = ModelTranslatorFactory.forUse();
 
-        // Sync Classes (Concrete, Abstract, AssociationClass)
-        for (MClass cls : model.classes()) {
-            createClassNode(session, cls);
-        }
+        // Enums → domain → repo
+        model.enumTypes().stream()
+            .map(translators.enumTranslator()::translate)
+            .forEach(node -> {
+                repo.upsertEnumeration(node, model.name());
+                logger.log("PUSH_ENUM", "Pushed enumeration: " + node.getName());
+            });
+
+
+        // Classes → domain → repo
+        model.classes().stream()
+            .map(translators.classTranslator()::translate)
+            .forEach(node -> createClassNode(node, model.name()));
     }
 
     public void syncInheritance(Session session, MModel model) {
@@ -205,27 +219,32 @@ public class CoreModelPushService {
     }
 
 
-    /**
-     * refactored
-     * @param session
-     * @param cls
-     */
-    public void createClassNode(Session session, MClass cls) {
+
+    public void createClassNodeTC(Session session, MClass cls) {
         AbstractClassNode classNode;
 
         if (cls instanceof MAssociationClass) {
-            classNode = new NodeAssociationClass();
+            classNode = new NodeAssociationClass(cls.name());
         } else if (cls.isAbstract()) {
-            classNode = new NodeAbstractClass();
+            classNode = new NodeAbstractClass(cls.name());
         } else {
-            classNode = new NodeConcreteClass();
+            classNode = new NodeConcreteClass(cls.name());
         }
+        boolean isAbstract = cls.isAbstract();
         classNode.setName(cls.name());
         classNode.setHasParent(!cls.parents().isEmpty());
         classNode.setHasChildren(!cls.children().isEmpty());
+        classNode.setAbstract(isAbstract);
 
-        repo.createInstanceNode(classNode, cls.name(), modelApi.getModel().name());
+
+        repo.upsertClassNode(classNode, cls.name(), modelApi.getModel().name());
     }
+
+    @Latest
+    private void createClassNode(AbstractClassNode node, String modelName) {
+        repo.upsertClassNode(node, node.getMetaLabel(), modelName);
+    }
+
 
     /**
      * refactored

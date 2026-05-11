@@ -10,6 +10,15 @@ import java.util.Map;
 public class NodeEnumeration extends AbstractMetaNode {
     private List<String> values;
 
+    public NodeEnumeration(String name, List<String> values) {
+        super(name);
+        this.values = values;
+    }
+
+    public NodeEnumeration() {
+        super(null);
+    }
+
     public List<String> getValues() {
         return values;
     }

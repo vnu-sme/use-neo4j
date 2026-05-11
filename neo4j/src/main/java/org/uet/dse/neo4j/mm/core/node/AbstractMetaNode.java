@@ -3,6 +3,12 @@ package org.uet.dse.neo4j.mm.core.node;
 public abstract class AbstractMetaNode {
     private String metaName;
     private String metaLabel;
+    private String instanceId;
+    private String name;
+
+    public AbstractMetaNode(String name) {
+        this.name = name;
+    }
 
     public String getName() {
         return name;
@@ -11,9 +17,6 @@ public abstract class AbstractMetaNode {
     public void setName(String name) {
         this.name = name;
     }
-
-    private String instanceId;
-    private String name;
 
     public String getInstanceId() { return instanceId; }
     public void setInstanceId(String instanceId) { this.instanceId = instanceId; }

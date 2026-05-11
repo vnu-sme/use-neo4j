@@ -51,8 +51,6 @@ public class LoggingSession implements Session {
         return delegate.run(query);
     }
 
-
-
     @Override public void close() { delegate.close(); }
     @Override public boolean isOpen() { return delegate.isOpen(); }
     @Override public Transaction beginTransaction() { return delegate.beginTransaction(); }

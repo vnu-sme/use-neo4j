@@ -4,6 +4,10 @@ import org.uet.dse.neo4j.aop.MetaNode;
 
 @MetaNode(type = MetaNodeData.NODE_ASSOCIATION_CLASS)
 public class NodeAssociationClass extends AbstractClassNode {
+    public NodeAssociationClass(String name) {
+        super(name);
+    }
+
     @Override
     public String getMetaName() {
         return MetaNodeData.NODE_ASSOCIATION_CLASS.getName();
