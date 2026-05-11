@@ -175,56 +175,26 @@ public class Neo4jConnectionDialog extends JDialog {
 		}
 
 		try {
-			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-			//connect to driver
-			Neo4jDriverManager.connect(uri, user, pass, dbName, createNew, deleteOnExit);
+				Neo4jDriverManager.connect(uri, user, pass, dbName, createNew, deleteOnExit);
 
-			// init metamodel schema structure
-			Neo4jModelRepository repo = new Neo4jModelRepository();
-			repo.initializeMetamodel(this.useSession.system().model().name());
+				Neo4jModelRepository repo = new Neo4jModelRepository();
+				repo.initializeMetamodel(this.useSession.system().model().name());
 
-			WorkLogManager.getInstance().log("SCHEMA_INIT", "Metamodel nodes initialized for DB: " + dbName);
+				SessionManager sm = new SessionManager();
+				sm.joinSession("default-session");
 
-//			//manage session to work among user from different USE instances
-//			SessionManager sm = new SessionManager();
-			String finalKey = "single-session";
-//			if (rbNewSession.isSelected()) {
-//				finalKey = sm.createNewSession();
-//				lblGeneratedKey.setText("  Key: " + finalKey);
-//			} else {
-//				finalKey = txtSessionKey.getText().trim();
-//				if (finalKey.isEmpty()) {
-//					JOptionPane.showMessageDialog(this, "Please enter a Session Key to join!");
-//					return;
-//				}
-//				sm.joinSession(finalKey);
-//			}
+				Neo4jDriverManager.getInstance().setSessionManager(sm);
+				Neo4jRealTimeService.start(this.useSession);
 
-//			//set static object
-//			Neo4jDriverManager.getInstance().setSessionManager(sm);
+				Neo4jDashboardViewLite dashboard = Neo4jDashboardViewLite.getInstance(mainWindow, useSession);
+				dashboard.refreshData();
+				dashboard.setVisible(true);
 
+				JOptionPane.showMessageDialog(this, "Connected to Database: " + dbName);
 
-			// ============================================================
-			// CHỖ CẦN THÊM: KÍCH HOẠT REAL-TIME SERVICE
-			// ============================================================
-			Neo4jRealTimeService.start(this.useSession);
-			// ============================================================
-
-
-
-//			Map<String, Object> stats = Neo4jDriverManager.getInstance().getDatabaseStats();
-//			String logDetail = String.format("DB: %s | Key: %s | Ver: %s",
-//					dbName, finalKey, stats.getOrDefault("version", "unknown"));
-//			WorkLogManager.getInstance().log("CONNECTION_SUCCESS", logDetail);
-
-			// open dashboard biew
-			Neo4jDashboardView dashboard = Neo4jDashboardView.getInstance(mainWindow, useSession);
-			dashboard.refreshData();
-			dashboard.setVisible(true);
-			JOptionPane.showMessageDialog(this, "Connected successfully!\nSession Key: " + finalKey);
-
-			this.dispose();
+				this.dispose();
 
 		} catch (Exception ex) {
 			WorkLogManager.getInstance().log("CONNECTION_ERROR", ex.getMessage());

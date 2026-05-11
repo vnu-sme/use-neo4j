@@ -116,3 +116,5 @@ fabric.properties
 .project
 
 target/
+
+.neo4j_plugin_worklog.log

@@ -4,7 +4,7 @@ import org.tzi.use.gui.main.MainWindow;
 import org.tzi.use.main.Session;
 import org.tzi.use.runtime.gui.IPluginAction;
 import org.tzi.use.runtime.gui.IPluginActionDelegate;
-import org.uet.dse.neo4j.gui.Neo4jDashboardView;
+import org.uet.dse.neo4j.gui.Neo4jDashboardViewLite;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import javax.swing.*;
 
@@ -20,7 +20,7 @@ public class ActionOpenDashboard implements IPluginActionDelegate {
         MainWindow mainWindow = pluginAction.getParent();
         Session session = pluginAction.getSession();
 
-        Neo4jDashboardView dashboard = Neo4jDashboardView.getInstance(mainWindow, session);
+        Neo4jDashboardViewLite dashboard = Neo4jDashboardViewLite.getInstance(mainWindow, session);
         dashboard.setVisible(true);
         dashboard.toFront(); // Đưa lên phía trước
     }
