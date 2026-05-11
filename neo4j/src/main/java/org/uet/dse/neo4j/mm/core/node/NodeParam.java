@@ -15,7 +15,11 @@ public class NodeParam extends AbstractMetaNode {
     private int pOrder;
     private NType type;
 
-    public NCollectionType getCollectionType() {
+  public NodeParam(String name) {
+    super(name);
+  }
+
+  public NCollectionType getCollectionType() {
         return collectionType;
     }
 

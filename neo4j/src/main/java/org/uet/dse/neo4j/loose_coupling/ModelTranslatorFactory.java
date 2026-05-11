@@ -15,7 +15,13 @@ public class ModelTranslatorFactory {
   public static UseModelTranslators forUse() {
     return new UseModelTranslators(
         new UseClassTranslator(),
-        new UseEnumTranslator()
+        new UseEnumTranslator(),
+        new UseGeneralizationTranslator(),
+        new UseAttributeTranslator(),
+        new UseOperationTranslator(),
+        new UseParamTranslator(),
+        new UsePreConditionTranslator(),
+        new UsePostConditionTranslator()
     );
   }
 }

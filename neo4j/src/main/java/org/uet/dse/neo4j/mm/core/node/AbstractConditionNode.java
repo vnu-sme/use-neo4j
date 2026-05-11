@@ -8,6 +8,10 @@ public abstract class AbstractConditionNode extends AbstractMetaNode {
     protected String expression;
     protected int index;
 
+    public AbstractConditionNode(String name) {
+        super(name);
+    }
+
     public void setCondName(String condName) { this.condName = condName; }
     public void setExpression(String expression) { this.expression = expression; }
     public void setIndex(int index) { this.index = index; }

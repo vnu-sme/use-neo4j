@@ -9,6 +9,7 @@ import org.tzi.use.uml.mm.MAssociationClass;
 import org.tzi.use.uml.mm.MAssociationEnd;
 import org.uet.dse.neo4j.aop.Latest;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
+import org.uet.dse.neo4j.mm.core.edge.Extends;
 import org.uet.dse.neo4j.mm.core.node.AbstractClassNode;
 import org.uet.dse.neo4j.mm.core.node.AbstractMetaNode;
 import org.uet.dse.neo4j.mm.core.node.NodeEnumeration;
@@ -173,6 +174,19 @@ public class Neo4jModelRepository {
         withSession(session -> session.run(
             CypherQueryBuilder.buildUpsertEnumerationQuery(nodeEnum.getName()),
             Values.parameters("modelName", modelName, "name", nodeEnum.getName(), "values", nodeEnum.getValues())
+        ));
+    }
+
+    @Latest
+    public void createExtendsEdge(Extends edge) {
+        String cypher = CypherQueryBuilder.buildExtendsEdgeQuery();
+
+        withSession(session -> session.run(
+            cypher,
+            Values.parameters(
+                "srcName", edge.getChildName(),
+                "tgtName", edge.getParentName()
+            )
         ));
     }
 

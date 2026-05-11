@@ -18,6 +18,10 @@ public class NodeOperation extends AbstractMetaNode {
 
     private boolean isReturnCollection;
 
+    public NodeOperation(String name) {
+        super(name);
+    }
+
     public String getBody() {
         return body;
     }

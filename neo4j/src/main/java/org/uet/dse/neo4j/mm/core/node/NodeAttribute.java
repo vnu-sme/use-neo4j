@@ -16,6 +16,9 @@ public class NodeAttribute extends AbstractMetaNode {
     private NCollectionType collectionType;
     private boolean isDerived;
 
+    public NodeAttribute(String name) {
+        super(name);
+    }
     @Override
     public String getMetaName() {
         return MetaNodeData.NODE_ATTRIBUTE.getName();
@@ -29,7 +32,6 @@ public class NodeAttribute extends AbstractMetaNode {
     @Override
     public Map<String, Object> toPropertyMap() {
         Map<String, Object> props = new HashMap<>();
-        // Trong Neo4j, 'name' thường dùng làm ID định danh cho MERGE
         props.put("name", this.getName());
         props.put("attrName", this.attrName);
         props.put("index", this.index);

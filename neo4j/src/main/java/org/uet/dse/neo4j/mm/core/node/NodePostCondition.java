@@ -8,7 +8,11 @@ import java.util.Map;
 @MetaNode(type = MetaNodeData.NODE_POST_CONDITION)
 public class NodePostCondition extends AbstractConditionNode {
 
-    @Override
+  public NodePostCondition(String name) {
+    super(name);
+  }
+
+  @Override
     public String getMetaName() {
         return MetaNodeData.NODE_POST_CONDITION.getName();
     }

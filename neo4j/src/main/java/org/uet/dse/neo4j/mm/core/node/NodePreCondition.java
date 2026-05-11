@@ -8,6 +8,10 @@ import java.util.Map;
 @MetaNode(type = MetaNodeData.NODE_PRE_CONDITION)
 public class NodePreCondition extends AbstractConditionNode {
 
+    public NodePreCondition(String name) {
+        super(name);
+    }
+
     @Override
     public String getMetaName() {
         return MetaNodeData.NODE_PRE_CONDITION.getName();

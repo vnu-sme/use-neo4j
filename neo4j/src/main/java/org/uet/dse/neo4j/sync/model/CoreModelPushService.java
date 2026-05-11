@@ -5,15 +5,17 @@ import org.neo4j.driver.Values;
 import org.tzi.use.api.UseModelApi;
 import org.tzi.use.graph.DirectedGraph;
 import org.tzi.use.uml.mm.*;
+import org.tzi.use.uml.ocl.expr.VarDecl;
+import org.tzi.use.uml.ocl.expr.VarDeclList;
 import org.tzi.use.uml.ocl.type.CollectionType;
 import org.tzi.use.uml.ocl.type.Type;
 import org.uet.dse.neo4j.aop.Latest;
 import org.uet.dse.neo4j.helper.TypeMapper;
-import org.uet.dse.neo4j.loose_coupling.ModelTranslatorFactory;
-import org.uet.dse.neo4j.loose_coupling.UseModelTranslators;
+import org.uet.dse.neo4j.loose_coupling.*;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.mm.core.common.NCollectionType;
 import org.uet.dse.neo4j.mm.core.common.NType;
+import org.uet.dse.neo4j.mm.core.edge.Extends;
 import org.uet.dse.neo4j.mm.core.node.*;
 import org.uet.dse.neo4j.manager.WorkLogManager;
 import org.uet.dse.neo4j.query.builder.CypherQueryBuilder;
@@ -21,8 +23,7 @@ import org.uet.dse.neo4j.repo.Neo4jModelRepository;
 import org.uet.dse.neo4j.sync.helper.UmlTypeTranslator;
 import org.uet.dse.neo4j.sync.object.ObjectSyncHelper;
 
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 public class CoreModelPushService {
     private final UseModelApi modelApi;
@@ -49,7 +50,7 @@ public class CoreModelPushService {
             repo.initializeMetamodel(model.name());
 
             syncCoreEntities(model);
-            syncInheritance(session, model);
+            syncInheritance(model);
             syncStructuralDetails(session, model);
             syncAssociations(model);
 
@@ -81,23 +82,25 @@ public class CoreModelPushService {
         // Classes → domain → repo
         model.classes().stream()
             .map(translators.classTranslator()::translate)
-            .forEach(node -> createClassNode(node, model.name()));
+            .forEach(node -> repo.upsertClassNode(node, node.getMetaLabel(), model.name()));
     }
 
-    public void syncInheritance(Session session, MModel model) {
-        DirectedGraph<MClassifier, MGeneralization> genGraph = model.generalizationGraph();
+    public void syncInheritance(MModel model) {
+        DirectedGraph<MClassifier ,MGeneralization> genGraph = model.generalizationGraph();
         Iterator<MGeneralization> edgeIterator = genGraph.edgeIterator();
 
+        UseModelTranslators translators = ModelTranslatorFactory.forUse();
         while (edgeIterator.hasNext()) {
-            MGeneralization gen = edgeIterator.next();
-            createExtendsEdge(session, gen.child(), gen.parent());
+            Extends edge = translators.generalizationTranslator()
+                .translate(edgeIterator.next());
+            repo.createExtendsEdge(edge);
         }
     }
 
     public void syncStructuralDetails(Session session, MModel model) {
         for (MClass cls : model.classes()) {
-            mapAttributes(session, cls);
-            mapOperations(session, cls);
+            mapAttributes(cls, model.name());
+            mapOperations(cls, model.name());
             mapInvariants(session, cls);
             mapOperationConstraintsForAllOperationsInClass(session, cls);
         }
@@ -116,9 +119,6 @@ public class CoreModelPushService {
         }
     }
 
-    /**
-     * Cập nhật Node phiên bản để ChangeTracker của những người dùng khác có thể nhận biết
-     */
     public void updateModelVersion(org.neo4j.driver.Session session, String user) {
         org.tzi.use.uml.mm.MModel model = modelApi.getModel();
 
@@ -138,157 +138,55 @@ public class CoreModelPushService {
 
         logger.log("VERSION_UPDATE", "Model version updated. Hash: " + modelHash);
     }
-    /**
-     * refactored
-     */
-    public void mapOperations(Session session, MClass cls) {
+
+    public void mapOperations(MClass cls, String modelName) {
+        UseModelTranslators translators = ModelTranslatorFactory.forUse();
+
         for (MOperation op : cls.operations()) {
             if (!op.cls().equals(cls)) continue;
 
-            String opId = cls.name() + "_" + op.name();
-            Map<String, Object> rInfo = TypeMapper.parseTypeUSE2Neo4j(op.resultType());
+            // Translate operation
+            NodeOperation opNode = translators.operationTranslator()
+                .translate(new UseOperationTranslator.OperationContext(cls, op));
 
-            NodeOperation opNode = new NodeOperation();
-            opNode.setName(opId);
-            opNode.setOpName(op.name());
-            String rTypeStr = (String) rInfo.get("type");
-            opNode.setReturnType(NType.fromString(rTypeStr));
-            opNode.setReturnCollection((Boolean) rInfo.get("isCollection"));
-            opNode.setAbstract(cls.isAbstract());
-
-            String body = null;
-            boolean isQuery = true;
-            if (op.hasExpression()) {
-                body = op.expression().toString();
-                isQuery = true;
-            } else if (op.hasStatement()) {
-                body = op.getStatement().toString();
-                isQuery = false;
-            }
-            opNode.setBody(body);
-            opNode.setQuery(isQuery);
-
-            repo.createInstanceNode(opNode, "Operation", modelApi.getModel().name());
+            repo.createInstanceNode(opNode, "Operation", modelName);
             repo.createStructuralEdge(cls.name(), opNode.getName(), "HasOperation");
-
             TypeMapper.handleTypeReference(repo, opNode.getName(), op.resultType(), true);
 
+            // Translate params
+            VarDeclList params = op.paramList();
             int order = 1;
-            for (org.tzi.use.uml.ocl.expr.VarDecl param : op.paramList()) {
-                Map<String, Object> pInfo = TypeMapper.parseTypeUSE2Neo4j(param.type());
-                String paramId = opId + "_p_" + param.name();
+            for (VarDecl param : op.paramList()) {
+                NodeParam paramNode = translators.paramTranslator()
+                    .translate(new UseParamTranslator.ParamContext(param, opNode.getName(), order++));
 
-                NodeParam paramNode = new NodeParam();
-                paramNode.setName(paramId);
-                paramNode.setpName(param.name());
-                paramNode.setpOrder(order++);
-                paramNode.setCollection((Boolean) pInfo.get("isCollection"));
-                String pTypeStr = (String) pInfo.get("type");
-                paramNode.setType(NType.fromString(pTypeStr));
-
-                if ((Boolean) pInfo.get("isCollection")) {
-                    String pColTypeStr = (String) pInfo.get("collType");
-                    paramNode.setCollectionType(NCollectionType.valueOf(pColTypeStr));
-                } else {
-                    paramNode.setCollectionType(NCollectionType.None);
-                }
-
-                repo.createInstanceNode(paramNode, "Param", modelApi.getModel().name());
+                repo.createInstanceNode(paramNode, "Param", modelName);
                 repo.createStructuralEdge(opNode.getName(), paramNode.getName(), "HasParam");
-
                 TypeMapper.handleTypeReference(repo, paramNode.getName(), param.type(), false);
             }
 
-            mapOperationConstraintsForOneOperation(session, op, opNode.getName());
+            mapOperationConstraintsForOneOperation(op, opNode.getName(), modelName);
         }
     }
 
-    /**
-     * refactored
-     * @param session
-     * @param child
-     * @param parent
-     */
-    public void createExtendsEdge(Session session, MClassifier child, MClassifier parent) {
-        String cypher = CypherQueryBuilder.buildExtendsEdgeQuery();
+    public void mapAttributes(MClass cls, String modelName) {
+        UseModelTranslators translators = ModelTranslatorFactory.forUse();
 
-        session.run(cypher, Values.parameters(
-                "srcName", child.name(),
-                "tgtName", parent.name()
-        ));
-    }
+        List<MAttribute> attrs = new ArrayList<>(cls.attributes());
+        for (int i = 0; i < attrs.size(); i++) {
+            UseAttributeTranslator.AttributeContext ctx = new UseAttributeTranslator.AttributeContext(cls, attrs.get(i), i);
+            NodeAttribute nodeAttr = translators.attributeTranslator().translate(ctx);
 
-
-
-    public void createClassNodeTC(Session session, MClass cls) {
-        AbstractClassNode classNode;
-
-        if (cls instanceof MAssociationClass) {
-            classNode = new NodeAssociationClass(cls.name());
-        } else if (cls.isAbstract()) {
-            classNode = new NodeAbstractClass(cls.name());
-        } else {
-            classNode = new NodeConcreteClass(cls.name());
-        }
-        boolean isAbstract = cls.isAbstract();
-        classNode.setName(cls.name());
-        classNode.setHasParent(!cls.parents().isEmpty());
-        classNode.setHasChildren(!cls.children().isEmpty());
-        classNode.setAbstract(isAbstract);
-
-
-        repo.upsertClassNode(classNode, cls.name(), modelApi.getModel().name());
-    }
-
-    @Latest
-    private void createClassNode(AbstractClassNode node, String modelName) {
-        repo.upsertClassNode(node, node.getMetaLabel(), modelName);
-    }
-
-
-    /**
-     * refactored
-     * @param session
-     * @param cls
-     */
-    public void mapAttributes(Session session, MClass cls) {
-        int index = 0;
-        for (MAttribute attr : cls.attributes()) {
-            Type fullType = attr.type();
-            String instanceId = cls.name() + "_" + attr.name();
-
-            Type ultimateBaseType = UmlTypeTranslator.getUltimateBaseType(fullType);
-            int depth = UmlTypeTranslator.getCollectionDepth(fullType);
-            boolean isCollection = depth > 0;
-            boolean isNested = depth > 1;
-
-            NodeAttribute nodeAttr = new NodeAttribute();
-            nodeAttr.setName(instanceId);
-            nodeAttr.setAttrName(attr.name());
-            nodeAttr.setIndex(index++);
-            nodeAttr.setNestedCollection(isNested);
-            nodeAttr.setCollection(isCollection);
-            nodeAttr.setType(UmlTypeTranslator.toDatabaseType(ultimateBaseType));
-            nodeAttr.setDerived(attr.isDerived());
-            if (isCollection) {
-                String colTypeStr = UmlTypeTranslator.getCollectionType(fullType);
-                try {
-                    nodeAttr.setCollectionType(NCollectionType.valueOf(colTypeStr));
-                } catch (IllegalArgumentException e) {
-                    nodeAttr.setCollectionType(NCollectionType.None);
-                }
-            } else {
-                nodeAttr.setCollectionType(NCollectionType.None);
-            }
-
-
-            repo.createInstanceNode(nodeAttr, "Attribute", modelApi.getModel().name());
+            repo.createInstanceNode(nodeAttr, "Attribute", modelName);
             repo.createStructuralEdge(cls.name(), nodeAttr.getName(), "HasAttribute");
 
+            // Side effects sau translate — giữ ở service vì liên quan repo
+            Type ultimateBaseType = UmlTypeTranslator.getUltimateBaseType(attrs.get(i).type());
             TypeMapper.handleTypeReference(repo, nodeAttr.getName(), ultimateBaseType, false);
 
-            if (isNested) {
-                pushNestedCollectionNodes(session, nodeAttr.getName(), ((CollectionType) fullType).elemType());
+            if (nodeAttr.isNestedCollection()) {
+                Type elemType = ((CollectionType) attrs.get(i).type()).elemType();
+                pushNestedCollectionNodes(nodeAttr.getName(), elemType);
             }
         }
     }
@@ -297,7 +195,7 @@ public class CoreModelPushService {
      * refactored
      * create node nested collection
      */
-    public void pushNestedCollectionNodes(Session session, String parentId, Type currentType) {
+    public void pushNestedCollectionNodes(String parentId, Type currentType) {
         if (!currentType.isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID)) return;
         Type innerType = ((CollectionType) currentType).elemType();
         boolean stillNested = innerType.isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID);
@@ -313,10 +211,9 @@ public class CoreModelPushService {
         repo.createStructuralEdge(parentId, nestedNode.getName(), "HasNestedCollection");
 
         if (stillNested) {
-            pushNestedCollectionNodes(session, nestedNode.getName(), innerType);
+            pushNestedCollectionNodes(nestedNode.getName(), innerType);
         }
     }
-
 
 
     /**
@@ -344,38 +241,28 @@ public class CoreModelPushService {
         }
     }
 
-    /**
-     * refactored
-     * pre/post
-     */
-    public void mapOperationConstraintsForOneOperation(Session session, MOperation op, String opId) {
+
+    public void mapOperationConstraintsForOneOperation(MOperation op, String opId, String modelName) {
+        UseModelTranslators translators = ModelTranslatorFactory.forUse();
+
         int preIdx = 0;
         for (MPrePostCondition pre : op.preConditions()) {
-            NodePreCondition preNode = new NodePreCondition();
+            NodePreCondition preNode = translators.preConditionTranslator()
+                .translate(new UsePreConditionTranslator.PreConditionContext(pre, opId, preIdx++));
 
-            preNode.setName(opId + "_pre_" + preIdx);
-            preNode.setCondName(pre.name());
-            preNode.setExpression(pre.expression().toString());
-            preNode.setIndex(preIdx++);
-
-            repo.createInstanceNode(preNode, "PreCondition", modelApi.getModel().name());
+            repo.createInstanceNode(preNode, "PreCondition", modelName);
             repo.createStructuralEdge(opId, preNode.getName(), "HasPreCondition");
         }
 
         int postIdx = 0;
         for (MPrePostCondition post : op.postConditions()) {
-            NodePostCondition postNode = new NodePostCondition();
+            NodePostCondition postNode = translators.postConditionTranslator()
+                .translate(new UsePostConditionTranslator.PostConditionContext(post, opId, postIdx++));
 
-            postNode.setName(opId + "_post_" + postIdx);
-            postNode.setCondName(post.name());
-            postNode.setExpression(post.expression().toString());
-            postNode.setIndex(postIdx++);
-
-            repo.createInstanceNode(postNode, "PostCondition", modelApi.getModel().name());
+            repo.createInstanceNode(postNode, "PostCondition", modelName);
             repo.createStructuralEdge(opId, postNode.getName(), "HasPostCondition");
         }
     }
-
     /**
      * checked
      */
@@ -383,7 +270,7 @@ public class CoreModelPushService {
         for (MOperation op : cls.operations()) {
             if (op.cls().equals(cls)) {
                 String opId = cls.name() + "_" + op.name();
-                mapOperationConstraintsForOneOperation(session, op, opId);
+                mapOperationConstraintsForOneOperation(op, opId);
             }
         }
     }

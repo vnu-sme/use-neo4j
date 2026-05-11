@@ -15,7 +15,6 @@ public class UseClassTranslator implements IModelTranslator<MClass, AbstractClas
     public AbstractClassNode translate(MClass source) {
         AbstractClassNode node;
 
-        // Logic phân loại nằm ở đây — không còn trong SyncService
         if (source instanceof MAssociationClass) {
             node = new NodeAssociationClass(source.name());
         } else if (source.isAbstract()) {
