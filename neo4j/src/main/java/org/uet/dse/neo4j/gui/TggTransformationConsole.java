@@ -7,6 +7,7 @@ import org.neo4j.driver.Session;
 import org.uet.dse.neo4j.TGGLexer;
 import org.uet.dse.neo4j.TGGParser;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
+import org.uet.dse.neo4j.manager.TggTransformationManager;
 import org.uet.dse.neo4j.model_trafo.matching.CorrMetamodelGenerator;
 import org.uet.dse.neo4j.model_trafo.parser.*;
 
@@ -26,6 +27,8 @@ public class TggTransformationConsole extends JDialog {
     private JTextArea txtTggEditor, txtExecPreview, txtLog;
     private JTable tblRules, tblCandidates;
     private DefaultTableModel modelRules, modelCandidates;
+    private TggTransformationManager manager = TggTransformationManager.getInstance();
+
 
     private TGGTransformation currentTransformation;
     private CorrMetamodelGenerator queryGen = new CorrMetamodelGenerator();
@@ -263,20 +266,39 @@ public class TggTransformationConsole extends JDialog {
 
     private void applyTggChanges() {
         try {
-            String content = txtTggEditor.getText();
-            TGGLexer lexer = new TGGLexer(CharStreams.fromString(content));
-            TGGParser parser = new TGGParser(new CommonTokenStream(lexer));
-            currentTransformation = (TGGTransformation) new TGGBuildVisitor().visit(parser.tggFile());
 
-            modelRules.setRowCount(0);
-            for (TGGRule r : currentTransformation.rules) {
-                modelRules.addRow(new Object[]{r.name, "?", "?", "?"});
-            }
-            appendLog("Parsed " + currentTransformation.rules.size() + " rules.");
+            manager.parseTggContent(txtTggEditor.getText());
+            appendLog("Rules updated in Global Manager.");
+            refreshRuleTable();
         } catch (Exception e) {
             appendLog("Parse Error: " + e.getMessage());
         }
     }
+
+    private void refreshRuleTable() {
+        modelRules.setRowCount(0);
+        if (manager.isLoaded()) {
+            for (TGGRule r : manager.getTransformation().rules) {
+                modelRules.addRow(new Object[]{r.name, "?", "?", "?"});
+            }
+        }
+    }
+//    private void singleSessionVerApplyTggChanges() {
+//        try {
+//            String content = txtTggEditor.getText();
+//            TGGLexer lexer = new TGGLexer(CharStreams.fromString(content));
+//            TGGParser parser = new TGGParser(new CommonTokenStream(lexer));
+//            currentTransformation = (TGGTransformation) new TGGBuildVisitor().visit(parser.tggFile());
+//
+//            modelRules.setRowCount(0);
+//            for (TGGRule r : currentTransformation.rules) {
+//                modelRules.addRow(new Object[]{r.name, "?", "?", "?"});
+//            }
+//            appendLog("Parsed " + currentTransformation.rules.size() + " rules.");
+//        } catch (Exception e) {
+//            appendLog("Parse Error: " + e.getMessage());
+//        }
+//    }
 
     private void appendLog(String msg) {
         txtLog.append("> " + msg + "\n");

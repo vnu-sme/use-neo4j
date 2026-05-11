@@ -28,14 +28,14 @@ public class Neo4jConnectionDialog extends JDialog {
 	private final JRadioButton rbCreateNew;
 	private final JCheckBox chkDeleteOnExit;
 
-	// Collaboration Session Options
-	private final JRadioButton rbNewSession;
-	private final JRadioButton rbJoinSession;
-	private final JTextField txtSessionKey;
-	private final JLabel lblGeneratedKey;
+//	// Collaboration Session Options
+//	private final JRadioButton rbNewSession;
+//	private final JRadioButton rbJoinSession;
+//	private final JTextField txtSessionKey;
+//	private final JLabel lblGeneratedKey;
 
 	public Neo4jConnectionDialog(MainWindow parent, Session session) {
-		super(parent, "Neo4j Database & Collaboration Setup", true);
+		super(parent, "Neo4j Database Setup", true);
 		this.mainWindow = parent;
 		this.useSession = session;
 
@@ -104,35 +104,35 @@ public class Neo4jConnectionDialog extends JDialog {
 		content.add(Box.createVerticalStrut(10));
 
 		// --- 3. Collaboration Session Section ---
-		JPanel pnlSession = new JPanel(new GridLayout(0, 1));
-		pnlSession.setBorder(BorderFactory.createTitledBorder("Collaboration Session"));
-
-		rbNewSession = new JRadioButton("Start New Session (Owner)", true);
-		rbJoinSession = new JRadioButton("Join Existing Session (Member)");
-		ButtonGroup sessionGroup = new ButtonGroup();
-		sessionGroup.add(rbNewSession);
-		sessionGroup.add(rbJoinSession);
-
-		pnlSession.add(rbNewSession);
-		lblGeneratedKey = new JLabel("  Key: (Will be generated)");
-		lblGeneratedKey.setFont(new Font("Monospaced", Font.BOLD, 12));
-		pnlSession.add(lblGeneratedKey);
-
-		pnlSession.add(rbJoinSession);
-		JPanel pnlKeyInput = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		pnlKeyInput.add(new JLabel("  Enter Key: "));
-		txtSessionKey = new JTextField(15);
-		txtSessionKey.setEnabled(false);
-		pnlKeyInput.add(txtSessionKey);
-		pnlSession.add(pnlKeyInput);
-		content.add(pnlSession);
-
-		// Logic Session Mode
-		rbJoinSession.addActionListener(e -> txtSessionKey.setEnabled(true));
-		rbNewSession.addActionListener(e -> {
-			txtSessionKey.setEnabled(false);
-			txtSessionKey.setText("");
-		});
+//		JPanel pnlSession = new JPanel(new GridLayout(0, 1));
+//		pnlSession.setBorder(BorderFactory.createTitledBorder("Collaboration Session"));
+//
+//		rbNewSession = new JRadioButton("Start New Session (Owner)", true);
+//		rbJoinSession = new JRadioButton("Join Existing Session (Member)");
+//		ButtonGroup sessionGroup = new ButtonGroup();
+//		sessionGroup.add(rbNewSession);
+//		sessionGroup.add(rbJoinSession);
+//
+//		pnlSession.add(rbNewSession);
+//		lblGeneratedKey = new JLabel("  Key: (Will be generated)");
+//		lblGeneratedKey.setFont(new Font("Monospaced", Font.BOLD, 12));
+//		pnlSession.add(lblGeneratedKey);
+//
+//		pnlSession.add(rbJoinSession);
+//		JPanel pnlKeyInput = new JPanel(new FlowLayout(FlowLayout.LEFT));
+//		pnlKeyInput.add(new JLabel("  Enter Key: "));
+//		txtSessionKey = new JTextField(15);
+//		txtSessionKey.setEnabled(false);
+//		pnlKeyInput.add(txtSessionKey);
+//		pnlSession.add(pnlKeyInput);
+//		content.add(pnlSession);
+//
+//		// Logic Session Mode
+//		rbJoinSession.addActionListener(e -> txtSessionKey.setEnabled(true));
+//		rbNewSession.addActionListener(e -> {
+//			txtSessionKey.setEnabled(false);
+//			txtSessionKey.setText("");
+//		});
 
 		content.add(Box.createVerticalStrut(15));
 
@@ -153,6 +153,10 @@ public class Neo4jConnectionDialog extends JDialog {
 
 		// Dialog Config
 		this.pack();
+		if (this.getWidth() < 400) {
+			this.setSize(420, this.getHeight());
+		}
+
 		this.setLocationRelativeTo(parent);
 		this.setResizable(false);
 	}
@@ -182,23 +186,23 @@ public class Neo4jConnectionDialog extends JDialog {
 
 			WorkLogManager.getInstance().log("SCHEMA_INIT", "Metamodel nodes initialized for DB: " + dbName);
 
-			//manage session to work among user from different USE instances
-			SessionManager sm = new SessionManager();
-			String finalKey;
-			if (rbNewSession.isSelected()) {
-				finalKey = sm.createNewSession();
-				lblGeneratedKey.setText("  Key: " + finalKey);
-			} else {
-				finalKey = txtSessionKey.getText().trim();
-				if (finalKey.isEmpty()) {
-					JOptionPane.showMessageDialog(this, "Please enter a Session Key to join!");
-					return;
-				}
-				sm.joinSession(finalKey);
-			}
+//			//manage session to work among user from different USE instances
+//			SessionManager sm = new SessionManager();
+			String finalKey = "single-session";
+//			if (rbNewSession.isSelected()) {
+//				finalKey = sm.createNewSession();
+//				lblGeneratedKey.setText("  Key: " + finalKey);
+//			} else {
+//				finalKey = txtSessionKey.getText().trim();
+//				if (finalKey.isEmpty()) {
+//					JOptionPane.showMessageDialog(this, "Please enter a Session Key to join!");
+//					return;
+//				}
+//				sm.joinSession(finalKey);
+//			}
 
-			//set static object
-			Neo4jDriverManager.getInstance().setSessionManager(sm);
+//			//set static object
+//			Neo4jDriverManager.getInstance().setSessionManager(sm);
 
 
 			// ============================================================
@@ -209,10 +213,10 @@ public class Neo4jConnectionDialog extends JDialog {
 
 
 
-			Map<String, Object> stats = Neo4jDriverManager.getInstance().getDatabaseStats();
-			String logDetail = String.format("DB: %s | Key: %s | Ver: %s",
-					dbName, finalKey, stats.getOrDefault("version", "unknown"));
-			WorkLogManager.getInstance().log("CONNECTION_SUCCESS", logDetail);
+//			Map<String, Object> stats = Neo4jDriverManager.getInstance().getDatabaseStats();
+//			String logDetail = String.format("DB: %s | Key: %s | Ver: %s",
+//					dbName, finalKey, stats.getOrDefault("version", "unknown"));
+//			WorkLogManager.getInstance().log("CONNECTION_SUCCESS", logDetail);
 
 			// open dashboard biew
 			Neo4jDashboardView dashboard = Neo4jDashboardView.getInstance(mainWindow, useSession);

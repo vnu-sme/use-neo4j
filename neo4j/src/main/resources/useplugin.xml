@@ -2,101 +2,101 @@
 <?use version="3.0.0"?>
 <plugin name="Neo4jPlugin" version="0.1">
     <actions>
-        <action label="Open connection"
-                icon="images/rtl.png"
+        <action label="Open DB Connection"
+                icon="images/run.png"
                 class="org.uet.dse.neo4j.action_phase2.ActionOpenNeo4j"
                 tooltip="Compare between USE and Neo4j"
-                menu="Neo4j Plugin phase 2"
-                menuitem="Open connection"
+                menu="Neo4j Plugin"
+                menuitem="Open DB Connection"
                 id="org.uet.dse.neo4j.action_phase2.ActionOpenNeo4j">
         </action>
         <action label="Open dashboard"
-                icon="images/rtl.png"
+                icon="images/run.png"
                 class="org.uet.dse.neo4j.action_phase2.ActionOpenDashboard"
                 tooltip="Compare between USE and Neo4j"
-                menu="Neo4j Plugin phase 2"
+                menu="Neo4j Plugin"
                 menuitem="Open dashboard"
                 id="org.uet.dse.neo4j.action_phase2.ActionOpenDashboard">
         </action>
-        <action label="OpenSetting"
-                icon="images/rtl.png"
+        <action label="Open Sync Setting"
+                icon="images/run.png"
                 class="org.uet.dse.neo4j.action_phase2.ActionOpenSettings"
                 tooltip="Compare between USE and Neo4j"
-                menu="Neo4j Plugin phase 2"
-                menuitem="OpenSetting"
+                menu="Neo4j Plugin"
+                menuitem="Open Sync Setting"
                 id="org.uet.dse.neo4j.action_phase2.ActionOpenSettings">
         </action>
         <action label="Sync model forward"
-                icon="images/rtl.png"
+                icon="images/run.png"
                 class="org.uet.dse.neo4j.action_phase2.ActionSyncModelForward"
                 tooltip="Compare between USE and Neo4j"
-                menu="Neo4j Plugin phase 2"
+                menu="Neo4j Plugin"
                 menuitem="Sync model forward"
                 id="org.uet.dse.neo4j.action_phase2.ActionSyncModelForward">
         </action>
         <action label="Sync model backward"
-                icon="images/rtl.png"
+                icon="images/run.png"
                 class="org.uet.dse.neo4j.action_phase2.ActionSyncModelBackward"
                 tooltip="Compare between USE and Neo4j"
-                menu="Neo4j Plugin phase 2"
+                menu="Neo4j Plugin"
                 menuitem="Sync model backward"
                 id="org.uet.dse.neo4j.action_phase2.ActionSyncModelBackward">
         </action>
         <action label="Sync object forward"
-                icon="images/rtl.png"
+                icon="images/run.png"
                 class="org.uet.dse.neo4j.action_phase2.ActionSyncObjectForward"
                 tooltip="Compare between USE and Neo4j"
-                menu="Neo4j Plugin phase 2"
+                menu="Neo4j Plugin"
                 menuitem="Sync object forward"
                 id="org.uet.dse.neo4j.action_phase2.ActionSyncObjectForward">
         </action>
         <action label="Sync object backward"
-                icon="images/rtl.png"
+                icon="images/run.png"
                 class="org.uet.dse.neo4j.action_phase2.ActionSyncObjectBackward"
                 tooltip="Compare between USE and Neo4j"
-                menu="Neo4j Plugin phase 2"
+                menu="Neo4j Plugin"
                 menuitem="Sync object backward"
                 id="org.uet.dse.neo4j.action_phase2.ActionSyncObjectBackward">
         </action>
         <action label="OCL evaluator"
-                icon="images/rtl.png"
+                icon="images/run.png"
                 class="org.uet.dse.neo4j.action_phase2.ActionOpenOclEvaluator"
                 tooltip="Compare between USE and Neo4j"
-                menu="Neo4j Plugin phase 2"
+                menu="Neo4j Plugin"
                 menuitem="OCL evaluator"
                 id="org.uet.dse.neo4j.action_phase2.ActionOpenOclEvaluator">
         </action>
         <action label="Incremental model update"
-                icon="images/rtl.png"
+                icon="images/run.png"
                 class="org.uet.dse.neo4j.action_phase2.ActionOpenIncrementalUpdate"
                 tooltip="Compare between USE and Neo4j"
-                menu="Neo4j Plugin phase 2"
+                menu="Neo4j Plugin"
                 menuitem="Incremental model update"
                 id="org.uet.dse.neo4j.action_phase2.ActionOpenIncrementalUpdate">
         </action>
-        <action label="Model trafo"
-                icon="images/rtl.png"
+        <action label="Correspondence model"
+                icon="images/run.png"
                 class="org.uet.dse.neo4j.action_phase2.ActionTggTransformation"
-                tooltip="Model trafo"
-                menu="Neo4j Plugin phase 2"
-                menuitem="Model trafo"
+                tooltip="Correspondence model"
+                menu="Neo4j Plugin"
+                menuitem="Correspondence model"
                 id="org.uet.dse.neo4j.action_phase2.ActionTggTransformation">
         </action>
-        <action label="TGG1"
-                icon="images/rtl.png"
+        <action label="State manager"
+                icon="images/run.png"
                 class="org.uet.dse.neo4j.action_phase2.ActionTggCorrManagement"
                 tooltip="TGG1"
-                menu="Neo4j Plugin phase 2"
-                menuitem="TGG1"
+                menu="Neo4j Plugin"
+                menuitem="State manager"
                 id="org.uet.dse.neo4j.action_phase2.ActionTggCorrManagement">
         </action>
 
-        <action label="TGG matching"
-                icon="images/rtl.png"
+        <action label="Rule matcher-n-executor"
+                icon="images/run.png"
                 class="org.uet.dse.neo4j.action_phase2.ActionTggMatchingManagement"
                 tooltip="TGG matching"
-                menu="Neo4j Plugin phase 2"
-                menuitem="TGG matching"
+                menu="Neo4j Plugin"
+                menuitem="Rule matcher-n-executor"
                 id="org.uet.dse.neo4j.action_phase2.ActionTggMatchingManagement">
         </action>
 

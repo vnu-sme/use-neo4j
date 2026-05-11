@@ -1,0 +1,99 @@
+transformation Families2Persons
+direction forward
+
+rule Register2Register
+checkSource(
+){
+	fr: FamilyRegister
+}checkTarget(
+){
+	pr: PersonRegister
+}checkCorr(
+){
+	(fr, pr) as (fr, pr) in fr2pr:FR2PR
+}
+end
+
+rule Father2Male
+checkSource(
+	fr: FamilyRegister
+	fm: Family
+	(fr, fm): FamilyRegistration
+){
+	father: FamilyMember
+	(fm, father): Father
+}checkTarget(
+	pr: PersonRegister
+){
+	mp: Male
+	(pr, mp): PersonRegistration
+}checkCorr(
+	(fr, pr) as (fr, pr) in fr2pr:FR2PR
+){
+	(father, mp) as (f, mp) in f2mp:F2MP
+	(fm*, mp) as (fm, mp) in fm2mp:FM2MP
+}
+end
+
+rule Mother2Female
+checkSource(
+	fr: FamilyRegister
+	fm: Family
+	(fr, fm): FamilyRegistration
+){
+	mother: FamilyMember
+	(fm, mother): Mother
+}checkTarget(
+	pr: PersonRegister
+){
+	fp: Female
+	(pr, fp): PersonRegistration
+}checkCorr(
+	(fr, pr) as (fr, pr) in fr2pr:FR2PR
+){
+	(mother, fp) as (m, fp) in m2fp:M2FP
+	(fm*, fp) as (fm, fp) in fm2fp:FM2FP
+}
+end
+
+rule Son2Male
+checkSource(
+	fr: FamilyRegister
+	fm: Family
+	(fr, fm): FamilyRegistration
+){
+	son: FamilyMember
+	(fm, son): Sons
+}checkTarget(
+	pr: PersonRegister
+){
+	mp: Male
+	(pr, mp): PersonRegistration
+}checkCorr(
+	(fr, pr) as (fr, pr) in fr2pr:FR2PR
+){
+	(son, mp) as (s, mp) in s2mp:S2MP
+	(fm*, mp) as (fm, mp) in fm2mp:FM2MP
+}
+end
+
+rule Daughter2Female
+checkSource(
+	fr: FamilyRegister
+	fm: Family
+	(fr, fm): FamilyRegistration
+){
+	daughter: FamilyMember
+	(fm, daughter): Daughters
+}checkTarget(
+	pr: PersonRegister
+){
+	fp: Female
+	(pr, fp): PersonRegistration
+}checkCorr(
+	(fr, pr) as (fr, pr) in fr2pr:FR2PR
+){
+	(daughter, fp) as (d, fp) in d2fp:D2FP
+	(fm*, fp) as (fm, fp) in fm2fp:FM2FP
+}
+end
