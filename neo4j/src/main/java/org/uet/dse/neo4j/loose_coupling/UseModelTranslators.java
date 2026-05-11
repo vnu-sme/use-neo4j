@@ -1,9 +1,11 @@
 package org.uet.dse.neo4j.loose_coupling;
 
+import org.tzi.use.uml.mm.MAssociation;
 import org.tzi.use.uml.mm.MClass;
 import org.tzi.use.uml.mm.MGeneralization;
 import org.tzi.use.uml.ocl.type.EnumType;
 import org.uet.dse.neo4j.mm.core.edge.Extends;
+import org.uet.dse.neo4j.mm.core.edge.NodeBinaryAssociation;
 import org.uet.dse.neo4j.mm.core.node.*;
 
 public record UseModelTranslators(
@@ -14,6 +16,10 @@ public record UseModelTranslators(
     IModelTranslator<UseOperationTranslator.OperationContext, NodeOperation> operationTranslator,
     IModelTranslator<UseParamTranslator.ParamContext, NodeParam> paramTranslator,
     IModelTranslator<UsePreConditionTranslator.PreConditionContext, NodePreCondition> preConditionTranslator,
-    IModelTranslator<UsePostConditionTranslator.PostConditionContext, NodePostCondition> postConditionTranslator
+    IModelTranslator<UsePostConditionTranslator.PostConditionContext, NodePostCondition> postConditionTranslator,
+    IModelTranslator<UseClassInvariantTranslator.InvariantContext, NodeClassInvariant> invariantTranslator,
+    IModelTranslator<MAssociation, NodeBinaryAssociation> binaryAssociationTranslator,
+    IModelTranslator<UseAssociationClassTranslator.AssociationClassContext, NodeAssociationClass> associationClassTranslator,
+    IModelTranslator<UseTernaryAssociationTranslator.TernaryAssociationContext, NodeTernaryAssociation> ternaryAssociationTranslator
 
 ) {}

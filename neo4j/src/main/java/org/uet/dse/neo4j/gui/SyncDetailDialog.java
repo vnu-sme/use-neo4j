@@ -149,10 +149,10 @@ public class SyncDetailDialog extends JDialog {
                     if (label.contains("[JAVA ONLY]")) {
                         // Java có, DB thiếu -> Push Class
                         MClass mClass = modelCoord.getUseModel().getClass(name);
-                        coreModelPushService.pushSingleClass(mClass);
+                        //coreModelPushService.pushSingleClass(mClass);
                     } else if (label.contains("[DB ONLY]")) {
                         // DB có, Java thiếu -> Pull Class
-                        coreModelPushService.pullSingleClass(name);
+                        //coreModelPushService.pullSingleClass(name);
                     }
                 } else if (syncType.equals("Object")) {
                     if (label.contains("[JAVA ONLY]")) {

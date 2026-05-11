@@ -9,6 +9,11 @@ import java.util.Map;
 public class NodeNestedCollection extends AbstractMetaNode {
     private boolean isNestedCollection;
     private String collectionName;
+
+    public NodeNestedCollection(String name) {
+        super(name);
+    }
+
     public boolean isNestedCollection() {
         return isNestedCollection;
     }

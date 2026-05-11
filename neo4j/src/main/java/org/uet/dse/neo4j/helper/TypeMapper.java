@@ -56,6 +56,20 @@ public class TypeMapper {
         }
     }
 
+    public static void handleTypeReference(org.uet.dse.neo4j.repo.archive.Neo4jModelRepository repo, String sourceNodeName, Type useType, boolean isReturnType) {
+        if (useType == null) return;
+
+        Map<String, Object> tInfo = parseType(useType);
+
+        if (tInfo.containsKey("ref") && tInfo.get("ref") != null) {
+            String targetClassName = (String) tInfo.get("ref");
+
+            String edgeLabel = isReturnType ? "ReferenceReturnType" : "ReferenceType";
+
+            repo.createStructuralEdge(sourceNodeName, targetClassName, edgeLabel);
+        }
+    }
+
     /**
      * Lấy kiểu cơ sở (Unwrap collection).
      * Ví dụ: Set(Integer) -> Integer, Person -> Person.

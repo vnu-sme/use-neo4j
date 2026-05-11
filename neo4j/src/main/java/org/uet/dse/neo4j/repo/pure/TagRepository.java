@@ -1,4 +1,4 @@
-package org.uet.dse.neo4j.repo;
+package org.uet.dse.neo4j.repo.pure;
 
 import org.neo4j.driver.*;
 

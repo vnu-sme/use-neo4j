@@ -26,10 +26,6 @@ public class Neo4jDomainObjectRepository implements DomainObjectRepository {
                     ).list()
             );
 
-//            List<Record> records = session.run(
-//                DomainObjectQuery.FIND_OBJECT_WITH_ATTRIBUTEStest,
-//                Map.of("id", id)
-//            ).list();
             if (records.isEmpty()) {
                 return Optional.empty();
             }

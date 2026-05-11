@@ -3,6 +3,10 @@ package org.uet.dse.neo4j.mm.core.node;
 import java.util.Map;
 
 public class NodeManageModel extends AbstractMetaNode {
+    public NodeManageModel(String name) {
+        super(name);
+    }
+
     @Override
     public String getName() { return "NodeManageModel"; }
 

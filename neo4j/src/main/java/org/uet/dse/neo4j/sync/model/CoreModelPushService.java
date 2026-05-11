@@ -9,16 +9,13 @@ import org.tzi.use.uml.ocl.expr.VarDecl;
 import org.tzi.use.uml.ocl.expr.VarDeclList;
 import org.tzi.use.uml.ocl.type.CollectionType;
 import org.tzi.use.uml.ocl.type.Type;
-import org.uet.dse.neo4j.aop.Latest;
 import org.uet.dse.neo4j.helper.TypeMapper;
 import org.uet.dse.neo4j.loose_coupling.*;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
-import org.uet.dse.neo4j.mm.core.common.NCollectionType;
-import org.uet.dse.neo4j.mm.core.common.NType;
 import org.uet.dse.neo4j.mm.core.edge.Extends;
+import org.uet.dse.neo4j.mm.core.edge.NodeBinaryAssociation;
 import org.uet.dse.neo4j.mm.core.node.*;
 import org.uet.dse.neo4j.manager.WorkLogManager;
-import org.uet.dse.neo4j.query.builder.CypherQueryBuilder;
 import org.uet.dse.neo4j.repo.Neo4jModelRepository;
 import org.uet.dse.neo4j.sync.helper.UmlTypeTranslator;
 import org.uet.dse.neo4j.sync.object.ObjectSyncHelper;
@@ -45,15 +42,15 @@ public class CoreModelPushService {
 
         logger.log("PUSH_START", "User " + currentUser + " initiated sync for model: " + model.name());
 
+        //init meta-meta node, including create management node
+        repo.initializeMetamodel(model.name());
+
+        syncCoreEntities(model);
+        syncInheritance(model);
+        syncStructuralDetails(model);
+        syncAssociations(model);
+
         try (Session session = Neo4jDriverManager.getInstance().openSession()) {
-            //init meta-meta node, including create management node
-            repo.initializeMetamodel(model.name());
-
-            syncCoreEntities(model);
-            syncInheritance(model);
-            syncStructuralDetails(session, model);
-            syncAssociations(model);
-
             updateModelVersion(session, currentUser);
             logger.log("PUSH_SUCCESS", "Model " + model.name() + " is now synchronized.");
 
@@ -97,27 +94,36 @@ public class CoreModelPushService {
         }
     }
 
-    public void syncStructuralDetails(Session session, MModel model) {
+    public void syncStructuralDetails(MModel model) {
         for (MClass cls : model.classes()) {
             mapAttributes(cls, model.name());
             mapOperations(cls, model.name());
-            mapInvariants(session, cls);
-            mapOperationConstraintsForAllOperationsInClass(session, cls);
+            mapInvariants(cls, model.name());
+            mapOperationConstraintsForAllOperationsInClass(cls, model.name());
         }
     }
 
     public void syncAssociations(MModel model) {
+      UseModelTranslators translators = ModelTranslatorFactory.forUse();
         for (MAssociation assoc : model.associations()) {
             if (assoc.associationEnds().size() > 2) {
-                repo.upsertTernaryAssociation(assoc, model.name());
+              NodeTernaryAssociation ternary = translators.ternaryAssociationTranslator()
+                  .translate(new UseTernaryAssociationTranslator.TernaryAssociationContext(assoc, model.name()));
+              repo.upsertTernaryAssociation(ternary);
             }
-            else if (assoc instanceof MAssociationClass) {
-                repo.createAssociationClassStructure((MAssociationClass) assoc, model.name());
+            else if (assoc instanceof MAssociationClass ac) {
+              NodeAssociationClass node = translators.associationClassTranslator()
+                  .translate(new UseAssociationClassTranslator.AssociationClassContext(ac, model.name()));
+              repo.createAssociationClassStructure(node);
             } else {
-                repo.createAssociationEdge(assoc);
+              NodeBinaryAssociation edge = translators.binaryAssociationTranslator()
+                  .translate(assoc);
+              repo.createAssociationEdge(edge);
             }
         }
     }
+
+
 
     public void updateModelVersion(org.neo4j.driver.Session session, String user) {
         org.tzi.use.uml.mm.MModel model = modelApi.getModel();
@@ -154,7 +160,6 @@ public class CoreModelPushService {
             TypeMapper.handleTypeReference(repo, opNode.getName(), op.resultType(), true);
 
             // Translate params
-            VarDeclList params = op.paramList();
             int order = 1;
             for (VarDecl param : op.paramList()) {
                 NodeParam paramNode = translators.paramTranslator()
@@ -201,7 +206,7 @@ public class CoreModelPushService {
         boolean stillNested = innerType.isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID);
         String uuidName = "nested_" + java.util.UUID.randomUUID().toString();
 
-        NodeNestedCollection nestedNode = new NodeNestedCollection();
+        NodeNestedCollection nestedNode = new NodeNestedCollection(uuidName);
         nestedNode.setName(uuidName);
         nestedNode.setCollectionName(UmlTypeTranslator.getCollectionType(currentType));
         nestedNode.setNestedCollection(stillNested);
@@ -216,28 +221,16 @@ public class CoreModelPushService {
     }
 
 
-    /**
-     * refactored
-     * class invariant
-     */
-    public void mapInvariants(Session session, MClass cls) {
+    public void mapInvariants(MClass cls, String modelName) {
+        UseModelTranslators translators = ModelTranslatorFactory.forUse();
+
         int index = 0;
-
         for (MClassInvariant inv : modelApi.getModel().classInvariants(cls)) {
-            String displayName = (inv.name() == null || inv.name().isEmpty()) ? "unnamed" : inv.name();
-            String invInstanceId = cls.name() + "_inv_" + index;
+            NodeClassInvariant invNode = translators.invariantTranslator()
+                .translate(new UseClassInvariantTranslator.InvariantContext(inv, cls.name(), index++));
 
-            NodeClassInvariant invNode = new NodeClassInvariant();
-            invNode.setName(invInstanceId);
-            invNode.setInvName(displayName);
-            invNode.setExpression(inv.bodyExpression().toString());
-            invNode.setExistential(inv.isExistential());
-            invNode.setIndex(index);
-
-            repo.createInstanceNode(invNode, "ClassInvariant", modelApi.getModel().name());
+            repo.createInstanceNode(invNode, "ClassInvariant", modelName);
             repo.createStructuralEdge(cls.name(), invNode.getName(), "HasInvariant");
-
-            index++;
         }
     }
 
@@ -266,20 +259,12 @@ public class CoreModelPushService {
     /**
      * checked
      */
-    public void mapOperationConstraintsForAllOperationsInClass(Session session, MClass cls) {
+    public void mapOperationConstraintsForAllOperationsInClass(MClass cls, String modelName) {
         for (MOperation op : cls.operations()) {
             if (op.cls().equals(cls)) {
                 String opId = cls.name() + "_" + op.name();
-                mapOperationConstraintsForOneOperation(op, opId);
+                mapOperationConstraintsForOneOperation(op, opId, modelName);
             }
         }
-    }
-
-    public void pushSingleClass(MClass mClass) {
-
-    }
-
-    public void pullSingleClass(String className) throws Exception {
-
     }
 }

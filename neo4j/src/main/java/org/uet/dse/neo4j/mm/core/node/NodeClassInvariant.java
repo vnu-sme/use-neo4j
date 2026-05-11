@@ -12,6 +12,10 @@ public class NodeClassInvariant extends AbstractMetaNode {
     private boolean isExistential;
     private int index;
 
+    public NodeClassInvariant(String name) {
+        super(name);
+    }
+
     public String getExpression() {
         return expression;
     }

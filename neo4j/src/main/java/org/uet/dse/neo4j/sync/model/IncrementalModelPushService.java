@@ -26,12 +26,12 @@ public class IncrementalModelPushService extends CoreModelPushService implements
   private final UseModelApi modelApi;
   private final WorkLogManager logger = WorkLogManager.getInstance();
 
-  private final Neo4jModelRepository repo;
+  private final org.uet.dse.neo4j.repo.archive.Neo4jModelRepository repo;
 
   public IncrementalModelPushService(UseModelApi modelApi) {
     super(modelApi);
     this.modelApi = modelApi;
-    this.repo = new Neo4jModelRepository();
+    this.repo = new org.uet.dse.neo4j.repo.archive.Neo4jModelRepository();
     // Khởi tạo metamodel trước khi push
     this.repo.initializeMetamodel(modelApi.getModel().name());
   }
@@ -150,6 +150,27 @@ public class IncrementalModelPushService extends CoreModelPushService implements
         mapInvariants(session, cls);
         mapOperationConstraintsForAllOperationsInClass(session, cls);
       }
+    }
+  }
+
+  public void mapInvariants(Session session, MClass cls) {
+    int index = 0;
+
+    for (MClassInvariant inv : modelApi.getModel().classInvariants(cls)) {
+      String displayName = (inv.name() == null || inv.name().isEmpty()) ? "unnamed" : inv.name();
+      String invInstanceId = cls.name() + "_inv_" + index;
+
+      NodeClassInvariant invNode = new NodeClassInvariant(displayName);
+      invNode.setName(invInstanceId);
+      invNode.setInvName(displayName);
+      invNode.setExpression(inv.bodyExpression().toString());
+      invNode.setExistential(inv.isExistential());
+      invNode.setIndex(index);
+
+      repo.createInstanceNode(invNode, "ClassInvariant", modelApi.getModel().name());
+      repo.createStructuralEdge(cls.name(), invNode.getName(), "HasInvariant");
+
+      index++;
     }
   }
 
@@ -305,11 +326,11 @@ public class IncrementalModelPushService extends CoreModelPushService implements
     for (MAssociation assoc : allUseModel.associations()) {
       if (isContaining(assoc.name(), kusakabeModelDiff.associationDiff.isolated)) {
         if (assoc.associationEnds().size() > 2) {
-          repo.upsertTernaryAssociation(assoc, modelApi.getModel().name());
+          repo.upsertTernaryAssociationTC(assoc, modelApi.getModel().name());
         } else if (assoc instanceof MAssociationClass) {
-          repo.createAssociationClassStructure((MAssociationClass) assoc, modelApi.getModel().name());
+          repo.createAssociationClassStructureTC((MAssociationClass) assoc, modelApi.getModel().name());
         } else {
-          repo.createAssociationEdge(assoc);
+          repo.createAssociationEdgeTC(assoc);
         }
       }
     }

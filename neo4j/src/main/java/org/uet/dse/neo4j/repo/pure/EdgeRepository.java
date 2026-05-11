@@ -1,4 +1,4 @@
-package org.uet.dse.neo4j.repo;
+package org.uet.dse.neo4j.repo.pure;
 
 import org.uet.dse.neo4j.mm.graphdb.Edge;
 import org.neo4j.driver.*;

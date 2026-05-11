@@ -21,7 +21,11 @@ public class ModelTranslatorFactory {
         new UseOperationTranslator(),
         new UseParamTranslator(),
         new UsePreConditionTranslator(),
-        new UsePostConditionTranslator()
+        new UsePostConditionTranslator(),
+        new UseClassInvariantTranslator(),
+        new UseBinaryAssociationTranslator(),
+        new UseAssociationClassTranslator(),
+        new UseTernaryAssociationTranslator()
     );
   }
 }
