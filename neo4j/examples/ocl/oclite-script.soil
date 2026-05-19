@@ -1,0 +1,57 @@
+!create uet : University
+!create hcmut : University
+
+!create alice : Student
+!create bob : Student
+!create charlie : Student
+!create profSmith : Professor
+!create profJones : Professor
+
+!set uet.name := 'UET'
+!set uet.ranking := 1
+!set hcmut.name := 'HCMUT'
+!set hcmut.ranking := 2
+
+!set alice.name := 'Alice'
+!set alice.age := 21
+!set alice.salary := 1200.0
+!set alice.gpa := 3.6
+!set alice.codes := Set{'AI101', 'DB202'}
+
+!set bob.name := 'Bob'
+!set bob.age := 23
+!set bob.salary := 1500.0
+!set bob.gpa := 3.2
+!set bob.codes := Set{'SE101', 'DB202'}
+
+!set charlie.name := 'Charlie'
+!set charlie.age := 19
+!set charlie.salary := 900.0
+!set charlie.gpa := 3.9
+!set charlie.codes := Set{'AI101'}
+
+!set profSmith.name := 'John Smith'
+!set profSmith.age := 50
+!set profSmith.salary := 8000.0
+!set profSmith.office := 'B-401'
+!set profSmith.codes := Set{'AI101', 'DB202', 'SE301'}
+
+!set profJones.name := 'Mary Jones'
+!set profJones.age := 45
+!set profJones.salary := 6000.0
+!set profJones.office := 'C-205'
+!set profJones.codes := Set{'SE101'}
+
+!insert (alice, uet) into WorksFor
+!insert (bob, uet) into WorksFor
+!insert (charlie, hcmut) into WorksFor
+!insert (profSmith, uet) into WorksFor
+!insert (profJones, hcmut) into WorksFor
+
+!insert (alice, bob) into Friendship
+!insert (alice, charlie) into Friendship
+!insert (bob, profSmith) into Friendship
+!insert (profSmith, alice) into Friendship
+!insert (profSmith, bob) into Friendship
+
+check

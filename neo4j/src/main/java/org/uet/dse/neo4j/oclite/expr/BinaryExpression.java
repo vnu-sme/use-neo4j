@@ -1,6 +1,8 @@
 package org.uet.dse.neo4j.oclite.expr;
 
 import java.util.Objects;
+import java.util.Collection;
+import org.neo4j.driver.types.Node;
 
 public class BinaryExpression implements ExpressionNode {
     private final ExpressionNode left, right;
@@ -44,14 +46,25 @@ public class BinaryExpression implements ExpressionNode {
         if (a instanceof Number && b instanceof Number) {
             return Double.compare(((Number) a).doubleValue(), ((Number) b).doubleValue()) == 0;
         }
+        if (a instanceof Node && b instanceof Node) {
+            return ((Node) a).id() == ((Node) b).id();
+        }
+        if (a instanceof Collection && b instanceof Collection) {
+            Collection<?> leftItems = (Collection<?>) a;
+            Collection<?> rightItems = (Collection<?>) b;
+            return leftItems.size() == rightItems.size()
+                && leftItems.stream().allMatch(l -> rightItems.stream().anyMatch(r -> compareEquals(l, r)));
+        }
         return Objects.equals(a, b);
     }
 
     private Object compareNumbers(Object a, Object b, String operator) {
-        if (!(a instanceof Number) || !(b instanceof Number)) return false;
+        Number leftNumber = asNumber(a);
+        Number rightNumber = asNumber(b);
+        if (leftNumber == null || rightNumber == null) return false;
 
-        double n1 = ((Number) a).doubleValue();
-        double n2 = ((Number) b).doubleValue();
+        double n1 = leftNumber.doubleValue();
+        double n2 = rightNumber.doubleValue();
 
         switch (operator) {
             case ">":  return n1 > n2;
@@ -63,10 +76,12 @@ public class BinaryExpression implements ExpressionNode {
     }
 
     private Object calculateNumbers(Object a, Object b, String operator) {
-        if (!(a instanceof Number) || !(b instanceof Number)) return null;
+        Number leftNumber = asNumber(a);
+        Number rightNumber = asNumber(b);
+        if (leftNumber == null || rightNumber == null) return null;
 
-        double n1 = ((Number) a).doubleValue();
-        double n2 = ((Number) b).doubleValue();
+        double n1 = leftNumber.doubleValue();
+        double n2 = rightNumber.doubleValue();
 
         switch (operator) {
             case "+": return n1 + n2;
@@ -92,5 +107,27 @@ public class BinaryExpression implements ExpressionNode {
         default -> false;
       };
 
+    }
+
+    private Number asNumber(Object value) {
+        if (value instanceof Number) {
+            return (Number) value;
+        }
+        if (value instanceof String) {
+            String raw = ((String) value).trim();
+            if (raw.length() >= 2 && raw.startsWith("'") && raw.endsWith("'")) {
+                raw = raw.substring(1, raw.length() - 1);
+            }
+            raw = raw.replaceAll("[^0-9.\\-]", "");
+            if (raw.isEmpty() || raw.equals("-") || raw.equals(".")) {
+                return null;
+            }
+            try {
+                return Double.parseDouble(raw);
+            } catch (NumberFormatException ignored) {
+                return null;
+            }
+        }
+        return null;
     }
 }

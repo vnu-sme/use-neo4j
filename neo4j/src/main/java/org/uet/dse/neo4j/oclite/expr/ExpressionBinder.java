@@ -79,6 +79,19 @@ public class ExpressionBinder {
             else if (mName.equals("isUndefined")) {
                 return new IsDefinedExpression(sourceExec, false);
             }
+            else if (mName.equals("oclIsTypeOf") || mName.equals("oclIsKindOf")) {
+                if (mc.args.size() != 1 || !(mc.args.get(0) instanceof ASTVar)) {
+                    throw new RuntimeException(mName + " expects a type name.");
+                }
+                String typeName = ((ASTVar) mc.args.get(0)).name;
+                return new TypeCheckExpression(sourceExec, typeName, mName.equals("oclIsKindOf"));
+            }
+            else if (mc.args.isEmpty()) {
+                if (neo4jRepository.isRelationship(sourceExec, mName)) {
+                    return new NavigationExpression(sourceExec, mName);
+                }
+                return new PropertyExpression(sourceExec, mName);
+            }
 
 
         }
@@ -87,6 +100,10 @@ public class ExpressionBinder {
         if (node instanceof ASTProperty) {
             ASTProperty prop = (ASTProperty) node;
             ExpressionNode sourceNode = bind(prop.source);
+
+            if (sourceNode instanceof TypeExpression && prop.name.equalsIgnoreCase("allInstances")) {
+                return new AllInstancesExpression(((TypeExpression) sourceNode).getTypeName());
+            }
 
             if (neo4jRepository.isRelationship(sourceNode, prop.name)) {
                 return new NavigationExpression(sourceNode, prop.name);
@@ -115,6 +132,10 @@ public class ExpressionBinder {
 
         if (node instanceof ASTIntegerLiteral) {
             return new ConstantExpression(((ASTIntegerLiteral) node).value);
+        }
+
+        if (node instanceof ASTRealLiteral) {
+            return new ConstantExpression(((ASTRealLiteral) node).value);
         }
 
         if (node instanceof ASTStringLiteral) {
@@ -151,14 +172,24 @@ public class ExpressionBinder {
             switch (itAST.operation.toLowerCase()) {
                 case "select":
                     return new SelectExpression(sourceNode, itAST.iteratorName, bodyNode);
+                case "reject":
+                    return new RejectExpression(sourceNode, itAST.iteratorName, bodyNode);
                 case "forAll":
                     return new ForAllExpression(sourceNode, itAST.iteratorName, bodyNode);
                 case "exists":
                     return new ExistsExpression(sourceNode, itAST.iteratorName, bodyNode);
                 case "collect":
                     return new CollectExpression(sourceNode, itAST.iteratorName, bodyNode);
+                case "collectnested":
+                    return new CollectionOpExpression(
+                        new CollectExpression(sourceNode, itAST.iteratorName, bodyNode),
+                        "flatten",
+                        Collections.emptyList()
+                    );
                 case "any":
                     return new AnyExpression(sourceNode, itAST.iteratorName, bodyNode);
+                case "one":
+                    return new OneExpression(sourceNode, itAST.iteratorName, bodyNode);
                 default:
                     throw new RuntimeException("Chưa hỗ trợ Iterator: " + itAST.operation);
             }

@@ -1,0 +1,57 @@
+model OcliteTest
+
+class Person
+attributes
+    name : String
+    age : Integer
+    salary : Real
+    codes : Set(String)
+end
+
+class Student < Person
+attributes
+    gpa : Real
+end
+
+class Professor < Person
+attributes
+    office : String
+end
+
+class University
+attributes
+    name : String
+    ranking : Integer
+end
+
+association WorksFor between
+    Person[*] role employees
+    University[0..1] role employer
+end
+
+association Friendship between
+    Person[*] role friendOf
+    Person[*] role friends
+end
+
+constraints
+
+context Person
+inv PositiveSalary:
+    self.salary > 0
+
+context Person
+inv Adult:
+    self.age >= 18
+
+context University
+inv HasRank:
+    self.ranking > 0
+
+context Professor
+inv HigherSalaryThanEveryStudent:
+    Student.allInstances()->forAll(s | s.salary < self.salary)
+
+context Person
+inv FriendsAreAdults:
+    self.friends->forAll(f | f.age >= 18)

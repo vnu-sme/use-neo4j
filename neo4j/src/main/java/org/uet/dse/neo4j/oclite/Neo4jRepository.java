@@ -37,7 +37,7 @@ public class Neo4jRepository {
                     "MATCH (o) WHERE id(o) = $id " +
                         "MATCH (o)-[:ObjectHasAttribute]->(val:AttributeValue) " +
                         "WHERE val.name ENDS WITH $suffix " +
-                        "RETURN val.value AS value";
+                        "RETURN val.value AS value, val.type AS type, val.isCollection AS isCollection";
 
                 Result res = tx.run(cypher, Values.parameters(
                     "id", sourceNode.id(),
@@ -45,11 +45,12 @@ public class Neo4jRepository {
                 ));
 
                 if (res.hasNext()) {
-                    Value val = res.next().get("value");
+                    org.neo4j.driver.Record record = res.next();
+                    Value val = record.get("value");
                     if (val.isNull()) return null;
-                    if (val.type().name().equals("INTEGER")) return val.asDouble();
-                    if (val.type().name().equals("FLOAT")) return val.asDouble();
-                    return val.asObject();
+                    String type = record.get("type").isNull() ? "" : record.get("type").asString();
+                    boolean isCollection = !record.get("isCollection").isNull() && record.get("isCollection").asBoolean(false);
+                    return normalizeAttributeValue(val.asObject(), type, isCollection);
                 }
                 return null;
             });
@@ -119,6 +120,29 @@ public class Neo4jRepository {
             });
         }
     }
+
+    public String findClassName(Node objectNode) {
+        try (Session session = Neo4jDriverManager.getInstance().openSession()) {
+            return session.executeRead(tx -> {
+                String cypher = "MATCH (o) WHERE id(o) = $id MATCH (o)-[:ObjectInstanceOf]->(cls) RETURN cls.name AS className";
+                Result res = tx.run(cypher, Values.parameters("id", objectNode.id()));
+                return res.hasNext() ? res.next().get("className").asString() : null;
+            });
+        }
+    }
+
+    public boolean isKindOf(Node objectNode, String typeName) {
+        try (Session session = Neo4jDriverManager.getInstance().openSession()) {
+            return session.executeRead(tx -> {
+                String cypher =
+                    "MATCH (o) WHERE id(o) = $id " +
+                    "MATCH (o)-[:ObjectInstanceOf]->(cls) " +
+                    "RETURN cls.name = $typeName OR EXISTS { MATCH (cls)-[:Extends*1..]->(parent {name: $typeName}) } AS matches";
+                Result res = tx.run(cypher, Values.parameters("id", objectNode.id(), "typeName", typeName));
+                return res.hasNext() && res.next().get("matches").asBoolean(false);
+            });
+        }
+    }
     public Object findAttributeValue(Node ownerNode, String attrName) {
         try (Session session = Neo4jDriverManager.getInstance().openSession()) {
             return session.executeRead(tx -> {
@@ -171,9 +195,10 @@ public class Neo4jRepository {
         try (Session session = Neo4jDriverManager.getInstance().openSession()) {
             return session.executeRead(tx -> {
                 String cypher =
-                    "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->()<-[:InstanceOf]-(cls {name: $className}) " +
-                        "MATCH (obj)-[:ObjectInstanceOf]->(cls) " +
-                        "RETURN obj";
+                    "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->()<-[:InstanceOf]-(target {name: $className}) " +
+                    "MATCH (cls)-[:Extends*0..]->(target) " +
+                    "MATCH (obj)-[:ObjectInstanceOf]->(cls) " +
+                    "RETURN DISTINCT obj";
 
                 Result res = tx.run(cypher, Values.parameters(
                     "modelName", this.modelName,
@@ -187,6 +212,52 @@ public class Neo4jRepository {
                 return instances;
             });
         }
+    }
+
+    private Object normalizeAttributeValue(Object rawValue, String dbType, boolean isCollection) {
+        if (rawValue == null) return null;
+
+        String raw = rawValue.toString().trim();
+        if (raw.equals("Undefined") || raw.equals("COLLECTION_EMPTY")) return null;
+        if (raw.length() >= 2 && raw.startsWith("'") && raw.endsWith("'")) {
+            raw = raw.substring(1, raw.length() - 1);
+        }
+
+        if (isCollection && raw.contains("|")) {
+            List<Object> values = new ArrayList<>();
+            for (String part : raw.split("\\s*\\|\\s*")) {
+                if (!part.isBlank()) {
+                    values.add(normalizeAttributeValue(part, dbType, false));
+                }
+            }
+            return values;
+        }
+
+        if (dbType.equals("Int") || dbType.equals("Integer")) {
+            try {
+                return Long.parseLong(raw.replaceAll("[^0-9\\-]", ""));
+            } catch (NumberFormatException ignored) {
+                return rawValue;
+            }
+        }
+
+        if (dbType.equals("Double") || dbType.equals("Real")) {
+            try {
+                return Double.parseDouble(raw.replaceAll("[^0-9.\\-]", ""));
+            } catch (NumberFormatException ignored) {
+                return rawValue;
+            }
+        }
+
+        if (dbType.equals("Boolean")) {
+            return Boolean.parseBoolean(raw);
+        }
+
+        if (raw.startsWith("#")) {
+            return raw.substring(1);
+        }
+
+        return raw;
     }
 
     public boolean checkClassExistsInDb(String className) {

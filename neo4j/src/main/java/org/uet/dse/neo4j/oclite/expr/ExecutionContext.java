@@ -42,6 +42,12 @@ public class ExecutionContext {
   }
 
   public Object resolveVariable(String name) {
+    for (Map<String, Object> scope : scopeStack) {
+      if (scope.containsKey(name)) {
+        return scope.get(name);
+      }
+    }
+
     if (variables.containsKey(name)) {
       return variables.get(name);
     }
@@ -64,7 +70,23 @@ public class ExecutionContext {
     }
 
     if (source instanceof Node) {
-      return repo.getAttributeValue((Node) source, propertyName);
+      Object attributeValue = repo.getAttributeValue((Node) source, propertyName);
+      if (attributeValue != null) {
+        return attributeValue;
+      }
+
+      List<Node> relatedNodes = repo.findRelatedNodes((Node) source, propertyName);
+      if (!relatedNodes.isEmpty()) {
+        return relatedNodes;
+      }
+
+      Node node = (Node) source;
+      if (node.containsKey(propertyName)) {
+        return node.get(propertyName).asObject();
+      }
+      if ("oclIsNew".equals(propertyName)) {
+        return false;
+      }
     }
 
     return null;
@@ -123,6 +145,13 @@ public class ExecutionContext {
         Collection<?> targetCol = convertToCollection(args.get(0));
 
         return targetCol.stream().allMatch(t -> collection.stream().anyMatch(s -> isSameObject(s, t)));
+      }
+      case "excludesAll": {
+        if (args.isEmpty())
+          return true;
+        Collection<?> targetCol = convertToCollection(args.get(0));
+
+        return targetCol.stream().noneMatch(t -> collection.stream().anyMatch(s -> isSameObject(s, t)));
       }
 
       case "union": {
@@ -206,6 +235,45 @@ public class ExecutionContext {
       case "flatten": {
         return flatten(collection);
       }
+      case "sum": {
+        double sum = 0;
+        for (Object item : collection) {
+          Number number = asNumber(item);
+          if (number != null) {
+            sum += number.doubleValue();
+          }
+        }
+        return sum;
+      }
+      case "count": {
+        if (args.isEmpty()) {
+          return 0.0;
+        }
+        Object target = args.get(0);
+        return (double) collection.stream().filter(item -> isSameObject(item, target)).count();
+      }
+      case "max": {
+        return collection.stream()
+            .map(this::asNumber)
+            .filter(Objects::nonNull)
+            .mapToDouble(Number::doubleValue)
+            .max()
+            .stream()
+            .boxed()
+            .findFirst()
+            .orElse(null);
+      }
+      case "min": {
+        return collection.stream()
+            .map(this::asNumber)
+            .filter(Objects::nonNull)
+            .mapToDouble(Number::doubleValue)
+            .min()
+            .stream()
+            .boxed()
+            .findFirst()
+            .orElse(null);
+      }
 
       default:
         throw new RuntimeException("Not yet supported: " + opName);
@@ -246,7 +314,44 @@ public class ExecutionContext {
     return result;
   }
 
+  private Number asNumber(Object value) {
+    if (value instanceof Number) {
+      return (Number) value;
+    }
+    if (value instanceof String) {
+      String raw = ((String) value).trim();
+      if (raw.length() >= 2 && raw.startsWith("'") && raw.endsWith("'")) {
+        raw = raw.substring(1, raw.length() - 1);
+      }
+      raw = raw.replaceAll("[^0-9.\\-]", "");
+      if (raw.isEmpty() || raw.equals("-") || raw.equals(".")) {
+        return null;
+      }
+      try {
+        return Double.parseDouble(raw);
+      } catch (NumberFormatException ignored) {
+        return null;
+      }
+    }
+    return null;
+  }
+
   public Object resolveAllInstances(String className) {
     return repo.findAllInstancesOfClass(className);
+  }
+
+  public boolean isTypeOf(Object value, String typeName) {
+    if (!(value instanceof Node)) {
+      return false;
+    }
+    String actualType = repo.findClassName((Node) value);
+    return typeName.equals(actualType);
+  }
+
+  public boolean isKindOf(Object value, String typeName) {
+    if (!(value instanceof Node)) {
+      return false;
+    }
+    return repo.isKindOf((Node) value, typeName);
   }
 }
