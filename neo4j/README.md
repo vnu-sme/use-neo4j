@@ -1,3 +1,28 @@
+How to set-up and install?
+- git clone https://github.com/chikacow/use-neo4j.git
+- cd neo4j
+- mvn clean package
+- move the neo4j-7.1.0.jar from use-neo4j/neo4j/target -> use-neo4j/use-assembly/src/main/resources/plugins/officalVersion
+- Run the USE GUI
+- Replace the plugin directory of USE to match with your local machine
+
+How to sync model?
+- Load your model on USE
+- Connect to Neo4j
+- Use the Sync model forward feature, then approve
+- For syncing backward, use the sync backward feature, and choose the model you want to pull from Neo4j
+
+How to sync object?
+- You must sync the relevant model first
+- Use sync object forward feature to sync the object from USE to Neo4j
+- Use sync object backward feature to sync the object from Neo4j to USE
+
+
+How to run OCL-Cypher?
+- Set up your model and object in Neo4j
+- Use the OCL Evaluator from Neo4j to validate the state in Neo4j
+
+
 How to run TGG-Cypher?
 
 - Set up Neo4j DB on your local device first! Or having stuff on cloud if you are rich
