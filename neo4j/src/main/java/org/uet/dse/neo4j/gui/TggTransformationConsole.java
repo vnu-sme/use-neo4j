@@ -268,6 +268,7 @@ public class TggTransformationConsole extends JDialog {
         try {
 
             manager.parseTggContent(txtTggEditor.getText());
+            this.currentTransformation = manager.getTransformation();
             appendLog("Rules updated in Global Manager.");
             refreshRuleTable();
         } catch (Exception e) {

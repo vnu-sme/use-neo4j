@@ -23,18 +23,32 @@ public class Neo4jDirectObjectRepository {
 
     public void createRegularLink(String srcOid, String tgtOid, String assocName, String modelName) {
         String query =
-                "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(metaN:MetaNode {name: 'NodeConcreteClass'})\n" +
+            "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(metaN:MetaNode)\n" +
+                "WHERE metaN.name IN ['NodeConcreteClass', 'NodeAbstractClass', 'NodeAssociationClass']\n" +
 
                 "MATCH (obj1 {use_id: $srcOid})-[:ObjectInstanceOf]->(cls1)-[:InstanceOf]->(metaN)\n" +
                 "MATCH (obj2 {use_id: $tgtOid})-[:ObjectInstanceOf]->(cls2)-[:InstanceOf]->(metaN)\n" +
 
-                "MATCH (metaS)-[r]->(metaT) \n" +
-                "WHERE r.associationName = $assocName \n" +
-                "  AND ((metaS = cls1 AND metaT = cls2) OR (metaS = cls2 AND metaT = cls1))\n" +
+                "MATCH (metaS)-[r]->(metaT)\n" +
+                "WHERE r.associationName = $assocName\n" +
+                "  AND type(r) IN ['AssociateWith', 'ComposeOf', 'Aggregates']\n" +
+                "  AND (\n" +
+                "    (\n" +
+                "      (cls1 = metaS OR (cls1)-[:Extends*1..]->(metaS))\n" +
+                "      AND\n" +
+                "      (cls2 = metaT OR (cls2)-[:Extends*1..]->(metaT))\n" +
+                "    )\n" +
+                "    OR\n" +
+                "    (\n" +
+                "      (cls2 = metaS OR (cls2)-[:Extends*1..]->(metaS))\n" +
+                "      AND\n" +
+                "      (cls1 = metaT OR (cls1)-[:Extends*1..]->(metaT))\n" +
+                "    )\n" +
+                "  )\n" +
 
                 "WITH obj1, obj2, cls1, cls2, r, metaS, metaT, type(r) AS metaType\n" +
-                "WITH CASE WHEN metaS = cls1 THEN obj1 ELSE obj2 END AS sObj,\n" +
-                "     CASE WHEN metaT = cls2 THEN obj2 ELSE obj1 END AS tObj,\n" +
+                "WITH CASE WHEN cls1 = metaS OR (cls1)-[:Extends*1..]->(metaS) THEN obj1 ELSE obj2 END AS sObj,\n" +
+                "     CASE WHEN cls2 = metaT OR (cls2)-[:Extends*1..]->(metaT) THEN obj2 ELSE obj1 END AS tObj,\n" +
                 "     r, metaType\n" +
 
                 "FOREACH (ignore IN CASE WHEN metaType = 'ComposeOf' THEN [1] ELSE [] END |\n" +
@@ -46,6 +60,7 @@ public class Neo4jDirectObjectRepository {
                 "FOREACH (ignore IN CASE WHEN metaType = 'AssociateWith' THEN [1] ELSE [] END |\n" +
                 "  MERGE (sObj)-[l:LinkAssociateWith {name: r.associationName}]->(tObj)\n" +
                 "  SET l.isTernary = false, l.sourceRole = r.sourceClassrole, l.targetRole = r.targerClassrole)";
+
 
         try (Session s = Neo4jDriverManager.getInstance().openSession()) {
             s.run(query, Values.parameters(

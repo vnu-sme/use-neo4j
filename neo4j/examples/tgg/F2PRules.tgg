@@ -54,3 +54,45 @@ checkSource(
 }
 end
 
+
+rule Son2Male
+checkSource(
+    fr: FamilyRegister
+    fm: Family
+    (fr, fm): FamilyRegistration
+){
+    son: FamilyMember
+    (fm, son): Sons
+}checkTarget(
+    pr: PersonRegister
+){
+    mp: Male
+    (pr, mp): PersonRegistration
+}checkCorr(
+    (fr, pr) as (fr, pr) in fr2pr:FR2PR
+){
+    (son, mp) as (s, mp) in s2mp:S2MP
+    (fm*, mp) as (fm, mp) in fm2mp:FM2MP
+}
+end
+
+rule Daughter2Female
+checkSource(
+    fr: FamilyRegister
+    fm: Family
+    (fr, fm): FamilyRegistration
+){
+    daughter: FamilyMember
+    (fm, daughter): Daughters
+}checkTarget(
+    pr: PersonRegister
+){
+    fp: Female
+    (pr, fp): PersonRegistration
+}checkCorr(
+    (fr, pr) as (fr, pr) in fr2pr:FR2PR
+){
+    (daughter, fp) as (d, fp) in d2fp:D2FP
+    (fm*, fp) as (fm, fp) in fm2fp:FM2FP
+}
+end
