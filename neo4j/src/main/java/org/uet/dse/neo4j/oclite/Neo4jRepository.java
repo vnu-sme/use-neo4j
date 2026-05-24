@@ -45,12 +45,19 @@ public class Neo4jRepository {
                 ));
 
                 if (res.hasNext()) {
-                    org.neo4j.driver.Record record = res.next();
-                    Value val = record.get("value");
+//                    org.neo4j.driver.Record record = res.next();
+//                    Value val = record.get("value");
+//                    if (val.isNull()) return null;
+//                    String type = record.get("type").isNull() ? "" : record.get("type").asString();
+//                    boolean isCollection = !record.get("isCollection").isNull() && record.get("isCollection").asBoolean(false);
+//                    return normalizeAttributeValue(val.asObject(), type, isCollection);
+
+                    Value val = res.next().get("value");
+
                     if (val.isNull()) return null;
-                    String type = record.get("type").isNull() ? "" : record.get("type").asString();
-                    boolean isCollection = !record.get("isCollection").isNull() && record.get("isCollection").asBoolean(false);
-                    return normalizeAttributeValue(val.asObject(), type, isCollection);
+                    if (val.type().name().equals("INTEGER")) return val.asDouble();
+                    if (val.type().name().equals("FLOAT")) return val.asDouble();
+                    return val.asObject();
                 }
                 return null;
             });

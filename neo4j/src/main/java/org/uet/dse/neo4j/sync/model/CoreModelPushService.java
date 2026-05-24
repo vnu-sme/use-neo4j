@@ -79,7 +79,7 @@ public class CoreModelPushService {
         // Classes → domain → repo
         model.classes().stream()
             .map(translators.classTranslator()::translate)
-            .forEach(node -> repo.upsertClassNode(node, node.getMetaLabel(), model.name()));
+            .forEach(node -> repo.upsertClassNode(node, node.getName(), model.name()));
     }
 
     public void syncInheritance(MModel model) {
