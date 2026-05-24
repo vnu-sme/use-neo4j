@@ -110,7 +110,6 @@ public class ModelSyncCoordinator {
                 //just a testing feature, thats why freeForAllPushItAll is true
                 IncrementalModelPushService incrementalModelPushService = new IncrementalModelPushService(this.modelApi);
                 incrementalModelPushService.pushModelToNeo4j(diff, this.useModel);
-
             }
 
             WorkLogManager.getInstance().log("SYNC_FORWARD_SUCCESS", "Model pushed by: " + userIdentifier);
@@ -153,16 +152,6 @@ public class ModelSyncCoordinator {
         return true;
     }
 
-    private int showModelDiffBox(JTextArea textArea) {
-        textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
-        textArea.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setPreferredSize(new Dimension(600, 450));
-
-        return JOptionPane.showConfirmDialog(null, scrollPane,
-            "Push Model to Neo4j - Review Changes", JOptionPane.OK_CANCEL_OPTION);
-    }
-
 
 
     public void syncBackward() {
@@ -193,7 +182,7 @@ public class ModelSyncCoordinator {
                     return;
                 }
 
-                String actualModelName = getModelNameFromDb();
+                //String actualModelName = getModelNameFromDb();
 
                 //create new model
                 ModelFactory factory = new ModelFactory();
@@ -208,8 +197,7 @@ public class ModelSyncCoordinator {
 
                 //update & reload folder structure
                 mainWindow.getModelBrowser().updateUI();
-                // mainWindow.showModelStatus();
-                mainWindow.logWriter().println("Neo4j Sync: Model '" + actualModelName + "' successfully pulled.");
+                mainWindow.logWriter().println("Neo4j Sync: Model '" + selectedModelName + "' successfully pulled.");
 
                 JOptionPane.showMessageDialog(mainWindow, "Sync Backward Success!");
 

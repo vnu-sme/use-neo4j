@@ -1,0 +1,10 @@
+!create p1 : Patient
+  !create h1 : Hospital
+
+  !set p1.name := 'Alice'
+  !set h1.name := 'Central Hospital'
+
+  !create hosp1 : Hospitalization between (p1, h1)
+
+  !set hosp1.roomNumber := 'A302'
+  !set hosp1.admissionDate := '2026-05-23'

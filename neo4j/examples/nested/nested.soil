@@ -1,0 +1,26 @@
+!create d1 : Doctor
+  !create d2 : Doctor
+  !create d3 : Doctor
+
+  !create p1 : Patient
+
+  !set d1.name := 'Dr. Alice'
+  !set d2.name := 'Dr. Bob'
+  !set d3.name := 'Dr. Clark'
+
+  !set p1.name := 'Patient One'
+
+  -- Primitive nested: Sequence(Set(Integer))
+  !set p1.scoreMatrix := Sequence{Set{1, 2}, Set{3, 4, 5}}
+
+  -- Primitive nested: Sequence(Set(String))
+  !set p1.symptomGroups := Sequence{Set{'Fever', 'Cough'}, Set{'Headache'}}
+
+  -- Primitive nested: Sequence(Set(Bag(Integer)))
+  !set p1.deepNumbers := Sequence{Set{Bag{1, 1, 2}, Bag{3}}, Set{Bag{4, 5}}}
+
+  -- Object-reference nested: Sequence(Set(Doctor))
+  !set p1.doctorGroups := Sequence{Set{d1, d2}, Set{d3}}
+
+  -- Object-reference nested: Sequence(Set(Bag(Doctor)))
+  !set p1.deepDoctorGroups := Sequence{Set{Bag{d1, d2}, Bag{d3}}, Set{Bag{d2}}}

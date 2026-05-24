@@ -29,17 +29,6 @@ public class ObjectSnapshotCompare {
         return diff;
     }
 
-    public ObjectDiff compareObjects(FullObjectSnapshot javaSnap, FullObjectSnapshot neoSnap) {
-        ObjectDiff diff = new ObjectDiff();
-        diff.javaSnapshot  = javaSnap;
-        diff.neo4jSnapshot = neoSnap;
-
-        compareObjects(javaSnap, neoSnap, diff);
-        compareLinks(javaSnap, neoSnap, diff);
-
-        return diff;
-    }
-
     private void compareObjects(FullObjectSnapshot javaSnap, FullObjectSnapshot neoSnap, ObjectDiff diff) {
         diffKeys(
                 javaSnap.objects.keySet(),
@@ -134,71 +123,6 @@ public class ObjectSnapshotCompare {
             return "[" + ((List<?>) val).stream().map(Object::toString).collect(java.util.stream.Collectors.joining(", ")) + "]";
         }
         return val.toString();
-    }
-    private List<String> findObjectMismatchDetailsold(ObjectState javaObj, ObjectState neoObj) {
-        List<String> details = new ArrayList<>();
-
-        diffPrimitiveValues(javaObj, neoObj, details);
-        diffObjectReferences(javaObj, neoObj, details);
-
-        return details;
-    }
-
-    private void diffPrimitiveValues(ObjectState javaObj, ObjectState neoObj, List<String> details) {
-        collectValueMismatches(
-                javaObj.primitiveValues,
-                neoObj.primitiveValues,
-                (attr, jVal, nVal) -> String.format("Attr '%s' mismatch: Java(%s) vs DB(%s)", attr, jVal, nVal),
-                details
-        );
-    }
-
-    private void diffObjectReferences(ObjectState javaObj, ObjectState neoObj, List<String> details) {
-        collectValueMismatches(
-                javaObj.objectReferences,
-                neoObj.objectReferences,
-                (role, jVal, nVal) -> String.format("Reference '%s' has different targets: Java(%s) vs DB(%s)", role, jVal, nVal),
-                details
-        );
-    }
-
-    /**
-     * Unions the keys of both maps and reports any key whose stringified values differ.
-     * Null values on either side are represented as the literal "null" for readability.
-     *
-     * @param messageFormatter (key, leftValue, rightValue) → human-readable detail string
-     */
-    private static <V> void collectValueMismatches(
-            Map<String, V> left,
-            Map<String, V> right,
-            TriFunction<String, String, String, String> messageFormatter,
-            List<String> details) {
-
-        Set<String> allKeys = unionKeys(left, right);
-
-        for (String key : allKeys) {
-            String leftStr  = stringify(left.get(key));
-            String rightStr = stringify(right.get(key));
-
-            if (!leftStr.equals(rightStr)) {
-                details.add(messageFormatter.apply(key, leftStr, rightStr));
-            }
-        }
-    }
-
-    private static <V> Set<String> unionKeys(Map<String, V> left, Map<String, V> right) {
-        Set<String> keys = new HashSet<>(left.keySet());
-        keys.addAll(right.keySet());
-        return keys;
-    }
-
-    private static String stringify(Object value) {
-        return (value == null) ? "null" : value.toString();
-    }
-
-    @FunctionalInterface
-    private interface TriFunction<A, B, C, R> {
-        R apply(A a, B b, C c);
     }
 
 }

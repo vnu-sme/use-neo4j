@@ -1,0 +1,20 @@
+model NestedCollectionDemo
+
+  class Doctor
+  attributes
+    name : String
+  end
+
+  class Patient
+  attributes
+    name : String
+
+    -- Primitive nested collections
+    scoreMatrix : Sequence(Set(Integer))
+    symptomGroups : Sequence(Set(String))
+    deepNumbers : Sequence(Set(Bag(Integer)))
+
+    -- Object-reference nested collections
+    doctorGroups : Sequence(Set(Doctor))
+    deepDoctorGroups : Sequence(Set(Bag(Doctor)))
+  end

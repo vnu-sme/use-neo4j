@@ -1,0 +1,53 @@
+!create refA : RefTarget
+!create refB : RefTarget
+!create refC : RefTarget
+
+!set refA.name := 'Ref A'
+!set refA.score := 10
+!set refB.name := 'Ref B'
+!set refB.score := 20
+!set refC.name := 'Ref C'
+!set refC.score := 30
+
+!create hFull : Holder
+
+!set hFull.stringVal := 'alpha'
+!set hFull.intVal := 42
+!set hFull.realVal := 3.14
+!set hFull.boolVal := true
+!set hFull.enumVal := Status::Active
+!set hFull.refVal := refA
+
+!set hFull.setString := Set{'red', 'green', 'blue'}
+!set hFull.seqInt := Sequence{1, 2, 3}
+!set hFull.bagReal := Bag{1.5, 1.5, 2.25}
+!set hFull.orderedBool := OrderedSet{true, false}
+!set hFull.setEnum := Set{Status::Active, Status::Suspended}
+
+!set hFull.setRef := Set{refA, refB}
+!set hFull.seqRef := Sequence{refA, refB, refC}
+
+!set hFull.nestedPrimitive := Set{Sequence{1, 2}, Sequence{3, 4}}
+!set hFull.nestedStringBag := Bag{Set{'A', 'B'}, Set{'C'}}
+!set hFull.nestedRef := Set{Sequence{refA, refB}, Sequence{refC}}
+
+!create hUndefined : Holder
+
+!set hUndefined.stringVal := 'local value that can be reset'
+!set hUndefined.intVal := 99
+!set hUndefined.realVal := 9.9
+!set hUndefined.boolVal := false
+!set hUndefined.enumVal := Status::Closed
+!set hUndefined.refVal := refB
+!set hUndefined.setString := Set{'will', 'reset'}
+!set hUndefined.seqInt := Sequence{7, 8}
+!set hUndefined.bagReal := Bag{7.7, 8.8}
+!set hUndefined.orderedBool := OrderedSet{false}
+!set hUndefined.setEnum := Set{Status::Closed}
+!set hUndefined.setRef := Set{refB}
+!set hUndefined.seqRef := Sequence{refB}
+!set hUndefined.nestedPrimitive := Set{Sequence{9}}
+!set hUndefined.nestedStringBag := Bag{Set{'reset'}}
+!set hUndefined.nestedRef := Set{Sequence{refB}}
+
+check

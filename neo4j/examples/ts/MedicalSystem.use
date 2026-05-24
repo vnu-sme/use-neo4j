@@ -17,8 +17,6 @@ attributes
     email : String
     dateOfBirth : String
     emergencyContacts : Set(Person)
-    kk : OrderedSet(Set(Set(Bag(Set(Person)))))
-    nono : Set(Integer)
 end
 
 class Doctor < Person
@@ -33,10 +31,6 @@ attributes
     patientQueue : Sequence(Patient)
     assignedNurses : Set(Nurse)
     collaborationHistory : Sequence(Set(Doctor))
-    favNurse: Nurse
-
-    hotNurse: Set(Set(Nurse))
-    gd: Set(Gender)
 operations
     prescribe(p : Patient, m : Medication, quantity : Integer)
     getChiefResident() : Doctor
@@ -176,23 +170,19 @@ context Hospital
 
 context Doctor
     inv ValidSchedule:
-        self.shiftSchedule->forAll(s | s->size() <= 3) -- Mỗi ca không trực quá 3 phòng
+        self.shiftSchedule->forAll(s | s->size() <= 3)
 
 context Doctor::prescribe(p : Patient, m : Medication, quantity : Integer)
-    -- Kiểm tra tham số đầu vào (Parameters) [24]
     pre patientIsDefined: p.isDefined()
     pre medicationIsDefined: m.isDefined()
     pre validQuantity: quantity > 0
-
-    -- Hậu điều kiện kiểm tra sự thay đổi trạng thái [23, 25]
     post prescriptionCreated:
         Prescription.allInstances->exists(pr |
             pr.physician = self and pr.patient = p)
 
 context Prescription::updateDosage(newDosage : String)
     pre dosageNotEmpty: newDosage <> ''
-    -- Sử dụng @pre để so sánh giá trị cũ và mới [25, 26]
-    post dosageChanged: self.dosageInstructions <> self.dosageInstructions@pre
+    post dosageChanged: self.dosageInstructions <> self.dosageInstructions
 
 context Doctor
     inv WorkingLoadLimit:

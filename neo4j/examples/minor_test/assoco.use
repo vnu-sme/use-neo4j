@@ -1,0 +1,20 @@
+model AssociationObjectDemo
+
+  class Patient
+  attributes
+    name : String
+  end
+
+  class Hospital
+  attributes
+    name : String
+  end
+
+  associationclass Hospitalization
+  between
+    Patient[1] role patient
+    Hospital[1] role hospital
+  attributes
+    roomNumber : String
+    admissionDate : String
+  end

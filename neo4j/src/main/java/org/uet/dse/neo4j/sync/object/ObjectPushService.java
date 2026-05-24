@@ -64,6 +64,7 @@ public class ObjectPushService {
                     Map.of("name", name));
         }
     }
+
     private void pushModifiedObjects(TransactionContext tx, ObjectDiff diff) {
         MSystemState state = system.state();
 
@@ -154,8 +155,6 @@ public class ObjectPushService {
             metadata.put("collectionType", UmlTypeTranslator.getCollectionType(attr.type()));
             metadata.put("isNestedCollection", UmlTypeTranslator.getCollectionDepth(attr.type()) > 1);
             metadata.put("isObjectReference", isObjRef);
-
-
 
             Object mappedValue = ValueMapper.mapUseValue(useVal);
 

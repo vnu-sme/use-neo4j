@@ -1,0 +1,33 @@
+model AttributeSyncTypes
+
+enum Status { Active, Suspended, Closed }
+
+class RefTarget
+attributes
+  name : String
+  score : Integer
+end
+
+class Holder
+attributes
+  stringVal : String
+  intVal : Integer
+  realVal : Real
+  boolVal : Boolean
+  enumVal : Status
+  refVal : RefTarget
+
+  setString : Set(String)
+  seqInt : Sequence(Integer)
+  bagReal : Bag(Real)
+  orderedBool : OrderedSet(Boolean)
+  setEnum : Set(Status)
+
+  setRef : Set(RefTarget)
+  seqRef : Sequence(RefTarget)
+
+  nestedPrimitive : Set(Sequence(Integer))
+  nestedStringBag : Bag(Set(String))
+  nestedRef : Set(Sequence(RefTarget))
+end
+

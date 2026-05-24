@@ -1,0 +1,329 @@
+!create centralHospital : Hospital
+!create cityHospital : Hospital
+
+!create cardiologyDept : Department
+!create emergencyDept : Department
+!create neurologyDept : Department
+
+!create doctorHouse : Doctor
+!create doctorGrey : Doctor
+!create doctorStrange : Doctor
+
+!create nurseAnna : Nurse
+!create nurseBen : Nurse
+!create nurseClara : Nurse
+
+!create patientAlice : Patient
+!create patientBob : Patient
+!create patientCarol : Patient
+
+!create medAspirin : Medication
+!create medIbuprofen : Medication
+!create medBuffaprin : Medication
+
+!create flu : Disease
+!create stroke : Disease
+!create cancer : Disease
+
+!create recordAlice : MedicalRecord
+!create recordBob : MedicalRecord
+!create entryAlice1 : RecordEntry
+!create entryAlice2 : RecordEntry
+!create entryBob1 : RecordEntry
+
+!create dosageAlice : Dosage
+!create dosageBob : Dosage
+!create planMorning : DosagePlan
+!create planEmergency : DosagePlan
+
+!set centralHospital.name := 'Central Hospital'
+!set centralHospital.totalBudget := 1500000.0
+!set centralHospital.location := 'Hanoi'
+!set centralHospital.totalBeds := 500
+!set centralHospital.availableICUs := 25
+!set centralHospital.rating := 4.8
+!set centralHospital.isPublic := true
+!set centralHospital.emergencyContact := '115'
+
+!set cityHospital.name := 'City Hospital'
+!set cityHospital.totalBudget := 750000.0
+!set cityHospital.location := 'Ho Chi Minh City'
+!set cityHospital.totalBeds := 250
+!set cityHospital.availableICUs := 10
+!set cityHospital.rating := 4.1
+!set cityHospital.isPublic := false
+!set cityHospital.emergencyContact := '1900-999'
+
+!set cardiologyDept.deptName := 'Cardiology'
+!set emergencyDept.deptName := 'Emergency'
+!set neurologyDept.deptName := 'Neurology'
+
+!set doctorHouse.name := 'Gregory House'
+!set doctorHouse.age := 52
+!set doctorHouse.gender := Gender::MALE
+!set doctorHouse.address := '221B Hospital Wing'
+!set doctorHouse.phoneNumber := '0900000001'
+!set doctorHouse.email := 'house@central.example'
+!set doctorHouse.dateOfBirth := '1974-05-15'
+!set doctorHouse.doctorID := 'D-001'
+!set doctorHouse.specialty := Specialty::EMERGENCY
+!set doctorHouse.consultationFee := 250.0
+!set doctorHouse.yearsOfExperience := 25
+!set doctorHouse.qualification := 'MD Diagnostics'
+!set doctorHouse.isAvailable := true
+!set doctorHouse.shiftSchedule := Sequence{Set{1, 2}, Set{3}, Set{4, 5, 6}}
+!set doctorHouse.patientQueue := Sequence{patientAlice, patientBob}
+!set doctorHouse.assignedNurses := Set{nurseAnna, nurseBen}
+!set doctorHouse.collaborationHistory := Sequence{Set{doctorGrey}, Set{doctorGrey, doctorStrange}}
+!set doctorHouse.favNurse := nurseAnna
+!set doctorHouse.hotNurse := Set{Set{nurseAnna}, Set{nurseBen, nurseClara}}
+!set doctorHouse.gd := Set{Gender::MALE, Gender::FEMALE}
+!set doctorHouse.emergencyContacts := Set{nurseAnna}
+!set doctorHouse.nono := Set{10, 20, 30}
+!set doctorHouse.kk := OrderedSet{Set{Set{Bag{Set{nurseAnna, patientAlice}}}}}
+
+!set doctorGrey.name := 'Meredith Grey'
+!set doctorGrey.age := 45
+!set doctorGrey.gender := Gender::FEMALE
+!set doctorGrey.address := 'Central Campus'
+!set doctorGrey.phoneNumber := '0900000002'
+!set doctorGrey.email := 'grey@central.example'
+!set doctorGrey.dateOfBirth := '1981-11-02'
+!set doctorGrey.doctorID := 'D-002'
+!set doctorGrey.specialty := Specialty::CARDIOLOGY
+!set doctorGrey.consultationFee := 180.0
+!set doctorGrey.yearsOfExperience := 18
+!set doctorGrey.qualification := 'MD Cardiology'
+!set doctorGrey.isAvailable := false
+!set doctorGrey.shiftSchedule := Sequence{Set{7}, Set{8, 9}}
+!set doctorGrey.patientQueue := Sequence{patientCarol}
+!set doctorGrey.assignedNurses := Set{nurseClara}
+!set doctorGrey.collaborationHistory := Sequence{Set{doctorHouse}}
+!set doctorGrey.favNurse := nurseClara
+!set doctorGrey.hotNurse := Set{Set{nurseClara}}
+!set doctorGrey.gd := Set{Gender::FEMALE}
+!set doctorGrey.emergencyContacts := Set{doctorHouse}
+!set doctorGrey.nono := Set{40, 50}
+!set doctorGrey.kk := OrderedSet{Set{Set{Bag{Set{doctorHouse}}}}}
+
+!set doctorStrange.name := 'Stephen Strange'
+!set doctorStrange.age := 48
+!set doctorStrange.gender := Gender::MALE
+!set doctorStrange.address := 'Neurology Tower'
+!set doctorStrange.phoneNumber := '0900000003'
+!set doctorStrange.email := 'strange@city.example'
+!set doctorStrange.dateOfBirth := '1978-01-20'
+!set doctorStrange.doctorID := 'D-003'
+!set doctorStrange.specialty := Specialty::NEUROLOGY
+!set doctorStrange.consultationFee := 300.0
+!set doctorStrange.yearsOfExperience := 20
+!set doctorStrange.qualification := 'MD Neurosurgery'
+!set doctorStrange.isAvailable := true
+!set doctorStrange.shiftSchedule := Sequence{Set{10, 11}, Set{12}}
+!set doctorStrange.patientQueue := Sequence{}
+!set doctorStrange.assignedNurses := Set{nurseBen}
+!set doctorStrange.collaborationHistory := Sequence{Set{doctorHouse, doctorGrey}}
+!set doctorStrange.favNurse := nurseBen
+!set doctorStrange.hotNurse := Set{Set{nurseBen}}
+!set doctorStrange.gd := Set{Gender::MALE, Gender::OTHER}
+!set doctorStrange.emergencyContacts := Set{doctorGrey}
+!set doctorStrange.nono := Set{60}
+!set doctorStrange.kk := OrderedSet{Set{Set{Bag{Set{doctorGrey, nurseBen}}}}}
+
+!set nurseAnna.name := 'Anna Nguyen'
+!set nurseAnna.age := 32
+!set nurseAnna.gender := Gender::FEMALE
+!set nurseAnna.address := 'Ward A'
+!set nurseAnna.phoneNumber := '0911000001'
+!set nurseAnna.email := 'anna@central.example'
+!set nurseAnna.dateOfBirth := '1994-03-10'
+!set nurseAnna.nurseID := 'N-001'
+!set nurseAnna.isHeadNurse := true
+!set nurseAnna.certificationLevel := 5
+!set nurseAnna.assignedWard := 'Emergency'
+!set nurseAnna.onCall := true
+!set nurseAnna.hourlyRate := 45.0
+!set nurseAnna.lastTrainingDate := '2026-01-15'
+!set nurseAnna.emergencyContacts := Set{doctorHouse}
+!set nurseAnna.nono := Set{1, 2}
+!set nurseAnna.kk := OrderedSet{Set{Set{Bag{Set{doctorHouse}}}}}
+
+!set nurseBen.name := 'Ben Tran'
+!set nurseBen.age := 29
+!set nurseBen.gender := Gender::MALE
+!set nurseBen.address := 'Ward B'
+!set nurseBen.phoneNumber := '0911000002'
+!set nurseBen.email := 'ben@central.example'
+!set nurseBen.dateOfBirth := '1997-09-22'
+!set nurseBen.nurseID := 'N-002'
+!set nurseBen.isHeadNurse := false
+!set nurseBen.certificationLevel := 3
+!set nurseBen.assignedWard := 'Cardiology'
+!set nurseBen.onCall := false
+!set nurseBen.hourlyRate := 35.0
+!set nurseBen.lastTrainingDate := '2025-12-01'
+!set nurseBen.emergencyContacts := Set{nurseAnna}
+!set nurseBen.nono := Set{3, 4}
+!set nurseBen.kk := OrderedSet{Set{Set{Bag{Set{nurseAnna}}}}}
+
+!set nurseClara.name := 'Clara Pham'
+!set nurseClara.age := 41
+!set nurseClara.gender := Gender::FEMALE
+!set nurseClara.address := 'Ward C'
+!set nurseClara.phoneNumber := '0911000003'
+!set nurseClara.email := 'clara@city.example'
+!set nurseClara.dateOfBirth := '1985-07-07'
+!set nurseClara.nurseID := 'N-003'
+!set nurseClara.isHeadNurse := true
+!set nurseClara.certificationLevel := 4
+!set nurseClara.assignedWard := 'Neurology'
+!set nurseClara.onCall := true
+!set nurseClara.hourlyRate := 42.5
+!set nurseClara.lastTrainingDate := '2026-03-20'
+!set nurseClara.emergencyContacts := Set{doctorGrey}
+!set nurseClara.nono := Set{5, 6}
+!set nurseClara.kk := OrderedSet{Set{Set{Bag{Set{doctorGrey}}}}}
+
+!set patientAlice.name := 'Alice Le'
+!set patientAlice.age := 34
+!set patientAlice.gender := Gender::FEMALE
+!set patientAlice.address := 'District 1'
+!set patientAlice.phoneNumber := '0922000001'
+!set patientAlice.email := 'alice@example.com'
+!set patientAlice.dateOfBirth := '1992-04-11'
+!set patientAlice.patientID := 'P-001'
+!set patientAlice.isEmergency := false
+!set patientAlice.bloodType := BloodType::A_POS
+!set patientAlice.weight := 55.5
+!set patientAlice.height := 1.62
+!set patientAlice.symptoms := Sequence{'fever', 'cough'}
+!set patientAlice.treatmentHistory := Set{Sequence{'triage', 'blood test'}, Sequence{'x-ray'}}
+!set patientAlice.allergies := Set{'penicillin'}
+!set patientAlice.attendingPhysicians := Set{doctorHouse, doctorGrey}
+!set patientAlice.currentMeds := Set{medAspirin}
+!set patientAlice.prescriptionHistory := Sequence{Sequence{medAspirin}, Sequence{medIbuprofen, medBuffaprin}}
+!set patientAlice.emergencyContacts := Set{nurseAnna, doctorHouse}
+!set patientAlice.nono := Set{100, 101}
+!set patientAlice.kk := OrderedSet{Set{Set{Bag{Set{doctorHouse, nurseAnna}}}}}
+
+!set patientBob.name := 'Bob Hoang'
+!set patientBob.age := 82
+!set patientBob.gender := Gender::MALE
+!set patientBob.address := 'District 3'
+!set patientBob.phoneNumber := '0922000002'
+!set patientBob.email := 'bob@example.com'
+!set patientBob.dateOfBirth := '1944-12-01'
+!set patientBob.patientID := 'P-002'
+!set patientBob.isEmergency := true
+!set patientBob.bloodType := BloodType::O_NEG
+!set patientBob.weight := 70.0
+!set patientBob.height := 1.70
+!set patientBob.symptoms := Sequence{'chest pain', 'shortness of breath'}
+!set patientBob.treatmentHistory := Set{Sequence{'icu admission'}, Sequence{'cardiac monitoring', 'oxygen'}}
+!set patientBob.allergies := Set{'ibuprofen', 'latex'}
+!set patientBob.attendingPhysicians := Set{doctorHouse}
+!set patientBob.currentMeds := Set{medBuffaprin}
+!set patientBob.prescriptionHistory := Sequence{Sequence{medBuffaprin}}
+!set patientBob.emergencyContacts := Set{patientAlice}
+!set patientBob.nono := Set{200, 201}
+!set patientBob.kk := OrderedSet{Set{Set{Bag{Set{doctorHouse, nurseBen}}}}}
+
+!set patientCarol.name := 'Carol Vu'
+!set patientCarol.age := 17
+!set patientCarol.gender := Gender::OTHER
+!set patientCarol.address := 'District 7'
+!set patientCarol.phoneNumber := '0922000003'
+!set patientCarol.email := 'carol@example.com'
+!set patientCarol.dateOfBirth := '2009-08-30'
+!set patientCarol.patientID := 'P-003'
+!set patientCarol.isEmergency := false
+!set patientCarol.bloodType := BloodType::AB_NEG
+!set patientCarol.weight := 48.0
+!set patientCarol.height := 1.58
+!set patientCarol.symptoms := Sequence{'headache'}
+!set patientCarol.treatmentHistory := Set{Sequence{'neurology consult'}}
+!set patientCarol.allergies := Set{}
+!set patientCarol.attendingPhysicians := Set{doctorGrey, doctorStrange}
+!set patientCarol.currentMeds := Set{}
+!set patientCarol.prescriptionHistory := Sequence{}
+!set patientCarol.emergencyContacts := Set{patientAlice}
+!set patientCarol.nono := Set{300}
+!set patientCarol.kk := OrderedSet{Set{Set{Bag{Set{doctorStrange}}}}}
+
+!set medAspirin.brandName := 'ASCRIPTIN'
+!set medAspirin.genericName := 'Aspirin'
+!set medAspirin.price := 12.5
+
+!set medIbuprofen.brandName := 'IBUPRIN'
+!set medIbuprofen.genericName := 'Ibuprofen'
+!set medIbuprofen.price := 8.9
+
+!set medBuffaprin.brandName := 'BUFFAPRIN'
+!set medBuffaprin.genericName := 'Buffered Aspirin'
+!set medBuffaprin.price := 15.0
+
+!set flu.diseaseName := 'Influenza'
+!set stroke.diseaseName := 'Stroke'
+!set cancer.diseaseName := 'Cancer'
+
+!set entryAlice1.entryDate := '2026-01-01'
+!set entryAlice1.description := 'Initial check and fever treatment'
+!set entryAlice2.entryDate := '2026-01-03'
+!set entryAlice2.description := 'Follow-up with improved symptoms'
+!set entryBob1.entryDate := '2026-02-10'
+!set entryBob1.description := 'Emergency cardiac monitoring'
+
+!set dosageAlice.patientNumber := 1
+!set dosageAlice.adminMethod := Administration::ENTERAL
+!set dosageAlice.brandName := Brand::ASCRIPTIN
+!set dosageBob.patientNumber := 2
+!set dosageBob.adminMethod := Administration::PARENTERAL
+!set dosageBob.brandName := Brand::BUFFAPRIN
+
+!set centralHospital.medicalStaff := Set{doctorHouse, doctorGrey, nurseAnna, nurseBen, patientAlice, patientBob}
+!set cityHospital.medicalStaff := Set{doctorStrange, nurseClara, patientCarol}
+
+!insert (patientAlice, recordAlice) into PatientRecord
+!insert (patientBob, recordBob) into PatientRecord
+!insert (recordAlice, entryAlice1) into RecordEntries
+!insert (recordAlice, entryAlice2) into RecordEntries
+!insert (recordBob, entryBob1) into RecordEntries
+
+!insert (doctorHouse, patientAlice, flu) into Consultation
+!insert (doctorHouse, patientBob, stroke) into Consultation
+!insert (doctorGrey, patientCarol, cancer) into Consultation
+!insert (doctorStrange, patientCarol, stroke) into Consultation
+
+!insert (doctorHouse, patientAlice, emergencyDept) into Appointment
+!insert (doctorGrey, patientCarol, cardiologyDept) into Appointment
+!insert (doctorStrange, patientCarol, neurologyDept) into Appointment
+
+!insert (centralHospital, cardiologyDept) into HospitalStructure
+!insert (centralHospital, emergencyDept) into HospitalStructure
+!insert (cityHospital, neurologyDept) into HospitalStructure
+
+!create hospitalizationAlice : Hospitalization between (patientAlice, cardiologyDept)
+!set hospitalizationAlice.admissionDate := '2026-01-01'
+!set hospitalizationAlice.roomNumber := 301
+
+!create hospitalizationBob : Hospitalization between (patientBob, emergencyDept)
+!set hospitalizationBob.admissionDate := '2026-02-10'
+!set hospitalizationBob.roomNumber := 101
+
+!create hospitalizationCarol : Hospitalization between (patientCarol, neurologyDept)
+!set hospitalizationCarol.admissionDate := '2026-03-05'
+!set hospitalizationCarol.roomNumber := 405
+
+!create prescriptionAlice : Prescription between (doctorHouse, patientAlice)
+!set prescriptionAlice.prescriptionID := 'RX-001'
+!set prescriptionAlice.dosageInstructions := 'Take one tablet after breakfast'
+
+!create prescriptionBob : Prescription between (doctorHouse, patientBob)
+!set prescriptionBob.prescriptionID := 'RX-002'
+!set prescriptionBob.dosageInstructions := 'Emergency dose under supervision'
+
+!create prescriptionCarol : Prescription between (doctorGrey, patientCarol)
+!set prescriptionCarol.prescriptionID := 'RX-003'
+!set prescriptionCarol.dosageInstructions := 'Half tablet before sleep'
+
+check

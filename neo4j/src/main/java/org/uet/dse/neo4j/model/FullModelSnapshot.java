@@ -17,6 +17,4 @@ public class FullModelSnapshot {
                 && (associations == null || associations.isEmpty())
                 && (ternaryAssociations == null || ternaryAssociations.isEmpty());
     }
-
-
 }

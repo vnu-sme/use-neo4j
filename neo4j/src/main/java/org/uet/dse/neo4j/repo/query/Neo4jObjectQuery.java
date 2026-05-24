@@ -76,6 +76,10 @@ public class Neo4jObjectQuery {
     public static final String GET_MODEL_HASH =
             "MATCH (v:ModelVersion {id: 'CURRENT'}) RETURN v.modelHash AS hash";
 
+    public static final String UPSERT_HAS_ASSOCIATION_OBJECT =
+        "MATCH (p {use_id: $pId}), (lo {use_id: $loId}) " +
+            "MERGE (p)-[:HasAssociationObject]->(lo)";
+
     public static final String PULL_BINARY_LINKS =
             "MATCH (a)-[r]->(b) " +
                     "WHERE type(r) STARTS WITH 'Link' " +
@@ -147,4 +151,5 @@ public class Neo4jObjectQuery {
         "MATCH (o {use_id: $objName})-[:ObjectHasAttribute]->(val:AttributeValue {name: $valId}) " +
             "OPTIONAL MATCH (val)-[:HasNestedCollectionValue*1..10]->(nested) " +
             "DETACH DELETE nested";
+
 }

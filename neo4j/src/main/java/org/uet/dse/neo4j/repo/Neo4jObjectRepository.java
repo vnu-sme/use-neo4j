@@ -98,51 +98,6 @@ public class Neo4jObjectRepository {
         }
       }
 
-//      if (isNested && value instanceof Map) {
-//        pushNestedStructure(tx, valNodeId, (Map<String, Object>) value, isObjRef);
-//      }
-//
-//      else if (isObjRef && !isColl && !"Undefined".equals(value)) {
-//        createObjectReferences(tx, valNodeId, value);
-//      }
-
-
-    }
-  }
-
-  private void pushNestedStructureold(TransactionContext tx, String parentId, Map<String, Object> collMap, boolean isObjRef) {
-    List<Object> items = (List<Object>) collMap.get("items");
-    if (items == null) return;
-
-    for (int i = 0; i < items.size(); i++) {
-      Object item = items.get(i);
-
-      if (item instanceof Map) {
-        Map<String, Object> subColl = (Map<String, Object>) item;
-        String childId = "nested_" + UUID.randomUUID();
-
-        // Ghi isObjRef vào từng node NestedCollectionValue
-        tx.run(Neo4jObjectQuery.CREATE_NESTED_COLLECTION_NODE,
-            Values.parameters(
-                "nId", childId,
-                "collType", subColl.get("collectionType"),
-                "isObjRef", isObjRef // TRUYỀN GIÁ TRỊ TỪ METADATA XUỐNG
-            ));
-
-        tx.run(Neo4jObjectQuery.CONNECT_NESTED_NODE,
-            Values.parameters("parentId", parentId, "childId", childId, "idx", i));
-
-        pushNestedStructure(tx, childId, subColl, isObjRef);
-      }
-      else if (item != null) {
-        if (isObjRef) {
-          tx.run(Neo4jObjectQuery.CONNECT_NESTED_TO_OBJECT,
-              Values.parameters("nId", parentId, "targetId", item.toString(), "idx", i));
-        } else {
-          tx.run(Neo4jObjectQuery.SET_PRIMITIVE_VALUE_ON_NODE,
-              Map.of("nId", parentId, "val", item.toString()));
-        }
-      }
     }
   }
 
@@ -219,6 +174,13 @@ public class Neo4jObjectRepository {
 
     for (Map<String, Object> p : participants) {
       tx.run(Neo4jObjectQuery.upsertLinkObjectSpoke((String) p.get("label")), Map.of("loId", loName, "pId", p.get("objName"), "role", p.get("role")));
+
+      tx.run(Neo4jObjectQuery.UPSERT_HAS_ASSOCIATION_OBJECT,
+          Map.of(
+              "loId", loName,
+              "pId", p.get("objName")
+          )
+      );
     }
   }
 

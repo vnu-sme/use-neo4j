@@ -83,7 +83,7 @@ public class ModelPullService {
     }
 
     private void applyAttribute(UseModelApi api, String className, Map<String, Object> attr) {
-        String attrName      = (String) attr.get("attrName");
+        String attrName = (String) attr.get("attrName");
         String umlTypeString = UmlTypeTranslator.reconstructFullTypeString(attr);
 
         try {
@@ -144,7 +144,7 @@ public class ModelPullService {
 
     private void applyAssociations(MModel targetModel, UseModelApi api, FullModelSnapshot snapshot) throws Exception {
         syncAssociationsToTargetModel(targetModel, api);
-        syncTernaryAssociationsFromGraph(targetModel, api, snapshot.ternaryAssociations);
+        syncTernaryAssociationsFromGraph(api, snapshot.ternaryAssociations);
     }
 
     private Collection<ClassState> classesOfType(FullModelSnapshot snapshot, String metaNodeName) {
@@ -169,7 +169,7 @@ public class ModelPullService {
 
 
 
-    private void syncTernaryAssociationsFromGraph(MModel targetModel, UseModelApi tempApi, List<Map<String, Object>> ternaryList) {
+    private void syncTernaryAssociationsFromGraph(UseModelApi tempApi, List<Map<String, Object>> ternaryList) {
         for (Map<String, Object> ternaryData : ternaryList) {
             String assocName = (String) ternaryData.get("name");
             List<Object> rawParticipants = (List<Object>) ternaryData.get("participants");
@@ -434,7 +434,7 @@ public class ModelPullService {
                 String srcName = rec.get("src").asString();
                 String sRole = rec.get("sRole").asString("src_" + assocName);
                 String sMult = rec.get("sMult").asString("1");
-                // Lấy kind từ DB, nếu null thì mặc định 0
+                // Lấy kind từ DB, nếu null thì mặc định 0.
                 int sKind = rec.get("sKind").isNull() ? 0 : rec.get("sKind").asInt();
 
                 // 2. Thông tin đầu Đích (End 1)

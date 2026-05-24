@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diagram_Layout version="13">
+    <diagramOptions>
+        <autolayout>false</autolayout>
+        <antialiasing>false</antialiasing>
+        <showassocnames>false</showassocnames>
+        <showattributes>true</showattributes>
+        <showmultiplicities>false</showmultiplicities>
+        <showoperations>false</showoperations>
+        <showrolenames>true</showrolenames>
+        <showgrid>false</showgrid>
+    </diagramOptions>
+    <node id="Patient" sizeCalculated="true" type="Class">
+        <name>Patient</name>
+        <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyFixed">
+            <x>179.0</x>
+            <y>40.0</y>
+        </strategy>
+        <hidden>false</hidden>
+    </node>
+    <node id="Doctor" sizeCalculated="true" type="Class">
+        <name>Doctor</name>
+        <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyFixed">
+            <x>22.0</x>
+            <y>116.0</y>
+        </strategy>
+        <hidden>false</hidden>
+    </node>
+</diagram_Layout>
