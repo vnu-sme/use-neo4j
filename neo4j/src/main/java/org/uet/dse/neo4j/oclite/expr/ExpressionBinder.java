@@ -174,7 +174,7 @@ public class ExpressionBinder {
                     return new SelectExpression(sourceNode, itAST.iteratorName, bodyNode);
                 case "reject":
                     return new RejectExpression(sourceNode, itAST.iteratorName, bodyNode);
-                case "forAll":
+                case "forall":
                     return new ForAllExpression(sourceNode, itAST.iteratorName, bodyNode);
                 case "exists":
                     return new ExistsExpression(sourceNode, itAST.iteratorName, bodyNode);
