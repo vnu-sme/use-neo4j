@@ -12,7 +12,6 @@ import org.uet.dse.neo4j.repo.Neo4jModelRepository;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.util.Map;
 
 public class Neo4jConnectionDialog extends JDialog {
 

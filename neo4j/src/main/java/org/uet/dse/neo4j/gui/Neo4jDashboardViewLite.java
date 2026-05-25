@@ -3,7 +3,6 @@ package org.uet.dse.neo4j.gui;
 import org.tzi.use.gui.main.MainWindow;
 import org.tzi.use.main.Session;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
-import org.uet.dse.neo4j.sync.ChangeTracker;
 import org.uet.dse.neo4j.sync.model.ModelSyncCoordinator;
 import org.uet.dse.neo4j.sync.object.ObjectSyncCoordinator;
 
@@ -37,8 +36,6 @@ public class Neo4jDashboardViewLite extends JDialog {
 
         // 1. Thông tin kết nối (Metadata)
         add(createConnectionInfoPanel(), BorderLayout.NORTH);
-
-        ChangeTracker.startMonitoring(parent, session, lblModelStatus, lblObjectStatus);
 
         this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         this.setLocationRelativeTo(parent);

@@ -12,11 +12,8 @@ public class SessionManager {
      * Ví dụ: neo4j [Key: A1B2C3] (Admin-PC)
      */
     public String getUserDisplayName() {
-        // 1. Lấy tên user đăng nhập vào Neo4j
         String dbUser = Neo4jDriverManager.getInstance().getUser();
         if (dbUser == null) dbUser = "unknown_user";
-
-        // 2. Lấy Key của phiên làm việc hiện tại
         String key = (this.sessionKey != null) ? this.sessionKey : "NO_KEY";
 
         // 3. Lấy tên máy tính/người dùng từ hệ điều hành (Java build-in)

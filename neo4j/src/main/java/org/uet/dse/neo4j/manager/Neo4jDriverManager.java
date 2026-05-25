@@ -16,7 +16,7 @@ public class Neo4jDriverManager implements AutoCloseable {
 
     private SessionManager sessionManager;
 
-    // Constructor private để ép buộc khởi tạo qua phương thức static connect
+    // constructor private để ép buộc khởi tạo qua phương thức static connect
     private Neo4jDriverManager(String uri, String user, String password, String database, boolean deleteOnExit) {
         this.uri = uri;
         this.user = user;
@@ -88,9 +88,6 @@ public class Neo4jDriverManager implements AutoCloseable {
         return false;
     }
 
-    /**
-     * Lấy các thông số thống kê của Database (Metadata)
-     */
     public Map<String, Object> getDatabaseStats() {
         Map<String, Object> stats = new HashMap<>();
         if (!isConnected()) return stats;

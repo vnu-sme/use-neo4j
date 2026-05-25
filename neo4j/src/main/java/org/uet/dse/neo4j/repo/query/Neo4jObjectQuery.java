@@ -87,11 +87,17 @@ public class Neo4jObjectQuery {
                     "  AND NOT coalesce(r.isLinkObjectPart, false) " +
                     "RETURN r.name AS assocName, a.use_id AS src, b.use_id AS tgt";
 
-    public static final String PULL_TERNARY_LINKS =
-            "MATCH (p)-[r]->(hub:LinkHub) WHERE r.isTernary = true " +
-                    "RETURN hub.name AS assocName, " +
-                    "       collect({obj: p.use_id, idx: r.index}) AS participants";
+//    public static final String PULL_TERNARY_LINKS =
+//            "MATCH (p)-[r]->(hub:LinkHub) WHERE r.isTernary = true " +
+//                    "RETURN hub.name AS assocName, " +
+//                    "       collect({obj: p.use_id, idx: r.index}) AS participants";
 
+    public static final String PULL_TERNARY_LINKS =
+        "MATCH (p)-[r]->(hub:LinkHub) " +
+            "WHERE r.isTernary = true " +
+            "RETURN hub.use_id AS hubId, " +
+            "       hub.name AS assocName, " +
+            "       collect({obj: p.use_id, idx: r.index}) AS participants";
     public static final String PULL_LINK_OBJECTS =
             "MATCH (lo)-[:ObjectInstanceOf]->(ac:AssociationClass) " +
                     "MATCH (lo)-[r]->(p) WHERE r.isLinkObjectPart = true " +

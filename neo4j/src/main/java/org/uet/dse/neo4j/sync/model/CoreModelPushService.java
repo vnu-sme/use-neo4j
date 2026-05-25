@@ -139,9 +139,6 @@ public class CoreModelPushService {
                 "    v.modelHash = $hash, v.modelName = $name";
         session.run(cypher, Values.parameters("user", user, "hash", modelHash, "name", modelName));
 
-        // 5. Cập nhật tracker local để máy mình không tự báo "Database Updated"
-        org.uet.dse.neo4j.sync.ChangeTracker.updateLocalTimestamp(ts);
-
         logger.log("VERSION_UPDATE", "Model version updated. Hash: " + modelHash);
     }
 

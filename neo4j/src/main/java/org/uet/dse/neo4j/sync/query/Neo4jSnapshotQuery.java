@@ -70,42 +70,6 @@ public class Neo4jSnapshotQuery {
                     "       s.name AS src, r.sourceClassrole AS sRole, r.sourceMultiplicity AS sMult, " +
                     "       t.name AS tgt, r.targerClassrole   AS tRole, r.targetMultiplicity AS tMult";
 
-    public static final String TERNARY_ASSOCIATIONSold =
-
-            "MATCH (c)-[r]->(hub)-[:InstanceOf]->(:MetaNode {name: 'NodeTernaryAssociation'}) " +
-                    "WHERE r.isTernary = true " +
-                    "RETURN hub.name AS assocName, " +
-                    "       collect({cls: c.name, role: r.sourceClassrole, " +
-                    "                mult: r.sourceMultiplicity, idx: r.index, type: type(r)}) AS participants";
-
-    public static final String OBJECTS_AND_ATTRIBUTESold =
-            "MATCH (o)-[:ObjectInstanceOf]->(cls) " +
-                    "OPTIONAL MATCH (o)-[:ObjectHasAttribute]->(val:AttributeValue)-[:InstanceOf]->(attrDef) " +
-                    "OPTIONAL MATCH (val)-[r:objectReference]->(target) " +
-                    "RETURN o.use_id AS name, cls.name AS className, " +
-                    "       collect({ " +
-                    "         attr:  attrDef.attrName, " +
-                    "         type:  val.type, " +
-                    "         value: val.value, " +
-                    "         ref:   target.use_id, " +
-                    "         idx:   r.index " +
-                    "       }) AS data";
-
-    public static final String BINARY_LINKS_old =
-            "MATCH (a)-[r]->(b) " +
-                    "WHERE type(r) STARTS WITH 'Link' " +
-                    "  AND NOT coalesce(r.isTernary,        false) " +
-                    "  AND NOT coalesce(r.isLinkObjectPart, false) " +
-                    "RETURN r.name AS assocName, type(r) AS label, " +
-                    "       a.use_id AS src, b.use_id AS tgt";
-
-    public  static final String LINK_OBJECTSold =
-            "MATCH (lo)-[:ObjectInstanceOf]->(ac:AssociationClass) " +
-                    "MATCH (lo)-[r]->(p) WHERE r.isLinkObjectPart = true " +
-                    "RETURN lo.use_id AS loName, ac.name AS acName, " +
-                    "       collect({p: p.use_id, idx: r.index}) AS parts";
-    ///
-
 
     public static final String TERNARY_ASSOCIATIONS =
         "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(meta:MetaNode {name: 'NodeTernaryAssociation'}) " +
@@ -163,4 +127,15 @@ public class Neo4jSnapshotQuery {
             "RETURN lo.use_id AS loName, ac.name AS acName, " +
             "       collect({p: p.use_id, idx: r.index}) AS parts";
 
+    public static final String TERNARY_LINKS =
+        "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->(meta:MetaNode) " +
+            "WHERE meta.name IN ['NodeConcreteClass', 'NodeAssociationClass'] " +
+            "MATCH (cls)-[:InstanceOf]->(meta) " +
+            "MATCH (p)-[:ObjectInstanceOf]->(cls) " +
+            "MATCH (p)-[r]->(hub:LinkHub) " +
+            "WHERE r.isTernary = true " +
+            "RETURN hub.use_id AS hubId, " +
+            "       hub.name AS assocName, " +
+            "       type(r) AS label, " +
+            "       collect({p: p.use_id, idx: r.index}) AS parts";
 }

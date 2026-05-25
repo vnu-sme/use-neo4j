@@ -6,18 +6,10 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.neo4j.driver.types.Node;
 import org.tzi.use.gui.util.TextComponentWriter;
 import org.tzi.use.main.Session;
-import org.tzi.use.parser.ocl.OCLCompiler;
 import org.tzi.use.uml.mm.MModel;
-import org.tzi.use.uml.ocl.expr.Expression;
-import org.tzi.use.uml.ocl.value.Value;
-import org.tzi.use.uml.sys.MSystemState;
 import org.tzi.use.util.TeeWriter;
 import org.uet.dse.neo4j.OCLLexer;
 import org.uet.dse.neo4j.OCLParser;
-import org.uet.dse.neo4j.ocl.IOCLEvaluator;
-import org.uet.dse.neo4j.ocl.NEvaluator;
-import org.uet.dse.neo4j.ocl.mapper.NExpressionRewriter;
-import org.uet.dse.neo4j.ocl.expr.NExpression;
 import org.uet.dse.neo4j.oclite.Neo4jRepository;
 import org.uet.dse.neo4j.oclite.ast.ASTContext;
 import org.uet.dse.neo4j.oclite.ast.ASTNode;
@@ -25,28 +17,21 @@ import org.uet.dse.neo4j.oclite.ast.ASTVisitor;
 import org.uet.dse.neo4j.oclite.expr.ExecutionContext;
 import org.uet.dse.neo4j.oclite.expr.ExpressionBinder;
 import org.uet.dse.neo4j.oclite.expr.ExpressionNode;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class OclEvaluatorDialog extends JDialog {
   private final JTextArea txtExpression;
   private final JTextArea txtResult;
   private final Session useSession;
-  private final IOCLEvaluator oclEvaluator;
-  private final MSystemState currentState;
 
-  public OclEvaluatorDialog(Frame parent, Session session, IOCLEvaluator oclEvaluator) {
+  public OclEvaluatorDialog(Frame parent, Session session) {
     super(parent, "Evaluate OCL expression", false);
     this.useSession = session;
-    this.oclEvaluator = oclEvaluator;
-    this.currentState = session.system().state();
 
     setSize(600, 300);
     setLayout(new BorderLayout(10, 10));

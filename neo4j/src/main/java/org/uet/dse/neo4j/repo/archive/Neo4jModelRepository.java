@@ -7,10 +7,7 @@ import org.neo4j.driver.Values;
 import org.tzi.use.uml.mm.MAssociation;
 import org.tzi.use.uml.mm.MAssociationClass;
 import org.tzi.use.uml.mm.MAssociationEnd;
-import org.uet.dse.neo4j.aop.Latest;
 import org.uet.dse.neo4j.manager.Neo4jDriverManager;
-import org.uet.dse.neo4j.mm.core.edge.Extends;
-import org.uet.dse.neo4j.mm.core.edge.NodeBinaryAssociation;
 import org.uet.dse.neo4j.mm.core.node.*;
 import org.uet.dse.neo4j.query.builder.CypherQueryBuilder;
 import org.uet.dse.neo4j.query.builder.MetaNodeCypherBuilder;
@@ -59,29 +56,6 @@ public class Neo4jModelRepository {
         });
     }
 
-    public void createAssociationEdge(NodeBinaryAssociation edge) {
-        withSession(session -> {
-            session.run(
-                Neo4jModelQuery.DELETE_ASSOCIATION_EDGES,
-                Values.parameters("name", edge.getAssocName())
-            );
-            session.run(
-                Neo4jModelQuery.upsertBinaryAssociationEdge(edge.getEdgeLabel()),
-                Values.parameters(
-                    "assocName", edge.getAssocName(),
-                    "sName",     edge.getSourceName(),
-                    "sRole",     edge.getSourceRole(),
-                    "sMult",     edge.getSourceMult(),
-                    "sKind",     edge.getSourceKind(),
-                    "tName",     edge.getTargetName(),
-                    "tRole",     edge.getTargetRole(),
-                    "tMult",     edge.getTargetMult(),
-                    "tKind",     edge.getTargetKind()
-                )
-            );
-        });
-    }
-
     public void createAssociationClassStructureTC(MAssociationClass ac, String modelName) {
         MAssociationEnd src = ac.associationEnds().get(0);
         MAssociationEnd tgt = ac.associationEnds().get(1);
@@ -98,22 +72,6 @@ public class Neo4jModelRepository {
                         "tRole", tgt.name(),
                         "tMult", tgt.multiplicity().toString()
                 )
-        ));
-    }
-
-    public void createAssociationClassStructure(NodeAssociationClass node) {
-        withSession(session -> session.run(
-            Neo4jModelQuery.UPSERT_ASSOCIATION_CLASS_STRUCTURE,
-            Values.parameters(
-                "modelName", node.getModelName(),
-                "srcName",   node.getSourceName(),
-                "tgtName",   node.getTargetName(),
-                "acName",    node.getName(),
-                "sRole",     node.getSourceRole(),
-                "sMult",     node.getSourceMult(),
-                "tRole",     node.getTargetRole(),
-                "tMult",     node.getTargetMult()
-            )
         ));
     }
 
@@ -139,28 +97,6 @@ public class Neo4jModelRepository {
                                 "role", end.name(),
                                 "mult", end.multiplicity().toString()
                         )
-                );
-            }
-        });
-    }
-
-    public void upsertTernaryAssociation(NodeTernaryAssociation node) {
-        withSession(session -> {
-            session.run(
-                Neo4jModelQuery.createTernaryHub(node.getName()),
-                Values.parameters("name", node.getName())
-            );
-            for (NodeTernarySpoke spoke : node.getSpokes()) {
-                session.run(
-                    Neo4jModelQuery.upsertTernarySpoke(node.getName(), spoke.getEdgeLabel()),
-                    Values.parameters(
-                        "modelName", node.getModelName(),
-                        "clsName",   spoke.getClsName(),
-                        "name",      node.getName(),
-                        "idx",       spoke.getIndex(),
-                        "role",      spoke.getRole(),
-                        "mult",      spoke.getMult()
-                    )
                 );
             }
         });
@@ -222,31 +158,6 @@ public class Neo4jModelRepository {
         withSession(session -> session.run(
                 CypherQueryBuilder.buildUpsertEnumerationQuery(nodeEnum.getName()),
                 Values.parameters("modelName", modelName, "name", nodeEnum.getName(), "values", nodeEnum.getValues())
-        ));
-    }
-
-    @Latest
-    public void upsertEnumeration(NodeEnumeration nodeEnumeration, String modelName) {
-        NodeEnumeration nodeEnum = new NodeEnumeration();
-        nodeEnum.setName(nodeEnumeration.getName());
-        nodeEnum.setValues(nodeEnumeration.getValues());
-
-        withSession(session -> session.run(
-            CypherQueryBuilder.buildUpsertEnumerationQuery(nodeEnum.getName()),
-            Values.parameters("modelName", modelName, "name", nodeEnum.getName(), "values", nodeEnum.getValues())
-        ));
-    }
-
-    @Latest
-    public void createExtendsEdge(Extends edge) {
-        String cypher = CypherQueryBuilder.buildExtendsEdgeQuery();
-
-        withSession(session -> session.run(
-            cypher,
-            Values.parameters(
-                "srcName", edge.getChildName(),
-                "tgtName", edge.getParentName()
-            )
         ));
     }
 

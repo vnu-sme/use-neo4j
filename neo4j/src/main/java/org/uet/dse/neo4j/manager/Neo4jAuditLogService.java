@@ -18,9 +18,6 @@ public class Neo4jAuditLogService {
         return instance;
     }
 
-    /**
-     * Ghi log bất đồng bộ (Non-blocking)
-     */
     public static void log(String actionType, String category, String target, String details) {
         SessionManager sm = Neo4jDriverManager.getInstance().getSessionManager();
         String user = sm.getUserDisplayName();

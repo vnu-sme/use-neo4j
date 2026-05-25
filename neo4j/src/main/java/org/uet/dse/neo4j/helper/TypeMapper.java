@@ -9,32 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TypeMapper {
-
-    public static final String VAR_INT = "Int";
-    public static final String VAR_STRING = "String";
-    public static final String VAR_BOOLEAN = "Boolean";
-    public static final String VAR_DOUBLE = "Double";
-    public static final String VAR_OBJECT = "Object";
-    public static final String VAR_VOID = "Void";
-
-    public static String getVarTypeString(Type useType) {
-        if (useType == null) return VAR_VOID;
-
-        Type baseType = getBaseType(useType);
-
-        if (baseType.isTypeOfInteger()) return VAR_INT;
-        if (baseType.isTypeOfString()) return VAR_STRING;
-        if (baseType.isTypeOfBoolean()) return VAR_BOOLEAN;
-        if (baseType.isTypeOfReal()) return VAR_DOUBLE;
-
-        if (baseType.isKindOfClass(VoidHandling.EXCLUDE_VOID) ||
-                baseType.isKindOfEnum(VoidHandling.EXCLUDE_VOID)) {
-            return VAR_OBJECT;
-        }
-
-        return VAR_OBJECT;
-    }
-
     /**
      * Xử lý tạo quan hệ Reference (Đặc tả cạnh 16 và 17).
      * @param repo Repository thực thi Cypher
@@ -70,34 +44,9 @@ public class TypeMapper {
         }
     }
 
-    /**
-     * Lấy kiểu cơ sở (Unwrap collection).
-     * Ví dụ: Set(Integer) -> Integer, Person -> Person.
-     */
-    public static Type getBaseType(Type type) {
-        if (type.isKindOfCollection(VoidHandling.EXCLUDE_VOID) && type instanceof CollectionType) {
-            return ((CollectionType) type).elemType();
-        }
-        return type;
-    }
 
     /**
-     * Xác định Sys Enum CollectionType (List, Set).
-     */
-    public static String getCollectionTypeString(Type type) {
-        if (!type.isKindOfCollection(VoidHandling.EXCLUDE_VOID)) {
-            return "None"; // Hoặc null tùy logic của bạn
-        }
-        if (type.isKindOfSet(VoidHandling.EXCLUDE_VOID)) return "Set";
-        if (type.isKindOfOrderedSet(VoidHandling.EXCLUDE_VOID)) return "Set";
-        if (type.isKindOfSequence(VoidHandling.EXCLUDE_VOID)) return "List";
-        if (type.isKindOfBag(VoidHandling.EXCLUDE_VOID)) return "List";
-
-        return "List";
-    }
-
-    /**
-     * Hàm quan trọng nhất: Phân tích Type của USE thành Map thuộc tính cho Neo4j
+     * phân tích Type của USE thành Map thuộc tính cho Neo4j
      * @param type Đối tượng Type từ USE Java API
      * @return Map chứa các key: type, isCollection, collType, ref
      */

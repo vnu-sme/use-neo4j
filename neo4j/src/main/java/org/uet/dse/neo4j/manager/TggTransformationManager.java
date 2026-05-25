@@ -12,7 +12,6 @@ import java.nio.file.Files;
 public class TggTransformationManager {
     private static TggTransformationManager instance;
     private TGGTransformation currentTransformation;
-    private String tggFilePath;
     private String sourceModelName = "Families";
     private String targetModelName = "Persons";
 
@@ -23,11 +22,6 @@ public class TggTransformationManager {
         return instance;
     }
 
-    public void loadTggFile(File file) throws Exception {
-        this.tggFilePath = file.getAbsolutePath();
-        String content = new String(Files.readAllBytes(file.toPath()));
-        parseTggContent(content);
-    }
 
     public void parseTggContent(String content) throws Exception {
         TGGLexer lexer = new TGGLexer(CharStreams.fromString(content));
