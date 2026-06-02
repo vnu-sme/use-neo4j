@@ -6,10 +6,8 @@ import org.uet.dse.neo4j.manager.Neo4jDriverManager;
 import org.uet.dse.neo4j.oclite.expr.ExpressionNode;
 import org.uet.dse.neo4j.oclite.expr.VariableExpression;
 import org.uet.dse.neo4j.oclite.expr.PropertyExpression;
-import java.util.Collection;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
+
+import java.util.*;
 
 public class Neo4jRepository {
     private String modelName;
@@ -37,8 +35,11 @@ public class Neo4jRepository {
                     "MATCH (o) WHERE id(o) = $id " +
                         "MATCH (o)-[:ObjectHasAttribute]->(val:AttributeValue) " +
                         "WHERE val.name ENDS WITH $suffix " +
-                        "RETURN val.value AS value, val.type AS type, val.isCollection AS isCollection";
-
+                        "OPTIONAL MATCH (val)-[refRel:HasReferenceValue]->(target) " +
+                        "RETURN val.value AS value, " +
+                        "       val.type AS type, " +
+                        "       val.isCollection AS isCollection, " +
+                        "       collect({node: target, idx: refRel.index}) AS refs";
                 Result res = tx.run(cypher, Values.parameters(
                     "id", sourceNode.id(),
                     "suffix", "_" + attrName
@@ -51,13 +52,33 @@ public class Neo4jRepository {
 //                    String type = record.get("type").isNull() ? "" : record.get("type").asString();
 //                    boolean isCollection = !record.get("isCollection").isNull() && record.get("isCollection").asBoolean(false);
 //                    return normalizeAttributeValue(val.asObject(), type, isCollection);
+                    org.neo4j.driver.Record record = res.next();
 
-                    Value val = res.next().get("value");
+                    List<Node> refs = record.get("refs").asList(v -> {
+                            Map<String, Object> m = v.asMap();
+                            Object nodeObj = m.get("node");
+                            return nodeObj instanceof Node ? (Node) nodeObj : null;
+                        }).stream()
+                        .filter(Objects::nonNull)
+                        .collect(java.util.stream.Collectors.toList());
 
+                    if (!refs.isEmpty()) {
+                        return refs;
+                    }
+
+                    Value val = record.get("value");
                     if (val.isNull()) return null;
-                    if (val.type().name().equals("INTEGER")) return val.asDouble();
-                    if (val.type().name().equals("FLOAT")) return val.asDouble();
-                    return val.asObject();
+
+                    String type = record.get("type").isNull() ? "" : record.get("type").asString();
+                    boolean isCollection = !record.get("isCollection").isNull() && record.get("isCollection").asBoolean(false);
+
+                    return normalizeAttributeValue(val.asObject(), type, isCollection);
+//                    Value val = res.next().get("value");
+//
+//                    if (val.isNull()) return null;
+//                    if (val.type().name().equals("INTEGER")) return val.asDouble();
+//                    if (val.type().name().equals("FLOAT")) return val.asDouble();
+//                    return val.asObject();
                 }
                 return null;
             });

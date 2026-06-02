@@ -1,0 +1,335 @@
+-- Department: 6
+!create dep1 : Department
+!set dep1.deptName := 'Neurology'
+
+!create dep2 : Department
+!set dep2.deptName := 'Emergency'
+
+!create dep3 : Department
+!set dep3.deptName := 'Cardiology'
+
+!create dep4 : Department
+!set dep4.deptName := 'Oncology'
+
+!create dep5 : Department
+!set dep5.deptName := 'Pediatrics'
+
+!create dep6 : Department
+!set dep6.deptName := 'Radiology'
+
+-- Disease: 3
+!create dis1 : Disease
+!set dis1.diseaseName := 'Flu'
+
+!create dis2 : Disease
+!set dis2.diseaseName := 'Migraine'
+
+!create dis3 : Disease
+!set dis3.diseaseName := 'Hypertension'
+
+-- Medication: 4
+!create med1 : Medication
+!set med1.brandName := 'Ascriptin'
+!set med1.genericName := 'Aspirin'
+!set med1.price := 15.5
+
+!create med2 : Medication
+!set med2.brandName := 'Ibuprin'
+!set med2.genericName := 'Ibuprofen'
+!set med2.price := 12.0
+
+!create med3 : Medication
+!set med3.brandName := 'Axotal'
+!set med3.genericName := 'Paracetamol'
+!set med3.price := 10.0
+
+!create med4 : Medication
+!set med4.brandName := 'Buffaprin'
+!set med4.genericName := 'Aspirin Buffer'
+!set med4.price := 18.0
+
+-- Dosage: 3
+!create dos1 : Dosage
+!set dos1.patientNumber := 1
+!set dos1.adminMethod := Administration::ENTERAL
+!set dos1.brandName := Brand::ASCRIPTIN
+
+!create dos2 : Dosage
+!set dos2.patientNumber := 2
+!set dos2.adminMethod := Administration::PARENTERAL
+!set dos2.brandName := Brand::IBUPRIN
+
+!create dos3 : Dosage
+!set dos3.patientNumber := 3
+!set dos3.adminMethod := Administration::OTHER
+!set dos3.brandName := Brand::AXOTAL
+
+-- DosagePlan: 2
+!create plan1 : DosagePlan
+!create plan2 : DosagePlan
+
+-- Hospital: 3
+!create h1 : Hospital
+!set h1.name := 'Central Hospital'
+!set h1.totalBudget := 500000.0
+!set h1.location := 'Ha Noi'
+!set h1.totalBeds := 1000
+!set h1.availableICUs := 30
+!set h1.rating := 4.8
+!set h1.isPublic := true
+!set h1.emergencyContact := '19001000'
+
+!create h2 : Hospital
+!set h2.name := 'City Hospital'
+!set h2.totalBudget := 300000.0
+!set h2.location := 'Da Nang'
+!set h2.totalBeds := 600
+!set h2.availableICUs := 12
+!set h2.rating := 4.2
+!set h2.isPublic := true
+!set h2.emergencyContact := '19002000'
+
+!create h3 : Hospital
+!set h3.name := 'Private Hospital'
+!set h3.totalBudget := 250000.0
+!set h3.location := 'Ho Chi Minh'
+!set h3.totalBeds := 400
+!set h3.availableICUs := 8
+!set h3.rating := 4.0
+!set h3.isPublic := false
+!set h3.emergencyContact := '19003000'
+
+-- Doctor: 4
+!create dr1 : Doctor
+!set dr1.name := 'Jack'
+!set dr1.age := 45
+!set dr1.gender := Gender::MALE
+!set dr1.address := 'Doctor Address 1'
+!set dr1.phoneNumber := '0900000001'
+!set dr1.email := 'jack@example.com'
+!set dr1.dateOfBirth := '1979-01-01'
+!set dr1.doctorID := 'DR001'
+!set dr1.specialty := Specialty::NEUROLOGY
+!set dr1.consultationFee := 150.0
+!set dr1.yearsOfExperience := 15
+!set dr1.qualification := 'MD'
+!set dr1.isAvailable := true
+!set dr1.shiftSchedule := Sequence{Set{101, 102}, Set{201}}
+
+!create dr2 : Doctor
+!set dr2.name := 'John'
+!set dr2.age := 40
+!set dr2.gender := Gender::MALE
+!set dr2.address := 'Doctor Address 2'
+!set dr2.phoneNumber := '0900000002'
+!set dr2.email := 'john@example.com'
+!set dr2.dateOfBirth := '1984-01-01'
+!set dr2.doctorID := 'DR002'
+!set dr2.specialty := Specialty::CARDIOLOGY
+!set dr2.consultationFee := 100.0
+!set dr2.yearsOfExperience := 10
+!set dr2.qualification := 'MD'
+!set dr2.isAvailable := true
+!set dr2.shiftSchedule := Sequence{Set{301}}
+
+!create dr3 : Doctor
+!set dr3.name := 'Alice'
+!set dr3.age := 38
+!set dr3.gender := Gender::FEMALE
+!set dr3.doctorID := 'DR003'
+!set dr3.specialty := Specialty::EMERGENCY
+!set dr3.consultationFee := 120.0
+!set dr3.yearsOfExperience := 8
+!set dr3.qualification := 'MD'
+!set dr3.isAvailable := true
+!set dr3.shiftSchedule := Sequence{Set{401}}
+
+!create dr4 : Doctor
+!set dr4.name := 'Robert'
+!set dr4.age := 50
+!set dr4.gender := Gender::MALE
+!set dr4.doctorID := 'DR004'
+!set dr4.specialty := Specialty::ONCOLOGY
+!set dr4.consultationFee := 180.0
+!set dr4.yearsOfExperience := 20
+!set dr4.qualification := 'PhD'
+!set dr4.isAvailable := false
+!set dr4.shiftSchedule := Sequence{Set{501, 502}}
+
+-- Nurse: 3
+!create n1 : Nurse
+!set n1.name := 'Nurse One'
+!set n1.age := 30
+!set n1.gender := Gender::FEMALE
+!set n1.nurseID := 'N001'
+!set n1.isHeadNurse := false
+!set n1.certificationLevel := 2
+!set n1.assignedWard := 'Neurology'
+!set n1.onCall := true
+!set n1.hourlyRate := 20.0
+!set n1.lastTrainingDate := '2025-01-01'
+
+!create n2 : Nurse
+!set n2.name := 'Nurse Two'
+!set n2.age := 32
+!set n2.gender := Gender::FEMALE
+!set n2.nurseID := 'N002'
+!set n2.isHeadNurse := false
+!set n2.certificationLevel := 2
+!set n2.assignedWard := 'Emergency'
+!set n2.onCall := true
+!set n2.hourlyRate := 22.0
+!set n2.lastTrainingDate := '2025-01-01'
+
+!create n3 : Nurse
+!set n3.name := 'Nurse Three'
+!set n3.age := 35
+!set n3.gender := Gender::FEMALE
+!set n3.nurseID := 'N003'
+!set n3.isHeadNurse := true
+!set n3.certificationLevel := 3
+!set n3.assignedWard := 'Cardiology'
+!set n3.onCall := false
+!set n3.hourlyRate := 25.0
+!set n3.lastTrainingDate := '2025-01-01'
+
+-- Patient: 3
+!create p1 : Patient
+!set p1.name := 'Patient One'
+!set p1.age := 85
+!set p1.gender := Gender::MALE
+!set p1.patientID := 'P001'
+!set p1.isEmergency := true
+!set p1.bloodType := BloodType::O_POS
+!set p1.weight := 70.0
+!set p1.height := 170.0
+!set p1.symptoms := Sequence{'Sot cao', 'Dau dau', 'Met moi'}
+!set p1.treatmentHistory := Set{Sequence{'Nhap vien'}, Sequence{'Theo doi'}}
+!set p1.allergies := Set{'Penicillin'}
+!set p1.attendingPhysicians := Set{dr1, dr2}
+!set p1.currentMeds := Set{med1, med2}
+!set p1.prescriptionHistory := Sequence{Sequence{med1}, Sequence{med2, med3}}
+
+!create p2 : Patient
+!set p2.name := 'Patient Two'
+!set p2.age := 35
+!set p2.gender := Gender::FEMALE
+!set p2.patientID := 'P002'
+!set p2.isEmergency := false
+!set p2.bloodType := BloodType::A_POS
+!set p2.weight := 55.0
+!set p2.height := 160.0
+!set p2.symptoms := Sequence{'Ho', 'Dau hong'}
+!set p2.treatmentHistory := Set{Sequence{'Kham ngoai tru'}}
+!set p2.allergies := Set{}
+!set p2.attendingPhysicians := Set{dr3}
+!set p2.currentMeds := Set{med3}
+!set p2.prescriptionHistory := Sequence{Sequence{med3}}
+
+!create p3 : Patient
+!set p3.name := 'Patient Three'
+!set p3.age := 60
+!set p3.gender := Gender::OTHER
+!set p3.patientID := 'P003'
+!set p3.isEmergency := false
+!set p3.bloodType := BloodType::B_POS
+!set p3.weight := 68.0
+!set p3.height := 168.0
+!set p3.symptoms := Sequence{'Chong mat', 'Met moi'}
+!set p3.treatmentHistory := Set{Sequence{'Theo doi huyet ap'}}
+!set p3.allergies := Set{'Seafood'}
+!set p3.attendingPhysicians := Set{dr4}
+!set p3.currentMeds := Set{med4}
+!set p3.prescriptionHistory := Sequence{Sequence{med4}}
+
+-- Object reference attributes used by OCL
+!set dr1.assignedNurses := Set{n1, n2}
+!set dr1.patientQueue := Sequence{p1}
+!set dr1.collaborationHistory := Sequence{Set{dr2}, Set{dr3}}
+
+!set dr2.assignedNurses := Set{n3}
+!set dr2.patientQueue := Sequence{p2}
+!set dr2.collaborationHistory := Sequence{Set{dr1}}
+
+!set dr3.assignedNurses := Set{n1}
+!set dr3.patientQueue := Sequence{p3}
+!set dr3.collaborationHistory := Sequence{Set{dr4}}
+
+!set dr4.assignedNurses := Set{}
+!set dr4.patientQueue := Sequence{}
+!set dr4.collaborationHistory := Sequence{Set{dr3}}
+
+!set h1.medicalStaff := Set{dr1, dr2, n1, n2}
+!set h2.medicalStaff := Set{dr3, n3}
+!set h3.medicalStaff := Set{dr4}
+
+-- MedicalRecord: 3
+!create mr1 : MedicalRecord
+!create mr2 : MedicalRecord
+!create mr3 : MedicalRecord
+
+-- RecordEntry: 3
+!create re1 : RecordEntry
+!set re1.entryDate := '2026-05-01'
+!set re1.description := 'Initial examination'
+
+!create re2 : RecordEntry
+!set re2.entryDate := '2026-05-02'
+!set re2.description := 'Blood test'
+
+!create re3 : RecordEntry
+!set re3.entryDate := '2026-05-03'
+!set re3.description := 'Follow up'
+
+-- HospitalStructure: 6 links
+!insert (h1, dep1) into HospitalStructure
+!insert (h1, dep2) into HospitalStructure
+!insert (h2, dep3) into HospitalStructure
+!insert (h2, dep4) into HospitalStructure
+!insert (h3, dep5) into HospitalStructure
+!insert (h3, dep6) into HospitalStructure
+
+-- PatientRecord: 3 links
+!insert (p1, mr1) into PatientRecord
+!insert (p2, mr2) into PatientRecord
+!insert (p3, mr3) into PatientRecord
+
+-- RecordEntries: 3 links
+!insert (mr1, re1) into RecordEntries
+!insert (mr2, re2) into RecordEntries
+!insert (mr3, re3) into RecordEntries
+
+-- Appointment: 1 link
+!insert (dr1, p1, dep1) into Appointment
+
+-- Consultation: 3 links
+!insert (dr1, p1, dis1) into Consultation
+!insert (dr2, p2, dis2) into Consultation
+!insert (dr3, p3, dis3) into Consultation
+
+-- Hospitalization: 3 association-class objects / links
+!create hosp1 : Hospitalization between (p1, dep1)
+!set hosp1.admissionDate := '2026-05-25'
+!set hosp1.roomNumber := 302
+
+!create hosp2 : Hospitalization between (p2, dep2)
+!set hosp2.admissionDate := '2026-05-26'
+!set hosp2.roomNumber := 204
+
+!create hosp3 : Hospitalization between (p3, dep3)
+!set hosp3.admissionDate := '2026-05-27'
+!set hosp3.roomNumber := 105
+
+-- Prescription: 3 association-class objects / links
+!create presc1 : Prescription between (dr1, p1)
+!set presc1.prescriptionID := 'RX001'
+!set presc1.dosageInstructions := 'Take twice daily'
+
+!create presc2 : Prescription between (dr2, p2)
+!set presc2.prescriptionID := 'RX002'
+!set presc2.dosageInstructions := 'Take once daily'
+
+!create presc3 : Prescription between (dr3, p3)
+!set presc3.prescriptionID := 'RX003'
+!set presc3.dosageInstructions := 'Take after meal'
+

@@ -1,0 +1,353 @@
+// --- STEP 0: CREATE CORRESPONDENCE METAMODEL ---
+MERGE (mCorr:ManageModel {name: 'Families2Persons_Corr'})
+MERGE (metaC:MetaNode {name: 'NodeConcreteClass', label: 'NodeConcreteClass'})
+MERGE (mCorr)-[:DefineMetamodels]->(metaC)
+WITH mCorr, metaC
+MATCH (mSrc:ManageModel {name: 'Families'})
+MATCH (mTrg:ManageModel {name: 'Persons'})
+WITH mCorr, metaC, mSrc, mTrg
+
+// 2. Create class node with class label
+MERGE (c_FM2MP:`FM2MP`:NodeConcreteClass {name: 'FM2MP'}) MERGE (c_FM2MP)-[:InstanceOf]->(metaC)
+MERGE (c_S2MP:`S2MP`:NodeConcreteClass {name: 'S2MP'}) MERGE (c_S2MP)-[:InstanceOf]->(metaC)
+MERGE (c_D2FP:`D2FP`:NodeConcreteClass {name: 'D2FP'}) MERGE (c_D2FP)-[:InstanceOf]->(metaC)
+MERGE (c_FR2PR:`FR2PR`:NodeConcreteClass {name: 'FR2PR'}) MERGE (c_FR2PR)-[:InstanceOf]->(metaC)
+MERGE (c_FM2FP:`FM2FP`:NodeConcreteClass {name: 'FM2FP'}) MERGE (c_FM2FP)-[:InstanceOf]->(metaC)
+MERGE (c_M2FP:`M2FP`:NodeConcreteClass {name: 'M2FP'}) MERGE (c_M2FP)-[:InstanceOf]->(metaC)
+MERGE (c_F2MP:`F2MP`:NodeConcreteClass {name: 'F2MP'}) MERGE (c_F2MP)-[:InstanceOf]->(metaC)
+WITH mSrc, mTrg, mCorr, metaC
+
+// 3. Tao cac lien ket AssociateWith giua cac Class
+// Link FR2PR_FamilyRegister
+MATCH (mSrc)-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})
+MATCH (targetCls:`FamilyRegister` {name: 'FamilyRegister'})-[:InstanceOf]->(metaT)
+MATCH (corrCls:`FR2PR` {name: 'FR2PR'})-[:InstanceOf]->(metaC)
+MERGE (corrCls)-[r:AssociateWith {associationName: 'FR2PR_FamilyRegister'}]->(targetCls)
+SET r.isTernary = false,
+    r.sourceClassName = 'FR2PR',
+    r.sourceClassrole = 'fr2pr',
+    r.targetClassName = 'FamilyRegister',
+    r.targerClassrole = 'fr'
+WITH mSrc, mTrg, mCorr, metaC
+// Link FR2PR_PersonRegister
+MATCH (mTrg)-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})
+MATCH (targetCls:`PersonRegister` {name: 'PersonRegister'})-[:InstanceOf]->(metaT)
+MATCH (corrCls:`FR2PR` {name: 'FR2PR'})-[:InstanceOf]->(metaC)
+MERGE (corrCls)-[r:AssociateWith {associationName: 'FR2PR_PersonRegister'}]->(targetCls)
+SET r.isTernary = false,
+    r.sourceClassName = 'FR2PR',
+    r.sourceClassrole = 'fr2pr',
+    r.targetClassName = 'PersonRegister',
+    r.targerClassrole = 'pr'
+WITH mSrc, mTrg, mCorr, metaC
+// Link F2MP_FamilyMember
+MATCH (mSrc)-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})
+MATCH (targetCls:`FamilyMember` {name: 'FamilyMember'})-[:InstanceOf]->(metaT)
+MATCH (corrCls:`F2MP` {name: 'F2MP'})-[:InstanceOf]->(metaC)
+MERGE (corrCls)-[r:AssociateWith {associationName: 'F2MP_FamilyMember'}]->(targetCls)
+SET r.isTernary = false,
+    r.sourceClassName = 'F2MP',
+    r.sourceClassrole = 'f2mp',
+    r.targetClassName = 'FamilyMember',
+    r.targerClassrole = 'f'
+WITH mSrc, mTrg, mCorr, metaC
+// Link F2MP_Male
+MATCH (mTrg)-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})
+MATCH (targetCls:`Male` {name: 'Male'})-[:InstanceOf]->(metaT)
+MATCH (corrCls:`F2MP` {name: 'F2MP'})-[:InstanceOf]->(metaC)
+MERGE (corrCls)-[r:AssociateWith {associationName: 'F2MP_Male'}]->(targetCls)
+SET r.isTernary = false,
+    r.sourceClassName = 'F2MP',
+    r.sourceClassrole = 'f2mp',
+    r.targetClassName = 'Male',
+    r.targerClassrole = 'mp'
+WITH mSrc, mTrg, mCorr, metaC
+// Link FM2MP_Family
+MATCH (mSrc)-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})
+MATCH (targetCls:`Family` {name: 'Family'})-[:InstanceOf]->(metaT)
+MATCH (corrCls:`FM2MP` {name: 'FM2MP'})-[:InstanceOf]->(metaC)
+MERGE (corrCls)-[r:AssociateWith {associationName: 'FM2MP_Family'}]->(targetCls)
+SET r.isTernary = false,
+    r.sourceClassName = 'FM2MP',
+    r.sourceClassrole = 'fm2mp',
+    r.targetClassName = 'Family',
+    r.targerClassrole = 'fm'
+WITH mSrc, mTrg, mCorr, metaC
+// Link FM2MP_Male
+MATCH (mTrg)-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})
+MATCH (targetCls:`Male` {name: 'Male'})-[:InstanceOf]->(metaT)
+MATCH (corrCls:`FM2MP` {name: 'FM2MP'})-[:InstanceOf]->(metaC)
+MERGE (corrCls)-[r:AssociateWith {associationName: 'FM2MP_Male'}]->(targetCls)
+SET r.isTernary = false,
+    r.sourceClassName = 'FM2MP',
+    r.sourceClassrole = 'fm2mp',
+    r.targetClassName = 'Male',
+    r.targerClassrole = 'mp'
+WITH mSrc, mTrg, mCorr, metaC
+// Link M2FP_FamilyMember
+MATCH (mSrc)-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})
+MATCH (targetCls:`FamilyMember` {name: 'FamilyMember'})-[:InstanceOf]->(metaT)
+MATCH (corrCls:`M2FP` {name: 'M2FP'})-[:InstanceOf]->(metaC)
+MERGE (corrCls)-[r:AssociateWith {associationName: 'M2FP_FamilyMember'}]->(targetCls)
+SET r.isTernary = false,
+    r.sourceClassName = 'M2FP',
+    r.sourceClassrole = 'm2fp',
+    r.targetClassName = 'FamilyMember',
+    r.targerClassrole = 'm'
+WITH mSrc, mTrg, mCorr, metaC
+// Link M2FP_Female
+MATCH (mTrg)-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})
+MATCH (targetCls:`Female` {name: 'Female'})-[:InstanceOf]->(metaT)
+MATCH (corrCls:`M2FP` {name: 'M2FP'})-[:InstanceOf]->(metaC)
+MERGE (corrCls)-[r:AssociateWith {associationName: 'M2FP_Female'}]->(targetCls)
+SET r.isTernary = false,
+    r.sourceClassName = 'M2FP',
+    r.sourceClassrole = 'm2fp',
+    r.targetClassName = 'Female',
+    r.targerClassrole = 'fp'
+WITH mSrc, mTrg, mCorr, metaC
+// Link FM2FP_Family
+MATCH (mSrc)-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})
+MATCH (targetCls:`Family` {name: 'Family'})-[:InstanceOf]->(metaT)
+MATCH (corrCls:`FM2FP` {name: 'FM2FP'})-[:InstanceOf]->(metaC)
+MERGE (corrCls)-[r:AssociateWith {associationName: 'FM2FP_Family'}]->(targetCls)
+SET r.isTernary = false,
+    r.sourceClassName = 'FM2FP',
+    r.sourceClassrole = 'fm2fp',
+    r.targetClassName = 'Family',
+    r.targerClassrole = 'fm'
+WITH mSrc, mTrg, mCorr, metaC
+// Link FM2FP_Female
+MATCH (mTrg)-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})
+MATCH (targetCls:`Female` {name: 'Female'})-[:InstanceOf]->(metaT)
+MATCH (corrCls:`FM2FP` {name: 'FM2FP'})-[:InstanceOf]->(metaC)
+MERGE (corrCls)-[r:AssociateWith {associationName: 'FM2FP_Female'}]->(targetCls)
+SET r.isTernary = false,
+    r.sourceClassName = 'FM2FP',
+    r.sourceClassrole = 'fm2fp',
+    r.targetClassName = 'Female',
+    r.targerClassrole = 'fp'
+WITH mSrc, mTrg, mCorr, metaC
+// Link S2MP_FamilyMember
+MATCH (mSrc)-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})
+MATCH (targetCls:`FamilyMember` {name: 'FamilyMember'})-[:InstanceOf]->(metaT)
+MATCH (corrCls:`S2MP` {name: 'S2MP'})-[:InstanceOf]->(metaC)
+MERGE (corrCls)-[r:AssociateWith {associationName: 'S2MP_FamilyMember'}]->(targetCls)
+SET r.isTernary = false,
+    r.sourceClassName = 'S2MP',
+    r.sourceClassrole = 's2mp',
+    r.targetClassName = 'FamilyMember',
+    r.targerClassrole = 's'
+WITH mSrc, mTrg, mCorr, metaC
+// Link S2MP_Male
+MATCH (mTrg)-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})
+MATCH (targetCls:`Male` {name: 'Male'})-[:InstanceOf]->(metaT)
+MATCH (corrCls:`S2MP` {name: 'S2MP'})-[:InstanceOf]->(metaC)
+MERGE (corrCls)-[r:AssociateWith {associationName: 'S2MP_Male'}]->(targetCls)
+SET r.isTernary = false,
+    r.sourceClassName = 'S2MP',
+    r.sourceClassrole = 's2mp',
+    r.targetClassName = 'Male',
+    r.targerClassrole = 'mp'
+WITH mSrc, mTrg, mCorr, metaC
+// Link FM2MP_Family
+MATCH (mSrc)-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})
+MATCH (targetCls:`Family` {name: 'Family'})-[:InstanceOf]->(metaT)
+MATCH (corrCls:`FM2MP` {name: 'FM2MP'})-[:InstanceOf]->(metaC)
+MERGE (corrCls)-[r:AssociateWith {associationName: 'FM2MP_Family'}]->(targetCls)
+SET r.isTernary = false,
+    r.sourceClassName = 'FM2MP',
+    r.sourceClassrole = 'fm2mp',
+    r.targetClassName = 'Family',
+    r.targerClassrole = 'fm'
+WITH mSrc, mTrg, mCorr, metaC
+// Link FM2MP_Male
+MATCH (mTrg)-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})
+MATCH (targetCls:`Male` {name: 'Male'})-[:InstanceOf]->(metaT)
+MATCH (corrCls:`FM2MP` {name: 'FM2MP'})-[:InstanceOf]->(metaC)
+MERGE (corrCls)-[r:AssociateWith {associationName: 'FM2MP_Male'}]->(targetCls)
+SET r.isTernary = false,
+    r.sourceClassName = 'FM2MP',
+    r.sourceClassrole = 'fm2mp',
+    r.targetClassName = 'Male',
+    r.targerClassrole = 'mp'
+WITH mSrc, mTrg, mCorr, metaC
+// Link D2FP_FamilyMember
+MATCH (mSrc)-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})
+MATCH (targetCls:`FamilyMember` {name: 'FamilyMember'})-[:InstanceOf]->(metaT)
+MATCH (corrCls:`D2FP` {name: 'D2FP'})-[:InstanceOf]->(metaC)
+MERGE (corrCls)-[r:AssociateWith {associationName: 'D2FP_FamilyMember'}]->(targetCls)
+SET r.isTernary = false,
+    r.sourceClassName = 'D2FP',
+    r.sourceClassrole = 'd2fp',
+    r.targetClassName = 'FamilyMember',
+    r.targerClassrole = 'd'
+WITH mSrc, mTrg, mCorr, metaC
+// Link D2FP_Female
+MATCH (mTrg)-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})
+MATCH (targetCls:`Female` {name: 'Female'})-[:InstanceOf]->(metaT)
+MATCH (corrCls:`D2FP` {name: 'D2FP'})-[:InstanceOf]->(metaC)
+MERGE (corrCls)-[r:AssociateWith {associationName: 'D2FP_Female'}]->(targetCls)
+SET r.isTernary = false,
+    r.sourceClassName = 'D2FP',
+    r.sourceClassrole = 'd2fp',
+    r.targetClassName = 'Female',
+    r.targerClassrole = 'fp'
+WITH mSrc, mTrg, mCorr, metaC
+// Link FM2FP_Family
+MATCH (mSrc)-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})
+MATCH (targetCls:`Family` {name: 'Family'})-[:InstanceOf]->(metaT)
+MATCH (corrCls:`FM2FP` {name: 'FM2FP'})-[:InstanceOf]->(metaC)
+MERGE (corrCls)-[r:AssociateWith {associationName: 'FM2FP_Family'}]->(targetCls)
+SET r.isTernary = false,
+    r.sourceClassName = 'FM2FP',
+    r.sourceClassrole = 'fm2fp',
+    r.targetClassName = 'Family',
+    r.targerClassrole = 'fm'
+WITH mSrc, mTrg, mCorr, metaC
+// Link FM2FP_Female
+MATCH (mTrg)-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})
+MATCH (targetCls:`Female` {name: 'Female'})-[:InstanceOf]->(metaT)
+MATCH (corrCls:`FM2FP` {name: 'FM2FP'})-[:InstanceOf]->(metaC)
+MERGE (corrCls)-[r:AssociateWith {associationName: 'FM2FP_Female'}]->(targetCls)
+SET r.isTernary = false,
+    r.sourceClassName = 'FM2FP',
+    r.sourceClassrole = 'fm2fp',
+    r.targetClassName = 'Female',
+    r.targerClassrole = 'fp'
+
+RETURN 'Correspondence Metamodel Created Successfully';
+
+
+
+
+
+match
+
+RETURN EXISTS {
+  MATCH (mSrc:ManageModel {name: 'Families'})-[:DefineMetamodels]->(metaS:MetaNode {name: 'NodeConcreteClass'})
+  MATCH (mTrg:ManageModel {name: 'Persons'})-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})
+  MATCH (mCorr:ManageModel {name: 'Families2Persons_Corr'})-[:DefineMetamodels]->(metaC:MetaNode {name: 'NodeConcreteClass'})
+  MATCH (fr)-[:ObjectInstanceOf]->(cls_fr)-[:InstanceOf]->(metaS),
+    (fm)-[:ObjectInstanceOf]->(cls_fm)-[:InstanceOf]->(metaS),
+    (fr)-[e0]-(fm),
+    (father)-[:ObjectInstanceOf]->(cls_father)-[:InstanceOf]->(metaS),
+    (fm)-[e1]-(father),
+    (pr)-[:ObjectInstanceOf]->(cls_pr)-[:InstanceOf]->(metaT),
+    (fr)-[rel2]-(fr2pr)-[rel3]-(pr),
+    (fr2pr)-[:ObjectInstanceOf]->(cls_fr2pr)-[:InstanceOf]->(metaC)
+  WHERE cls_fr.name = 'FamilyRegister'
+    AND cls_fm.name = 'Family'
+    AND e0.name = 'FamilyRegistration' AND type(e0) STARTS WITH 'Link'
+    AND cls_father.name = 'FamilyMember'
+    AND e1.name = 'Father' AND type(e1) STARTS WITH 'Link'
+    AND cls_pr.name = 'PersonRegister'
+    AND type(rel2) = 'LinkAssociateWith'
+    AND type(rel3) = 'LinkAssociateWith'
+    AND cls_fr2pr.name = 'FR2PR'
+    AND NOT EXISTS {
+    MATCH (father)-[:LinkAssociateWith]-(existingCorr)-[:ObjectInstanceOf]->(clsRHS)-[:InstanceOf]->(metaC)
+    WHERE clsRHS.name = 'F2MP'
+  }
+    AND NOT EXISTS {
+    MATCH (fm)-[:LinkAssociateWith]-(existingCorr)-[:ObjectInstanceOf]->(clsRHS)-[:InstanceOf]->(metaC)
+    WHERE clsRHS.name = 'FM2MP'
+  }
+} AS isMatched
+
+
+
+execute match query:
+
+// --- STEP 1: FETCH MATCHING TUPLES (SYNTAX FIXED) ---
+MATCH (mSrc:ManageModel {name: 'Families'})-[:DefineMetamodels]->(metaS:MetaNode {name: 'NodeConcreteClass'})
+MATCH (mTrg:ManageModel {name: 'Persons'})-[:DefineMetamodels]->(metaT:MetaNode {name: 'NodeConcreteClass'})
+MATCH (mCorr:ManageModel {name: 'Families2Persons_Corr'})-[:DefineMetamodels]->(metaC:MetaNode {name: 'NodeConcreteClass'})
+  MATCH (fr)-[:ObjectInstanceOf]->(cls_fr)-[:InstanceOf]->(metaS),
+    (fm)-[:ObjectInstanceOf]->(cls_fm)-[:InstanceOf]->(metaS),
+    (fr)-[e0]-(fm),
+    (father)-[:ObjectInstanceOf]->(cls_father)-[:InstanceOf]->(metaS),
+    (fm)-[e1]-(father),
+    (pr)-[:ObjectInstanceOf]->(cls_pr)-[:InstanceOf]->(metaT),
+    (fr)-[rel2]-(fr2pr)-[rel3]-(pr),
+    (fr2pr)-[:ObjectInstanceOf]->(cls_fr2pr)-[:InstanceOf]->(metaC)
+  WHERE cls_fr.name = 'FamilyRegister'
+    AND cls_fm.name = 'Family'
+    AND e0.name = 'FamilyRegistration' AND type(e0) STARTS WITH 'Link'
+    AND cls_father.name = 'FamilyMember'
+    AND e1.name = 'Father' AND type(e1) STARTS WITH 'Link'
+    AND cls_pr.name = 'PersonRegister'
+    AND type(rel2) = 'LinkAssociateWith'
+    AND type(rel3) = 'LinkAssociateWith'
+    AND cls_fr2pr.name = 'FR2PR'
+    AND NOT EXISTS {
+      MATCH (father)-[:LinkAssociateWith]-(existingCorr)-[:ObjectInstanceOf]->(clsRHS)-[:InstanceOf]->(metaC)
+      WHERE clsRHS.name = 'F2MP'
+    }
+    AND NOT EXISTS {
+      MATCH (fm)-[:LinkAssociateWith]-(existingCorr)-[:ObjectInstanceOf]->(clsRHS)-[:InstanceOf]->(metaC)
+      WHERE clsRHS.name = 'FM2MP'
+    }
+RETURN DISTINCT fr.use_id AS fr, fm.use_id AS fm, elementId(e0) AS e0, father.use_id AS father, elementId(e1) AS e1, pr.use_id AS pr, fr2pr.use_id AS fr2pr
+
+
+--execute
+
+// --- STEP 2: EXECUTION ON SELECTED TUPLE ---
+
+
+MATCH (mSrc:ManageModel {name:'Families'}), (mTrg:ManageModel {name:'Persons'}), (mCorr:ManageModel {name:'Families2Persons_Corr'})
+MATCH (mSrc)-[:DefineMetamodels]->(metaS:MetaNode {name:'NodeConcreteClass'})
+MATCH (mTrg)-[:DefineMetamodels]->(metaT:MetaNode {name:'NodeConcreteClass'})
+MATCH (mCorr)-[:DefineMetamodels]->(metaC:MetaNode {name:'NodeConcreteClass'})
+MATCH (cls_FM2MP {name:'FM2MP'})-[:InstanceOf]->(metaC)
+MATCH (cls_FamilyRegister {name:'FamilyRegister'})-[:InstanceOf]->(metaS)
+MATCH (cls_FamilyMember {name:'FamilyMember'})-[:InstanceOf]->(metaS)
+MATCH (cls_PersonRegister {name:'PersonRegister'})-[:InstanceOf]->(metaT)
+MATCH (cls_FR2PR {name:'FR2PR'})-[:InstanceOf]->(metaC)
+MATCH (cls_Family {name:'Family'})-[:InstanceOf]->(metaS)
+MATCH (cls_Male {name:'Male'})-[:InstanceOf]->(metaT)
+MATCH (cls_F2MP {name:'F2MP'})-[:InstanceOf]->(metaC)
+WITH *
+MATCH (fr {use_id: 'fr'})-[:ObjectInstanceOf]->(cls_FamilyRegister)
+MATCH (fm {use_id: 'fm'})-[:ObjectInstanceOf]->(cls_Family)
+MATCH ()-[e0]->() WHERE elementId(e0) = '5:141ad05f-f513-4837-90e4-11ac1f2975d8:1152942395327774773'
+MATCH (father {use_id: 'father'})-[:ObjectInstanceOf]->(cls_FamilyMember)
+MATCH ()-[e1]->() WHERE elementId(e1) = '5:141ad05f-f513-4837-90e4-11ac1f2975d8:1152943494839402545'
+MATCH (pr {use_id: 'pr'})-[:ObjectInstanceOf]->(cls_PersonRegister)
+MATCH (fr2pr {use_id: 'fr2pr'})-[:ObjectInstanceOf]->(cls_FR2PR)
+CREATE
+  (mp:`Male`:Object {use_id: 'Male_820473', name: 'Male_820473', isCorrespondence: false}),
+  (pr)-[:LinkComposeOf {name: 'PersonRegistration', isCorrespondenceLink: false}]->(mp),
+  (f2mp:`F2MP`:CorrespondenceObject {use_id: 'F2MP_820475', name: 'F2MP_820475', isCorrespondence: true}),
+  (f2mp)-[:LinkAssociateWith {name: 'F2MP_FamilyMember', isCorrespondenceLink: true}]->(father),
+  (f2mp)-[:LinkAssociateWith {name: 'F2MP_Male', isCorrespondenceLink: true}]->(mp),
+  (fm2mp:`FM2MP`:CorrespondenceObject {use_id: 'FM2MP_820475', name: 'FM2MP_820475', isCorrespondence: true}),
+  (fm2mp)-[:LinkAssociateWith {name: 'FM2MP_Family', isCorrespondenceLink: true}]->(fm),
+  (fm2mp)-[:LinkAssociateWith {name: 'FM2MP_Male', isCorrespondenceLink: true}]->(mp)
+MERGE (mp)-[:ObjectInstanceOf]->(cls_Male)
+MERGE (f2mp)-[:ObjectInstanceOf]->(cls_F2MP)
+MERGE (fm2mp)-[:ObjectInstanceOf]->(cls_FM2MP)
+RETURN 'Success';
+
+rule Father2Male
+checkSource(
+    fr: FamilyRegister
+    fm: Family
+    (fr, fm): FamilyRegistration
+){
+    father: FamilyMember
+    (fm, father): Father
+}checkTarget(
+    pr: PersonRegister
+){
+    mp: Male
+    (pr, mp): PersonRegistration
+}checkCorr(
+    (fr, pr) as (fr, pr) in fr2pr:FR2PR
+){
+    (father, mp) as (f, mp) in f2mp:F2MP
+    (fm, mp) as (fm, mp) in fm2mp:FM2MP
+
+}
+end

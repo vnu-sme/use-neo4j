@@ -1,0 +1,11 @@
+
+dr1.consultationFee < 200
+p1.isEmergency = true
+h1.departments.deptName->includes('Neurology')
+dr1.assignedNurses->size() < 4
+dr1.patientQueue->includes(p1)
+hosp1.roomNumber = 'A302'
+p1.symptoms->size() > 1
+dr1.consultationFee > dr2.consultationFee
+p1.attendingPhysicians.name->includes('Jack')
+p1.symptoms->includes('Sot cao')

@@ -8,7 +8,6 @@ public class CorrDecl implements TGGElement {
     public String corrName;   // Ví dụ: f2mp
     public String corrType;   // Ví dụ: F2MP
 
-    // Hai trường này dùng để lưu kết quả phân tích sau này (Resolve Type)
     public String sourceClassType;
     public String targetClassType;
 }

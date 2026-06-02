@@ -13,8 +13,8 @@
     <node id="Prescription" sizeCalculated="true" type="Class">
         <name>Prescription</name>
         <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyRelativeToCorner">
-            <userOffsetX>298.0</userOffsetX>
-            <userOffsetY>12.0</userOffsetY>
+            <userOffsetX>338.0</userOffsetX>
+            <userOffsetY>52.0</userOffsetY>
             <basisDeltaX>ABSOLUTE</basisDeltaX>
             <deltaX>0.0</deltaX>
             <maxDeltaX>1.7976931348623157E308</maxDeltaX>
@@ -29,16 +29,16 @@
     <node id="Disease" sizeCalculated="true" type="Class">
         <name>Disease</name>
         <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyFixed">
-            <x>767.0</x>
-            <y>135.0</y>
+            <x>884.0</x>
+            <y>148.0</y>
         </strategy>
         <hidden>false</hidden>
     </node>
     <node id="Patient" sizeCalculated="true" type="Class">
         <name>Patient</name>
         <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyFixed">
-            <x>413.0</x>
-            <y>406.0</y>
+            <x>410.0</x>
+            <y>398.0</y>
         </strategy>
         <hidden>false</hidden>
     </node>
@@ -53,8 +53,8 @@
     <node id="Hospitalization" sizeCalculated="true" type="Class">
         <name>Hospitalization</name>
         <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyRelativeToCorner">
-            <userOffsetX>-89.0</userOffsetX>
-            <userOffsetY>69.0</userOffsetY>
+            <userOffsetX>-24.0</userOffsetX>
+            <userOffsetY>65.0</userOffsetY>
             <basisDeltaX>ABSOLUTE</basisDeltaX>
             <deltaX>0.0</deltaX>
             <maxDeltaX>1.7976931348623157E308</maxDeltaX>
@@ -69,8 +69,8 @@
     <node id="Doctor" sizeCalculated="true" type="Class">
         <name>Doctor</name>
         <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyFixed">
-            <x>430.0</x>
-            <y>4.0</y>
+            <x>443.0</x>
+            <y>15.0</y>
         </strategy>
         <hidden>false</hidden>
     </node>
@@ -85,40 +85,40 @@
     <node id="Dosage" sizeCalculated="true" type="Class">
         <name>Dosage</name>
         <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyFixed">
-            <x>741.0</x>
-            <y>31.0</y>
+            <x>880.0</x>
+            <y>26.0</y>
         </strategy>
         <hidden>false</hidden>
     </node>
     <node id="Department" sizeCalculated="true" type="Class">
         <name>Department</name>
         <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyFixed">
-            <x>128.0</x>
-            <y>428.0</y>
+            <x>105.0</x>
+            <y>453.0</y>
         </strategy>
         <hidden>false</hidden>
     </node>
     <node id="Medication" sizeCalculated="true" type="Class">
         <name>Medication</name>
         <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyFixed">
-            <x>806.0</x>
-            <y>208.0</y>
+            <x>920.0</x>
+            <y>257.0</y>
         </strategy>
         <hidden>false</hidden>
     </node>
     <node id="Hospital" sizeCalculated="true" type="Class">
         <name>Hospital</name>
         <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyFixed">
-            <x>50.0</x>
-            <y>170.0</y>
+            <x>45.0</x>
+            <y>175.0</y>
         </strategy>
         <hidden>false</hidden>
     </node>
     <node id="Person" sizeCalculated="true" type="Class">
         <name>Person</name>
         <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyFixed">
-            <x>212.0</x>
-            <y>7.0</y>
+            <x>221.0</x>
+            <y>66.0</y>
         </strategy>
         <hidden>false</hidden>
     </node>
@@ -190,8 +190,8 @@
         sizeCalculated="false" type="DiamondNode" width="40.0">
         <name>Appointment</name>
         <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyFixed">
-            <x>463.71199544270826</x>
-            <y>294.3333333333333</y>
+            <x>469.71199544270826</x>
+            <y>301.3333333333333</y>
         </strategy>
         <connectedNode>Department</connectedNode>
         <connectedNode>Patient</connectedNode>
@@ -219,20 +219,6 @@
             <target>Doctor</target>
             <name>doctor</name>
             <properties>
-                <edgeproperty id="Appointment::doctor::target::rolename"
-                    sizeCalculated="true" type="rolename"
-                    userDefined="true" visible="true">
-                    <name>doctor</name>
-                    <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyRelativeToAttached">
-                        <userOffsetX>21.0</userOffsetX>
-                        <userOffsetY>13.0</userOffsetY>
-                        <attached>Appointment::doctor::WayPoint::1</attached>
-                        <offset_x>8</offset_x>
-                        <offset_y>8</offset_y>
-                        <placement>TOP</placement>
-                    </strategy>
-                    <hidden>false</hidden>
-                </edgeproperty>
                 <edgeproperty
                     id="Appointment::doctor::target::multiplicity"
                     sizeCalculated="true" type="multiplicity"
@@ -245,6 +231,20 @@
                         <offset_x>8</offset_x>
                         <offset_y>8</offset_y>
                         <placement>BOTTOM</placement>
+                    </strategy>
+                    <hidden>false</hidden>
+                </edgeproperty>
+                <edgeproperty id="Appointment::doctor::target::rolename"
+                    sizeCalculated="true" type="rolename"
+                    userDefined="true" visible="true">
+                    <name>doctor</name>
+                    <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyRelativeToAttached">
+                        <userOffsetX>21.0</userOffsetX>
+                        <userOffsetY>13.0</userOffsetY>
+                        <attached>Appointment::doctor::WayPoint::1</attached>
+                        <offset_x>8</offset_x>
+                        <offset_y>8</offset_y>
+                        <placement>TOP</placement>
                     </strategy>
                     <hidden>false</hidden>
                 </edgeproperty>
@@ -283,21 +283,6 @@
             <name>patient</name>
             <properties>
                 <edgeproperty
-                    id="Appointment::patient::target::rolename"
-                    sizeCalculated="true" type="rolename"
-                    userDefined="true" visible="true">
-                    <name>patient</name>
-                    <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyRelativeToAttached">
-                        <userOffsetX>12.0</userOffsetX>
-                        <userOffsetY>-33.0</userOffsetY>
-                        <attached>Appointment::patient::WayPoint::1</attached>
-                        <offset_x>8</offset_x>
-                        <offset_y>8</offset_y>
-                        <placement>TOP</placement>
-                    </strategy>
-                    <hidden>false</hidden>
-                </edgeproperty>
-                <edgeproperty
                     id="Appointment::patient::target::multiplicity"
                     sizeCalculated="true" type="multiplicity"
                     userDefined="true" visible="true">
@@ -309,6 +294,21 @@
                         <offset_x>8</offset_x>
                         <offset_y>8</offset_y>
                         <placement>BOTTOM</placement>
+                    </strategy>
+                    <hidden>false</hidden>
+                </edgeproperty>
+                <edgeproperty
+                    id="Appointment::patient::target::rolename"
+                    sizeCalculated="true" type="rolename"
+                    userDefined="true" visible="true">
+                    <name>patient</name>
+                    <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyRelativeToAttached">
+                        <userOffsetX>12.0</userOffsetX>
+                        <userOffsetY>-33.0</userOffsetY>
+                        <attached>Appointment::patient::WayPoint::1</attached>
+                        <offset_x>8</offset_x>
+                        <offset_y>8</offset_y>
+                        <placement>TOP</placement>
                     </strategy>
                     <hidden>false</hidden>
                 </edgeproperty>
@@ -507,21 +507,6 @@
             <name>patients</name>
             <properties>
                 <edgeproperty
-                    id="Consultation::patients::target::multiplicity"
-                    sizeCalculated="true" type="multiplicity"
-                    userDefined="false" visible="true">
-                    <name>1..*</name>
-                    <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyRelativeToAttached">
-                        <userOffsetX>0.0</userOffsetX>
-                        <userOffsetY>0.0</userOffsetY>
-                        <attached>Consultation::patients::WayPoint::1</attached>
-                        <offset_x>8</offset_x>
-                        <offset_y>8</offset_y>
-                        <placement>BOTTOM</placement>
-                    </strategy>
-                    <hidden>false</hidden>
-                </edgeproperty>
-                <edgeproperty
                     id="Consultation::patients::target::rolename"
                     sizeCalculated="true" type="rolename"
                     userDefined="true" visible="true">
@@ -533,6 +518,21 @@
                         <offset_x>8</offset_x>
                         <offset_y>8</offset_y>
                         <placement>TOP</placement>
+                    </strategy>
+                    <hidden>false</hidden>
+                </edgeproperty>
+                <edgeproperty
+                    id="Consultation::patients::target::multiplicity"
+                    sizeCalculated="true" type="multiplicity"
+                    userDefined="false" visible="true">
+                    <name>1..*</name>
+                    <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyRelativeToAttached">
+                        <userOffsetX>0.0</userOffsetX>
+                        <userOffsetY>0.0</userOffsetY>
+                        <attached>Consultation::patients::WayPoint::1</attached>
+                        <offset_x>8</offset_x>
+                        <offset_y>8</offset_y>
+                        <placement>BOTTOM</placement>
                     </strategy>
                     <hidden>false</hidden>
                 </edgeproperty>
@@ -636,19 +636,6 @@
         <target>Department</target>
         <name>HospitalStructure</name>
         <properties>
-            <edgeproperty id="HospitalStructure::target::rolename"
-                sizeCalculated="true" type="rolename" userDefined="true" visible="true">
-                <name>departments</name>
-                <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyRelativeToAttached">
-                    <userOffsetX>4.0</userOffsetX>
-                    <userOffsetY>8.0</userOffsetY>
-                    <attached>HospitalStructure::WayPoint::1</attached>
-                    <offset_x>8</offset_x>
-                    <offset_y>8</offset_y>
-                    <placement>TOP</placement>
-                </strategy>
-                <hidden>false</hidden>
-            </edgeproperty>
             <edgeproperty id="HospitalStructure::target::multiplicity"
                 sizeCalculated="true" type="multiplicity"
                 userDefined="true" visible="true">
@@ -663,17 +650,16 @@
                 </strategy>
                 <hidden>false</hidden>
             </edgeproperty>
-            <edgeproperty id="HospitalStructure::source::multiplicity"
-                sizeCalculated="true" type="multiplicity"
-                userDefined="false" visible="true">
-                <name>1..*</name>
+            <edgeproperty id="HospitalStructure::target::rolename"
+                sizeCalculated="true" type="rolename" userDefined="true" visible="true">
+                <name>departments</name>
                 <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyRelativeToAttached">
-                    <userOffsetX>0.0</userOffsetX>
-                    <userOffsetY>0.0</userOffsetY>
-                    <attached>HospitalStructure::WayPoint::0</attached>
+                    <userOffsetX>4.0</userOffsetX>
+                    <userOffsetY>8.0</userOffsetY>
+                    <attached>HospitalStructure::WayPoint::1</attached>
                     <offset_x>8</offset_x>
                     <offset_y>8</offset_y>
-                    <placement>BOTTOM</placement>
+                    <placement>TOP</placement>
                 </strategy>
                 <hidden>false</hidden>
             </edgeproperty>
@@ -687,6 +673,20 @@
                     <offset_x>8</offset_x>
                     <offset_y>8</offset_y>
                     <placement>TOP</placement>
+                </strategy>
+                <hidden>false</hidden>
+            </edgeproperty>
+            <edgeproperty id="HospitalStructure::source::multiplicity"
+                sizeCalculated="true" type="multiplicity"
+                userDefined="false" visible="true">
+                <name>1..*</name>
+                <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyRelativeToAttached">
+                    <userOffsetX>0.0</userOffsetX>
+                    <userOffsetY>0.0</userOffsetY>
+                    <attached>HospitalStructure::WayPoint::0</attached>
+                    <offset_x>8</offset_x>
+                    <offset_y>8</offset_y>
+                    <placement>BOTTOM</placement>
                 </strategy>
                 <hidden>false</hidden>
             </edgeproperty>
@@ -976,19 +976,6 @@
                 </strategy>
                 <hidden>false</hidden>
             </edgeproperty>
-            <edgeproperty id="Prescription::source::rolename"
-                sizeCalculated="true" type="rolename" userDefined="true" visible="true">
-                <name>physician</name>
-                <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyRelativeToAttached">
-                    <userOffsetX>28.0</userOffsetX>
-                    <userOffsetY>27.0</userOffsetY>
-                    <attached>Prescription::WayPoint::0</attached>
-                    <offset_x>8</offset_x>
-                    <offset_y>8</offset_y>
-                    <placement>TOP</placement>
-                </strategy>
-                <hidden>false</hidden>
-            </edgeproperty>
             <edgeproperty id="Prescription::source::multiplicity"
                 sizeCalculated="true" type="multiplicity"
                 userDefined="false" visible="true">
@@ -1000,6 +987,19 @@
                     <offset_x>8</offset_x>
                     <offset_y>8</offset_y>
                     <placement>BOTTOM</placement>
+                </strategy>
+                <hidden>false</hidden>
+            </edgeproperty>
+            <edgeproperty id="Prescription::source::rolename"
+                sizeCalculated="true" type="rolename" userDefined="true" visible="true">
+                <name>physician</name>
+                <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyRelativeToAttached">
+                    <userOffsetX>28.0</userOffsetX>
+                    <userOffsetY>27.0</userOffsetY>
+                    <attached>Prescription::WayPoint::0</attached>
+                    <offset_x>8</offset_x>
+                    <offset_y>8</offset_y>
+                    <placement>TOP</placement>
                 </strategy>
                 <hidden>false</hidden>
             </edgeproperty>
@@ -1071,8 +1071,8 @@
             <node id="Prescription" sizeCalculated="true" type="Class">
                 <name>Prescription</name>
                 <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyRelativeToCorner">
-                    <userOffsetX>298.0</userOffsetX>
-                    <userOffsetY>12.0</userOffsetY>
+                    <userOffsetX>338.0</userOffsetX>
+                    <userOffsetY>52.0</userOffsetY>
                     <basisDeltaX>ABSOLUTE</basisDeltaX>
                     <deltaX>0.0</deltaX>
                     <maxDeltaX>1.7976931348623157E308</maxDeltaX>
@@ -1091,6 +1091,19 @@
         <target>Department</target>
         <name>Hospitalization</name>
         <properties>
+            <edgeproperty id="Hospitalization::target::rolename"
+                sizeCalculated="true" type="rolename" userDefined="true" visible="true">
+                <name>ward</name>
+                <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyRelativeToAttached">
+                    <userOffsetX>10.0</userOffsetX>
+                    <userOffsetY>-21.0</userOffsetY>
+                    <attached>Hospitalization::WayPoint::1</attached>
+                    <offset_x>8</offset_x>
+                    <offset_y>8</offset_y>
+                    <placement>TOP</placement>
+                </strategy>
+                <hidden>false</hidden>
+            </edgeproperty>
             <edgeproperty id="Hospitalization::target::multiplicity"
                 sizeCalculated="true" type="multiplicity"
                 userDefined="false" visible="true">
@@ -1102,19 +1115,6 @@
                     <offset_x>8</offset_x>
                     <offset_y>8</offset_y>
                     <placement>BOTTOM</placement>
-                </strategy>
-                <hidden>false</hidden>
-            </edgeproperty>
-            <edgeproperty id="Hospitalization::target::rolename"
-                sizeCalculated="true" type="rolename" userDefined="true" visible="true">
-                <name>ward</name>
-                <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyRelativeToAttached">
-                    <userOffsetX>10.0</userOffsetX>
-                    <userOffsetY>-21.0</userOffsetY>
-                    <attached>Hospitalization::WayPoint::1</attached>
-                    <offset_x>8</offset_x>
-                    <offset_y>8</offset_y>
-                    <placement>TOP</placement>
                 </strategy>
                 <hidden>false</hidden>
             </edgeproperty>
@@ -1213,8 +1213,8 @@
             <node id="Hospitalization" sizeCalculated="true" type="Class">
                 <name>Hospitalization</name>
                 <strategy type="org.tzi.use.gui.views.diagrams.elements.positioning.StrategyRelativeToCorner">
-                    <userOffsetX>-89.0</userOffsetX>
-                    <userOffsetY>69.0</userOffsetY>
+                    <userOffsetX>-24.0</userOffsetX>
+                    <userOffsetY>65.0</userOffsetY>
                     <basisDeltaX>ABSOLUTE</basisDeltaX>
                     <deltaX>0.0</deltaX>
                     <maxDeltaX>1.7976931348623157E308</maxDeltaX>

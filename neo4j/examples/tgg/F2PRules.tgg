@@ -28,7 +28,7 @@ checkSource(
     (fr, pr) as (fr, pr) in fr2pr:FR2PR
 ){
     (father, mp) as (f, mp) in f2mp:F2MP
-    (fm*, mp) as (fm, mp) in fm2mp:FM2MP
+    (fm, mp) as (fm, mp) in fm2mp:FM2MP
 
 }
 end
@@ -50,7 +50,7 @@ checkSource(
     (fr, pr) as (fr, pr) in fr2pr:FR2PR
 ){
     (mother, fp) as (m, fp) in m2fp:M2FP
-    (fm*, fp) as (fm, fp) in fm2fp:FM2FP
+    (fm, fp) as (fm, fp) in fm2fp:FM2FP
 }
 end
 
@@ -72,7 +72,7 @@ checkSource(
     (fr, pr) as (fr, pr) in fr2pr:FR2PR
 ){
     (son, mp) as (s, mp) in s2mp:S2MP
-    (fm*, mp) as (fm, mp) in fm2mp:FM2MP
+    (fm, mp) as (fm, mp) in fm2mp:FM2MP
 }
 end
 
@@ -93,6 +93,6 @@ checkSource(
     (fr, pr) as (fr, pr) in fr2pr:FR2PR
 ){
     (daughter, fp) as (d, fp) in d2fp:D2FP
-    (fm*, fp) as (fm, fp) in fm2fp:FM2FP
+    (fm, fp) as (fm, fp) in fm2fp:FM2FP
 }
 end

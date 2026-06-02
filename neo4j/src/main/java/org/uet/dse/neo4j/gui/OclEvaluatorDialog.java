@@ -134,10 +134,6 @@ public class OclEvaluatorDialog extends JDialog {
     }
 
     ExpressionBinder binder = new ExpressionBinder(modelName);
-    //      ExpressionNode execTree = binder.bind(astTree);
-    //
-    //
-    //      ExecutionContext context = new ExecutionContext(modelName);
 
     Object result;
     boolean isValidation = astTree instanceof ASTContext;
