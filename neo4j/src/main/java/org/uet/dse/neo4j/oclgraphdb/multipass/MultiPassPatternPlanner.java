@@ -2,11 +2,18 @@ package org.uet.dse.neo4j.oclgraphdb.multipass;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.uet.dse.neo4j.oclgraphdb.multipass.pass.AdvancedCollectionCompositionPass;
 import org.uet.dse.neo4j.oclgraphdb.multipass.pass.CompareCompositionPass;
+import org.uet.dse.neo4j.oclgraphdb.multipass.pass.CollectionSourcePass;
+import org.uet.dse.neo4j.oclgraphdb.multipass.pass.DateTimeOperationPass;
+import org.uet.dse.neo4j.oclgraphdb.multipass.pass.FilteredCompareCompositionPass;
+import org.uet.dse.neo4j.oclgraphdb.multipass.pass.ImplicitPropertyPass;
 import org.uet.dse.neo4j.oclgraphdb.multipass.pass.IteratorCompositionPass;
+import org.uet.dse.neo4j.oclgraphdb.multipass.pass.PartialRecursiveCompositionPass;
 import org.uet.dse.neo4j.oclgraphdb.multipass.pass.PrimitivePatternPass;
 import org.uet.dse.neo4j.oclgraphdb.multipass.pass.RootCompositionPass;
 import org.uet.dse.neo4j.oclgraphdb.multipass.pass.SemanticPropertyPass;
+import org.uet.dse.neo4j.oclgraphdb.multipass.pass.SizeCompareCompositionPass;
 import org.uet.dse.neo4j.oclgraphdb.multipass.pass.TerminalCompositionPass;
 import org.uet.dse.neo4j.oclgraphdb.pattern.PatternPlanner;
 import org.uet.dse.neo4j.oclgraphdb.plan.CompileContext;
@@ -79,9 +86,16 @@ public class MultiPassPatternPlanner {
     return List.of(
         new PrimitivePatternPass(),
         new SemanticPropertyPass(),
+        new ImplicitPropertyPass(),
+        new DateTimeOperationPass(),
+        new CollectionSourcePass(),
         new CompareCompositionPass(),
         new IteratorCompositionPass(),
         new TerminalCompositionPass(),
+        new SizeCompareCompositionPass(),
+        new FilteredCompareCompositionPass(),
+        new AdvancedCollectionCompositionPass(),
+        new PartialRecursiveCompositionPass(),
         new RootCompositionPass()
     );
   }

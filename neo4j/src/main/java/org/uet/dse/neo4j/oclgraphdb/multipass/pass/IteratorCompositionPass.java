@@ -12,6 +12,7 @@ import org.uet.dse.neo4j.oclgraphdb.plan.ExpressionKind;
 import org.uet.dse.neo4j.oclite.ast.ASTIterator;
 import org.uet.dse.neo4j.oclite.ast.ASTNode;
 import org.uet.dse.neo4j.oclite.ast.ASTProperty;
+import org.uet.dse.neo4j.oclite.ast.ASTQuery;
 
 public class IteratorCompositionPass implements PatternPass {
   @Override
@@ -23,24 +24,27 @@ public class IteratorCompositionPass implements PatternPass {
   public int apply(PatternGraph graph, MultiPassPatternContext context, int passNumber) {
     int added = 0;
     for (ASTNode node : AstPatternSupport.flatten(graph.getRoot())) {
-      if (!(node instanceof ASTIterator iterator)) continue;
-
-      added += addSourcePatterns(graph, iterator, context, passNumber);
-      added += addIteratorPattern(graph, iterator, context, passNumber);
+      if (node instanceof ASTIterator iterator) {
+        added += addSourcePatterns(graph, iterator.source, context, passNumber);
+        added += addIteratorPattern(graph, iterator, context, passNumber);
+      } else if (node instanceof ASTQuery query) {
+        added += addSourcePatterns(graph, query.source, context, passNumber);
+        added += addQueryPattern(graph, query, context, passNumber);
+      }
     }
     return added;
   }
 
   private int addSourcePatterns(
       PatternGraph graph,
-      ASTIterator iterator,
+      ASTNode source,
       MultiPassPatternContext context,
       int passNumber
   ) {
     int added = 0;
-    Optional<String> allInstancesClass = AstPatternSupport.allInstancesClassName(iterator.source, context.compileContext());
+    Optional<String> allInstancesClass = AstPatternSupport.allInstancesClassName(source, context.compileContext());
     if (allInstancesClass.isPresent()) {
-      PatternInstance.Builder builder = PatternInstance.builder(MultiPassPatternKind.ALL_INSTANCES_SOURCE, iterator.source)
+      PatternInstance.Builder builder = PatternInstance.builder(MultiPassPatternKind.ALL_INSTANCES_SOURCE, source)
           .label(allInstancesClass.get() + ".allInstances")
           .outputKind(ExpressionKind.COLLECTION)
           .score(1650)
@@ -49,7 +53,7 @@ public class IteratorCompositionPass implements PatternPass {
       if (graph.add(builder, passNumber).isPresent()) added++;
     }
 
-    if (iterator.source instanceof ASTProperty property) {
+    if (source instanceof ASTProperty property) {
       Optional<PatternInstance> navigation = graph.bestFor(property, MultiPassPatternKind.NAVIGATION_ACCESS);
       if (navigation.isPresent()) {
         PatternInstance.Builder builder = PatternInstance.builder(MultiPassPatternKind.NAVIGATION_SOURCE, property)
@@ -90,18 +94,55 @@ public class IteratorCompositionPass implements PatternPass {
     }
 
     if ("forall".equals(operation) || "exists".equals(operation) || "one".equals(operation) || "any".equals(operation)) {
-      if (body.isEmpty()) return 0;
       PatternInstance.Builder builder = PatternInstance.builder(MultiPassPatternKind.QUANTIFIER, iterator)
           .label(operation + " " + iterator.iteratorName)
           .outputKind("any".equals(operation) ? ExpressionKind.NODE : ExpressionKind.BOOLEAN)
-          .score(2200 + source.get().getScore() / 10 + body.get().getScore() / 10)
-          .exactSemantic(source.get().isExactSemantic() && body.get().isExactSemantic())
-          .children(List.of(source.get(), body.get()))
+          .score(2200 + source.get().getScore() / 10 + body.map(p -> p.getScore() / 10).orElse(0))
+          .exactSemantic(source.get().isExactSemantic() && body.map(PatternInstance::isExactSemantic).orElse(false))
+          .children(body.map(pattern -> List.of(source.get(), pattern)).orElseGet(() -> List.of(source.get())))
           .metadata("operation", operation)
           .metadata("iterator", iterator.iteratorName);
       return graph.add(builder, passNumber).isPresent() ? 1 : 0;
     }
 
+    return 0;
+  }
+
+  private int addQueryPattern(
+      PatternGraph graph,
+      ASTQuery query,
+      MultiPassPatternContext context,
+      int passNumber
+  ) {
+    Optional<PatternInstance> body = bestBooleanPattern(graph, query.body);
+    Optional<PatternInstance> source = bestIteratorSource(graph, query.source);
+    if (source.isEmpty()) return 0;
+
+    String operation = query.operation.toLowerCase();
+    String iteratorName = query.primaryVariableName();
+    if (AstPatternSupport.isSelectOrReject(operation)) {
+      PatternInstance.Builder builder = PatternInstance.builder(MultiPassPatternKind.FILTER, query)
+          .label(operation + " " + iteratorName)
+          .outputKind(ExpressionKind.COLLECTION)
+          .score(2100 + source.get().getScore() / 10 + body.map(p -> p.getScore() / 10).orElse(0))
+          .exactSemantic(source.get().isExactSemantic() && body.map(PatternInstance::isExactSemantic).orElse(false))
+          .children(body.map(pattern -> List.of(source.get(), pattern)).orElseGet(() -> List.of(source.get())))
+          .metadata("operation", operation)
+          .metadata("iterator", iteratorName);
+      return graph.add(builder, passNumber).isPresent() ? 1 : 0;
+    }
+
+    if ("forall".equals(operation) || "exists".equals(operation) || "one".equals(operation) || "any".equals(operation)) {
+      PatternInstance.Builder builder = PatternInstance.builder(MultiPassPatternKind.QUANTIFIER, query)
+          .label(operation + " " + iteratorName)
+          .outputKind("any".equals(operation) ? ExpressionKind.NODE : ExpressionKind.BOOLEAN)
+          .score(2200 + source.get().getScore() / 10 + body.map(p -> p.getScore() / 10).orElse(0))
+          .exactSemantic(source.get().isExactSemantic() && body.map(PatternInstance::isExactSemantic).orElse(false))
+          .children(body.map(pattern -> List.of(source.get(), pattern)).orElseGet(() -> List.of(source.get())))
+          .metadata("operation", operation)
+          .metadata("iterator", iteratorName);
+      return graph.add(builder, passNumber).isPresent() ? 1 : 0;
+    }
     return 0;
   }
 

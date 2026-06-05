@@ -7,14 +7,18 @@ import org.neo4j.driver.types.Node;
 import org.tzi.use.main.Session;
 import org.uet.dse.neo4j.OCLLexer;
 import org.uet.dse.neo4j.OCLParser;
-import org.uet.dse.neo4j.oclgraphdb.OclGraphDbEvaluationOptions;
+import org.uet.dse.neo4j.oclgraphdb.CypherExecutor;
 import org.uet.dse.neo4j.oclgraphdb.GraphDbEvaluationResult;
+import org.uet.dse.neo4j.oclgraphdb.OclGraphDbEvaluationOptions;
 import org.uet.dse.neo4j.oclgraphdb.OclGraphDbEvaluator;
 import org.uet.dse.neo4j.oclgraphdb.analysis.OclAnalysisResult;
 import org.uet.dse.neo4j.oclgraphdb.analysis.OclAnalysisService;
 import org.uet.dse.neo4j.oclgraphdb.analysis.OclAstAnalysisNode;
 import org.uet.dse.neo4j.oclgraphdb.analysis.OclPatternCandidateAnalysis;
 import org.uet.dse.neo4j.oclgraphdb.multipass.PatternInstance;
+import org.uet.dse.neo4j.oclgraphdb.plan.CypherPlan;
+import org.uet.dse.neo4j.oclgraphdb.rewrite.PatternTreeRewriteService;
+import org.uet.dse.neo4j.oclgraphdb.rewrite.RewritePatternOptions;
 import org.uet.dse.neo4j.oclite.Neo4jRepository;
 import org.uet.dse.neo4j.oclite.ast.ASTContext;
 import org.uet.dse.neo4j.oclite.ast.ASTNode;
@@ -27,21 +31,44 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class OclEvaluatorDialog extends JDialog {
+  private enum OclExecutionMode {
+    AUTO("Auto: GraphDB then Java"),
+    JAVA("Java fallback"),
+    GRAPHDB("OCLGraphDB multipass"),
+    REWRITE("Rewrite tree experimental");
+
+    private final String label;
+
+    OclExecutionMode(String label) {
+      this.label = label;
+    }
+
+    @Override
+    public String toString() {
+      return label;
+    }
+  }
+
   private final JTextArea txtExpression;
   private final JTextArea txtResult;
   private final JTextArea txtAnalysis;
   private final JTextArea txtMermaid;
   private final JTextField txtSelfObject;
   private final JTextField txtPatternPasses;
+  private final JComboBox<OclExecutionMode> cmbExecutionMode;
   private final JTree treeAnalysis;
   private final JTabbedPane outputTabs;
   private final Session useSession;
   private final OclGraphDbEvaluator graphDbEvaluator = new OclGraphDbEvaluator();
   private final OclAnalysisService analysisService = new OclAnalysisService();
+  private final PatternTreeRewriteService rewriteService = new PatternTreeRewriteService();
+  private final CypherExecutor cypherExecutor = new CypherExecutor();
 
   public OclEvaluatorDialog(Frame parent, Session session) {
     super(parent, "Evaluate OCL expression", false);
@@ -57,7 +84,12 @@ public class OclEvaluatorDialog extends JDialog {
     txtExpression = new JTextArea();
     txtExpression.setLineWrap(true);
     pnlInput.add(new JScrollPane(txtExpression), BorderLayout.CENTER);
-    JPanel pnlOptions = new JPanel(new GridLayout(2, 1, 5, 4));
+    JPanel pnlOptions = new JPanel(new GridLayout(3, 1, 5, 4));
+    JPanel pnlMode = new JPanel(new BorderLayout(5, 5));
+    pnlMode.add(new JLabel("execution mode:"), BorderLayout.WEST);
+    cmbExecutionMode = new JComboBox<>(OclExecutionMode.values());
+    cmbExecutionMode.setSelectedItem(OclExecutionMode.AUTO);
+    pnlMode.add(cmbExecutionMode, BorderLayout.CENTER);
     JPanel pnlSelf = new JPanel(new BorderLayout(5, 5));
     pnlSelf.add(new JLabel("self object id (optional):"), BorderLayout.WEST);
     txtSelfObject = new JTextField();
@@ -66,6 +98,7 @@ public class OclEvaluatorDialog extends JDialog {
     pnlPasses.add(new JLabel("pattern passes (0 = auto):"), BorderLayout.WEST);
     txtPatternPasses = new JTextField("0");
     pnlPasses.add(txtPatternPasses, BorderLayout.CENTER);
+    pnlOptions.add(pnlMode);
     pnlOptions.add(pnlSelf);
     pnlOptions.add(pnlPasses);
     pnlInput.add(pnlOptions, BorderLayout.SOUTH);
@@ -127,6 +160,7 @@ public class OclEvaluatorDialog extends JDialog {
       txtExpression.setText("");
       txtSelfObject.setText("");
       txtPatternPasses.setText("0");
+      cmbExecutionMode.setSelectedItem(OclExecutionMode.AUTO);
       txtResult.setText("");
       txtAnalysis.setText("");
       txtMermaid.setText("");
@@ -151,34 +185,23 @@ public class OclEvaluatorDialog extends JDialog {
     ASTNode astTree = parseAst(expression);
     String modelName = currentModelName();
     String selfObjectId = txtSelfObject.getText().trim();
-    OclGraphDbEvaluationOptions graphOptions = graphOptionsFromUi();
+    OclExecutionMode mode = selectedExecutionMode();
 
-    Object result;
     boolean isValidation = astTree instanceof ASTContext;
-    Optional<GraphDbEvaluationResult> graphDbResult = graphDbEvaluator.tryEvaluate(astTree, modelName, graphOptions);
-    if (graphDbResult.isPresent()) {
-      result = graphDbResult.get().getValue();
-    } else {
-      ExpressionBinder binder = new ExpressionBinder(modelName);
-      if (astTree instanceof ASTContext) {
-
-        result = handleValidation((ASTContext) astTree, modelName, binder);
-      } else {
-
-        result = handleNormalEvaluation(astTree, modelName, binder, selfObjectId);
-      }
-    }
+    EvaluationOutput output = evaluateByMode(astTree, modelName, selfObjectId, mode);
+    Object result = output.value();
     //Object result = execTree.evaluate(context);
 
     System.out.println("--- 3. Kết quả thực thi OCL ---");
+    System.out.println("Mode: " + output.modeLabel());
     System.out.println("Result: " + result);
 
     if (result != null) {
-      String resStr = result.toString();
+      String resStr = formatResult(output);
       txtResult.setText(resStr);
       outputTabs.setSelectedIndex(0);
 
-      if (isValidation && resStr.startsWith("FAILURE")) {
+      if (isValidation && result.toString().startsWith("FAILURE")) {
         txtResult.setForeground(Color.RED);
       } else {
         txtResult.setForeground(new Color(0, 100, 0));
@@ -188,6 +211,79 @@ public class OclEvaluatorDialog extends JDialog {
       txtResult.setForeground(Color.RED);
       outputTabs.setSelectedIndex(0);
     }
+  }
+
+  private EvaluationOutput evaluateByMode(
+      ASTNode astTree,
+      String modelName,
+      String selfObjectId,
+      OclExecutionMode mode
+  ) {
+    return switch (mode) {
+      case JAVA -> new EvaluationOutput(evaluateWithJava(astTree, modelName, selfObjectId), mode.toString(), null);
+      case GRAPHDB -> evaluateGraphDbOnly(astTree, modelName);
+      case REWRITE -> evaluateRewriteOnly(astTree, modelName, selfObjectId);
+      case AUTO -> evaluateAuto(astTree, modelName, selfObjectId);
+    };
+  }
+
+  private EvaluationOutput evaluateAuto(ASTNode astTree, String modelName, String selfObjectId) {
+    Optional<GraphDbEvaluationResult> graphDbResult = graphDbEvaluator.tryEvaluate(astTree, modelName, graphOptionsFromUi());
+    if (graphDbResult.isPresent()) {
+      return new EvaluationOutput(graphDbResult.get().getValue(), OclExecutionMode.GRAPHDB.toString(), graphDbResult.get().getCypher());
+    }
+    return new EvaluationOutput(evaluateWithJava(astTree, modelName, selfObjectId), OclExecutionMode.JAVA.toString(), null);
+  }
+
+  private EvaluationOutput evaluateGraphDbOnly(ASTNode astTree, String modelName) {
+    Optional<GraphDbEvaluationResult> graphDbResult = graphDbEvaluator.tryEvaluate(astTree, modelName, graphOptionsFromUi());
+    if (graphDbResult.isPresent()) {
+      return new EvaluationOutput(graphDbResult.get().getValue(), OclExecutionMode.GRAPHDB.toString(), graphDbResult.get().getCypher());
+    }
+    return new EvaluationOutput("OCLGraphDB multipass could not produce an executable Cypher plan.", OclExecutionMode.GRAPHDB.toString(), null);
+  }
+
+  private EvaluationOutput evaluateRewriteOnly(ASTNode astTree, String modelName, String selfObjectId) {
+    Optional<CypherPlan> plan = rewriteService.compile(
+        astTree,
+        modelName,
+        rewriteOptionsFromUi(),
+        objectBindingsFromUi(selfObjectId)
+    );
+    if (plan.isEmpty()) {
+      return new EvaluationOutput("Rewrite tree did not produce an executable Cypher plan.", OclExecutionMode.REWRITE.toString(), null);
+    }
+
+    Object value;
+    if (astTree instanceof ASTContext astContext) {
+      value = cypherExecutor.executeValidation(plan.get()).format(astContext.className, astContext.invName);
+    } else {
+      value = cypherExecutor.executeScalar(plan.get());
+    }
+    return new EvaluationOutput(value, OclExecutionMode.REWRITE.toString(), plan.get().toCypher());
+  }
+
+  private Object evaluateWithJava(ASTNode astTree, String modelName, String selfObjectId) {
+    ExpressionBinder binder = new ExpressionBinder(modelName);
+    if (astTree instanceof ASTContext) {
+      return handleValidation((ASTContext) astTree, modelName, binder);
+    }
+    return handleNormalEvaluation(astTree, modelName, binder, selfObjectId);
+  }
+
+  private String formatResult(EvaluationOutput output) {
+    StringBuilder result = new StringBuilder();
+    result.append("Mode: ").append(output.modeLabel()).append("\n");
+    if (output.cypher() != null && !output.cypher().isBlank()) {
+      result.append("Cypher-backed: yes\n\n");
+    } else {
+      result.append("Cypher-backed: no\n\n");
+    }
+    result.append(output.value());
+    if (output.cypher() != null && !output.cypher().isBlank()) {
+      result.append("\n\n--- Cypher ---\n").append(output.cypher());
+    }
+    return result.toString();
   }
 
   private void doAnalyze() {
@@ -249,6 +345,24 @@ public class OclEvaluatorDialog extends JDialog {
     return builder.build();
   }
 
+  private RewritePatternOptions rewriteOptionsFromUi() {
+    int patternPasses = patternPassesFromUi();
+    return new RewritePatternOptions(patternPasses == 0, patternPasses, true);
+  }
+
+  private Map<String, String> objectBindingsFromUi(String selfObjectId) {
+    Map<String, String> bindings = new HashMap<>();
+    if (selfObjectId != null && !selfObjectId.isBlank()) {
+      bindings.put("self", selfObjectId.trim());
+    }
+    return bindings;
+  }
+
+  private OclExecutionMode selectedExecutionMode() {
+    Object selected = cmbExecutionMode.getSelectedItem();
+    return selected instanceof OclExecutionMode ? (OclExecutionMode) selected : OclExecutionMode.AUTO;
+  }
+
   private int patternPassesFromUi() {
     String text = txtPatternPasses.getText().trim();
     if (text.isEmpty()) return 0;
@@ -259,6 +373,8 @@ public class OclEvaluatorDialog extends JDialog {
       return 0;
     }
   }
+
+  private record EvaluationOutput(Object value, String modeLabel, String cypher) {}
 
   private DefaultMutableTreeNode toSwingTree(OclAstAnalysisNode node) {
     DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode(node.toTreeLabel());
@@ -317,7 +433,7 @@ public class OclEvaluatorDialog extends JDialog {
   }
 
   private Object handleValidation(ASTContext astContext, String modelName, ExpressionBinder binder) {
-    ExpressionNode constraintExecTree = binder.bind(astContext.expression);
+    ExpressionNode constraintExecTree = binder.bind(astContext);
     Neo4jRepository repo = new Neo4jRepository(modelName);
 
     List<Node> instances = repo.findAllInstancesOfClass(astContext.className);
@@ -335,6 +451,9 @@ public class OclEvaluatorDialog extends JDialog {
       ExecutionContext ctx = new ExecutionContext(modelName);
       ctx.pushScope("self", node);
       ctx.setVariable("self", node);
+      if (astContext.contextVariableName != null && !astContext.contextVariableName.isBlank()) {
+        ctx.setVariable(astContext.contextVariableName, node);
+      }
 
       Object isOk = constraintExecTree.evaluate(ctx);
 

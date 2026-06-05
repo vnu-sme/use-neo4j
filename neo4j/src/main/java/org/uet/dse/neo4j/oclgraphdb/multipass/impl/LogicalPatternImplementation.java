@@ -12,7 +12,8 @@ import org.uet.dse.neo4j.oclite.ast.ASTBinary;
 public class LogicalPatternImplementation implements PatternImplementation {
   @Override
   public boolean supports(PatternInstance pattern) {
-    return pattern.getKind() == MultiPassPatternKind.LOGICAL_COMPOSITION;
+    return pattern.getKind() == MultiPassPatternKind.LOGICAL_COMPOSITION
+        || pattern.getKind() == MultiPassPatternKind.LOGICAL_WITH_BOOLEAN_ATTRIBUTE;
   }
 
   @Override
@@ -30,6 +31,8 @@ public class LogicalPatternImplementation implements PatternImplementation {
     String expression = switch (binary.op) {
       case "and" -> "(" + left.get().getExpression() + " AND " + right.get().getExpression() + ")";
       case "or" -> "(" + left.get().getExpression() + " OR " + right.get().getExpression() + ")";
+      case "xor" -> "((" + left.get().getExpression() + " AND NOT (" + right.get().getExpression()
+          + ")) OR (NOT (" + left.get().getExpression() + ") AND " + right.get().getExpression() + "))";
       case "implies" -> "((NOT (" + left.get().getExpression() + ")) OR " + right.get().getExpression() + ")";
       default -> null;
     };

@@ -28,11 +28,11 @@ public class BinaryExpression implements ExpressionNode {
             return compareNumbers(lVal, rVal, op);
         }
 
-        if (op.equals("+") || op.equals("-") || op.equals("*") || op.equals("/")) {
+        if (op.equals("+") || op.equals("-") || op.equals("*") || op.equals("/") || op.equals("div")) {
             return calculateNumbers(lVal, rVal, op);
         }
 
-        if (op.equals("and") || op.equals("or") || op.equals("implies")) {
+        if (op.equals("and") || op.equals("or") || op.equals("xor") || op.equals("implies")) {
             return evaluateLogic(lVal, rVal, op);
         }
 
@@ -90,6 +90,9 @@ public class BinaryExpression implements ExpressionNode {
             case "/":
                 if (n2 == 0) throw new ArithmeticException("Lỗi chia cho 0");
                 return n1 / n2;
+            case "div":
+                if (n2 == 0) throw new ArithmeticException("Lỗi chia cho 0");
+                return (double) ((long) n1 / (long) n2);
         }
         return null;
     }
@@ -101,6 +104,7 @@ public class BinaryExpression implements ExpressionNode {
       return switch (op) {
         case "and" -> b1 && b2;
         case "or" -> b1 || b2;
+        case "xor" -> b1 ^ b2;
         case "implies" ->
           //A implies B  <=>  !A or B
             !b1 || b2;

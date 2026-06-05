@@ -47,6 +47,9 @@ public class TerminalCompositionPass implements PatternPass {
   }
 
   private boolean isTerminal(String operation) {
-    return "size".equals(operation) || "isEmpty".equals(operation) || "isNotEmpty".equals(operation);
+    return "size".equals(operation)
+        || "isEmpty".equals(operation)
+        || "isNotEmpty".equals(operation)
+        || "notEmpty".equals(operation);
   }
 }

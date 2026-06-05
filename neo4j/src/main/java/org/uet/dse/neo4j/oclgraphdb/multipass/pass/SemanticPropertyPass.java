@@ -11,6 +11,7 @@ import org.uet.dse.neo4j.oclgraphdb.multipass.PatternPass;
 import org.uet.dse.neo4j.oclgraphdb.plan.ExpressionKind;
 import org.uet.dse.neo4j.oclite.ast.ASTNode;
 import org.uet.dse.neo4j.oclite.ast.ASTProperty;
+import org.uet.dse.neo4j.oclite.ast.ASTQualifiedNavigation;
 
 public class SemanticPropertyPass implements PatternPass {
   @Override
@@ -22,6 +23,11 @@ public class SemanticPropertyPass implements PatternPass {
   public int apply(PatternGraph graph, MultiPassPatternContext context, int passNumber) {
     int added = 0;
     for (ASTNode node : AstPatternSupport.flatten(graph.getRoot())) {
+      if (node instanceof ASTQualifiedNavigation navigation) {
+        added += addQualifiedNavigation(graph, navigation, context, passNumber);
+        continue;
+      }
+
       if (!(node instanceof ASTProperty property)) continue;
 
       Optional<String> sourceType;
@@ -37,6 +43,7 @@ public class SemanticPropertyPass implements PatternPass {
 
       if (attribute.isPresent()) {
         PropertyDescriptor descriptor = attribute.get();
+        boolean booleanAttribute = !descriptor.isCollection() && isBooleanType(descriptor.getValueType());
         PatternInstance.Builder builder = PatternInstance.builder(MultiPassPatternKind.ATTRIBUTE_ACCESS, node)
             .label(sourceType.get() + "." + property.name)
             .outputKind(descriptor.isCollection() ? ExpressionKind.COLLECTION : ExpressionKind.VALUE)
@@ -48,6 +55,20 @@ public class SemanticPropertyPass implements PatternPass {
             .metadata("valueType", descriptor.getValueType())
             .metadata("collection", descriptor.isCollection());
         if (graph.add(builder, passNumber).isPresent()) added++;
+
+        if (booleanAttribute) {
+          PatternInstance.Builder booleanBuilder = PatternInstance.builder(MultiPassPatternKind.BOOLEAN_ATTRIBUTE_ACCESS, node)
+              .label(sourceType.get() + "." + property.name)
+              .outputKind(ExpressionKind.BOOLEAN)
+              .score(1650)
+              .exactSemantic(true)
+              .metadata("sourceType", sourceType.get())
+              .metadata("ownerClass", descriptor.getOwnerClassName())
+              .metadata("property", property.name)
+              .metadata("valueType", descriptor.getValueType())
+              .metadata("collection", false);
+          if (graph.add(booleanBuilder, passNumber).isPresent()) added++;
+        }
       }
 
       if (navigation.isPresent()) {
@@ -75,5 +96,44 @@ public class SemanticPropertyPass implements PatternPass {
       }
     }
     return added;
+  }
+
+  private int addQualifiedNavigation(
+      PatternGraph graph,
+      ASTQualifiedNavigation navigation,
+      MultiPassPatternContext context,
+      int passNumber
+  ) {
+    Optional<String> sourceType;
+    try {
+      sourceType = AstPatternSupport.inferNodeType(navigation.source, context.compileContext());
+    } catch (RuntimeException ex) {
+      sourceType = Optional.empty();
+    }
+    if (sourceType.isEmpty()) return 0;
+
+    Optional<PropertyDescriptor> descriptor = context.compileContext()
+        .resolver()
+        .resolveNavigation(sourceType.get(), navigation.roleName);
+    if (descriptor.isEmpty()) return 0;
+
+    PatternInstance.Builder builder = PatternInstance.builder(MultiPassPatternKind.QUALIFIED_NAVIGATION, navigation)
+        .label(sourceType.get() + "." + navigation.roleName + "[qualified]")
+        .outputKind(descriptor.get().isCollection() ? ExpressionKind.COLLECTION : ExpressionKind.NODE)
+        .score(1580)
+        .exactSemantic(true)
+        .metadata("sourceType", sourceType.get())
+        .metadata("ownerClass", descriptor.get().getOwnerClassName())
+        .metadata("role", navigation.roleName)
+        .metadata("qualified", true)
+        .metadata("targetClass", descriptor.get().getTargetClassName().orElse(""))
+        .metadata("collection", descriptor.get().isCollection());
+    return graph.add(builder, passNumber).isPresent() ? 1 : 0;
+  }
+
+  private boolean isBooleanType(String valueType) {
+    if (valueType == null) return false;
+    String normalized = valueType.trim().toLowerCase();
+    return "boolean".equals(normalized) || "bool".equals(normalized);
   }
 }

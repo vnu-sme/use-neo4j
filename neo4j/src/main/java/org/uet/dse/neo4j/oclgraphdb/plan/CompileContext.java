@@ -18,6 +18,7 @@ public class CompileContext {
   private final Set<String> rootVariables;
   private final Map<String, String> objectBindings;
   private final Map<String, String> variableTypes;
+  private final Map<String, CypherExpression> expressionBindings;
   private final Deque<Set<String>> localScopes;
 
   private CompileContext(
@@ -28,6 +29,7 @@ public class CompileContext {
       Set<String> rootVariables,
       Map<String, String> objectBindings,
       Map<String, String> variableTypes,
+      Map<String, CypherExpression> expressionBindings,
       Deque<Set<String>> localScopes
   ) {
     this.modelName = modelName;
@@ -37,6 +39,7 @@ public class CompileContext {
     this.rootVariables = rootVariables;
     this.objectBindings = objectBindings;
     this.variableTypes = variableTypes;
+    this.expressionBindings = expressionBindings;
     this.localScopes = localScopes;
   }
 
@@ -45,13 +48,23 @@ public class CompileContext {
     params.put("modelName", modelName);
     Deque<Set<String>> scopes = new ArrayDeque<>();
     scopes.push(new LinkedHashSet<>());
-    return new CompileContext(modelName, resolver, new NameAllocator(), params, new LinkedHashSet<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), scopes);
+    return new CompileContext(
+        modelName,
+        resolver,
+        new NameAllocator(),
+        params,
+        new LinkedHashSet<>(),
+        new LinkedHashMap<>(),
+        new LinkedHashMap<>(),
+        new LinkedHashMap<>(),
+        scopes
+    );
   }
 
   public CompileContext withRootVariable(String name) {
     Set<String> roots = new LinkedHashSet<>(rootVariables);
     roots.add(name);
-    return new CompileContext(modelName, resolver, names, params, roots, copyObjectBindings(), copyVariableTypes(), copyScopes());
+    return new CompileContext(modelName, resolver, names, params, roots, copyObjectBindings(), copyVariableTypes(), copyExpressionBindings(), copyScopes());
   }
 
   public CompileContext withRootVariable(String name, String typeName) {
@@ -61,7 +74,7 @@ public class CompileContext {
     if (typeName != null && !typeName.isBlank()) {
       types.put(name, typeName);
     }
-    return new CompileContext(modelName, resolver, names, params, roots, copyObjectBindings(), types, copyScopes());
+    return new CompileContext(modelName, resolver, names, params, roots, copyObjectBindings(), types, copyExpressionBindings(), copyScopes());
   }
 
   public CompileContext withBoundObject(String variableName, String objectId) {
@@ -71,7 +84,7 @@ public class CompileContext {
     bindings.put(variableName, objectId);
     Map<String, String> types = copyVariableTypes();
     resolver.objectClass(objectId).ifPresent(type -> types.put(variableName, type));
-    return new CompileContext(modelName, resolver, names, params, roots, bindings, types, copyScopes());
+    return new CompileContext(modelName, resolver, names, params, roots, bindings, types, copyExpressionBindings(), copyScopes());
   }
 
   public CompileContext enterScope(String name) {
@@ -87,7 +100,25 @@ public class CompileContext {
     if (typeName != null && !typeName.isBlank()) {
       types.put(name, typeName);
     }
-    return new CompileContext(modelName, resolver, names, params, rootVariables, copyObjectBindings(), types, scopes);
+    return new CompileContext(modelName, resolver, names, params, rootVariables, copyObjectBindings(), types, copyExpressionBindings(), scopes);
+  }
+
+  public CompileContext withExpressionBinding(String name, CypherExpression expression) {
+    return withExpressionBinding(name, expression, null);
+  }
+
+  public CompileContext withExpressionBinding(String name, CypherExpression expression, String typeName) {
+    Deque<Set<String>> scopes = copyScopes();
+    Set<String> top = new LinkedHashSet<>();
+    top.add(name);
+    scopes.push(top);
+    Map<String, CypherExpression> expressions = copyExpressionBindings();
+    expressions.put(name, expression);
+    Map<String, String> types = copyVariableTypes();
+    if (typeName != null && !typeName.isBlank()) {
+      types.put(name, typeName);
+    }
+    return new CompileContext(modelName, resolver, names, params, rootVariables, copyObjectBindings(), types, expressions, scopes);
   }
 
   public boolean isLocalVariable(String name) {
@@ -116,8 +147,25 @@ public class CompileContext {
     return objectBindings.get(variableName);
   }
 
+  public boolean hasExpressionBinding(String variableName) {
+    return expressionBindings.containsKey(variableName);
+  }
+
+  public CypherExpression expressionBinding(String variableName) {
+    return expressionBindings.get(variableName);
+  }
+
   public java.util.Optional<String> variableType(String variableName) {
     return java.util.Optional.ofNullable(variableTypes.get(variableName));
+  }
+
+  public List<String> visibleVariables() {
+    List<String> variables = new ArrayList<>();
+    for (Set<String> scope : localScopes) {
+      variables.addAll(scope);
+    }
+    variables.addAll(rootVariables);
+    return List.copyOf(variables);
   }
 
   public String getModelName() {
@@ -147,6 +195,10 @@ public class CompileContext {
 
   private Map<String, String> copyVariableTypes() {
     return new LinkedHashMap<>(variableTypes);
+  }
+
+  private Map<String, CypherExpression> copyExpressionBindings() {
+    return new LinkedHashMap<>(expressionBindings);
   }
 
   private boolean isIteratorVariable(String name) {

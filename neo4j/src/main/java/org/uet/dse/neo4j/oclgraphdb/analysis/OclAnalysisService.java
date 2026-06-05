@@ -18,17 +18,11 @@ import org.uet.dse.neo4j.oclgraphdb.multipass.PatternGraph;
 import org.uet.dse.neo4j.oclgraphdb.multipass.PatternInstance;
 import org.uet.dse.neo4j.oclgraphdb.pattern.PatternPlanner;
 import org.uet.dse.neo4j.oclgraphdb.plan.CompileContext;
+import org.uet.dse.neo4j.oclgraphdb.plan.CypherExpression;
 import org.uet.dse.neo4j.oclgraphdb.plan.ExpectedKind;
+import org.uet.dse.neo4j.oclgraphdb.plan.ExpressionKind;
 import org.uet.dse.neo4j.oclgraphdb.plan.PlanCandidate;
-import org.uet.dse.neo4j.oclite.ast.ASTBinary;
-import org.uet.dse.neo4j.oclite.ast.ASTCollectionOp;
-import org.uet.dse.neo4j.oclite.ast.ASTContext;
-import org.uet.dse.neo4j.oclite.ast.ASTExpression;
-import org.uet.dse.neo4j.oclite.ast.ASTIterator;
-import org.uet.dse.neo4j.oclite.ast.ASTMethodCall;
-import org.uet.dse.neo4j.oclite.ast.ASTNode;
-import org.uet.dse.neo4j.oclite.ast.ASTNot;
-import org.uet.dse.neo4j.oclite.ast.ASTProperty;
+import org.uet.dse.neo4j.oclite.ast.*;
 
 public class OclAnalysisService {
   private static final int MAX_CANDIDATES_PER_NODE = 6;
@@ -66,7 +60,7 @@ public class OclAnalysisService {
     SemanticResolver resolver = resolverFactory.apply(modelName);
     CompileContext context = createRootContext(modelName, resolver, options);
     CompileContext planningContext = ast instanceof ASTContext astContext
-        ? context.withRootVariable("self", astContext.className)
+        ? contextWithSelf(astContext, context)
         : context;
     MultiPassPatternPlan multiPassPlan = multiPassPlanner.plan(ast, planningContext, multiPassOptions(options));
     AtomicInteger ids = new AtomicInteger(1);
@@ -107,7 +101,7 @@ public class OclAnalysisService {
     List<OclAstAnalysisNode> children = new ArrayList<>();
 
     if (node instanceof ASTContext astContext) {
-      CompileContext selfContext = context.withRootVariable("self", astContext.className);
+      CompileContext selfContext = contextWithSelf(astContext, context);
       children.add(analyzeNode(astContext.expression, selfContext, patternGraph, depth + 1, ids));
     } else if (node instanceof ASTBinary binary) {
       children.add(analyzeNode(binary.left, context, patternGraph, depth + 1, ids));
@@ -128,6 +122,36 @@ public class OclAnalysisService {
       children.add(analyzeNode(iterator.source, context, patternGraph, depth + 1, ids));
       CompileContext iteratorContext = iteratorContext(iterator, context, notes);
       children.add(analyzeNode(iterator.body, iteratorContext, patternGraph, depth + 1, ids));
+    } else if (node instanceof ASTQuery query) {
+      children.add(analyzeNode(query.source, context, patternGraph, depth + 1, ids));
+      CompileContext queryContext = queryContext(query, context, notes);
+      children.add(analyzeNode(query.body, queryContext, patternGraph, depth + 1, ids));
+    } else if (node instanceof ASTIterate iterate) {
+      children.add(analyzeNode(iterate.source, context, patternGraph, depth + 1, ids));
+      children.add(analyzeNode(iterate.accumulator.value, context, patternGraph, depth + 1, ids));
+      CompileContext iterateContext = context.enterScope(iterate.iterator.name, iterate.iterator.typeName)
+          .enterScope(iterate.accumulator.variable.name, iterate.accumulator.variable.typeName);
+      children.add(analyzeNode(iterate.body, iterateContext, patternGraph, depth + 1, ids));
+    } else if (node instanceof ASTLet let) {
+      CompileContext scoped = context;
+      for (ASTLetBinding binding : let.bindings) {
+        children.add(analyzeNode(binding.value, scoped, patternGraph, depth + 1, ids));
+        scoped = bindLetForAnalysis(binding, scoped);
+      }
+      children.add(analyzeNode(let.body, scoped, patternGraph, depth + 1, ids));
+    } else if (node instanceof ASTIf ifNode) {
+      children.add(analyzeNode(ifNode.condition, context, patternGraph, depth + 1, ids));
+      children.add(analyzeNode(ifNode.thenExpression, context, patternGraph, depth + 1, ids));
+      children.add(analyzeNode(ifNode.elseExpression, context, patternGraph, depth + 1, ids));
+    } else if (node instanceof ASTUnary unary) {
+      children.add(analyzeNode(unary.expression, context, patternGraph, depth + 1, ids));
+    } else if (node instanceof ASTCollectionLiteral literal) {
+      for (ASTExpression item : literal.items) {
+        children.add(analyzeNode(item, context, patternGraph, depth + 1, ids));
+      }
+    } else if (node instanceof ASTRange range) {
+      children.add(analyzeNode(range.start, context, patternGraph, depth + 1, ids));
+      children.add(analyzeNode(range.end, context, patternGraph, depth + 1, ids));
     } else if (node instanceof ASTNot not) {
       children.add(analyzeNode(not.expression, context, patternGraph, depth + 1, ids));
     }
@@ -157,6 +181,44 @@ public class OclAnalysisService {
       notes.add("Iterator variable type inference failed: " + ex.getMessage());
       return context.enterScope(iterator.iteratorName);
     }
+  }
+
+  private CompileContext queryContext(ASTQuery query, CompileContext context, List<String> notes) {
+    CompileContext scoped = context;
+    String inferredType = null;
+    try {
+      inferredType = AstPatternSupport.inferCollectionElementType(query.source, context).orElse(null);
+    } catch (RuntimeException ex) {
+      notes.add("Query variable type inference failed: " + ex.getMessage());
+    }
+
+    if (query.variables.isEmpty()) {
+      return scoped.enterScope("it", inferredType);
+    }
+    for (ASTVarDecl variable : query.variables) {
+      scoped = scoped.enterScope(variable.name, variable.hasType() ? variable.typeName : inferredType);
+    }
+    return scoped;
+  }
+
+  private CompileContext bindLetForAnalysis(ASTLetBinding binding, CompileContext context) {
+    CypherExpression expression;
+    try {
+      expression = planner.plan(binding.value, context, ExpectedKind.ANY)
+          .map(PlanCandidate::expression)
+          .orElse(new CypherExpression("null", ExpressionKind.VALUE));
+    } catch (RuntimeException ex) {
+      expression = new CypherExpression("null", ExpressionKind.VALUE);
+    }
+    return context.withExpressionBinding(binding.variable.name, expression, binding.variable.typeName);
+  }
+
+  private CompileContext contextWithSelf(ASTContext ast, CompileContext context) {
+    CompileContext scoped = context.withRootVariable("self", ast.className);
+    if (ast.contextVariableName != null && !ast.contextVariableName.isBlank()) {
+      scoped = scoped.withExpressionBinding(ast.contextVariableName, new CypherExpression("self", ExpressionKind.NODE), ast.className);
+    }
+    return scoped;
   }
 
   private List<OclPatternCandidateAnalysis> collectCandidates(

@@ -42,7 +42,7 @@ public class MultiPassCypherCompiler {
           .or(() -> bestBooleanRoot(plan, astContext.expression));
       if (predicatePattern.isEmpty()) return Optional.empty();
 
-      CompileContext scoped = context.withRootVariable("self", astContext.className);
+      CompileContext scoped = contextWithSelf(astContext, context);
       Optional<CypherExpression> predicate = compileExpression(predicatePattern.get(), scoped, ExpectedKind.BOOLEAN);
       return predicate.map(expr -> CypherPlan.validation(astContext.className, expr, scoped));
     }
@@ -121,5 +121,13 @@ public class MultiPassCypherCompiler {
             || pattern.getKind() == MultiPassPatternKind.NEGATION
             || pattern.getKind() == MultiPassPatternKind.QUANTIFIER)
         .max(Comparator.comparingInt(PatternInstance::getScore));
+  }
+
+  private CompileContext contextWithSelf(ASTContext ast, CompileContext context) {
+    CompileContext scoped = context.withRootVariable("self", ast.className);
+    if (ast.contextVariableName != null && !ast.contextVariableName.isBlank()) {
+      scoped = scoped.withExpressionBinding(ast.contextVariableName, new CypherExpression("self", ExpressionKind.NODE), ast.className);
+    }
+    return scoped;
   }
 }

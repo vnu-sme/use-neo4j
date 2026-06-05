@@ -10,20 +10,7 @@ import org.uet.dse.neo4j.oclgraphdb.multipass.PatternPass;
 import org.uet.dse.neo4j.oclgraphdb.plan.ExpectedKind;
 import org.uet.dse.neo4j.oclgraphdb.plan.ExpressionKind;
 import org.uet.dse.neo4j.oclgraphdb.plan.PlanCandidate;
-import org.uet.dse.neo4j.oclite.ast.ASTBinary;
-import org.uet.dse.neo4j.oclite.ast.ASTBooleanLiteral;
-import org.uet.dse.neo4j.oclite.ast.ASTCollectionOp;
-import org.uet.dse.neo4j.oclite.ast.ASTContext;
-import org.uet.dse.neo4j.oclite.ast.ASTIntegerLiteral;
-import org.uet.dse.neo4j.oclite.ast.ASTIterator;
-import org.uet.dse.neo4j.oclite.ast.ASTMethodCall;
-import org.uet.dse.neo4j.oclite.ast.ASTNode;
-import org.uet.dse.neo4j.oclite.ast.ASTNot;
-import org.uet.dse.neo4j.oclite.ast.ASTNullLiteral;
-import org.uet.dse.neo4j.oclite.ast.ASTProperty;
-import org.uet.dse.neo4j.oclite.ast.ASTRealLiteral;
-import org.uet.dse.neo4j.oclite.ast.ASTStringLiteral;
-import org.uet.dse.neo4j.oclite.ast.ASTVar;
+import org.uet.dse.neo4j.oclite.ast.*;
 
 public class PrimitivePatternPass implements PatternPass {
   @Override
@@ -65,7 +52,7 @@ public class PrimitivePatternPass implements PatternPass {
     if (isLiteral(node)) {
       return PatternInstance.builder(MultiPassPatternKind.LITERAL, node)
           .label(AstPatternSupport.labelOf(node))
-          .outputKind(ExpressionKind.VALUE)
+          .outputKind(node instanceof ASTBooleanLiteral ? ExpressionKind.BOOLEAN : ExpressionKind.VALUE)
           .score(520)
           .exactSemantic(true);
     }
@@ -73,6 +60,13 @@ public class PrimitivePatternPass implements PatternPass {
       return PatternInstance.builder(MultiPassPatternKind.PROPERTY_ACCESS, node)
           .label("." + property.name)
           .metadata("property", property.name)
+          .score(560);
+    }
+    if (node instanceof ASTQualifiedNavigation navigation) {
+      return PatternInstance.builder(MultiPassPatternKind.PROPERTY_ACCESS, node)
+          .label("." + navigation.roleName + "[...]")
+          .metadata("property", navigation.roleName)
+          .metadata("qualified", true)
           .score(560);
     }
     if (node instanceof ASTMethodCall methodCall) {
@@ -93,6 +87,48 @@ public class PrimitivePatternPass implements PatternPass {
           .metadata("operation", iterator.operation)
           .metadata("iterator", iterator.iteratorName)
           .score(560);
+    }
+    if (node instanceof ASTQuery query) {
+      return PatternInstance.builder(MultiPassPatternKind.QUERY, node)
+          .label("->" + query.operation + "(" + query.primaryVariableName() + " | ...)")
+          .metadata("operation", query.operation)
+          .metadata("iterator", query.primaryVariableName())
+          .score(560);
+    }
+    if (node instanceof ASTIterate iterate) {
+      return PatternInstance.builder(MultiPassPatternKind.ITERATE, node)
+          .label("->iterate(" + iterate.iterator.name + "; " + iterate.accumulator.variable.name + " | ...)")
+          .metadata("iterator", iterate.iterator.name)
+          .metadata("accumulator", iterate.accumulator.variable.name)
+          .score(540);
+    }
+    if (node instanceof ASTLet) {
+      return PatternInstance.builder(MultiPassPatternKind.LET, node)
+          .label("let")
+          .score(540);
+    }
+    if (node instanceof ASTIf) {
+      return PatternInstance.builder(MultiPassPatternKind.IF, node)
+          .label("if")
+          .score(540);
+    }
+    if (node instanceof ASTUnary unary) {
+      return PatternInstance.builder(MultiPassPatternKind.UNARY, node)
+          .label(unary.operator)
+          .outputKind("not".equals(unary.operator) ? ExpressionKind.BOOLEAN : ExpressionKind.VALUE)
+          .score(540);
+    }
+    if (node instanceof ASTCollectionLiteral literal) {
+      return PatternInstance.builder(MultiPassPatternKind.COLLECTION_LITERAL, node)
+          .label(literal.kind + "{}")
+          .outputKind(ExpressionKind.COLLECTION)
+          .score(540);
+    }
+    if (node instanceof ASTRange) {
+      return PatternInstance.builder(MultiPassPatternKind.RANGE, node)
+          .label("..")
+          .outputKind(ExpressionKind.COLLECTION)
+          .score(540);
     }
     if (node instanceof ASTBinary binary) {
       return PatternInstance.builder(MultiPassPatternKind.BINARY, node)
@@ -140,7 +176,10 @@ public class PrimitivePatternPass implements PatternPass {
         || node instanceof ASTRealLiteral
         || node instanceof ASTStringLiteral
         || node instanceof ASTBooleanLiteral
-        || node instanceof ASTNullLiteral;
+        || node instanceof ASTNullLiteral
+        || node instanceof ASTUndefinedLiteral
+        || node instanceof ASTEnumLiteral
+        || node instanceof ASTTypeLiteral;
   }
 
   private String preview(String value) {

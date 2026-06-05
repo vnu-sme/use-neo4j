@@ -46,9 +46,19 @@ public class CompareCompositionPass implements PatternPass {
     if (left.isEmpty() || right.isEmpty()) return 0;
 
     MultiPassPatternKind kind = MultiPassPatternKind.COMPARE;
-    if (left.get().getKind() == MultiPassPatternKind.ATTRIBUTE_ACCESS || right.get().getKind() == MultiPassPatternKind.ATTRIBUTE_ACCESS) {
+    if (left.get().getKind() == MultiPassPatternKind.ATTRIBUTE_ACCESS
+        || right.get().getKind() == MultiPassPatternKind.ATTRIBUTE_ACCESS
+        || left.get().getKind() == MultiPassPatternKind.BOOLEAN_ATTRIBUTE_ACCESS
+        || right.get().getKind() == MultiPassPatternKind.BOOLEAN_ATTRIBUTE_ACCESS
+        || left.get().getKind() == MultiPassPatternKind.IMPLICIT_ITERATOR_PROPERTY_ACCESS
+        || right.get().getKind() == MultiPassPatternKind.IMPLICIT_ITERATOR_PROPERTY_ACCESS
+        || left.get().getKind() == MultiPassPatternKind.IMPLICIT_SELF_PROPERTY_ACCESS
+        || right.get().getKind() == MultiPassPatternKind.IMPLICIT_SELF_PROPERTY_ACCESS) {
       kind = MultiPassPatternKind.ATTRIBUTE_COMPARE;
-    } else if (left.get().getKind() == MultiPassPatternKind.NAVIGATION_ACCESS || right.get().getKind() == MultiPassPatternKind.NAVIGATION_ACCESS) {
+    } else if (left.get().getKind() == MultiPassPatternKind.NAVIGATION_ACCESS
+        || right.get().getKind() == MultiPassPatternKind.NAVIGATION_ACCESS
+        || left.get().getKind() == MultiPassPatternKind.QUALIFIED_NAVIGATION
+        || right.get().getKind() == MultiPassPatternKind.QUALIFIED_NAVIGATION) {
       kind = MultiPassPatternKind.NAVIGATION_COMPARE;
     }
 
@@ -81,10 +91,17 @@ public class CompareCompositionPass implements PatternPass {
     Optional<PatternInstance> right = bestBooleanLike(graph, binary.right);
     if (left.isEmpty() || right.isEmpty()) return 0;
 
-    PatternInstance.Builder builder = PatternInstance.builder(MultiPassPatternKind.LOGICAL_COMPOSITION, binary)
+    MultiPassPatternKind kind = containsBooleanAttribute(left.get())
+        || containsBooleanAttribute(right.get())
+        ? MultiPassPatternKind.LOGICAL_WITH_BOOLEAN_ATTRIBUTE
+        : MultiPassPatternKind.LOGICAL_COMPOSITION;
+
+    PatternInstance.Builder builder = PatternInstance.builder(kind, binary)
         .label(binary.op)
         .outputKind(ExpressionKind.BOOLEAN)
-        .score(1700 + left.get().getScore() / 10 + right.get().getScore() / 10)
+        .score((kind == MultiPassPatternKind.LOGICAL_WITH_BOOLEAN_ATTRIBUTE ? 1780 : 1700)
+            + left.get().getScore() / 10
+            + right.get().getScore() / 10)
         .exactSemantic(left.get().isExactSemantic() && right.get().isExactSemantic())
         .children(List.of(left.get(), right.get()))
         .metadata("operator", binary.op);
@@ -94,12 +111,26 @@ public class CompareCompositionPass implements PatternPass {
   private Optional<PatternInstance> bestValueLike(PatternGraph graph, ASTNode node) {
     List<MultiPassPatternKind> preferred = new ArrayList<>();
     preferred.add(MultiPassPatternKind.ATTRIBUTE_ACCESS);
+    preferred.add(MultiPassPatternKind.BOOLEAN_ATTRIBUTE_ACCESS);
+    preferred.add(MultiPassPatternKind.IMPLICIT_ITERATOR_PROPERTY_ACCESS);
+    preferred.add(MultiPassPatternKind.IMPLICIT_SELF_PROPERTY_ACCESS);
     preferred.add(MultiPassPatternKind.NAVIGATION_ACCESS);
+    preferred.add(MultiPassPatternKind.QUALIFIED_NAVIGATION);
     preferred.add(MultiPassPatternKind.LITERAL);
     preferred.add(MultiPassPatternKind.VARIABLE);
+    preferred.add(MultiPassPatternKind.FILTERED_TERMINAL);
+    preferred.add(MultiPassPatternKind.FILTERED_SIZE_COMPARE);
+    preferred.add(MultiPassPatternKind.AGGREGATE_FUNCTION);
+    preferred.add(MultiPassPatternKind.AS_SET_SIZE_DISTINCT_COUNT);
+    preferred.add(MultiPassPatternKind.DATE_TIME_OPERATION_MAPPING);
     preferred.add(MultiPassPatternKind.CYPHER_CANDIDATE);
+    preferred.add(MultiPassPatternKind.PARTIAL_RECURSIVE_COMPOSITION);
     return graph.patternsFor(node).stream()
         .filter(pattern -> preferred.contains(pattern.getKind()))
+        .filter(pattern -> pattern.getOutputKind() == null
+            || pattern.getOutputKind() == ExpressionKind.VALUE
+            || pattern.getOutputKind() == ExpressionKind.BOOLEAN
+            || pattern.getOutputKind() == ExpressionKind.NODE)
         .max(java.util.Comparator.comparingInt(PatternInstance::getScore));
   }
 
@@ -110,7 +141,18 @@ public class CompareCompositionPass implements PatternPass {
             || pattern.getKind() == MultiPassPatternKind.ATTRIBUTE_COMPARE
             || pattern.getKind() == MultiPassPatternKind.NAVIGATION_COMPARE
             || pattern.getKind() == MultiPassPatternKind.LOGICAL_COMPOSITION
+            || pattern.getKind() == MultiPassPatternKind.LOGICAL_WITH_BOOLEAN_ATTRIBUTE
             || pattern.getKind() == MultiPassPatternKind.NEGATION)
         .max(java.util.Comparator.comparingInt(PatternInstance::getScore));
+  }
+
+  private boolean containsBooleanAttribute(PatternInstance pattern) {
+    if (pattern.getKind() == MultiPassPatternKind.BOOLEAN_ATTRIBUTE_ACCESS) return true;
+    if ((pattern.getKind() == MultiPassPatternKind.IMPLICIT_ITERATOR_PROPERTY_ACCESS
+        || pattern.getKind() == MultiPassPatternKind.IMPLICIT_SELF_PROPERTY_ACCESS)
+        && pattern.getOutputKind() == ExpressionKind.BOOLEAN) {
+      return true;
+    }
+    return pattern.getChildren().stream().anyMatch(this::containsBooleanAttribute);
   }
 }

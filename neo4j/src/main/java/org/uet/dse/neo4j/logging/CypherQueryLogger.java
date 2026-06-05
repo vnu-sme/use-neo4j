@@ -1,4 +1,4 @@
-package org.uet.dse.neo4j.oclgraphdb;
+package org.uet.dse.neo4j.logging;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -7,19 +7,35 @@ import java.util.Map;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.neo4j.driver.Value;
+import org.uet.dse.neo4j.manager.WorkLogManager;
 
 public final class CypherQueryLogger {
   private CypherQueryLogger() {}
 
+  public static void log(String label, String cypher) {
+    log(label, cypher, Map.of());
+  }
+
+  public static void log(String label, String cypher, Value params) {
+    log(label, cypher, params == null || params.isNull() ? Map.of() : params.asMap());
+  }
+
   public static void log(String label, String cypher, Map<String, Object> params) {
-    System.out.println("\n--- OCLGraphDB Cypher [" + label + "] ---");
-    System.out.println("-- template --");
-    System.out.println(cypher);
-    System.out.println("-- params --");
-    System.out.println(formatParams(params));
-    System.out.println("-- rendered --");
-    System.out.println(render(cypher, params));
-    System.out.println("--- end OCLGraphDB Cypher [" + label + "] ---\n");
+    String logMessage = formatLog(label, cypher, params);
+    System.out.println(logMessage);
+    WorkLogManager.getInstance().log("CYPHER_EXECUTE", logMessage);
+  }
+
+  private static String formatLog(String label, String cypher, Map<String, Object> params) {
+    return "\n--- Cypher [" + label + "] ---\n"
+        + "-- template --\n"
+        + cypher + "\n"
+        + "-- params --\n"
+        + formatParams(params) + "\n"
+        + "-- rendered --\n"
+        + render(cypher, params) + "\n"
+        + "--- end Cypher [" + label + "] ---\n";
   }
 
   public static String render(String cypher, Map<String, Object> params) {

@@ -16,6 +16,17 @@ public class Neo4jRepository {
         this.modelName = modelName;
     }
 
+    private Map<String, Object> params(Object... entries) {
+        if (entries.length % 2 != 0) {
+            throw new IllegalArgumentException("Cypher params must be key/value pairs.");
+        }
+        Map<String, Object> result = new LinkedHashMap<>();
+        for (int i = 0; i < entries.length; i += 2) {
+            result.put((String) entries[i], entries[i + 1]);
+        }
+        return result;
+    }
+
 
     public Node findNodeById(String name) {
         try (Session session = Neo4jDriverManager.getInstance().openSession()) {
@@ -23,7 +34,8 @@ public class Neo4jRepository {
                 String cypher = "MATCH (m:ManageModel {name: $modelName})-[:DefineMetamodels]->()<-[:InstanceOf]-(cls) " +
                     "MATCH (obj {use_id: $name})-[:ObjectInstanceOf]->(cls) " +
                     "RETURN obj";
-                Result res = tx.run(cypher, Values.parameters("modelName", this.modelName, "name", name));
+                Map<String, Object> params = params("modelName", this.modelName, "name", name);
+                Result res = tx.run(cypher, params);
                 return res.hasNext() ? res.next().get("obj").asNode() : null;
             });
         }
@@ -40,10 +52,11 @@ public class Neo4jRepository {
                         "       val.type AS type, " +
                         "       val.isCollection AS isCollection, " +
                         "       collect({node: target, idx: refRel.index}) AS refs";
-                Result res = tx.run(cypher, Values.parameters(
+                Map<String, Object> params = params(
                     "id", sourceNode.id(),
                     "suffix", "_" + attrName
-                ));
+                );
+                Result res = tx.run(cypher, params);
 
                 if (res.hasNext()) {
 //                    org.neo4j.driver.Record record = res.next();
@@ -95,7 +108,8 @@ public class Neo4jRepository {
                         "MATCH (obj {use_id: $varName})-[:ObjectInstanceOf]->(cls) " +
                         "RETURN count(obj) > 0 AS exists";
 
-                Result res = tx.run(cypher, Values.parameters("modelName", this.modelName, "varName", varName));
+                Map<String, Object> params = params("modelName", this.modelName, "varName", varName);
+                Result res = tx.run(cypher, params);
                 return res.single().get("exists").asBoolean();
             });
         }
@@ -120,11 +134,12 @@ public class Neo4jRepository {
                         ") " +
                         "RETURN count(r) > 0 AS isRel";
 
-                Result res = tx.run(cypher, Values.parameters(
+                Map<String, Object> params = params(
                     "modelName", this.modelName,
                     "clsName", sourceClassName,
                     "targetName", name
-                ));
+                );
+                Result res = tx.run(cypher, params);
                 return res.single().get("isRel").asBoolean();
             });
         }
@@ -143,7 +158,8 @@ public class Neo4jRepository {
         try (Session session = Neo4jDriverManager.getInstance().openSession()) {
             return session.executeRead(tx -> {
                 String cypher = "MATCH (o {use_id: $id})-[:ObjectInstanceOf]->(cls) RETURN cls.name";
-                Result res = tx.run(cypher, Map.of("id", objId));
+                Map<String, Object> params = params("id", objId);
+                Result res = tx.run(cypher, params);
                 return res.hasNext() ? res.next().get(0).asString() : null;
             });
         }
@@ -153,7 +169,8 @@ public class Neo4jRepository {
         try (Session session = Neo4jDriverManager.getInstance().openSession()) {
             return session.executeRead(tx -> {
                 String cypher = "MATCH (o) WHERE id(o) = $id MATCH (o)-[:ObjectInstanceOf]->(cls) RETURN cls.name AS className";
-                Result res = tx.run(cypher, Values.parameters("id", objectNode.id()));
+                Map<String, Object> params = params("id", objectNode.id());
+                Result res = tx.run(cypher, params);
                 return res.hasNext() ? res.next().get("className").asString() : null;
             });
         }
@@ -166,7 +183,8 @@ public class Neo4jRepository {
                     "MATCH (o) WHERE id(o) = $id " +
                     "MATCH (o)-[:ObjectInstanceOf]->(cls) " +
                     "RETURN cls.name = $typeName OR EXISTS { MATCH (cls)-[:Extends*1..]->(parent {name: $typeName}) } AS matches";
-                Result res = tx.run(cypher, Values.parameters("id", objectNode.id(), "typeName", typeName));
+                Map<String, Object> params = params("id", objectNode.id(), "typeName", typeName);
+                Result res = tx.run(cypher, params);
                 return res.hasNext() && res.next().get("matches").asBoolean(false);
             });
         }
@@ -180,7 +198,8 @@ public class Neo4jRepository {
                         "WHERE val.name ENDS WITH $attrName " +
                         "RETURN val.value AS value";
 
-                Result res = tx.run(cypher, Values.parameters("id", ownerNode.id(), "attrName", "_" + attrName));
+                Map<String, Object> params = params("id", ownerNode.id(), "attrName", "_" + attrName);
+                Result res = tx.run(cypher, params);
                 if (res.hasNext()) {
                     var v = res.next().get("value");
                     return v.asObject();
@@ -205,10 +224,11 @@ public class Neo4jRepository {
                         ") " +
                         "RETURN t";
 
-                Result res = tx.run(cypher, Values.parameters(
+                Map<String, Object> params = params(
                     "id", startNode.id(),
                     "relType", relationshipType
-                ));
+                );
+                Result res = tx.run(cypher, params);
 
                 List<Node> nodes = new ArrayList<>();
                 while (res.hasNext()) {
@@ -228,10 +248,11 @@ public class Neo4jRepository {
                     "MATCH (obj)-[:ObjectInstanceOf]->(cls) " +
                     "RETURN DISTINCT obj";
 
-                Result res = tx.run(cypher, Values.parameters(
+                Map<String, Object> params = params(
                     "modelName", this.modelName,
                     "className", className
-                ));
+                );
+                Result res = tx.run(cypher, params);
 
                 List<Node> instances = new ArrayList<>();
                 while (res.hasNext()) {
@@ -297,10 +318,11 @@ public class Neo4jRepository {
                         "MATCH (cls {name: $className})-[:InstanceOf]->(meta) " +
                         "RETURN count(cls) > 0 AS exists";
 
-                Result res = tx.run(cypher, Values.parameters(
+                Map<String, Object> params = params(
                     "modelName", this.modelName,
                     "className", className
-                ));
+                );
+                Result res = tx.run(cypher, params);
 
                 return res.single().get("exists").asBoolean();
             });

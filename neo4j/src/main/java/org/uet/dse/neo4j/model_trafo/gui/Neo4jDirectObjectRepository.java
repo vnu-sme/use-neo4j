@@ -16,7 +16,8 @@ public class Neo4jDirectObjectRepository {
         );
 
         try (Session s = Neo4jDriverManager.getInstance().openSession()) {
-            s.run(query, Values.parameters("modelName", modelName, "clsName", className, "useId", useId));
+            Value params = Values.parameters("modelName", modelName, "clsName", className, "useId", useId);
+            s.run(query, params);
         }
     }
 
@@ -63,12 +64,13 @@ public class Neo4jDirectObjectRepository {
 
 
         try (Session s = Neo4jDriverManager.getInstance().openSession()) {
-            s.run(query, Values.parameters(
+            Value params = Values.parameters(
                 "srcOid", srcOid,
                 "tgtOid", tgtOid,
                 "assocName", assocName,
                 "modelName", modelName
-            ));
+            );
+            s.run(query, params);
         }
     }
 
@@ -97,7 +99,8 @@ public class Neo4jDirectObjectRepository {
     public void deleteRegularObject(String useId) {
         String query = "MATCH (o {use_id: $useId, isCorrespondence: false}) DETACH DELETE o";
         try (Session s = Neo4jDriverManager.getInstance().openSession()) {
-            s.run(query, Values.parameters("useId", useId));
+            Value params = Values.parameters("useId", useId);
+            s.run(query, params);
         }
     }
 

@@ -13,7 +13,8 @@ import org.uet.dse.neo4j.oclite.ast.ASTProperty;
 public class AttributeAccessImplementation implements PatternImplementation {
   @Override
   public boolean supports(PatternInstance pattern) {
-    return pattern.getKind() == MultiPassPatternKind.ATTRIBUTE_ACCESS;
+    return pattern.getKind() == MultiPassPatternKind.ATTRIBUTE_ACCESS
+        || pattern.getKind() == MultiPassPatternKind.BOOLEAN_ATTRIBUTE_ACCESS;
   }
 
   @Override
@@ -30,6 +31,9 @@ public class AttributeAccessImplementation implements PatternImplementation {
     String expression = collection
         ? CypherSupport.attributeValues(source.get().getExpression(), property.name, context)
         : CypherSupport.attributeValue(source.get().getExpression(), property.name, context);
+    if (pattern.getKind() == MultiPassPatternKind.BOOLEAN_ATTRIBUTE_ACCESS) {
+      return Optional.of(CypherExpression.combine(CypherSupport.booleanValue(expression), ExpressionKind.BOOLEAN, source.get()));
+    }
     ExpressionKind kind = collection ? ExpressionKind.COLLECTION : ExpressionKind.VALUE;
     return Optional.of(CypherExpression.combine(expression, kind, source.get()));
   }

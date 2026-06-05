@@ -13,7 +13,6 @@ import org.uet.dse.neo4j.query.builder.MetaNodeCypherBuilder;
 import org.uet.dse.neo4j.query.model.MetaNodeDescriptor;
 import org.uet.dse.neo4j.query.model.MetaNodeRegistry;
 import org.uet.dse.neo4j.repo.query.Neo4jModelQuery;
-import org.uet.dse.neo4j.sync.log.LoggingSession;
 import java.util.List;
 import java.util.Map;
 
@@ -165,8 +164,7 @@ public class Neo4jModelRepository {
     private void withSession(java.util.function.Consumer<Session> block) {
         String dbName = Neo4jDriverManager.getInstance().getActiveDatabase();
         try (Session session = driver.session(SessionConfig.forDatabase(dbName))) {
-            Session loggingSession = new LoggingSession(session);
-            block.accept(loggingSession);
+            block.accept(session);
         }
 
     }

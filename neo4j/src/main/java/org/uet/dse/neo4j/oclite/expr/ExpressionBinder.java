@@ -4,9 +4,8 @@ import org.uet.dse.neo4j.oclite.Neo4jRepository;
 import org.uet.dse.neo4j.oclite.ast.*;
 
 
-import org.uet.dse.neo4j.oclite.ast.*;
-
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ExpressionBinder {
     private String modelName;
@@ -20,6 +19,11 @@ public class ExpressionBinder {
     private void enterScope(String varName) {
         Set<String> newScope = new HashSet<>();
         newScope.add(varName);
+        scopeStack.push(newScope);
+    }
+
+    private void enterScope(Collection<String> varNames) {
+        Set<String> newScope = new HashSet<>(varNames);
         scopeStack.push(newScope);
     }
 
@@ -38,6 +42,18 @@ public class ExpressionBinder {
 //        if (node instanceof ASTLiteral) {
 //            return new ConstantExpression(((ASTLiteral) node).value);
 //        }
+        if (node instanceof ASTContext) {
+            ASTContext context = (ASTContext) node;
+            List<String> aliases = new ArrayList<>();
+            aliases.add("self");
+            if (context.contextVariableName != null && !context.contextVariableName.isBlank()) {
+                aliases.add(context.contextVariableName);
+            }
+            enterScope(aliases);
+            ExpressionNode expression = bind(context.expression);
+            exitScope();
+            return expression;
+        }
 
         //p1
         if (node instanceof ASTVar) {
@@ -63,7 +79,7 @@ public class ExpressionBinder {
             ASTMethodCall mc = (ASTMethodCall) node;
             ExpressionNode sourceExec = bind(mc.source);
 
-            if (mc.methodName.equalsIgnoreCase("allInstances")) {
+            if (mc.methodName.equalsIgnoreCase("allInstances") || mc.methodName.equalsIgnoreCase("allInstance")) {
                 // Kiểm tra xem vế trước có phải là một Class không
                 if (sourceExec instanceof TypeExpression) {
                     String className = ((TypeExpression) sourceExec).getTypeName();
@@ -73,6 +89,17 @@ public class ExpressionBinder {
                 }
             }
             String mName = mc.methodName;
+            if (mName.equals("equals") || mName.equals("after") || mName.equals("before")) {
+                if (mc.args.size() != 1) {
+                    throw new RuntimeException(mName + "() expects one argument.");
+                }
+                String operator = switch (mName) {
+                    case "after" -> ">";
+                    case "before" -> "<";
+                    default -> "=";
+                };
+                return new BinaryExpression(sourceExec, operator, bind(mc.args.get(0)));
+            }
             if (mName.equals("isDefined")) {
                 return new IsDefinedExpression(sourceExec, true);
             }
@@ -80,11 +107,25 @@ public class ExpressionBinder {
                 return new IsDefinedExpression(sourceExec, false);
             }
             else if (mName.equals("oclIsTypeOf") || mName.equals("oclIsKindOf")) {
-                if (mc.args.size() != 1 || !(mc.args.get(0) instanceof ASTVar)) {
+                String typeName = typeNameArg(mc.args);
+                if (typeName == null) {
                     throw new RuntimeException(mName + " expects a type name.");
                 }
-                String typeName = ((ASTVar) mc.args.get(0)).name;
                 return new TypeCheckExpression(sourceExec, typeName, mName.equals("oclIsKindOf"));
+            }
+            else if (mName.equals("oclAsType")) {
+                String typeName = typeNameArg(mc.args);
+                if (typeName == null) {
+                    throw new RuntimeException(mName + " expects a type name.");
+                }
+                return new TypeOperationExpression(sourceExec, typeName, true, false);
+            }
+            else if (mName.equals("selectByType") || mName.equals("selectByKind")) {
+                String typeName = typeNameArg(mc.args);
+                if (typeName == null) {
+                    throw new RuntimeException(mName + " expects a type name.");
+                }
+                return new TypeOperationExpression(sourceExec, typeName, mName.equals("selectByKind"), true);
             }
             else if (mc.args.isEmpty()) {
                 if (neo4jRepository.isRelationship(sourceExec, mName)) {
@@ -101,7 +142,8 @@ public class ExpressionBinder {
             ASTProperty prop = (ASTProperty) node;
             ExpressionNode sourceNode = bind(prop.source);
 
-            if (sourceNode instanceof TypeExpression && prop.name.equalsIgnoreCase("allInstances")) {
+            if (sourceNode instanceof TypeExpression
+                && (prop.name.equalsIgnoreCase("allInstances") || prop.name.equalsIgnoreCase("allInstance"))) {
                 return new AllInstancesExpression(((TypeExpression) sourceNode).getTypeName());
             }
 
@@ -110,6 +152,15 @@ public class ExpressionBinder {
             } else {
                 return new PropertyExpression(sourceNode, prop.name);
             }
+        }
+
+        if (node instanceof ASTQualifiedNavigation) {
+            ASTQualifiedNavigation navigation = (ASTQualifiedNavigation) node;
+            ExpressionNode sourceNode = bind(navigation.source);
+            if (neo4jRepository.isRelationship(sourceNode, navigation.roleName)) {
+                return new NavigationExpression(sourceNode, navigation.roleName);
+            }
+            return new PropertyExpression(sourceNode, navigation.roleName);
         }
 
 //        if (node instanceof ASTBinary) {
@@ -122,10 +173,6 @@ public class ExpressionBinder {
             ASTBinary bin = (ASTBinary) node;
             ExpressionNode left = bind(bin.left);
             ExpressionNode right = bind(bin.right);
-
-            if (bin.op.equals(">") && (bin.right instanceof ASTStringLiteral)) {
-                throw new RuntimeException("nah");
-            }
 
             return new BinaryExpression(left, bin.op, right);
         }
@@ -150,9 +197,29 @@ public class ExpressionBinder {
             return new ConstantExpression(null);
         }
 
+        if (node instanceof ASTUndefinedLiteral) {
+            return new ConstantExpression(null);
+        }
+
+        if (node instanceof ASTEnumLiteral) {
+            return new ConstantExpression(((ASTEnumLiteral) node).value());
+        }
+
+        if (node instanceof ASTTypeLiteral) {
+            return new TypeExpression(((ASTTypeLiteral) node).typeName);
+        }
+
         if (node instanceof ASTCollectionOp) {
             ASTCollectionOp colAST = (ASTCollectionOp) node;
             ExpressionNode sourceNode = bind(colAST.source);
+
+            if (colAST.opName.equals("selectByType") || colAST.opName.equals("selectByKind")) {
+                String typeName = typeNameArg(colAST.args);
+                if (typeName == null) {
+                    throw new RuntimeException(colAST.opName + " expects a type name.");
+                }
+                return new TypeOperationExpression(sourceNode, typeName, colAST.opName.equals("selectByKind"), true);
+            }
 
             List<ExpressionNode> bindedArgs = new ArrayList<>();
             for (ASTNode arg : colAST.args) {
@@ -160,6 +227,70 @@ public class ExpressionBinder {
             }
 
             return new CollectionOpExpression(sourceNode, colAST.opName, bindedArgs);
+        }
+
+        if (node instanceof ASTLet) {
+            ASTLet let = (ASTLet) node;
+            List<LetExpression.Binding> bindings = new ArrayList<>();
+            int openedScopes = 0;
+            for (ASTLetBinding binding : let.bindings) {
+                bindings.add(new LetExpression.Binding(binding.variable.name, bind(binding.value)));
+                enterScope(binding.variable.name);
+                openedScopes++;
+            }
+            ExpressionNode body = bind(let.body);
+            for (int i = 0; i < openedScopes; i++) {
+                exitScope();
+            }
+            return new LetExpression(bindings, body);
+        }
+
+        if (node instanceof ASTIf) {
+            ASTIf ifNode = (ASTIf) node;
+            return new IfExpression(bind(ifNode.condition), bind(ifNode.thenExpression), bind(ifNode.elseExpression));
+        }
+
+        if (node instanceof ASTUnary) {
+            ASTUnary unary = (ASTUnary) node;
+            return new UnaryExpression(unary.operator, bind(unary.expression));
+        }
+
+        if (node instanceof ASTCollectionLiteral) {
+            ASTCollectionLiteral literal = (ASTCollectionLiteral) node;
+            List<ExpressionNode> items = new ArrayList<>();
+            for (ASTExpression item : literal.items) {
+                items.add(bind(item));
+            }
+            return new CollectionLiteralExpression(literal.kind, items);
+        }
+
+        if (node instanceof ASTRange) {
+            ASTRange range = (ASTRange) node;
+            return new RangeExpression(bind(range.start), bind(range.end));
+        }
+
+        if (node instanceof ASTQuery) {
+            ASTQuery query = (ASTQuery) node;
+            ExpressionNode sourceNode = bind(query.source);
+            List<String> varNames = query.variables.stream().map(v -> v.name).collect(Collectors.toList());
+            if (!varNames.isEmpty()) {
+                enterScope(varNames);
+            } else {
+                enterScope("it");
+            }
+            ExpressionNode bodyNode = bind(query.body);
+            exitScope();
+            return new QueryExpression(sourceNode, query.operation, varNames, bodyNode);
+        }
+
+        if (node instanceof ASTIterate) {
+            ASTIterate iterate = (ASTIterate) node;
+            ExpressionNode sourceNode = bind(iterate.source);
+            ExpressionNode accumulatorInit = bind(iterate.accumulator.value);
+            enterScope(List.of(iterate.iterator.name, iterate.accumulator.variable.name));
+            ExpressionNode bodyNode = bind(iterate.body);
+            exitScope();
+            return new IterateExpression(sourceNode, iterate.iterator.name, iterate.accumulator.variable.name, accumulatorInit, bodyNode);
         }
 
         if (node instanceof ASTIterator) {
@@ -202,6 +333,21 @@ public class ExpressionBinder {
 
 
         throw new RuntimeException("Không hỗ trợ chuyển đổi Node: " + node.getClass().getSimpleName());
+    }
+
+    private String typeNameArg(List<ASTExpression> args) {
+        if (args.size() != 1) return null;
+        ASTExpression arg = args.get(0);
+        if (arg instanceof ASTTypeLiteral) {
+            return ((ASTTypeLiteral) arg).typeName;
+        }
+        if (arg instanceof ASTVar) {
+            return ((ASTVar) arg).name;
+        }
+        if (arg instanceof ASTStringLiteral) {
+            return ((ASTStringLiteral) arg).value;
+        }
+        return null;
     }
 
 }

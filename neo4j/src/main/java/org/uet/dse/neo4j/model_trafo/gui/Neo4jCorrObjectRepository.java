@@ -18,7 +18,8 @@ public class Neo4jCorrObjectRepository {
         );
 
         try (Session s = Neo4jDriverManager.getInstance().openSession()) {
-            s.run(query, Values.parameters("corrModel", corrModelName, "clsName", clsName, "objName", objName));
+            Value params = Values.parameters("corrModel", corrModelName, "clsName", clsName, "objName", objName);
+            s.run(query, params);
         }
     }
 
@@ -49,7 +50,8 @@ public class Neo4jCorrObjectRepository {
                 "    l.targetClassName = metaT.name";
 
         try (Session s = Neo4jDriverManager.getInstance().openSession()) {
-            s.run(query, Values.parameters("sId", sId, "tId", tId, "name", assocName));
+            Value params = Values.parameters("sId", sId, "tId", tId, "name", assocName);
+            s.run(query, params);
         }
     }
 
@@ -64,7 +66,8 @@ public class Neo4jCorrObjectRepository {
     public void deleteLink(String name, String src, String tgt) {
         String query = "MATCH (a {use_id: $src})-[r {name: $name}]->(b {use_id: $tgt}) DELETE r";
         try (Session s = Neo4jDriverManager.getInstance().openSession()) {
-            s.run(query, Values.parameters("name", name, "src", src, "tgt", tgt));
+            Value params = Values.parameters("name", name, "src", src, "tgt", tgt);
+            s.run(query, params);
         }
     }
 
@@ -72,7 +75,8 @@ public class Neo4jCorrObjectRepository {
     public void deleteObject(String id) {
         String query = "MATCH (o {use_id: $id, isCorrespondence: true}) DETACH DELETE o";
         try (Session s = Neo4jDriverManager.getInstance().openSession()) {
-            s.run(query, Values.parameters("id", id));
+            Value params = Values.parameters("id", id);
+            s.run(query, params);
         }
     }
 

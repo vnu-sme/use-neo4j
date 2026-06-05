@@ -38,12 +38,15 @@ public class BinaryPattern implements OclPattern {
     String expression = switch (op) {
       case "and" -> "(" + left.get().expression().getExpression() + " AND " + right.get().expression().getExpression() + ")";
       case "or" -> "(" + left.get().expression().getExpression() + " OR " + right.get().expression().getExpression() + ")";
+      case "xor" -> "((" + left.get().expression().getExpression() + " AND NOT (" + right.get().expression().getExpression()
+          + ")) OR (NOT (" + left.get().expression().getExpression() + ") AND " + right.get().expression().getExpression() + "))";
       case "implies" -> "((NOT (" + left.get().expression().getExpression() + ")) OR " + right.get().expression().getExpression() + ")";
       case ">", "<", ">=", "<=" -> CypherSupport.numeric(left.get().expression().getExpression()) + " " + op + " " + CypherSupport.numeric(right.get().expression().getExpression());
       case "+" -> CypherSupport.numeric(left.get().expression().getExpression()) + " + " + CypherSupport.numeric(right.get().expression().getExpression());
       case "-" -> CypherSupport.numeric(left.get().expression().getExpression()) + " - " + CypherSupport.numeric(right.get().expression().getExpression());
       case "*" -> CypherSupport.numeric(left.get().expression().getExpression()) + " * " + CypherSupport.numeric(right.get().expression().getExpression());
       case "/" -> CypherSupport.numeric(left.get().expression().getExpression()) + " / " + CypherSupport.numeric(right.get().expression().getExpression());
+      case "div" -> "toInteger(" + CypherSupport.numeric(left.get().expression().getExpression()) + " / " + CypherSupport.numeric(right.get().expression().getExpression()) + ")";
       default -> null;
     };
     if (expression == null) return List.of();
@@ -70,7 +73,7 @@ public class BinaryPattern implements OclPattern {
   }
 
   private boolean isLogical(String op) {
-    return "and".equals(op) || "or".equals(op) || "implies".equals(op);
+    return "and".equals(op) || "or".equals(op) || "xor".equals(op) || "implies".equals(op);
   }
 
   private boolean isPredicate(String op) {

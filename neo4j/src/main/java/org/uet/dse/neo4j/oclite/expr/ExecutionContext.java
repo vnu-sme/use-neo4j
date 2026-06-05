@@ -28,6 +28,10 @@ public class ExecutionContext {
     scopeStack.push(newScope);
   }
 
+  public void pushScope(Map<String, Object> values) {
+    scopeStack.push(new HashMap<>(values));
+  }
+
   public void popScope() {
     if (scopeStack.size() > 1)
       scopeStack.pop();
@@ -125,9 +129,11 @@ public class ExecutionContext {
         return collection.isEmpty();
 
       case "isNotEmpty":
+      case "notEmpty":
         return !collection.isEmpty();
 
       case "includes":
+      case "contains":
         if (args.isEmpty())
           return false;
         Object t1 = args.get(0);
@@ -166,6 +172,22 @@ public class ExecutionContext {
           }
         }
         return result;
+      }
+      case "including": {
+        if (args.isEmpty())
+          return collection;
+        Object target = args.get(0);
+        List<Object> result = new ArrayList<>(collection);
+        if (result.stream().noneMatch(item -> isSameObject(item, target))) {
+          result.add(target);
+        }
+        return result;
+      }
+      case "excluding": {
+        if (args.isEmpty())
+          return collection;
+        Object target = args.get(0);
+        return collection.stream().filter(item -> !isSameObject(item, target)).collect(Collectors.toList());
       }
       case "intersection": {
         if (args.isEmpty())
@@ -232,6 +254,11 @@ public class ExecutionContext {
         }
         return uniqueList;
       }
+      case "asSequence":
+      case "asBag":
+      case "asOrderedSet": {
+        return new ArrayList<>(collection);
+      }
       case "flatten": {
         return flatten(collection);
       }
@@ -244,6 +271,19 @@ public class ExecutionContext {
           }
         }
         return sum;
+      }
+      case "avg":
+      case "average": {
+        double sum = 0;
+        int count = 0;
+        for (Object item : collection) {
+          Number number = asNumber(item);
+          if (number != null) {
+            sum += number.doubleValue();
+            count++;
+          }
+        }
+        return count == 0 ? null : sum / count;
       }
       case "count": {
         if (args.isEmpty()) {
@@ -281,7 +321,7 @@ public class ExecutionContext {
     }
   }
 
-  private boolean isSameObject(Object a, Object b) {
+  public boolean isSameObject(Object a, Object b) {
     if (a == b)
       return true;
     if (a == null || b == null)
@@ -294,7 +334,7 @@ public class ExecutionContext {
     return Objects.equals(a, b);
   }
 
-  private Collection<?> convertToCollection(Object obj) {
+  public Collection<?> convertToCollection(Object obj) {
     if (obj instanceof Collection)
       return (Collection<?>) obj;
     if (obj == null)
@@ -302,7 +342,7 @@ public class ExecutionContext {
     return Collections.singletonList(obj);
   }
 
-  private List<Object> flatten(Collection<?> col) {
+  public List<Object> flatten(Collection<?> col) {
     List<Object> result = new ArrayList<>();
     for (Object item : col) {
       if (item instanceof Collection) {
@@ -314,7 +354,7 @@ public class ExecutionContext {
     return result;
   }
 
-  private Number asNumber(Object value) {
+  public Number asNumber(Object value) {
     if (value instanceof Number) {
       return (Number) value;
     }

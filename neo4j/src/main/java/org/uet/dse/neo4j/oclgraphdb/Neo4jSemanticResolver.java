@@ -44,7 +44,6 @@ public class Neo4jSemanticResolver implements SemanticResolver {
           "MATCH (obj {use_id: $objectId})-[:ObjectInstanceOf]->(cls) " +
           "RETURN cls.name AS className LIMIT 1";
       Map<String, Object> params = Map.of("modelName", modelName, "objectId", objectId);
-      CypherQueryLogger.log("semantic-object-class", cypher, params);
       Result result = session.run(cypher, params);
       return result.hasNext() ? Optional.of(result.next().get("className").asString()) : Optional.empty();
     }
@@ -102,7 +101,6 @@ public class Neo4jSemanticResolver implements SemanticResolver {
           "qualifiedName", sourceClassName + "_" + propertyName,
           "suffix", "_" + propertyName
       );
-      CypherQueryLogger.log("semantic-attribute", cypher, params);
       Result result = session.run(cypher, params);
       if (!result.hasNext()) return Optional.empty();
 
@@ -140,7 +138,6 @@ public class Neo4jSemanticResolver implements SemanticResolver {
           "sourceClass", sourceClassName,
           "role", roleName
       );
-      CypherQueryLogger.log("semantic-relationship-target-class", cypher, params);
       Result result = session.run(cypher, params);
       if (!result.hasNext()) return Optional.empty();
 

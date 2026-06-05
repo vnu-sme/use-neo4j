@@ -2,6 +2,7 @@ package org.uet.dse.neo4j.repo.pure;
 
 import org.uet.dse.neo4j.mm.graphdb.Edge;
 import org.neo4j.driver.*;
+import org.uet.dse.neo4j.logging.LoggingNeo4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +13,7 @@ public class EdgeRepository {
     private final String database;
 
     public EdgeRepository(Driver driver, String database) {
-        this.driver = driver;
+        this.driver = LoggingNeo4j.wrap(driver);
         this.database = database;
     }
 

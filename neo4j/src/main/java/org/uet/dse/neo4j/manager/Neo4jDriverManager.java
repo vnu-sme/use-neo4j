@@ -1,6 +1,7 @@
 package org.uet.dse.neo4j.manager;
 
 import org.neo4j.driver.*;
+import org.uet.dse.neo4j.logging.LoggingNeo4j;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class Neo4jDriverManager implements AutoCloseable {
         // 2. Nếu yêu cầu tạo mới DB, phải can thiệp qua database 'system'
         if (createNew && !database.equalsIgnoreCase("neo4j") && !database.equalsIgnoreCase("system")) {
             try (Driver adminDriver = GraphDatabase.driver(uri, AuthTokens.basic(user, password))) {
-                try (Session sysSession = adminDriver.session(SessionConfig.forDatabase("system"))) {
+                try (Session sysSession = LoggingNeo4j.wrap(adminDriver.session(SessionConfig.forDatabase("system")))) {
                     sysSession.executeWrite(tx -> {
                         tx.run("CREATE DATABASE `" + database + "` IF NOT EXISTS WAIT");
                         return null;
@@ -73,7 +74,7 @@ public class Neo4jDriverManager implements AutoCloseable {
      * Mở session làm việc với database đã chọn
      */
     public Session openSession() {
-        return driver.session(SessionConfig.forDatabase(activeDatabase));
+        return LoggingNeo4j.wrap(driver.session(SessionConfig.forDatabase(activeDatabase)));
     }
 
     public boolean isConnected() {
@@ -139,7 +140,7 @@ public class Neo4jDriverManager implements AutoCloseable {
         if (driver != null) {
             if (deleteOnExit && !activeDatabase.equals("neo4j") && !activeDatabase.equals("system")) {
                 WorkLogManager.getInstance().log("CLEANUP", "Deleting temporary database: " + activeDatabase);
-                try (Session sysSession = driver.session(SessionConfig.forDatabase("system"))) {
+                try (Session sysSession = LoggingNeo4j.wrap(driver.session(SessionConfig.forDatabase("system")))) {
                     sysSession.executeWrite(tx -> {
                         tx.run("STOP DATABASE `" + activeDatabase + "` WAIT");
                         tx.run("DROP DATABASE `" + activeDatabase + "` WAIT");
@@ -154,6 +155,6 @@ public class Neo4jDriverManager implements AutoCloseable {
     }
 
     public Driver getDriver() {
-        return driver;
+        return LoggingNeo4j.wrap(driver);
     }
 }

@@ -4,21 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.uet.dse.neo4j.oclgraphdb.plan.CompileContext;
-import org.uet.dse.neo4j.oclite.ast.ASTBinary;
-import org.uet.dse.neo4j.oclite.ast.ASTBooleanLiteral;
-import org.uet.dse.neo4j.oclite.ast.ASTCollectionOp;
-import org.uet.dse.neo4j.oclite.ast.ASTContext;
-import org.uet.dse.neo4j.oclite.ast.ASTExpression;
-import org.uet.dse.neo4j.oclite.ast.ASTIntegerLiteral;
-import org.uet.dse.neo4j.oclite.ast.ASTIterator;
-import org.uet.dse.neo4j.oclite.ast.ASTMethodCall;
-import org.uet.dse.neo4j.oclite.ast.ASTNode;
-import org.uet.dse.neo4j.oclite.ast.ASTNot;
-import org.uet.dse.neo4j.oclite.ast.ASTNullLiteral;
-import org.uet.dse.neo4j.oclite.ast.ASTProperty;
-import org.uet.dse.neo4j.oclite.ast.ASTRealLiteral;
-import org.uet.dse.neo4j.oclite.ast.ASTStringLiteral;
-import org.uet.dse.neo4j.oclite.ast.ASTVar;
+import org.uet.dse.neo4j.oclite.ast.*;
 
 public final class AstPatternSupport {
   private AstPatternSupport() {}
@@ -42,9 +28,17 @@ public final class AstPatternSupport {
     if (node instanceof ASTContext context) return "context " + context.className + " inv " + context.invName;
     if (node instanceof ASTBinary binary) return "binary '" + binary.op + "'";
     if (node instanceof ASTProperty property) return "property ." + property.name;
+    if (node instanceof ASTQualifiedNavigation navigation) return "qualified navigation ." + navigation.roleName + "[...]";
     if (node instanceof ASTMethodCall methodCall) return "method ." + methodCall.methodName + "()";
     if (node instanceof ASTCollectionOp collectionOp) return "collection ->" + collectionOp.opName + "()";
     if (node instanceof ASTIterator iterator) return "iterator ->" + iterator.operation + "(" + iterator.iteratorName + " | ...)";
+    if (node instanceof ASTQuery query) return "query ->" + query.operation + "(" + query.primaryVariableName() + " | ...)";
+    if (node instanceof ASTIterate iterate) return "iterate ->iterate(" + iterate.iterator.name + "; " + iterate.accumulator.variable.name + " | ...)";
+    if (node instanceof ASTLet) return "let";
+    if (node instanceof ASTIf) return "if";
+    if (node instanceof ASTUnary unary) return "unary '" + unary.operator + "'";
+    if (node instanceof ASTCollectionLiteral literal) return literal.kind + " literal";
+    if (node instanceof ASTRange) return "range";
     if (node instanceof ASTNot) return "not";
     if (node instanceof ASTVar var) return "var " + var.name;
     if (node instanceof ASTIntegerLiteral literal) return "integer " + literal.value;
@@ -52,6 +46,9 @@ public final class AstPatternSupport {
     if (node instanceof ASTStringLiteral literal) return "string '" + literal.value + "'";
     if (node instanceof ASTBooleanLiteral literal) return "boolean " + literal.value;
     if (node instanceof ASTNullLiteral) return "null";
+    if (node instanceof ASTUndefinedLiteral) return "undefined";
+    if (node instanceof ASTEnumLiteral literal) return "enum " + literal.value();
+    if (node instanceof ASTTypeLiteral literal) return "type " + literal.typeName;
     return node.getClass().getSimpleName();
   }
 
@@ -60,6 +57,9 @@ public final class AstPatternSupport {
     if (allInstancesType.isPresent()) return allInstancesType;
     if (node instanceof ASTIterator iterator && isSelectOrReject(iterator.operation)) {
       return inferCollectionElementType(iterator.source, context);
+    }
+    if (node instanceof ASTQuery query && isSelectOrReject(query.operation)) {
+      return inferCollectionElementType(query.source, context);
     }
     return inferNodeType(node, context);
   }
@@ -75,6 +75,11 @@ public final class AstPatternSupport {
           .flatMap(type -> context.resolver().resolveNavigation(type, property.name))
           .flatMap(descriptor -> descriptor.getTargetClassName());
     }
+    if (node instanceof ASTQualifiedNavigation navigation) {
+      return inferNodeType(navigation.source, context)
+          .flatMap(type -> context.resolver().resolveNavigation(type, navigation.roleName))
+          .flatMap(descriptor -> descriptor.getTargetClassName());
+    }
     if (node instanceof ASTMethodCall methodCall && methodCall.args.isEmpty()) {
       return inferNodeType(methodCall.source, context)
           .flatMap(type -> context.resolver().resolveNavigation(type, methodCall.methodName))
@@ -84,10 +89,10 @@ public final class AstPatternSupport {
   }
 
   public static Optional<String> allInstancesClassName(ASTNode node, CompileContext context) {
-    if (node instanceof ASTProperty property && "allInstances".equalsIgnoreCase(property.name)) {
+    if (node instanceof ASTProperty property && isAllInstancesName(property.name)) {
       return className(property.source, context);
     }
-    if (node instanceof ASTMethodCall methodCall && "allInstances".equalsIgnoreCase(methodCall.methodName)) {
+    if (node instanceof ASTMethodCall methodCall && isAllInstancesName(methodCall.methodName)) {
       return className(methodCall.source, context);
     }
     return Optional.empty();
@@ -102,7 +107,7 @@ public final class AstPatternSupport {
   }
 
   public static boolean isLogical(String op) {
-    return "and".equals(op) || "or".equals(op) || "implies".equals(op);
+    return "and".equals(op) || "or".equals(op) || "xor".equals(op) || "implies".equals(op);
   }
 
   private static Optional<String> className(ASTNode node, CompileContext context) {
@@ -110,6 +115,10 @@ public final class AstPatternSupport {
       return Optional.of(var.name);
     }
     return Optional.empty();
+  }
+
+  private static boolean isAllInstancesName(String name) {
+    return "allInstances".equalsIgnoreCase(name) || "allInstance".equalsIgnoreCase(name);
   }
 
   private static void collect(ASTNode node, List<ASTNode> result) {
@@ -138,6 +147,9 @@ public final class AstPatternSupport {
       children.add(binary.right);
     } else if (node instanceof ASTProperty property) {
       children.add(property.source);
+    } else if (node instanceof ASTQualifiedNavigation navigation) {
+      children.add(navigation.source);
+      children.add(navigation.qualifier);
     } else if (node instanceof ASTMethodCall methodCall) {
       children.add(methodCall.source);
       children.addAll(methodCall.args);
@@ -147,6 +159,29 @@ public final class AstPatternSupport {
     } else if (node instanceof ASTIterator iterator) {
       children.add(iterator.source);
       children.add(iterator.body);
+    } else if (node instanceof ASTQuery query) {
+      children.add(query.source);
+      children.add(query.body);
+    } else if (node instanceof ASTIterate iterate) {
+      children.add(iterate.source);
+      children.add(iterate.accumulator.value);
+      children.add(iterate.body);
+    } else if (node instanceof ASTLet let) {
+      for (ASTLetBinding binding : let.bindings) {
+        children.add(binding.value);
+      }
+      children.add(let.body);
+    } else if (node instanceof ASTIf ifNode) {
+      children.add(ifNode.condition);
+      children.add(ifNode.thenExpression);
+      children.add(ifNode.elseExpression);
+    } else if (node instanceof ASTUnary unary) {
+      children.add(unary.expression);
+    } else if (node instanceof ASTCollectionLiteral literal) {
+      children.addAll(literal.items);
+    } else if (node instanceof ASTRange range) {
+      children.add(range.start);
+      children.add(range.end);
     } else if (node instanceof ASTNot not) {
       children.add(not.expression);
     }

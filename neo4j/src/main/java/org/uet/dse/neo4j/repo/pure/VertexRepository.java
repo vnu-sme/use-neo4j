@@ -3,6 +3,7 @@ package org.uet.dse.neo4j.repo.pure;
 import org.uet.dse.neo4j.mm.graphdb.Tag;
 import org.uet.dse.neo4j.mm.graphdb.Vertex;
 import org.neo4j.driver.*;
+import org.uet.dse.neo4j.logging.LoggingNeo4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +14,7 @@ public class VertexRepository {
     private final String database;
 
     public VertexRepository(Driver driver, String database) {
-        this.driver = driver;
+        this.driver = LoggingNeo4j.wrap(driver);
         this.database = database;
     }
 

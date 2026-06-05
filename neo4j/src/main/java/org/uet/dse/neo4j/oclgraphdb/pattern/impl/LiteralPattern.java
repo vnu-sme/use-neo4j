@@ -23,7 +23,10 @@ public class LiteralPattern implements OclPattern {
         || node instanceof ASTRealLiteral
         || node instanceof ASTStringLiteral
         || node instanceof ASTBooleanLiteral
-        || node instanceof ASTNullLiteral;
+        || node instanceof ASTNullLiteral
+        || node instanceof ASTUndefinedLiteral
+        || node instanceof ASTEnumLiteral
+        || node instanceof ASTTypeLiteral;
   }
 
   @Override
@@ -33,6 +36,10 @@ public class LiteralPattern implements OclPattern {
     if (node instanceof ASTIntegerLiteral) value = ((ASTIntegerLiteral) node).value;
     else if (node instanceof ASTRealLiteral) value = ((ASTRealLiteral) node).value;
     else if (node instanceof ASTStringLiteral) value = ((ASTStringLiteral) node).value;
+    else if (node instanceof ASTEnumLiteral) value = ((ASTEnumLiteral) node).value();
+    else if (node instanceof ASTTypeLiteral) {
+      return List.of(PlanCandidate.exact(name(), new CypherExpression(((ASTTypeLiteral) node).typeName, ExpressionKind.TYPE), 900));
+    }
     else if (node instanceof ASTBooleanLiteral) {
       value = ((ASTBooleanLiteral) node).value;
       kind = ExpressionKind.BOOLEAN;

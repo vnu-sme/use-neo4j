@@ -9,8 +9,10 @@ import org.uet.dse.neo4j.oclgraphdb.multipass.impl.MultiPassCypherCompiler;
 import org.uet.dse.neo4j.oclgraphdb.pattern.PatternRegistry;
 import org.uet.dse.neo4j.oclgraphdb.pattern.PatternPlanner;
 import org.uet.dse.neo4j.oclgraphdb.plan.CompileContext;
+import org.uet.dse.neo4j.oclgraphdb.plan.CypherExpression;
 import org.uet.dse.neo4j.oclgraphdb.plan.CypherPlan;
 import org.uet.dse.neo4j.oclgraphdb.plan.ExpectedKind;
+import org.uet.dse.neo4j.oclgraphdb.plan.ExpressionKind;
 import org.uet.dse.neo4j.oclgraphdb.plan.PlanCandidate;
 import org.uet.dse.neo4j.oclite.ast.ASTContext;
 import org.uet.dse.neo4j.oclite.ast.ASTNode;
@@ -135,7 +137,7 @@ public class OclGraphDbEvaluator {
 
   private CompileContext planningContext(ASTNode ast, CompileContext context) {
     if (ast instanceof ASTContext astContext) {
-      return context.withRootVariable("self", astContext.className);
+      return contextWithSelf(astContext, context);
     }
     return context;
   }
@@ -145,7 +147,7 @@ public class OclGraphDbEvaluator {
       CompileContext baseContext,
       PatternPlanner planner
   ) {
-    CompileContext context = baseContext.withRootVariable("self", ast.className);
+    CompileContext context = contextWithSelf(ast, baseContext);
     Optional<PlanCandidate> candidate = planner.plan(ast.expression, context, ExpectedKind.BOOLEAN);
     if (candidate.isEmpty()) {
       throw new RuntimeException("Invariant is not supported by OCLGraphDB patterns.");
@@ -155,5 +157,13 @@ public class OclGraphDbEvaluator {
     CypherExecutor.ValidationSummary summary = executor.executeValidation(plan);
     String value = summary.format(ast.className, ast.invName);
     return new GraphDbEvaluationResult(value, plan.toCypher(), true);
+  }
+
+  private CompileContext contextWithSelf(ASTContext ast, CompileContext context) {
+    CompileContext scoped = context.withRootVariable("self", ast.className);
+    if (ast.contextVariableName != null && !ast.contextVariableName.isBlank()) {
+      scoped = scoped.withExpressionBinding(ast.contextVariableName, new CypherExpression("self", ExpressionKind.NODE), ast.className);
+    }
+    return scoped;
   }
 }

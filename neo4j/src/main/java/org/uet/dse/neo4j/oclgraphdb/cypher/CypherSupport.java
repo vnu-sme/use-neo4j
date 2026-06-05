@@ -52,6 +52,21 @@ public final class CypherSupport {
         + ") | " + target + "]";
   }
 
+  public static String qualifiedNavigation(
+      String nodeExpr,
+      String roleName,
+      String qualifierExpr,
+      CompileContext context
+  ) {
+    String rel = context.nextName("rel");
+    String target = context.nextName("target");
+    String role = context.addParam("role", roleName);
+    return "[(" + nodeExpr + ")-[" + rel + "]-(" + target + ") "
+        + "WHERE type(" + rel + ") STARTS WITH 'Link' AND "
+        + qualifiedNavigationPredicate(nodeExpr, rel, role, qualifierExpr)
+        + " | " + target + "]";
+  }
+
   public static List<String> navigationMatch(String nodeExpr, String roleName, String targetVar, CompileContext context) {
     String rel = context.nextName("rel");
     String role = context.addParam("role", roleName);
@@ -61,6 +76,22 @@ public final class CypherSupport {
             + "(startNode(" + rel + ") = " + nodeExpr + " AND (" + rel + ".targetRole = " + role + " OR " + rel + ".name = " + role + ")) "
             + "OR (endNode(" + rel + ") = " + nodeExpr + " AND (" + rel + ".sourceRole = " + role + " OR " + rel + ".name = " + role + "))"
             + ")"
+    );
+  }
+
+  public static List<String> qualifiedNavigationMatch(
+      String nodeExpr,
+      String roleName,
+      String qualifierExpr,
+      String targetVar,
+      CompileContext context
+  ) {
+    String rel = context.nextName("rel");
+    String role = context.addParam("role", roleName);
+    return List.of(
+        "MATCH (" + nodeExpr + ")-[" + rel + "]-(" + targetVar + ")",
+        "WHERE type(" + rel + ") STARTS WITH 'Link' AND "
+            + qualifiedNavigationPredicate(nodeExpr, rel, role, qualifierExpr)
     );
   }
 
@@ -91,6 +122,31 @@ public final class CypherSupport {
     return "replace(replace(toString(" + expr + "), \"'\", \"\"), \"#\", \"\")";
   }
 
+  public static String dateValue(String expr) {
+    return "date(" + normalizeString(expr) + ")";
+  }
+
+  public static String dateTimeValue(String expr) {
+    return "datetime(" + normalizeString(expr) + ")";
+  }
+
+  public static String durationDays(String startExpr, String endExpr) {
+    return "duration.inDays(" + dateValue(startExpr) + ", " + dateValue(endExpr) + ").days";
+  }
+
+  public static String durationHours(String startExpr, String endExpr) {
+    return "(duration.inSeconds(" + dateTimeValue(startExpr) + ", " + dateTimeValue(endExpr) + ").seconds / 3600.0)";
+  }
+
+  public static String monthStart(String expr) {
+    return "date.truncate('month', " + dateValue(expr) + ")";
+  }
+
+  public static String lastWeekdayOfMonth(String monthStartExpr, int weekday) {
+    String lastDay = "(" + monthStartExpr + " + duration({months: 1, days: -1}))";
+    return "(" + lastDay + " - duration({days: ((" + lastDay + ".dayOfWeek - " + weekday + " + 7) % 7)}))";
+  }
+
   public static String numeric(String expr) {
     return "toFloat(" + normalizeString(expr) + ")";
   }
@@ -107,5 +163,20 @@ public final class CypherSupport {
 
   public static CypherExpression asBoolean(String expression, CypherExpression... children) {
     return CypherExpression.combine(expression, ExpressionKind.BOOLEAN, children);
+  }
+
+  private static String qualifiedNavigationPredicate(String nodeExpr, String rel, String role, String qualifierExpr) {
+    String qualifier = normalizeString(qualifierExpr);
+    return "(("
+        + "startNode(" + rel + ") = " + nodeExpr
+        + " AND (" + rel + ".targetRole = " + role + " OR " + rel + ".name = " + role + ")"
+        + " AND (" + normalizeString(rel + ".sourceRole") + " = " + qualifier
+        + " OR " + normalizeString(rel + ".qualifier") + " = " + qualifier + ")"
+        + ") OR ("
+        + "endNode(" + rel + ") = " + nodeExpr
+        + " AND (" + rel + ".sourceRole = " + role + " OR " + rel + ".name = " + role + ")"
+        + " AND (" + normalizeString(rel + ".targetRole") + " = " + qualifier
+        + " OR " + normalizeString(rel + ".qualifier") + " = " + qualifier + ")"
+        + "))";
   }
 }

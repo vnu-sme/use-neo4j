@@ -1,6 +1,7 @@
 package org.uet.dse.neo4j.repo.pure;
 
 import org.neo4j.driver.*;
+import org.uet.dse.neo4j.logging.LoggingNeo4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,7 @@ public class TagRepository {
     private final String database;
 
     public TagRepository(Driver driver, String database) {
-        this.driver = driver;
+        this.driver = LoggingNeo4j.wrap(driver);
         this.database = database;
     }
 

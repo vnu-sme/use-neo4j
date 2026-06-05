@@ -12,16 +12,18 @@ import org.uet.dse.neo4j.oclite.ast.ASTIterator;
 import org.uet.dse.neo4j.oclite.ast.ASTMethodCall;
 import org.uet.dse.neo4j.oclite.ast.ASTNode;
 import org.uet.dse.neo4j.oclite.ast.ASTProperty;
+import org.uet.dse.neo4j.oclite.ast.ASTQualifiedNavigation;
+import org.uet.dse.neo4j.oclite.ast.ASTQuery;
 import org.uet.dse.neo4j.oclite.ast.ASTVar;
 
 final class PatternCypherUtils {
   private PatternCypherUtils() {}
 
   static Optional<String> allInstancesClassName(ASTNode source, CompileContext context) {
-    if (source instanceof ASTMethodCall call && "allInstances".equalsIgnoreCase(call.methodName)) {
+    if (source instanceof ASTMethodCall call && isAllInstancesName(call.methodName)) {
       return className(call.source, context);
     }
-    if (source instanceof ASTProperty property && "allInstances".equalsIgnoreCase(property.name)) {
+    if (source instanceof ASTProperty property && isAllInstancesName(property.name)) {
       return className(property.source, context);
     }
     return Optional.empty();
@@ -45,6 +47,11 @@ final class PatternCypherUtils {
           .flatMap(type -> context.resolver().resolveNavigation(type, property.name))
           .flatMap(descriptor -> descriptor.getTargetClassName());
     }
+    if (node instanceof ASTQualifiedNavigation navigation) {
+      return sourceType(navigation.source, context)
+          .flatMap(type -> context.resolver().resolveNavigation(type, navigation.roleName))
+          .flatMap(descriptor -> descriptor.getTargetClassName());
+    }
     if (node instanceof ASTMethodCall call && call.args.isEmpty()) {
       return sourceType(call.source, context)
           .flatMap(type -> context.resolver().resolveNavigation(type, call.methodName))
@@ -58,6 +65,9 @@ final class PatternCypherUtils {
     if (allInstancesType.isPresent()) return allInstancesType;
     if (node instanceof ASTIterator iterator && isSelectOrReject(iterator)) {
       return collectionElementType(iterator.source, context);
+    }
+    if (node instanceof ASTQuery query && isSelectOrReject(query)) {
+      return collectionElementType(query.source, context);
     }
     return sourceType(node, context);
   }
@@ -90,8 +100,17 @@ final class PatternCypherUtils {
     return "select".equals(operation) || "reject".equals(operation);
   }
 
+  static boolean isSelectOrReject(ASTQuery query) {
+    String operation = query.operation.toLowerCase();
+    return "select".equals(operation) || "reject".equals(operation);
+  }
+
   private static boolean isSimpleVariable(String expression) {
     return expression.matches("[A-Za-z_][A-Za-z0-9_]*");
+  }
+
+  private static boolean isAllInstancesName(String name) {
+    return "allInstances".equalsIgnoreCase(name) || "allInstance".equalsIgnoreCase(name);
   }
 
   record BoundNode(String name, List<String> preludeClauses) {}

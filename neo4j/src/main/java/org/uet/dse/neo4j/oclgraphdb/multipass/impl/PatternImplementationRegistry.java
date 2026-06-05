@@ -8,8 +8,10 @@ public final class PatternImplementationRegistry {
   public static List<PatternImplementation> defaults() {
     return List.of(
         new RootPatternImplementation(),
+        new ImplicitPropertyAccessImplementation(),
         new AttributeAccessImplementation(),
         new NavigationAccessImplementation(),
+        new DateTimeOperationImplementation(),
         new ComparePatternImplementation(),
         new LogicalPatternImplementation(),
         new NegationPatternImplementation(),
@@ -17,6 +19,10 @@ public final class PatternImplementationRegistry {
         new FilterPatternImplementation(),
         new QuantifierPatternImplementation(),
         new FilteredTerminalImplementation(),
+        new FilteredCompareImplementation(),
+        new SizeCompareImplementation(),
+        new AdvancedCollectionImplementation(),
+        new PartialRecursiveCompositionImplementation(),
         new LegacyPatternImplementation()
     );
   }

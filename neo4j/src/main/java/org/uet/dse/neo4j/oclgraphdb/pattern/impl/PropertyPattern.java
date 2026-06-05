@@ -30,7 +30,7 @@ public class PropertyPattern implements OclPattern {
     List<PlanCandidate> result = new ArrayList<>();
 
     planner.plan(prop.source, context, ExpectedKind.TYPE).ifPresent(source -> {
-      if ("allInstances".equalsIgnoreCase(prop.name)) {
+      if ("allInstances".equalsIgnoreCase(prop.name) || "allInstance".equalsIgnoreCase(prop.name)) {
         String className = source.expression().getExpression();
         result.add(PlanCandidate.exact("allInstances-property", CypherSupport.allInstancesExpression(className, context), 1000));
       }

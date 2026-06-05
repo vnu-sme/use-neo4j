@@ -9,7 +9,6 @@ import org.uet.dse.neo4j.oclgraphdb.plan.CypherPlan;
 
 public class CypherExecutor {
   public Object executeScalar(CypherPlan plan) {
-    CypherQueryLogger.log("execute-scalar", plan.toCypher(), plan.getParams());
     try (Session session = Neo4jDriverManager.getInstance().openSession()) {
       Result result = session.run(plan.toCypher(), plan.getParams());
       if (!result.hasNext()) return null;
@@ -20,7 +19,6 @@ public class CypherExecutor {
   }
 
   public ValidationSummary executeValidation(CypherPlan plan) {
-    CypherQueryLogger.log("execute-validation", plan.toCypher(), plan.getParams());
     try (Session session = Neo4jDriverManager.getInstance().openSession()) {
       Result result = session.run(plan.toCypher(), plan.getParams());
       if (!result.hasNext()) return new ValidationSummary(0, List.of());
