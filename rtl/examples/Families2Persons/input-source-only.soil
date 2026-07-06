@@ -1,0 +1,20 @@
+-- Source-only input for forward TGG testing with Neo4j
+-- This file creates only Families-side objects.
+
+!new FamilyRegister('fr')
+
+!new Family('fm')
+!set fm.name := 'Nguyen'
+!insert (fr, fm) into FamilyRegistration
+
+!new FamilyMember('father')
+!set father.name := 'Hanh'
+!insert (fm, father) into Father
+
+!new FamilyMember('mother')
+!set mother.name := 'Lan'
+!insert (fm, mother) into Mother
+
+!new FamilyMember('son')
+!set son.name := 'Minh'
+!insert (fm, son) into Sons

@@ -272,6 +272,10 @@ public class NRuleCollectionManager {
       patterns.add(pattern);
     }
 
+    if (patterns.isEmpty()) {
+      throw new IllegalStateException("No graph pattern could be generated for the selected TGG rule.");
+    }
+
     query.append(String.join(",\n", patterns));
     query.append("\nRETURN *\nLIMIT 250;");
 
@@ -307,7 +311,7 @@ public class NRuleCollectionManager {
         allObject.removeIf(o -> o.name().equals(obj_name));
       }
     }
-    singleClass.addAll(singleClass);
+    singleClass.addAll(allObject);
   }
 
   class LinkedClass {

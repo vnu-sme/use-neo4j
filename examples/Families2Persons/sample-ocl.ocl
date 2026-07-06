@@ -1,0 +1,14 @@
+context FamilyRegister inv HasFamilies:
+    self.families->size() > 0
+
+context Family inv HasFather:
+    self.father->notEmpty()
+
+context FamilyMember inv BelongsToFamily:
+    self.familyFather->notEmpty() or
+    self.familyMother->notEmpty() or
+    self.familySon->notEmpty() or
+    self.familyDaughter->notEmpty()
+
+context Family inv FatherNamed:
+    self.father.name <> ''

@@ -71,7 +71,7 @@
             <directory>${project.basedir}/src/main/resources/plugins</directory>
             <outputDirectory>lib/plugins</outputDirectory>
             <includes>
-                <include>*</include>
+                <include>**/*</include>
             </includes>
         </fileSet>
     </fileSets>

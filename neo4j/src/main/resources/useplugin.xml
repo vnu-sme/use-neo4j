@@ -66,6 +66,14 @@
                 menuitem="OCL evaluator"
                 id="org.uet.dse.neo4j.action_phase2.ActionOpenOclEvaluator">
         </action>
+        <action label="Run TGG from Neo4j"
+                icon="images/rtl.png"
+                class="org.uet.dse.neo4j.action_phase2.ActionRunTggFromNeo4j"
+                tooltip="Run prototype TGG execution using Neo4j matches"
+                menu="Neo4j Plugin phase 2"
+                menuitem="Run TGG from Neo4j"
+                id="org.uet.dse.neo4j.action_phase2.ActionRunTggFromNeo4j">
+        </action>
         <action label="Incremental model update"
                 icon="images/rtl.png"
                 class="org.uet.dse.neo4j.action_phase2.ActionOpenIncrementalUpdate"

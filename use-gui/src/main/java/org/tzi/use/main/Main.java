@@ -43,6 +43,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
@@ -85,7 +86,13 @@ public final class Main {
 		if (Options.doPLUGIN) {
 			// create URL from plugin directory
 			Path pluginDirURL = Options.pluginDir;
-			pluginDirURL = Path.of("/Users/kiencc/Downloads/thesis/use-neo4j/use-assembly/src/main/resources/plugins/officalVersion");
+			Path officialPluginDir = pluginDirURL.resolve("officialVersion");
+			Path officalPluginDir = pluginDirURL.resolve("officalVersion");
+			if (Files.isDirectory(officialPluginDir)) {
+				pluginDirURL = officialPluginDir;
+			} else if (Files.isDirectory(officalPluginDir)) {
+				pluginDirURL = officalPluginDir;
+			}
 			Log.verbose("Plugin path: [" + pluginDirURL + "]");
 			Class<?> mainPluginRuntimeClass = null;
 			try {
