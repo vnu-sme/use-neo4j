@@ -368,7 +368,7 @@ source OCL
 | Production plugin | [`ocl2cypher/src/main`](ocl2cypher/src/main) | Frontend, Core/Q IR, graph builder, Cypher generation, and execution |
 | Tests | [`ocl2cypher/src/test`](ocl2cypher/src/test) | Conformance, differential, rejection, UI, and Neo4j tests |
 | Formal proofs | [`verification/lean`](verification/lean) | Lean definitions and preservation results |
-| Paper Isabelle session | [`Isabelle-HolIsL`](Isabelle-HolIsL) | Isabelle/HOL abstract graph-query proof in the versioned Git submodule |
+| Paper Isabelle session | [`Isabelle-HolIsL`](Isabelle-HolIsL) | Isabelle/HOL abstract graph-query proof tracked directly in this repository |
 | Evidence | [`verification`](verification) | Contracts, coverage, evidence, and runtime obligations |
 | Experiments | [`ocl2cypher/EXPERIMENT.adoc`](ocl2cypher/EXPERIMENT.adoc) | Research questions, corpus, commands, and generated-result format |
 | OCL2Cypher examples | [`example`](example) | Models, snapshots, constraints, and expected results |

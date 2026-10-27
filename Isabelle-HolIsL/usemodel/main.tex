@@ -1,0 +1,545 @@
+OCL2Cypher: A Semantics-Preserving Transformation
+from UML/OCL Models to Property Graphs
+Quoc-Bao Hoang, Hoang-Viet Trinh La, and Duc-Hanh Dang⋆
+Faculty of Information Technology, VNU University of Engineering and Technology
+VNU Town, Hoa Lac, Hanoi, Vietnam
+{23020012 | 24025181 | hanhdd}@vnu.edu.vn
+Abstract. UML models are commonly constrained using the Object Constraint
+Language (OCL), but validating such constraints over a property-graph representation requires more than generating executable graph queries: the generated
+query must return exactly the same set of violating context objects as source
+OCL evaluation. Existing work has studied UML-to-graph representations and
+OCL-to-query compilation, yet it often lacks an end-to-end semantic guarantee
+that jointly relates source validation semantics, graph representation, the generated query, and stable-ID projection. We present OCL2Cypher, a representationaware method that translates a UML snapshot to a property graph and invariants
+to graph queries, through typed Core and Q forms compiled to Cypher queries
+under a shared representation specification Σ. We ensure its correctness obligations explicitly by checking properties during the transformation: representation
+adequacy, typed translation, violation projection, and graph query realization and
+execution. Under the stated obligations, their composition conditionally preserves
+the exact violation-ID set for finite, well-formed snapshots and invariants in the
+supported fragment. A subset of the formal obligations is checked in Lean. Prototype evaluation on the graph database Neo4j yields 199 consistent intermediate
+comparisons, 23 negative cases outside the supported fragment or violating admission conditions that are rejected at the expected boundary, and 85 executions
+whose violation-ID sets exactly match source evaluation. These experiments provide finite implementation evidence and do not extend the theorem’s scope.
+Keywords: Object Constraint Language ꞏ Cypher ꞏ Property graph ꞏ Semantic
+preservation ꞏ Model transformation
+1 INTRODUCTION
+In Model-Driven Engineering (MDE), UML defines model structure and the Object
+Constraint Language (OCL) specifies invariants over model instances [16,4]. Graphbacked systems such as Neo4EMF and NeoEMF store model data outside the original
+OCL evaluator [3,7]; Mogwaï compiles OCL to Gremlin [8,5], and UMLtoGraphDB
+combines UML-to-graph mapping with OCL-to-Gremlin transformation [9].
+This shift creates a semantic boundary: an executable graph query can still disagree
+with source OCL if representation and compilation treat navigation, multiplicity, inher-
+⋆ Corresponding author
+itance, collections, or object identity differently. Prior work addresses OCL–SQL correctness [15], translations to graph constraints [17], and Cypher–SQL equivalence [12],
+but current approaches have not yet jointly related source semantics, graph representation, generated-query semantics, and violation-ID projection. We therefore seek explicit
+conditions under which generated Cypher returns exactly the source OCL violation-ID
+set.
+OCL2Cypher addresses this problem through two coordinated branches: one maps
+a conforming UML snapshot to a property graph, and the other compiles an OCL invariant to read-only Cypher. A shared representation specification governs identifiers,
+types, attributes, associations, multiplicities, and inheritance. Typed intermediate forms
+expose representation-dependent decisions before query realization. We make the obligations across representation, translation, violation projection, realization, and execution explicit; unsupported constructs are rejected rather than approximated.
+This paper makes two main contributions:
+– Representation-aware OCL-to-Cypher compilation. We provide a typed transformation from a supported OCL fragment to read-only Cypher under the shared representation specification.
+– Assurance framework. We identify and compose the obligations for representation
+adequacy, semantic preservation, violation projection, and query realization and execution, yielding conditional exact preservation of violation IDs.
+Section 2 gives the running example; Sects. 3–4 present and specify the method;
+Sect. 5 establishes correctness; Sect. 6 evaluates the prototype; and Sects. 7–8 discuss
+related work and conclude.
+2 MOTIVATING EXAMPLE AND SEMANTIC BACKGROUND
+This section uses a running example to expose a representation/translation mismatch
+and introduce the required semantic concepts.
+2.1 Motivating Example
+Consider a UML schema with class Branch and two association ends: employee of type
+Employee[*] and manager of type Employee[0..1]. Class Employee has attribute
+salary: Integer. The snapshot in Fig. 1 contains a Branch with stable identifier
+oneBranch and two Employee objects, Alice and Bob. Both are employees, and Alice
+is also the manager; their salaries are 50 and 70, respectively.
+The following invariant requires the manager’s salary to exceed that of every other
+employee in the same branch:
+context Branch inv ManagerSalaryDominates:
+self.employee->forAll(e |
+e <> self.manager implies
+self.manager.salary > e.salary)
+For Alice, the antecedent of the implication is false. For Bob, the antecedent is true,
+but 50 > 70 is false. Hence, forAll evaluates to false and the source validation observation is {oneBranch}.
+oneBranch : Branch
+Alice : Employee
+salary = 50
+Bob : Employee
+salary = 70
+employee
+manager
+(a) An example UML snapshot
+Transformation
+:Branch
+id=oneBranch
+:Employee
+name=Alice
+salary=50
+:Employee
+name=Bob
+salary=70
+MANAGER
+EMPLOYEE EMPLOYEE
+(b) Property-graph representation
+of the example snapshot
+Fig. 1. Example snapshot and property-graph representation. Open UML arrowheads denote navigability, not generalization; graph arrows show physical relationship direction.
+In Fig. 1, EMPLOYEE is stored from Employee to Branch, whereas self.employee
+navigates in the opposite logical direction:
+Naive: MATCH (b:Branch)-[:EMPLOYEE]->(e:Employee)
+Required: MATCH (b:Branch)<-[:EMPLOYEE]-(e:Employee)
+These are partial patterns, not complete validation queries. Equating logical with
+physical direction produces an empty employee collection, makes forAll true, and
+misses oneBranch, although the query remains executable. Representation and compilation must therefore agree on navigation, multiplicity, inheritance, collections, and
+stable-ID projection.
+Semantic background. A snapshot supplies the objects, values, and links conforming
+to a UML schema. OCL evaluates an invariant for every context-class object [16]; we
+preserve their violation-ID set, not one aggregate Boolean. Property-graph relationships
+are directed [1,2], whereas OCL navigation follows the association end and receiver
+type. The fragment also distinguishes an empty collection from typed bottom: forAll
+on an empty collection is true, and any non-true invariant value is violating.
+3 METHOD OVERVIEW
+OCL2Cypher translates an OCL invariant under a shared representation specification Σ
+and assumes a graph G satisfying AdequateΣ(M, G). Figure 2 separates this transformation from the prototype graph builder and execution context, which are not formally
+verified.
+Core is a source-oriented typed intermediate representation of the resolved and normalized OCL computation. Q is a representation-aware typed query IR that makes graph
+access, inheritance, collection processing, and three-valued iterator decisions explicit
+before Cypher realization.
+Write the representation contract schematically as Σ = (Σid, Σtype, Σattr, Σassoc, Σinh,
+Σcoll). The graph branch is schematically M
+BuildΣ −−−−→ G: each object becomes an observable node with its stable ID and type, attributes become properties, and links follow
+UML
+schema
+OCL
+invariant
+Frontend Core Q
+Cypher
+realization
+Generated
+Cypher query
+Σ
+Transformation pipeline
+Snapshot
+M
+Graph
+construction
+Property
+graph
+G
+Execute
+Cypher on G
+Target
+violation IDs
+Evaluate OCL
+on M
+Source
+violation IDs
+Compare
+violation IDs
+input/output
+IR
+process
+shared spec.
+data flow
+Σ dependence
+Fig. 2. OCL2Cypher transformation and observation workflow.
+Σassoc. The other components govern class keys, inheritance-aware extents, multiplicity,
+collection kind, and duplicates. Section 5.1 states the builder’s required output contract
+as AdequateΣ(M, G).
+FrontS resolves and normalizes the invariant to Core; TΣ lowers Core to Q, exposing graph-access, collection, and inheritance decisions; and RealizeΣ realizes the
+Violations(K, q) wrapper as read-only Cypher. Unsupported constructs are rejected.
+4 SPECIFICATION OF THE OCL2CYPHER
+TRANSFORMATION
+This section specifies three boundaries: OCL → Core performs source analysis, Core
+→ Q exposes representation decisions, and Q → Cypher realizes the query. Snapshot
+representation and query transformation share Σ.
+4.1 OCL-to-Core Frontend
+Given a UML schema S, FrontS is syntax-directed over the supported fragment: it resolves keys and binders, checks types, determines multiplicity and collection information, normalizes admitted constructs to Core, and rejects the rest. It returns a contextclass key K and expression e. Let Σ govern subsequent lowering and realization. A
+variable environment maps resolved binders, including self, to typed values; ρ[x 7→ v]
+is functional update. A successful transformation satisfies
+FrontS(inv) = Success(K, e),
+TΣ(e) = Success(q),
+RealizeΣ(Violations(K, q)) = Success(s, ∆, πgen).
+(1)
+Here e ∈ ExprCore[Boolean], q ∈ ExprQ[Boolean], and (s, ∆, πgen) is the Cypher artifact. These stages use Σ, not G; Violations carries K for projection, and failure is not
+an empty result.
+After name resolution and multiplicity analysis, the running example has the following Core AST shape (resolved keys and κ are explicit):
+ForAll(
+NavManyκ
+(self, remployee), x,
+Bin⇒
+(
+Bin̸=(x, NavOne(self, rmanager)),
+Bin>(Attr(NavOne(self, rmanager), asalary), Attr(x, asalary)))).
+Here remployee, rmanager, and asalary are resolved schema keys. Source multiplicity distinguishes to-one from to-many navigation; the source collection type fixes κ, subsequently
+checked against Σ by TΣ.
+Scope. The fragment admits finite well-formed snapshots; three-valued Boolean, String,
+object, Integer, and Real values; inheritance-aware navigation; finite flat Sets and Bags;
+and select, scalar-body collect, forAll, exists, isEmpty, notEmpty, size, and
+sum. It excludes ordered or nested collections, Tuples, recursion, order-sensitive operators, surface null/invalid, and any. Integers must remain in INT64 and Reals exactly
+representable; unchecked runtime range and precision conditions are P5 premises of
+Theorem 2.
+Typed bottom represents an undefined partial computation. For defined-value domain Dτ , let
+D⊥
+τ
+:= Dτ ∪ {⊥τ }, D⊥
+B := {T, F, ⊥B}.
+Here B is Boolean. Equality is typed and total: objects compare by class key and stable
+ID, same-typed bottoms are equal, and the result is never ⊥B. Also ¬⊥B = ⊥B, ∧ is
+F-dominant, ∨ is T-dominant, and β1 ⇒ β2 := ¬β1 ∨ β2.
+4.2 Core-to-Q Translation
+Abstract syntax. Core and Q are modeled as mathematical typed ASTs. For L ∈
+{Core, Q}, ExprL and PlanL denote the expression and collection-plan AST sorts,
+respectively, and ExprL[τ ] contains well-typed expressions of type τ . This paper-level
+calculus abstracts from both the production Java classes and the Lean datatypes; it is
+neither a concrete textual grammar nor a metamodel. Variables eL, PL range over terms,
+with collection processing factored into plans. The two IRs share these AST constructor
+families:
+eL ::= cτ | ⊥τ | x | Let(x, eL, eL) | If(eL, eL, eL)
+| Attr(eL, a) | NavOne(eL, r) | Uno1
+(eL) | Bino2
+(eL, eL)
+| Litκ(¯eL) | Materialize(PL),
+PL ::= NavManyκ
+(eL, r) | Collect(PL, x, eL) | Distinct(PL).
+The language-specific forms are
+ExprCore ∋ ForAll(PC , x, eC ) | Exists(PC , x, eC ),
+ExprQ ∋ ForAll3(PQ, x, eQ) | Exists3(PQ, x, eQ),
+PlanCore ∋ From(eC ) | ScanK | Select(PC , x, eC ) | LetP(x, eC , PC ),
+PlanQ ∋ FromCollection(eQ) | ScanClassK | Filter(PQ, x, eQ) | PlanLet(x, eQ, PQ).
+Here κ ∈ {Set, Bag}; U contains Boolean negation, numeric unary operations, and
+collection observations; and O2 contains Boolean, typed comparison/equality, and numeric binary operations. Thus o1 ∈ U, o2 ∈ O2; a, r, K are resolved keys, bars are
+finite sequences, and displayed syntax omits type/Σ data. Violations(K, q) is a top-level
+wrapper outside both AST sorts.
+The evaluations [[·]]O, [[·]]Core, and [[·]]Q are structural; Core/Q expression and plan
+evaluation is mutually defined into typed-bottom domains. The artifact supplies every
+constructor clause.
+TΣ consumes typed Core and Σ, without observing G. Define successful translation
+by
+Σ ` t ⇝ t
+′
+:⇐⇒ TΣ(t) = Success(t
+′
+).
+On admitted types, TyΣ : TypeCore → TypeQ is identity on primitives/class keys
+and homomorphic on Set and Bag; extend it pointwise to typing contexts. Translation
+preserves sort (expression to expression, plan to plan) and typing:
+Γ `Core t : τ ∧ Σ ` t ⇝ t
+′ =⇒ TyΣ(Γ) `Q t
+′
+: TyΣ(τ ).
+Table 1. Core-to-Q forms and semantic preservation obligations.
+Core form Q form Applicable semantic preservation obligation
+Constants, variables,
+bottom, Let/If/Attr
+cτ , x, ⊥τ , Let/If/Attr Corresponding values, bottoms, branches, and attribute
+observations agree.
+NavOne(e, r) NavOne(q, r) Source navigation agrees with the encoding, direction, target,
+and multiplicity in Σ(r).
+NavManyκ(e, r) NavManyκ(q, r) Source occurrences agree with Σ(r); preserve Set support or
+each Bag occurrence.
+Operations; collection
+observations
+Corresponding primitives Admitted primitive meanings agree.
+Lit; Select; Collect;
+Distinct
+Lit; Filter; Collect;
+Distinct
+Selection preserves retained occurrences and collection kind;
+collect preserves occurrence multiplicity as a Bag; Distinct
+preserves Set support.
+From; Materialize; LetP FromCollection;
+Materialize; PlanLet
+Preserve collection observations, occurrence multiplicity, and
+whole-bottom behavior across expression/plan boundaries.
+forAll/exists ForAll3/Exists3 Finite source; distinguish empty collections from whole-bottom.
+ScanK; invariant body ScanClassK;
+Violations(K, q)
+[[ScanK]]Core = InstM(K) and
+[[ScanClassK]]Q = ExtentΣ
+G(K); stable-ID projection retains
+exactly the cases where q ̸= T.
+Translation establishes key/binder identity, sort preservation, and typing. Table 1 exhaustively covers supported constructor families and lists the remaining semantic obligations. A structurally non-trivial rule is
+Σ ⊢ PC ⇝ qP Σ ⊢ b ⇝ b
+′
+Σ ⊢ ForAll(PC , x, b) ⇝ ForAll3(qP , x, b′)
+.
+The rule retains binder scope; exists similarly uses Exists3. For plan result C ∈
+D⊥
+Set(τ)
+or C ∈ D⊥
+Bag(τ)
+, let Bb(v) := [[b
+′
+]]Q(G, η[x 7→ v]) for v ∈ Occ(C). Wholebottom is distinct from the empty collection; ForAll3 follows the ordered cases below:
+
+
+
+⊥B, C is whole-bottom,
+F, ∃v ∈ Occ(C) : Bb(v) = F,
+⊥B, ∄v ∈ Occ(C) : Bb(v) = F ∧ ∃v ∈ Occ(C) : Bb(v) = ⊥B,
+T, otherwise.
+Here Occ(C) enumerates Bag occurrences or Set support; empty input yields T. Exists3
+is dual, prioritizing T, then ⊥B, then F; empty input yields F.
+4.3 Q-to-Cypher Realization
+In (1), ∆ = (Dompub, idCol, decode) gives the caller-parameter domain, returned ID
+column, and decoder to I ⊆ ID. Parameters πpublic and realization-generated πgen must
+have disjoint names.
+The emitted read-only fragment uses MATCH patterns with WHERE predicates, WITH,
+UNWIND, RETURN, CASE, comprehensions, quantified predicates, and EXISTS/COLLECT
+subqueries. Writes, procedures, dynamic labels, and OPTIONAL MATCH are excluded.
+Table 2. Q-to-Cypher realization patterns.
+Q form or wrapper Representative Cypher realization pattern
+ScanClassK COLLECT subquery with a type- and inheritance-aware context scan determined by Σ.
+cτ , ⊥τ , x; Let/If/Attr;
+Un/Bin
+Tagged constants and bottoms, bound variables, bind-once comprehensions, CASE, checked
+property access, and typed primitive expressions with explicit bottom propagation.
+NavOne(q, r) Σ-directed MATCH; exactly one collected target yields the corresponding defined target value,
+and any other cardinality yields typed bottom.
+NavManyκ(q, r) Σ-directed matching in COLLECT; DISTINCT for Set, with occurrences retained for Bag.
+Filter(P, x, b) Bottom-aware comprehension retaining occurrences satisfying b.
+Collect(P, x, e) Occurrence-preserving comprehension yielding a Bag.
+Litκ; Materialize;
+FromCollection; Distinct;
+PlanLet
+Tagged collection values; expression/plan bridges retain items and whole-bottom; Set
+realization removes duplicate atomic values, and plan binding uses bind-once realization.
+ForAll3/Exists3 Explicit defined/bottom cases, quantified checks, and CASE implement the three-valued
+priority rules.
+Violations(K, q) Context scan retaining non-true results; RETURN DISTINCT projects stable IDs.
+Table 2 covers every supported Q family and the Violations wrapper at the level of
+realization patterns, not one-to-one syntax; the artifact contains the production generator.
+5 CORRECTNESS OF THE OCL2CYPHER
+TRANSFORMATION
+The correctness argument uses a representation-adequacy contract and factors compilation through semantic preservation from OCL to Core and from Core to Q, followed by
+violation projection and graph query realization and execution.
+5.1 Formal Setup and Observations
+Let a UML schema S, finite snapshot M, graph G, and representation specification Σ
+be given. Conforms(M, S) requires declared object types, typed attributes and association endpoints, valid qualifiers, and inheritance-consistent membership. WFS(M) additionally requires injective stable IDs, no dangling endpoints or ambiguous scalar slots,
+and deterministic upper-one observations, with absence as typed bottom. Here “stable”
+means preserved by this representation, not across model versions.
+ObjObsΣ(G) contains object-representing graph nodes, excluding schema, metadata, and reification nodes. Source and graph type functions share a class-key domain,
+while idM : Obj(M) → ID and idG : ObjObsΣ(G) → ID share the codomain ID, with
+idM injective. A bijection γ : Obj(M) ∼= ObjObsΣ(G) pairs each source object with its
+graph representation. Its type-directed lifting fixes primitives and typed bottom, maps
+objects by γ, and maps collections pointwise: γb(c) = c, γb(⊥τ ) = ⊥τ , γb(o) = γ(o),
+and γb(κhviiI ) = κhγb(vi)iI . Here I indexes Set support or individual Bag occurrences,
+preserving Bag multiplicity.
+For fixed Σ, slotG, NavΣ
+G, and ExtentΣ
+G observe graph attributes, logical navigation,
+and inheritance-aware extents; their source counterparts are slotM, NavM, and InstM.
+Definition 1 (Observational representation adequacy). We say that G is Σ-adequate
+for M, written AdequateΣ(M, G), iff there is a bijection γ : Obj(M) ∼= ObjObsΣ(G)
+such that, for every object o, every attribute a and association end r applicable to o,
+and every class key K in the supported domain,
+idG(γ(o)) = idM(o), typeG(γ(o)) = typeM(o),
+γb(slotM(o, a)) = slotG(γ(o), a),
+γb(NavM(o, r)) = NavΣ
+G(γ(o), r), γ[InstM(K)] = ExtentΣ
+G(K).
+Whenever adequacy is assumed, fix its witness γ and lifting γb, and write
+v 'Σ w :⇐⇒ w = γb(v),
+ρ 'Σ η :⇐⇒ dom(ρ) = dom(η) ∧ ∀x ∈ dom(ρ), ρ(x) 'Σ η(x).
+The theorem assumes adequacy; Sect. 6 evaluates the non-formalized graph builder
+empirically.
+Let invariant inv have body φ and resolved context key K, and let q be its Q body.
+Source, Q, and Cypher observations are
+ViolO(M, inv) := {idM(o) | o ∈ InstM(K), [[φ]]O(M, o) 6= T},
+ObsQ(G, K, q) := [[Violations(K, q)]]Q(G),
+ViolC (G, s; π, ∆) = I ⇐⇒ [[s]]C (G; π, ∆) = Success(I).
+ViolC is a partial function, defined only when parsing, execution, and decoding succeed;
+failure is not interpreted as the empty set. The Q wrapper scans the extent, retains results
+other than T, and projects stable IDs.
+5.2 Preservation across OCL–Core and Core–Q
+Lemma 1 (Frontend preservation). Under Conforms(M, S) ∧ WFS(M), let source
+invariant inv belong to the supported fragment from Sect. 4.1 and be well-typed with
+respect to S. Let its body be φ and its resolved context-class key be K. If FrontS(inv) =
+Success(K, e), then for every o ∈ InstM(K),
+[[φ]]O(M, o) = [[e]]Core(M, ρo),
+where ρo maps self to o.
+Proof sketch. Resolution preserves referenced objects and binder scope; normalization
+replaces admitted surface forms by equivalent Core constructors, while type checking
+excludes inadmissible cases.
+Theorem 1 (Core-to-Q preservation). Assume AdequateΣ(M, G) and ρ 'Σ η. Let
+e ∈ ExprCore[τ ] and q ∈ ExprQ[TyΣ(τ )] such that Σ ` e ⇝ q. If the applicable
+semantic preservation obligations in Table 1 hold, then
+[[e]]Core(M, ρ) 'Σ [[q]]Q(G, η).
+This expression result is proved mutually with the corresponding preservation result for
+PC ∈ PlanCore and PQ ∈ PlanQ.
+Proof sketch. Simultaneous induction over expression and plan translation handles literals, variables, and bottom directly; attributes and navigation use adequacy; collection
+cases use preservation of Set support and Bag occurrences; and iterators apply their ordered three-valued cases. Primitive cases use the applicable obligations. The technical
+report gives the complete proof.
+5.3 Violation Projection and Graph Query Realization and Execution
+Lemma 2 (Violation-projection preservation). Assume AdequateΣ(M, G) and
+∀o ∈ InstM(K) : [[e]]Core(M, ρo) 'Σ [[q]]Q(G, ηγ(o)).
+Here ρo and ηγ(o) map self to o and γ(o), respectively. Then
+{idM(o) | o ∈ InstM(K), [[e]]Core(M, ρo) 6= T} = ObsQ(G, K, q).
+Proof. Adequacy pairs the extents and stable IDs, while Boolean preservation retains
+the condition of being different from T. The wrapper removes duplicate IDs in the final
+observation.
+Let TargetΣ contain typed, read-only realization records. Each p ∈ TargetΣ carries a target Boolean body, ID-projection predicate, and serialization metadata, interpreted as B
+p
+T
+and Retp
+; it is an abstract realization IR, not a Cypher AST. The relation
+WitnessΣ associates p, G, K, q with (s, ∆, πgen) exactly when p is a well-typed realization of Violations(K, q) under Σ and serializes to that artifact. It records provenance
+and artifact correspondence, not R1–R3; G interprets p, but realization does not read G.
+Define
+E := ExtentΣ
+G(K), BQ(g) := [[q]]Q(G, ηg),
+where ηg(self) = g. These observations have types
+E ⊆ ObjObsΣ(G),
+BQ, Bp
+T
+: E → D⊥
+B, Retp
+: ID → Prop.
+R1–R2 concern realization. Given successful execution and decoding [[s]]C (G; π, ∆) =
+Success(I) with I ⊆ ID, R3 is the execution-and-decoding obligation:
+R1 : ∀g ∈ E, BQ(g) = B
+p
+T
+(g),
+R2 : ∀j ∈ ID, Retp
+(j) ⇐⇒ ∃g ∈ E : idG(g) = j ∧ B
+p
+T
+(g) 6= T,
+R3 : ∀j ∈ ID, j ∈ I ⇐⇒ Retp
+(j).
+Lemma 3 (Generated-query refinement). Assume
+RealizeΣ(Violations(K, q)) = Success(s, ∆, πgen).
+Suppose there is a p such that WitnessΣ(p; G, K, q, s, ∆, πgen) and R1–R2 hold for p.
+Let πpublic ∈ Dompub satisfy
+dom(πpublic) ∩ dom(πgen) = ∅, π = πpublic ] πgen.
+If [[s]]C (G; π, ∆) = Success(I) and R3 holds for p, I, then
+I = ObsQ(G, K, q).
+Proof sketch. R1 preserves body values, R2 selects exactly the stable IDs whose values
+are non-true, and R3 gives the same membership condition for I.
+5.4 End-to-End Theorem and Mechanized Evidence
+Write CompileS,Σ(inv) = Success(s, ∆, πgen) when some K, e, q satisfy (1); this merely
+names the composition.
+Theorem 2 (Conditional exact preservation of the violation-ID set). Let S, M, G, Σ,
+invariant inv, and compilation result (s, ∆, πgen) be given. Assume:
+P1. Source admissibility: Conforms(M, S)∧WFS(M); M is finite, and inv is supported
+and well-typed under S.
+P2. Representation adequacy: AdequateΣ(M, G).
+P3. Compilation: CompileS,Σ(inv) = Success(s, ∆, πgen). Take K, e, q from Eq. (1).
+P4. Refinement: There is a p such that WitnessΣ(p; G, K, q, s, ∆, πgen); all applicable
+Table 1 obligations and R1–R2 hold.
+P5. Runtime: πpublic ∈ Dompub, dom(πpublic) ∩ dom(πgen) = ∅, and π = πpublic ] πgen.
+Applicable runtime numeric obligations hold; [[s]]C (G; π, ∆) = Success(I) with
+I ⊆ ID. R3 holds for the same p, I.
+Then
+ViolO(M, inv) = ViolC (G, s; π, ∆).
+Proof sketch. P1 and Lemma 1 preserve source evaluation in Core. P2–P5 supply adequacy, translation, preservation, and numeric premises; Theorem 1 and Lemma 2, followed by Lemma 3, yield
+ViolO(M, inv) = ObsQ(G, K, q) = ViolC (G, s; π, ∆).
+Thus the obligations are sufficient and compositional; the theorem does not assert that
+production runs automatically satisfy adequacy, R1–R3, or runtime premises.
+Scope of mechanization. Lean’s trusted kernel checks the formal normalization, Coreto-Q and Q-to-target preservation, and their composition, without unchecked placeholders or custom axioms. Adequacy, production compiler/graph builder, Cypher execution,
+decoding, and runtime numeric assumptions remain outside this scope and are evaluated
+separately in Sect. 6.
+6 EVALUATION
+Prototype implementation. The prototype builds a snapshot graph and lowers an invariant through Core and Q to read-only Cypher. Both paths use Σ and reject inadmissible
+inputs. The artifact1 provides code, corpus, results, reproduction instructions, and separate adequacy checks (excluded from RQ counts) for IDs, types, attributes, navigation,
+and extents.
+Research questions and evaluation design. We evaluate OCL2Cypher using three research questions.
+RQ1—Core–Q agreement. On prototype-admitted inputs, do Core and Q produce the
+same values, collection observations, and violation-ID sets?
+RQ2—Rejection. Are inadmissible inputs rejected at the prescribed transformation
+boundary?
+RQ3—End-to-end execution. Does executing the generated Cypher query on Neo4j
+return the same violation-ID set as source OCL evaluation?
+Units are invariant–snapshot pairs. RQ1 compares Core/Q values and violation IDs;
+RQ3 executes generated Cypher on Neo4j. RQ2 contains 23 negatives: eight require an
+exact stage/code and fifteen require rejection before Core. The source oracle evaluates
+frontend-produced Core directly on the snapshot. It shares data representations and frontend/lowering code, but bypasses Q, graph building, realization, Neo4j, and decoding;
+fixed ID fixtures provide an additional check. Thus RQ3 spans boundaries including R3
+but does not establish R3 independently.
+The feature matrix also tests prototype extensions—reject, Set operations,
+allInstances, and type tests/casts—outside the theorem profile. These tests do
+not enlarge the theorem’s supported language.
+Table 3. RQ results: a/b successful checks over total; dash means inapplicable.
+Subject Focus RQ1 RQ2 RQ3
+Library Collections, bottom, and numeric bounds 78/78 1/1 –
+CarRental Domain constraints; frontend admission 19/19 6/6 19/19
+DeepHierarchy Inheritance-aware context extent 36/36 – –
+Medical Navigation and iterators 36/36 – 36/36
+Feature matrix Profile risks and implementation extensions 30/30 1/1 30/30
+Boundary corpus Out-of-scope inputs – 15/15 –
+Total per unit 199/199 23/23 85/85
+Subjects and results. Table 3 shows that RQ1 passed all 199 intermediate comparisons;
+RQ2 rejected all 23 designated negatives—8/8 at their exact expected stage/code and
+15/15 before Core as required; and RQ3 matched the oracle in all 85 executions, with
+no missing or spurious IDs, using Cypher 5 on Neo4j 2026.06.0 Enterprise. These finite
+results cover only the reported corpus and configuration; they imply neither general
+correctness nor performance or scalability.
+1
+https://github.com/bao2811/OCL2Gratra.
+Threats to validity. Shared frontend/lowering code and data can correlate prototype and
+oracle faults. We mitigate this by evaluating Core directly while bypassing Q, graph construction, realization, Neo4j, and decoding, and by checking fixed ID fixtures. The corpus targets distinct risks and rejection cases but not all OCL or industrial-scale models;
+RQ3 uses one Neo4j configuration. Adequacy checks and formal obligations provide
+complementary evidence but do not establish portability or correctness probabilities for
+unseen inputs.
+7 RELATED WORK
+For OCL execution, USE evaluates OCL directly [11], while SQL-PL4OCL and
+OCL2PSQL compile it to SQL [10,14]; neither line connects a graph representation to
+its validation observation. For equivalence, Nguyen and Clavel [15] give an SMT-based
+method for proving manually written SQL implementations correct for a significant
+OCL subset. Radke et al. prove satisfaction equivalence between Essential OCL invariants and nested graph constraints [17]. Graphiti checks Cypher–SQL equivalence for
+supported query fragments modulo a supplied database transformer [12]; none covers
+the complete UML/OCL-to-Cypher validation pipeline.
+For graph-backed validation, Neo4EMF and NeoEMF [3,7] provide persistence.
+Prior work [5,8] has compiled OCL into Gremlin traversals through Mogwaï; GremlinATL [6] translates ATL transformations, whose expressions use OCL, into Gremlin
+scripts. Other approaches [9,13] map UML schemas or class diagrams to graphdatabase representations and labeled property graphs. In contrast, this work specifies
+a representation-aware translation of OCL invariants into Cypher and identifies the
+semantic preservation obligations required for a conditional end-to-end correctness
+result.
+8 CONCLUSION
+This paper introduced OCL2Cypher, a representation-aware method for compiling supported OCL invariants into read-only Cypher queries over property graphs. Its two
+main contributions are a typed OCL–Core–Q–Cypher transformation under a shared
+representation specification and an assurance framework that makes explicit the obligations for representation adequacy, semantic preservation, violation projection, and graph
+query realization and execution. Under the stated premises, these obligations compose
+to conditionally preserve the exact violation-ID set. Lean mechanically checks normalization, Core-to-Q preservation, Q-to-target preservation, and their composition, while
+representation adequacy, production components, Neo4j execution, decoding, and runtime numeric assumptions remain outside the mechanized scope. Future work will extend the supported fragment to nested and ordered collections and Tuple values, and
+evaluate OCL2Cypher on larger industrial models.
+References
+1. Angles, R., Arenas, M., Barceló, P., Hogan, A., Reutter, J., Vrgoč, D.: Foundations of modern query languages for graph
+databases. ACM Comput. Surv. 50(5), 68:1–68:40 (2017). doi: 10.1145/3104031
+2. Angles, R., Bonifati, A., Dumbrava, S., Fletcher, G., Green, A., Hidders, J., Li, B., Libkin, L., Marsault, V., Martens,
+W., Murlak, F., Plantikow, S., Savković, O., Schmidt, M., Sequeda, J., Staworko, S., Tomaszuk, D., Voigt, H., Vrgoč,
+D., Wu, M., Živković, D.: PG-Schema: Schemas for property graphs. Proc. ACM Manag. Data 1(2), 1–25 (Jun 2023).
+doi: 10.1145/3589778, Art. no. 198
+3. Benelallam, A., Gómez, A., Sunyé, G., Tisi, M., Launay, D.: Neo4EMF: A scalable persistence layer for EMF models.
+In: Proc. 10th Eur. Conf. Model. Foundations Appl. Lect. Notes Comput. Sci., vol. 8569, pp. 230–241 (2014). doi: 10.
+1007/978-3-319-09195-2_15
+4. Cabot, J., Gogolla, M.: Object constraint language (OCL): A definitive guide. In: Formal Methods for Model-Driven
+Engineering, Lect. Notes Comput. Sci., vol. 7320, pp. 58–90. Springer (2012). doi: 10.1007/978-3-642-30982-3_3
+5. Daniel, G.: Efficient validation of large models using the Mogwaï tool. In: Proc. 18th Int. Workshop on OCL and Textual
+Model. (OCL). CEUR Workshop Proc., vol. 2245, pp. 187–193 (2018), https://ceur-ws.org/Vol-2245/ocl_
+paper_8.pdf
+6. Daniel, G., Jouault, F., Sunyé, G., Cabot, J.: Gremlin-ATL: A scalable model transformation framework. In: Proc. 32nd
+IEEE/ACM Int. Conf. Automated Softw. Eng. (ASE). pp. 462–472. IEEE (2017). doi: 10.1109/ASE.2017.8115658
+7. Daniel, G., Sunyé, G., Benelallam, A., Tisi, M., Vernageau, Y., Gómez, A., Cabot, J.: NeoEMF: A multi-database model
+persistence framework for very large models. Sci. Comput. Program. 149, 9–14 (2017). doi: 10.1016/j.scico.2017.08.002
+8. Daniel, G., Sunyé, G., Cabot, J.: Mogwaï: A framework to handle complex queries on large models. In: Proc. 10th Int.
+Conf. Research Challenges Inf. Sci. (RCIS). pp. 1–12. IEEE (2016). doi: 10.1109/RCIS.2016.7549343
+9. Daniel, G., Sunyé, G., Cabot, J.: UMLtoGraphDB: Mapping conceptual schemas to graph databases. In: Proc. 35th
+Int. Conf. Conceptual Model. (ER). Lect. Notes Comput. Sci., vol. 9974, pp. 430–444. Springer (2016). doi: 10.1007/
+978-3-319-46397-1_33
+10. Egea, M., Dania, C.: SQL-PL4OCL: An automatic code generator from OCL to SQL procedural language. Softw. Syst.
+Model. 18(1), 769–791 (2019). doi: 10.1007/s10270-017-0597-6
+11. Gogolla, M., Büttner, F., Richters, M.: USE: A UML-based specification environment for validating UML and OCL.
+Sci. Comput. Program. 69(1–3), 27–34 (2007). doi: 10.1016/j.scico.2007.01.013
+12. He, Y., Fang, R., Dillig, I., Wang, Y.: Graphiti: Bridging graph and relational database queries. Proc. ACM Program.
+Lang. 9(PLDI), 1–25 (Jun 2025). doi: 10.1145/3729319, article 216
+13. León, A., Santos, M.Y., García, A., Casamayor, J.C., Pastor, O.: Model-to-model transformation: From UML class diagrams to labeled property graphs. Bus. Inf. Syst. Eng. 66(1), 85–110 (2024). doi: 10.1007/s12599-023-00824-9
+14. Nguyen Phuoc Bao, H., Clavel, M.: OCL2PSQL: An OCL-to-SQL code-generator for model-driven engineering. In:
+Proc. Int. Conf. Future Data and Security Eng. (FDSE). Lect. Notes Comput. Sci., vol. 11814, pp. 185–203 (2019).
+doi: 10.1007/978-3-030-35653-8_13
+15. Nguyen Phuoc Bao, H., Clavel, M.: Proving correctness for SQL implementations of OCL constraints (2024). doi: 10.
+48550/arXiv.2403.18599, arXiv:2403.18599 [cs.DB]
+16. Object Management Group: Object constraint language, version 2.4. Tech. Rep. formal/2014-02-03, Object Management
+Group (Feb 2014), https://www.omg.org/spec/OCL/2.4
+17. Radke, H., Arendt, T., Becker, J.S., Habel, A., Taentzer, G.: Translating essential OCL invariants to nested graph constraints for generating instances of meta-models. Sci. Comput. Program. 152, 38–62 (2018). doi: 10.1016/j.scico.2017.
+08.006

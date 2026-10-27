@@ -1,0 +1,42 @@
+# This repository publishes only the Isabelle formalization and its paper/model
+# inputs. Everything else at the repository root is local or legacy material.
+/*
+
+# Repository metadata and documentation.
+!/.gitignore
+!/README.md
+
+# Formal Isabelle/HOL sources.
+!/isabelle_stage1/
+!/isabelle_stage1/**
+
+# Paper and USE model inputs.
+!/usemodel/
+!/usemodel/**
+
+# Editor and Isabelle backup files inside the published directories.
+*~
+*.bak
+*.orig
+*.rej
+.DS_Store
+
+# LaTeX products: sources stay tracked, generated documents do not.
+/usemodel/*.aux
+/usemodel/*.bbl
+/usemodel/*.bcf
+/usemodel/*.blg
+/usemodel/*.fdb_latexmk
+/usemodel/*.fls
+/usemodel/*.log
+/usemodel/*.out
+/usemodel/*.pdf
+/usemodel/*.run.xml
+/usemodel/*.synctex.gz
+/usemodel/*.toc
+
+# Isabelle session products must be rebuilt locally.
+/isabelle_stage1/heaps/
+/isabelle_stage1/log/
+/isabelle_stage1/output/
+/isabelle_stage1/document/

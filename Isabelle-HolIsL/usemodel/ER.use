@@ -1,0 +1,88 @@
+-- Converted from er2rel-paper/ER.ecore. Ecore containment is composition.
+model ER
+
+class ERSchema
+end
+
+abstract class SchemaElement
+attributes
+  name : String
+end
+
+class Entity < SchemaElement
+end
+
+class Relship < SchemaElement
+end
+
+class ERAttribute
+attributes
+  name : String
+  isKey : Boolean
+end
+
+class RelshipEnd
+attributes
+  name : String
+end
+
+composition SchemaEntities between
+  ERSchema[1] role schema
+  Entity[1..*] role entities
+end
+
+composition SchemaRelships between
+  ERSchema[1] role schema
+  Relship[1..*] role relships
+end
+
+composition EntityAttrs between
+  Entity[0..1] role entity
+  ERAttribute[*] role attrs
+end
+
+composition RelshipAttrs between
+  Relship[0..1] role relship
+  ERAttribute[*] role attrs
+end
+
+association EntityRelshipEnds between
+  Entity[1] role entity
+  RelshipEnd[*] role relshipEnds
+end
+
+composition RelshipEnds between
+  Relship[1] role relship
+  RelshipEnd[2..*] role ends
+end
+
+constraints
+
+context ERSchema inv ER_EN:
+  self.entities->union(self.relships)->isUnique(e | e.name)
+
+context Entity inv ER_EAN:
+  self.attrs->isUnique(a | a.name)
+
+context Entity inv ER_EK:
+  self.attrs->exists(a | a.isKey)
+
+context Relship inv ER_RAN:
+  self.attrs->isUnique(a | a.name)
+
+context Relship inv ER_RK:
+  not self.attrs->exists(a | a.isKey)
+
+context ERAttribute inv ER_attrOwnerXor:
+  self.entity.oclIsUndefined() <> self.relship.oclIsUndefined()
+
+-- USE permits undefined attribute values; these constraints preserve the
+-- lowerBound=1 Ecore attributes.
+context SchemaElement inv RequiredName:
+  not self.name.oclIsUndefined()
+
+context ERAttribute inv RequiredValues:
+  not self.name.oclIsUndefined() and not self.isKey.oclIsUndefined()
+
+context RelshipEnd inv RequiredName:
+  not self.name.oclIsUndefined()

@@ -1,0 +1,13 @@
+session UML_OCL_Graph_Verification = HOL +
+  theories
+    ClassMetamodel
+    GraphMetamodel
+    Build
+    OCL
+    Core
+    Query
+    Cypher
+    Compile
+    Semantics
+    Adequacy
+    Example

@@ -1,0 +1,67 @@
+-- USE rendering model derived from
+-- LLM4ATL_neuro_symbolic/Workflows/n8n-docker/models/families.ecore
+model Families
+
+class FamilyRegister
+attributes
+  id : String
+end
+
+class Family
+attributes
+  lastName : String
+end
+
+class Member
+attributes
+  firstName : String
+end
+
+association RegisterFamilies between
+  FamilyRegister[1] role register
+  Family[*] role families
+end
+
+association FamilySons between
+  Family[0..1] role familySon
+  Member[*] role sons
+end
+
+association FamilyDaughters between
+  Family[0..1] role familyDaughter
+  Member[*] role daughters
+end
+
+association FamilyFather between
+  Family[0..1] role familyFather
+  Member[0..1] role father
+end
+
+association FamilyMother between
+  Family[0..1] role familyMother
+  Member[0..1] role mother
+end
+
+
+
+class PersonRegister
+attributes
+  id : String
+end
+
+abstract class Person
+attributes
+  fullName : String
+  birthday : String
+end
+
+class Male < Person
+end
+
+class Female < Person
+end
+
+association RegisterPersons between
+  PersonRegister[1] role register
+  Person[*] role persons
+end

@@ -1,0 +1,631 @@
+Đúng, tôi hiểu ý bạn. Và cách bạn phát biểu này **chính xác hơn cách tôi vừa mô tả trước đó**, vì phải phân biệt rõ ba tầng:
+
+* **Class metamodel**: quy định thế nào là một class diagram hợp lệ.
+* **Model \(M\)**: một class diagram cụ thể, gồm classes, attributes, relations, inheritance **và tập OCL \(O\)**.
+* **Snapshot \(S\)**: một trạng thái instance của \(M\), tức các object/link cụ thể và phải conform to \(M\).
+
+Khi đó bài toán của bạn là thế này.
+
+$$
+MM_{Class}
+$$
+
+$$
+M \models MM_{Class}
+$$
+
+và:
+
+$$
+S \models M.
+$$
+
+Trong \(M\) có:
+
+$$
+O(M)=\{o_1,\ldots,o_n\}.
+$$
+
+Từ \(M\), tool sinh tập query:
+
+$$
+\boxed{
+Compile(M)
+=
+Q
+=
+\{q_1,\ldots,q_n\}
+}
+$$
+
+trong đó:
+
+$$
+q_i = Compile(M,o_i).
+$$
+
+Còn từ snapshot \(S\), tool sinh property graph:
+
+$$
+\boxed{
+Build(M,S)=G.
+}
+$$
+
+Điểm quan trọng là **query được sinh từ model/OCL**, còn **graph được sinh từ snapshot**.
+
+Đó mới là hai luật chuyển của bạn.
+
+---
+
+## Hai nhánh của hệ thống
+
+Ta có:
+
+```text
+                  Model M
+          (Classes + Relations + OCL)
+             /                 \
+            /                   \
+       OCL compilation        Snapshot S
+            |                  S conforms M
+            |                       |
+            v                       v
+       Queries Q                Build
+                                    |
+                                    v
+                               Graph G
+```
+
+Hay chính xác hơn:
+
+```text
+M = (Class Diagram, OCL set O)
+│
+├────────────── Compile ──────────────► Q = {q1,...,qn}
+│
+│
+└─ Snapshot S, S conforms M
+                 │
+                 │ Build
+                 ▼
+                 G
+```
+
+Sau đó correctness mới được xét.
+
+---
+
+# Đối với mỗi OCL \(o_i\)
+
+Giả sử invariant:
+
+$$
+o_i\in O(M)
+$$
+
+có context class \(K_i\).
+
+Khi đánh giá OCL trực tiếp trên snapshot:
+
+$$
+Eval_{OCL}(o_i,S)
+$$
+
+ta không chỉ lấy một Boolean.
+
+Ta lấy **tập các object của snapshot vi phạm invariant**:
+
+$$
+\boxed{
+Viol_S(o_i)
+=
+\{
+s\in Obj(S)
+\mid
+type(s)\leq K_i
+\land
+Eval_{OCL}(o_i,s,S)\neq true
+\}.
+}
+$$
+
+Ví dụ:
+
+```ocl
+context Person inv PositiveAge:
+    self.age > 0
+```
+
+Snapshot có:
+
+```text
+p1.age = 20
+p2.age = -3
+p3.age = 50
+```
+
+thì:
+
+$$
+Viol_S(o)=\{p_2\}.
+$$
+
+---
+
+## Bên graph
+
+Snapshot:
+
+$$
+S
+$$
+
+được chuyển thành:
+
+$$
+G=Build(M,S).
+$$
+
+Với mỗi object \(s\in S\), phải có một node tương ứng trong \(G\).
+
+Ta cần một ánh xạ:
+
+$$
+\boxed{
+\gamma_S:Obj(S)\rightarrow ObjNodes(G)
+}
+$$
+
+và quan trọng:
+
+$$
+\boxed{
+\gamma_S
+\text{ là song ánh}.
+}
+$$
+
+Tức là:
+
+### mỗi object có đúng một node
+
+$$
+\forall s\in Obj(S).
+\exists!v\in ObjNodes(G):
+v=\gamma_S(s)
+$$
+
+và mỗi object-node trong graph đến từ đúng một source object.
+
+Không mất object:
+
+$$
+s_1\neq s_2
+\Rightarrow
+\gamma_S(s_1)\neq\gamma_S(s_2).
+$$
+
+Không sinh object-node ma:
+
+$$
+\forall v\in ObjNodes(G).
+\exists s\in Obj(S):
+v=\gamma_S(s).
+$$
+
+Đây chính xác là điều bạn đang nói “mỗi \(s\) phải ánh xạ 1-1 với bên graph”.
+
+---
+
+# Query tương ứng
+
+Invariant:
+
+$$
+o_i
+$$
+
+được compiler sinh:
+
+$$
+q_i=Compile(M,o_i).
+$$
+
+Chạy:
+
+$$
+q_i(G)
+$$
+
+trả về tập node vi phạm:
+
+$$
+\boxed{
+Ans_G(q_i)\subseteq ObjNodes(G).
+}
+$$
+
+Correctness mà bạn cần chứng minh là:
+
+$$
+\boxed{
+Ans_G(q_i)
+=
+\gamma_S[Viol_S(o_i)].
+}
+\tag{1}
+$$
+
+Đây mới là câu quan trọng nhất.
+
+Nghĩa là nếu:
+
+$$
+Viol_S(o_i)=\{s_2,s_5,s_8\}
+$$
+
+thì query phải trả đúng:
+
+$$
+Ans_G(q_i)
+=
+\{
+\gamma(s_2),
+\gamma(s_5),
+\gamma(s_8)
+\}.
+$$
+
+Không hơn.
+
+Không thiếu.
+
+---
+
+# Và theorem của toàn phương pháp
+
+Tôi sẽ phát biểu theorem của bạn như sau:
+
+$$
+\boxed{
+\begin{aligned}
+\forall M,S.\quad
+&
+Conforms_{MM}(M)
+\land
+Conforms_M(S)
+\\
+&\Longrightarrow
+\\
+&
+\exists\gamma_S.
+\ Bijective(\gamma_S)
+\\
+&\qquad{}\land
+\forall o\in O(M).
+\\
+&
+\gamma_S[Viol_{OCL}(S,o)]
+=
+Ans_{Cypher}
+\left(
+Build(M,S),
+Compile(M,o)
+\right).
+\end{aligned}
+}
+\tag{MASTER}
+$$
+
+Đây là cách tôi nghĩ **đúng nhất với case study bạn vừa mô tả**.
+
+---
+
+# Có thể viết ngắn hơn
+
+Đặt:
+
+$$
+G = Build(M,S)
+$$
+
+và:
+
+$$
+Q=Compile(M,O(M)).
+$$
+
+Có ánh xạ:
+
+$$
+\gamma:Obj(S)\cong ObjNodes(G).
+$$
+
+Thì correctness là:
+
+$$
+\boxed{
+\forall o_i\in O(M):
+\quad
+\gamma
+\left[
+EvalViol_{OCL}(o_i,S)
+\right]
+=
+EvalViol_{Graph}
+(q_i,G).
+}
+\tag{2}
+$$
+
+với:
+
+$$
+q_i=Compile(M,o_i).
+$$
+
+Đây chính là **semantic preservation** của hai transformation phối hợp.
+
+---
+
+# Bây giờ hình vuông correctness mới chuẩn
+
+Bạn có:
+
+```text
+                         evaluate OCL oi
+       Snapshot S  ─────────────────────────►  ViolS(oi)
+           │                                      │
+           │ Build(M,S)                           │ γ
+           │                                      │
+           ▼                                      ▼
+       Graph G      ─────────────────────────► AnsG(qi)
+                        execute qi
+```
+
+với:
+
+$$
+q_i=Compile(M,o_i).
+$$
+
+Bạn phải chứng minh hình vuông commute:
+
+$$
+\boxed{
+\gamma\circ Eval_{OCL}
+=
+Eval_{Cypher}\circ(Build,Compile).
+}
+$$
+
+Hay trên tập violation:
+
+$$
+\boxed{
+\gamma[Viol_{OCL}(S,o)]
+=
+Viol_{Cypher}(Build(M,S),Compile(M,o)).
+}
+$$
+
+Đây là formulation rất đẹp cho paper.
+
+---
+
+# Vậy Isabelle phải biểu diễn theo formulation mới này
+
+Điểm này cũng làm tôi sửa lại kiến trúc Isabelle trước đó.
+
+Isabelle cần có trước tiên:
+
+```text
+ClassMetamodel
+      │
+      │ conforms
+      ▼
+    Model M
+(Class/Attr/Relation/OCL)
+      │
+      │
+      ├──────────── Compile ───────► Query
+      │
+      ▼
+  Snapshot S
+      │ conforms M
+      │
+      │ Build
+      ▼
+  PropertyGraph G
+```
+
+Nghĩa là trong Isabelle phải phân biệt rõ:
+
+```isabelle
+class_metamodel
+```
+
+```isabelle
+uml_model
+```
+
+```isabelle
+snapshot
+```
+
+chứ **không được gộp `uml_model` và `snapshot` như cách tôi nói trước**.
+
+Sau đó:
+
+```isabelle
+conforms_model ::
+  "class_metamodel ⇒ uml_model ⇒ bool"
+```
+
+và:
+
+```isabelle
+conforms_snapshot ::
+  "uml_model ⇒ snapshot ⇒ bool"
+```
+
+---
+
+## Model \(M\)
+
+Có thể conceptual:
+
+```isabelle
+record uml_model =
+  classes      :: ...
+  attributes   :: ...
+  associations :: ...
+  inheritance  :: ...
+  invariants   :: "ocl_inv set"
+```
+
+---
+
+## Snapshot \(S\)
+
+```isabelle
+record snapshot =
+  objects :: "object set"
+  links   :: "link set"
+```
+
+Snapshot không chứa class definitions.
+
+Nó là instance:
+
+$$
+S\models M.
+$$
+
+---
+
+# Transformation 1
+
+```isabelle
+compile ::
+  "uml_model ⇒ ocl_inv ⇒ query"
+```
+
+hoặc toàn model:
+
+```isabelle
+compile_all ::
+  "uml_model ⇒ (ocl_inv × query) set"
+```
+
+với:
+
+$$
+Compile(M)
+=
+\{(o,Compile(M,o))\mid o\in O(M)\}.
+$$
+
+---
+
+# Transformation 2
+
+```isabelle
+build ::
+  "uml_model ⇒ snapshot ⇒ property_graph"
+```
+
+Tôi nghĩ signature này chính xác hơn:
+
+$$
+\boxed{
+Build:M\times S\rightarrow G.
+}
+$$
+
+Vì để chuyển snapshot sang graph, builder phải biết structure của \(M\):
+
+* class nào;
+* association nào;
+* multiplicity;
+* inheritance;
+* role;
+* encoding.
+
+Không nên chỉ viết:
+
+$$
+Build(S).
+$$
+
+Mà nên là:
+
+$$
+\boxed{
+Build(M,S).
+}
+$$
+
+---
+
+# Sau đó định nghĩa violation phía nguồn
+
+```isabelle
+ocl_violations ::
+  "uml_model ⇒ snapshot ⇒ ocl_inv ⇒ object set"
+```
+
+$$
+Viol_O(M,S,o).
+$$
+
+Và phía graph:
+
+```isabelle
+query_violations ::
+  "property_graph ⇒ query ⇒ node set"
+```
+
+$$
+Viol_Q(G,q).
+$$
+
+---
+
+# Cuối cùng là correspondence
+
+```isabelle
+rep ::
+  "snapshot ⇒ property_graph ⇒ object ⇒ node"
+```
+
+hoặc existential witness:
+
+$$
+\gamma:Obj(S)\leftrightarrow Nodes(G).
+$$
+
+Rồi theorem:
+
+```isabelle
+theorem transformation_correct:
+  assumes "conforms_model ClassMM M"
+      and "conforms_snapshot M S"
+      and "o ∈ invariants M"
+  defines "G ≡ build M S"
+  defines "q ≡ compile M o"
+  shows
+    "∃γ.
+       bij_betw γ (objects S) (object_nodes G)
+       ∧ γ ` ocl_violations M S o
+         = query_violations G q"
+```
+
+**Đây gần như chính xác lời bạn vừa nói, nhưng viết thành Isabelle theorem.**
+
+---
+
+Và tôi nghĩ có một insight rất quan trọng ở đây: **cái cần prove không phải riêng “OCL→Cypher đúng” hay riêng “Snapshot→Graph đúng”. Cái cần prove là hai phép chuyển phối hợp sao cho tập object vi phạm được bảo toàn qua ánh xạ object→node.**
+
+Đó mới thực sự là correctness property của case study của bạn.

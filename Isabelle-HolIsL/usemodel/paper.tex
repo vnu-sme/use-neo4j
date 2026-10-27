@@ -1,0 +1,632 @@
+Đúng hướng rồi. Với mức trừu tượng bạn muốn, tôi sẽ tổ chức phần formalization thành một chuỗi rất tự nhiên: **khái niệm nguồn → khái niệm đích → hai phép chuyển → tính đúng đắn**. Cách này cũng gần với phong cách bài bạn gửi: trước hết định nghĩa các mô hình bằng tuple và điều kiện well-formedness, sau đó mới đưa phương pháp và tiêu chí conformance/correctness.  
+
+## 1. Definition: Class Metamodel, Class Model, and Object Model
+
+Mở đầu bằng một định nghĩa rất ngắn:
+
+$$
+\boxed{
+MM_C=\langle \mathcal C,\mathcal A,\mathcal R,\mathcal H,\mathcal O\rangle
+}
+$$
+
+Trong đó \(MM_C\) chỉ quy định các **loại phần tử có thể xuất hiện trong một class model**: class, attribute, association, inheritance và OCL constraint.
+
+Sau đó không cần định nghĩa lại một metamodel thứ hai. Chỉ nói:
+
+> A class model \(M\) is an instance of \(MM_C\).
+
+Ký hiệu:
+
+$$
+\boxed{
+M\models MM_C
+}
+$$
+
+và có thể biểu diễn:
+
+$$
+\boxed{
+M=\langle C_M,A_M,R_M,H_M,O(M)\rangle.
+}
+$$
+
+Ở đây:
+
+$$
+O(M)=\{o_1,\ldots,o_n\}
+$$
+
+là tập OCL invariants thuộc \(M\).
+
+Sau đó giới thiệu object model/snapshot:
+
+$$
+\boxed{
+S=\langle Obj_S,Slot_S,Link_S\rangle
+}
+$$
+
+và:
+
+$$
+\boxed{
+S\models M.
+}
+$$
+
+Nên giải thích ngắn:
+
+* \(Obj_S\): objects;
+* \(Slot_S\): attribute values;
+* \(Link_S\): association instances.
+
+Điểm cần nói rõ là:
+
+$$
+S\models M
+$$
+
+chỉ là **structural conformance**, không có nghĩa tất cả OCL trong \(M\) đều đúng.
+
+Đây là chỗ quan trọng để reader hiểu tại sao vẫn có thể tồn tại:
+
+$$
+Viol(O,S)\neq\varnothing.
+$$
+
+---
+
+## 2. Well-formedness và OCL phù hợp với \(M\)
+
+Không cần trình bày hàng chục typing rules.
+
+Chỉ cần một judgement tổng quát:
+
+$$
+\boxed{
+M;\Gamma\vdash e:\tau
+}
+$$
+
+nghĩa là biểu thức OCL \(e\):
+
+* dùng đúng phần tử khai báo trong \(M\);
+* variable/binder đúng scope;
+* attribute/navigation resolve được;
+* toán tử dùng đúng type;
+* multiplicity/navigation phù hợp.
+
+Với invariant:
+
+$$
+o=\langle K,e\rangle
+$$
+
+ta định nghĩa:
+
+$$
+\boxed{
+WF_{OCL}(M,o)
+\iff
+K\in C_M
+\land
+M;\{self:K\}\vdash e:Boolean.
+}
+\tag{1}
+$$
+
+Sau đó có thể nói:
+
+$$
+\boxed{
+WF(M)
+\iff
+M\models MM_C
+\land
+\forall o\in O(M).\ WF_{OCL}(M,o).
+}
+\tag{2}
+$$
+
+Đây là đủ. Toàn bộ proof chi tiết của typing/name resolution để Isabelle artifact.
+
+---
+
+# 3. Definition: Graph Metamodel and Graph
+
+Phía graph giữ đúng kiến trúc hai tầng.
+
+Định nghĩa:
+
+$$
+\boxed{
+MM_G
+}
+$$
+
+là metamodel của property graph, quy định một graph gồm node, relationship, labels, types và properties.
+
+Một graph cụ thể:
+
+$$
+\boxed{
+G=
+\langle
+V,E,\lambda,\rho,src,tgt,\pi
+\rangle
+}
+$$
+
+trong đó:
+
+$$
+V
+$$
+
+là nodes,
+
+$$
+E
+$$
+
+là relationships,
+
+$$
+\lambda:V\rightarrow 2^{Label}
+$$
+
+là labels,
+
+$$
+\rho:E\rightarrow RelType
+$$
+
+là relationship type,
+
+$$
+src,tgt:E\rightarrow V
+$$
+
+là endpoints,
+
+và:
+
+$$
+\pi:(V\cup E)\times Key\rightharpoonup Value
+$$
+
+là property function.
+
+Graph hợp lệ khi:
+
+$$
+\boxed{
+G\models MM_G.
+}
+\tag{3}
+$$
+
+Không cần giải thích `node_wf`, `edge_wf`, finiteness... ở main text.
+
+Một câu prose là đủ:
+
+> \(G\models MM_G\) requires finite well-formed nodes and relationships, valid relationship endpoints, labels, types, and property values.
+
+---
+
+# 4. Một query hợp lệ là gì?
+
+Query không cần một metamodel riêng.
+
+Chỉ cần ký hiệu:
+
+$$
+\boxed{
+WF_Q(M,\Sigma,q)
+}
+$$
+
+nghĩa là \(q\):
+
+* đúng cú pháp query language;
+* chỉ sử dụng labels, relationship types và property keys được ánh xạ từ \(M\) thông qua \(\Sigma\);
+* navigation/direction phù hợp với representation specification;
+* kết quả trả về đúng dạng violation nodes/IDs.
+
+Nếu muốn ngắn hơn nữa:
+
+$$
+\boxed{
+q\in \mathcal Q_{\Sigma}(M)
+}
+\tag{4}
+$$
+
+với:
+
+$$
+\mathcal Q_{\Sigma}(M)
+$$
+
+là tập các query well-formed đối với \(M\) và representation \(\Sigma\).
+
+Tôi thích notation này hơn vì paper sẽ nhẹ hơn.
+
+---
+
+# 5. Representation specification
+
+Trước hai phép chuyển, giới thiệu một lần:
+
+$$
+\boxed{
+\Sigma=
+\langle
+\Sigma_C,\Sigma_A,\Sigma_R,\Sigma_D,\Sigma_{id}
+\rangle
+}
+$$
+
+Trong đó:
+
+* \(\Sigma_C\): class → label;
+* \(\Sigma_A\): attribute → property;
+* \(\Sigma_R\): association → relationship type;
+* \(\Sigma_D\): logical/physical direction;
+* \(\Sigma_{id}\): object identity encoding.
+
+Sau này cả \(T_G\) và \(T_Q\) đều dùng cùng \(\Sigma\).
+
+Đây là cầu nối giữa hai transformation.
+
+---
+
+# 6. Transformation 1: Snapshot-to-Graph
+
+Không gọi đây là Definition.
+
+Có thể đặt subsection:
+
+### A. Snapshot-to-Graph Transformation
+
+Giới thiệu:
+
+$$
+\boxed{
+T_G^\Sigma:(M,S)\mapsto G
+}
+\tag{5}
+$$
+
+với:
+
+$$
+M\models MM_C,
+\qquad
+S\models M.
+$$
+
+Transformation tạo:
+
+$$
+\boxed{
+G=T_G^\Sigma(M,S)
+}
+$$
+
+và yêu cầu:
+
+$$
+\boxed{
+G\models MM_G.
+}
+\tag{6}
+$$
+
+Sau đó dùng một bảng nhỏ.
+
+| Source element              | Target graph element    | Mapping rule                  |
+| --------------------------- | ----------------------- | ----------------------------- |
+| Object \(x\in Obj_S\)       | Node \(v_x\in V\)       | \(x\mapsto v_x\)              |
+| Class of \(x\)              | Node label              | \(c\mapsto\Sigma_C(c)\)       |
+| Attribute value \(a(x)\)    | Node property           | \(a\mapsto\Sigma_A(a)\)       |
+| Association link \(r(x,y)\) | Relationship            | \(r\mapsto\Sigma_R(r)\)       |
+| Link direction              | Physical edge direction | determined by \(\Sigma_D(r)\) |
+| Object identifier           | Stable graph identifier | determined by \(\Sigma_{id}\) |
+
+Chỉ cần vậy.
+
+Sau bảng có thể tổng kết bằng:
+
+$$
+\boxed{
+\gamma_\Sigma:
+Obj_S\rightarrow V_G
+}
+$$
+
+là object-to-node correspondence induced by \(T_G^\Sigma\).
+
+Nếu builder tạo đúng một node cho mỗi object:
+
+$$
+\boxed{
+\gamma_\Sigma
+\text{ is bijective}.
+}
+\tag{7}
+$$
+
+---
+
+# 7. Transformation 2: OCL-to-Query
+
+Subsection riêng:
+
+### B. OCL-to-Query Transformation
+
+Giới thiệu:
+
+$$
+\boxed{
+T_Q^\Sigma:(M,o)\mapsto q,
+\qquad o\in O(M).
+}
+\tag{8}
+$$
+
+Transformation chỉ được áp dụng nếu:
+
+$$
+WF_{OCL}(M,o).
+$$
+
+Và kết quả phải thỏa:
+
+$$
+\boxed{
+q\in\mathcal Q_\Sigma(M).
+}
+\tag{9}
+$$
+
+Sau đó thêm bảng transformation rules.
+
+| OCL construct       | Query construct        | Ý nghĩa                                       |
+| ------------------- | ---------------------- | --------------------------------------------- |
+| Context class \(K\) | node scan              | scan nodes labelled \(\Sigma_C(K)\)           |
+| Attribute \(e.a\)   | property access        | access \(\Sigma_A(a)\)                        |
+| Navigation \(e.r\)  | relationship traversal | use \(\Sigma_R(r)\) and \(\Sigma_D(r)\)       |
+| Boolean operators   | graph predicate        | preserve Boolean semantics                    |
+| Comparison          | comparison predicate   | preserve typed comparison                     |
+| `select`            | filtering              | retain matching elements                      |
+| `collect`           | projection             | project expression values                     |
+| `forAll`            | universal predicate    | preserve OCL iterator semantics               |
+| `exists`            | existential predicate  | preserve OCL iterator semantics               |
+| Invariant \(o\)     | violation query        | return context nodes for which \(o\neq true\) |
+
+Nếu muốn nhấn mạnh implementation có các intermediate forms nhưng không muốn làm nặng main text, chỉ viết một câu:
+
+$$
+T_Q^\Sigma
+=
+Realize_\Sigma\circ Lower_\Sigma\circ Front_M.
+$$
+
+Không cần khai triển Core và Q ở đây.
+
+---
+
+# 8. Evaluation functions
+
+Đến đây tôi nghĩ **không cần gọi là Definition riêng**.
+
+Chỉ giới thiệu hai hàm quan sát.
+
+OCL:
+
+$$
+Eval_O(o,S)
+$$
+
+trả về tập object vi phạm:
+
+$$
+\boxed{
+Eval_O(o,S)\subseteq Obj_S.
+}
+\tag{10}
+$$
+
+Graph query:
+
+$$
+Eval_Q(q,G)
+$$
+
+trả về tập graph nodes được query xác định là vi phạm:
+
+$$
+\boxed{
+Eval_Q(q,G)\subseteq V_G.
+}
+\tag{11}
+$$
+
+Một câu prose là đủ:
+
+> \(Eval_O\) denotes standard OCL evaluation over a snapshot, while \(Eval_Q\) denotes execution of the generated query over the transformed graph.
+
+Không cần formalize semantics chi tiết ở đây.
+
+---
+
+# 9. Bây giờ mới Definition: Correctness
+
+Đây mới nên là Definition quan trọng của section.
+
+### Definition X (Transformation Correctness)
+
+Cho:
+
+$$
+M\models MM_C,
+$$
+
+$$
+S\models M,
+$$
+
+$$
+o\in O(M),
+$$
+
+và:
+
+$$
+WF_{OCL}(M,o).
+$$
+
+Đặt:
+
+$$
+G=T_G^\Sigma(M,S),
+$$
+
+$$
+q=T_Q^\Sigma(M,o).
+$$
+
+Phương pháp được gọi là **correct** nếu tồn tại song ánh:
+
+$$
+\gamma_\Sigma:
+Obj_S
+\overset{\sim}{\rightarrow}
+V_G
+$$
+
+sao cho:
+
+$$
+\boxed{
+\gamma_\Sigma
+\left[
+Eval_O(o,S)
+\right]
+=
+Eval_Q(q,G).
+}
+\tag{12}
+$$
+
+Đây là formula chính.
+
+---
+
+## 10. Dạng pointwise còn dễ hiểu hơn
+
+Ngay sau (12), thêm:
+
+$$
+\boxed{
+\forall x\in Obj_S:
+\quad
+x\in Eval_O(o,S)
+\iff
+\gamma_\Sigma(x)\in Eval_Q(q,G).
+}
+\tag{13}
+$$
+
+Rồi giải thích bằng lời:
+
+> An object violates an OCL invariant in the source snapshot if and only if its corresponding graph node is returned by the generated query.
+
+Câu này reviewer đọc là hiểu ngay.
+
+---
+
+# 11. Cuối cùng là theorem
+
+Sau Definition Correctness mới đưa theorem:
+
+### Theorem X (Correctness of the Transformation)
+
+$$
+\boxed{
+\begin{aligned}
+&M\models MM_C
+\land
+S\models M
+\land
+WF(M)
+\\
+&\Longrightarrow
+\\
+&G=T_G^\Sigma(M,S)
+\land
+G\models MM_G
+\\
+&\land\
+\forall o\in O(M):
+\\
+&
+\gamma_\Sigma
+[
+Eval_O(o,S)
+]
+=
+Eval_Q
+(
+T_Q^\Sigma(M,o),
+G
+).
+\end{aligned}
+}
+\tag{14}
+$$
+
+Đây là theorem lớn duy nhất main paper cần.
+
+---
+
+# Tôi sẽ tổ chức section của paper như thế này
+
+```text
+4. Formalization of the Transformation
+
+4.1 Source Modeling Domain
+    Definition 1. Class Metamodel and Class Model
+    Definition 2. Object Model / Snapshot
+    Well-formedness and OCL admissibility
+
+4.2 Target Graph Domain
+    Definition 3. Graph Metamodel and Property Graph
+    Well-formed graph and well-formed query
+
+4.3 Representation Specification
+    Σ
+
+4.4 Snapshot-to-Graph Transformation
+    TGΣ : (M,S) → G
+    Table I. Snapshot-to-Graph mapping rules
+
+4.5 OCL-to-Query Transformation
+    TQΣ : (M,o) → q
+    Table II. OCL-to-Query mapping rules
+
+4.6 Semantic Observations
+    EvalO(o,S)
+    EvalQ(q,G)
+
+4.7 Correctness
+    Definition 4. Transformation Correctness
+    Theorem 1. Exact Preservation of Violations
+```
+
+Tôi nghĩ đây là cấu trúc **vừa đủ formal, vừa đủ trừu tượng, và rất dễ đọc**.
+
+Điểm quan trọng nhất là: **Definition chỉ dành cho những “khái niệm” thực sự cần reader nhớ** — `Class Model`, `Snapshot`, `Graph`, `Correctness`. Hai transformation \(T_G,T_Q\) là **phương pháp**, nên trình bày bằng hàm + bảng mapping rules, đúng như bạn yêu cầu.

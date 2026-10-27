@@ -1,0 +1,57 @@
+-- Converted from er2rel-paper/REL.ecore. Ecore containment is composition.
+-- The Ecore multiplicities on references are 0..1 or *; REL_mult1..4 carry
+-- the stricter requirements exactly as named in the Ecore OCL annotations.
+model REL
+
+class RELSchema
+end
+
+class Relation
+attributes
+  name : String
+end
+
+class RELAttribute
+attributes
+  name : String
+  isKey : Boolean
+end
+
+composition SchemaRelations between
+  RELSchema[0..1] role schema
+  Relation[*] role relations
+end
+
+composition RelationAttrs between
+  Relation[0..1] role relation
+  RELAttribute[*] role attrs
+end
+
+constraints
+
+context RELSchema inv REL_RN:
+  self.relations->isUnique(r | r.name)
+
+context RELSchema inv REL_mult1:
+  self.relations->size() > 0
+
+context Relation inv REL_AN:
+  self.attrs->isUnique(a | a.name)
+
+context Relation inv REL_K:
+  self.attrs->exists(a | a.isKey)
+
+context Relation inv REL_mult2:
+  not self.schema.oclIsUndefined()
+
+context Relation inv REL_mult3:
+  self.attrs->size() > 0
+
+context RELAttribute inv REL_mult4:
+  not self.relation.oclIsUndefined()
+
+context Relation inv RequiredName:
+  not self.name.oclIsUndefined()
+
+context RELAttribute inv RequiredValues:
+  not self.name.oclIsUndefined() and not self.isKey.oclIsUndefined()

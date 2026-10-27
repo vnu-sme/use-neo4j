@@ -1,0 +1,27 @@
+-- USE rendering model derived from
+-- LLM4ATL_neuro_symbolic/Workflows/n8n-docker/models/persons.ecore
+-- EDate is represented as String because the USE model is intended for
+-- structural rendering and bounded examples.
+model Persons
+
+class PersonRegister
+attributes
+  id : String
+end
+
+abstract class Person
+attributes
+  fullName : String
+  birthday : String
+end
+
+class Male < Person
+end
+
+class Female < Person
+end
+
+association RegisterPersons between
+  PersonRegister[1] role register
+  Person[*] role persons
+end
