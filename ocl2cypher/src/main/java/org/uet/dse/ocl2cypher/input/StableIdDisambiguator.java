@@ -43,10 +43,6 @@ public final class StableIdDisambiguator {
         }
     }
 
-    public boolean isUsed(String id) {
-        return usedIds.contains(id);
-    }
-
     /**
      * Records an identity created by an external/runtime operation. Repeated
      * reservation is idempotent and does not consume a generated suffix.

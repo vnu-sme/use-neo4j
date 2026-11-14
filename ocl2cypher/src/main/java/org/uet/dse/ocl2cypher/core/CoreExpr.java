@@ -274,13 +274,6 @@ public abstract sealed class CoreExpr
 
         public AssociationClassNavigation(SourceSpan span, NavKind kind, CoreExpr source,
                                           String associationClassKey, String navigationSource,
-                                          List<CoreExpr> qualifiers, OclType declaredType) {
-            this(span, kind, source, associationClassKey, navigationSource,
-                    qualifiers, declaredType, false);
-        }
-
-        public AssociationClassNavigation(SourceSpan span, NavKind kind, CoreExpr source,
-                                          String associationClassKey, String navigationSource,
                                           List<CoreExpr> qualifiers, OclType declaredType,
                                           boolean receiverIsTarget) {
             super(span);

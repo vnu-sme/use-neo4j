@@ -5,9 +5,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.uet.dse.ocl2cypher.cypher.CypherAst.*;
-import org.uet.dse.ocl2cypher.diagnostics.RuleId;
-import org.uet.dse.ocl2cypher.trace.Trace;
-import org.uet.dse.ocl2cypher.trace.TraceCollector;
 
 /**
  * Deterministic serializer {@code S}: total on {@code WF_CypherAS} and
@@ -45,16 +42,6 @@ public final class Serializer {
                 .toList();
         return new Serialized(artifact.dialect(), out.toString(), parameters,
                 artifact.contract());
-    }
-
-    public static Serialized serialize(GeneratedArtifact artifact, TraceCollector traces) {
-        Serialized serialized = serialize(artifact);
-        traces.record(Trace.Stage.S,
-                "cypher-artifact:" + (artifact.contract().shape() == ResultShape.IDS
-                        ? "violations" : "value"),
-                "serialized-cypher",
-                RuleId.S_ARTIFACT);
-        return serialized;
     }
 
     /** Accessor shared by the adapter's round-trip check; body is the line above. */
@@ -276,15 +263,6 @@ public final class Serializer {
                         cs.query().requiresFinalReturn())) + "}";
             }
             throw new IllegalStateException("no serialize case for " + e.getClass().getSimpleName());
-        }
-
-        private static String paren(CypherExpr e) {
-            if (e instanceof VariableExpr || e instanceof ParameterExpr
-                    || e instanceof BooleanLiteral || e instanceof IntegerLiteral
-                    || e instanceof FloatLiteral || e instanceof StringLiteral) {
-                return expr(e);
-            }
-            return "(" + expr(e) + ")";
         }
 
         private static String atomize(CypherExpr expression) {

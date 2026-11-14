@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.uet.dse.ocl2cypher.diagnostics.Result;
-import org.uet.dse.ocl2cypher.runtime.Boolean3;
 import org.uet.dse.ocl2cypher.runtime.OclEquality;
 import org.uet.dse.ocl2cypher.runtime.OclType;
 import org.uet.dse.ocl2cypher.runtime.OclValue;

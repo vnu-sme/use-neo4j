@@ -1,0 +1,323 @@
+-- Independent snapshot; load into a fresh USE state.
+-- Scenario: larger. Invariant violations may be intentional.
+!new Organization('organization_0')
+!set organization_0.name := 'Organization 0'
+!new Organization('organization_1')
+!set organization_1.name := 'Organization 1'
+!new Organization('organization_2')
+!set organization_2.name := 'Organization 2'
+!new Organization('organization_3')
+!set organization_3.name := 'Organization 3'
+!new Organization('organization_4')
+!set organization_4.name := 'Organization 4'
+!new Organization('organization_5')
+!set organization_5.name := 'Organization 5'
+!new Organization('organization_6')
+!set organization_6.name := 'Organization 6'
+!new Organization('organization_7')
+!set organization_7.name := 'Organization 7'
+!new Organization('organization_8')
+!set organization_8.name := 'Organization 8'
+!new Organization('organization_9')
+!set organization_9.name := 'Organization 9'
+!new Organization('organization_10')
+!set organization_10.name := 'Organization 10'
+!new Organization('organization_11')
+!set organization_11.name := 'Organization 11'
+!new Department('department_0')
+!set department_0.code := 'D0'
+!set department_0.budget := -10.0
+!set department_0.active := true
+!insert (organization_0, department_0) into OrganizationDepartments
+!new Person('person_0_0')
+!set person_0_0.name := 'Repeated'
+!set person_0_0.rating := 4.8
+!set person_0_0.active := false
+!insert (department_0, person_0_0) into DepartmentStaff
+!new Employee('person_0_1')
+!set person_0_1.name := 'Repeated'
+!set person_0_1.age := 70
+!set person_0_1.rating := 4.8
+!set person_0_1.active := false
+!set person_0_1.salary := -1.0
+!insert (department_0, person_0_1) into DepartmentStaff
+!new Manager('person_0_2')
+!set person_0_2.name := 'Repeated'
+!set person_0_2.age := 70
+!set person_0_2.rating := 4.8
+!set person_0_2.active := false
+!set person_0_2.salary := 3000.0
+!set person_0_2.level := 0
+!insert (department_0, person_0_2) into DepartmentStaff
+!new Department('department_1')
+!set department_1.code := 'D1'
+!set department_1.budget := 10000.0
+!set department_1.active := true
+!insert (organization_1, department_1) into OrganizationDepartments
+!new Person('person_1_0')
+!set person_1_0.name := 'Repeated'
+!set person_1_0.age := -1
+!set person_1_0.rating := 4.8
+!set person_1_0.active := false
+!insert (department_1, person_1_0) into DepartmentStaff
+!new Employee('person_1_1')
+!set person_1_1.name := 'Repeated'
+!set person_1_1.age := 70
+!set person_1_1.rating := 4.8
+!set person_1_1.active := false
+!set person_1_1.salary := -1.0
+!insert (department_1, person_1_1) into DepartmentStaff
+!new Manager('person_1_2')
+!set person_1_2.name := 'Repeated'
+!set person_1_2.age := 70
+!set person_1_2.rating := 4.8
+!set person_1_2.active := false
+!set person_1_2.salary := 3000.0
+!set person_1_2.level := 4
+!insert (department_1, person_1_2) into DepartmentStaff
+!insert (department_1, person_1_2) into DepartmentManagement
+!new Department('department_2')
+!set department_2.code := 'D2'
+!set department_2.budget := 10000.0
+!set department_2.active := true
+!insert (organization_2, department_2) into OrganizationDepartments
+!new Person('person_2_0')
+!set person_2_0.name := 'Repeated'
+!set person_2_0.age := -1
+!set person_2_0.rating := 4.8
+!set person_2_0.active := false
+!insert (department_2, person_2_0) into DepartmentStaff
+!new Employee('person_2_1')
+!set person_2_1.name := 'Repeated'
+!set person_2_1.age := 70
+!set person_2_1.rating := 4.8
+!set person_2_1.active := false
+!set person_2_1.salary := -1.0
+!insert (department_2, person_2_1) into DepartmentStaff
+!new Manager('person_2_2')
+!set person_2_2.name := 'Repeated'
+!set person_2_2.age := 70
+!set person_2_2.rating := 4.8
+!set person_2_2.active := false
+!set person_2_2.salary := 3000.0
+!set person_2_2.level := 0
+!insert (department_2, person_2_2) into DepartmentStaff
+!insert (department_2, person_2_2) into DepartmentManagement
+!new Department('department_3')
+!set department_3.code := 'D3'
+!set department_3.budget := 10000.0
+!set department_3.active := true
+!insert (organization_3, department_3) into OrganizationDepartments
+!new Person('person_3_0')
+!set person_3_0.name := 'Repeated'
+!set person_3_0.rating := 4.8
+!set person_3_0.active := false
+!insert (department_3, person_3_0) into DepartmentStaff
+!new Employee('person_3_1')
+!set person_3_1.name := 'Repeated'
+!set person_3_1.age := 70
+!set person_3_1.rating := 4.8
+!set person_3_1.active := false
+!set person_3_1.salary := -1.0
+!insert (department_3, person_3_1) into DepartmentStaff
+!new Manager('person_3_2')
+!set person_3_2.name := 'Repeated'
+!set person_3_2.age := 70
+!set person_3_2.rating := 4.8
+!set person_3_2.active := false
+!set person_3_2.salary := 3000.0
+!set person_3_2.level := 4
+!insert (department_3, person_3_2) into DepartmentStaff
+!insert (department_3, person_3_2) into DepartmentManagement
+!new Department('department_4')
+!set department_4.code := 'D4'
+!set department_4.budget := 10000.0
+!set department_4.active := true
+!insert (organization_4, department_4) into OrganizationDepartments
+!new Person('person_4_0')
+!set person_4_0.name := 'Repeated'
+!set person_4_0.age := -1
+!set person_4_0.rating := 4.8
+!set person_4_0.active := false
+!insert (department_4, person_4_0) into DepartmentStaff
+!new Employee('person_4_1')
+!set person_4_1.name := 'Repeated'
+!set person_4_1.age := 70
+!set person_4_1.rating := 4.8
+!set person_4_1.active := false
+!set person_4_1.salary := -1.0
+!insert (department_4, person_4_1) into DepartmentStaff
+!new Manager('person_4_2')
+!set person_4_2.name := 'Repeated'
+!set person_4_2.age := 70
+!set person_4_2.rating := 4.8
+!set person_4_2.active := false
+!set person_4_2.salary := 3000.0
+!set person_4_2.level := 0
+!insert (department_4, person_4_2) into DepartmentStaff
+!insert (department_4, person_4_2) into DepartmentManagement
+!new Department('department_5')
+!set department_5.code := 'D5'
+!set department_5.budget := 10000.0
+!set department_5.active := true
+!insert (organization_5, department_5) into OrganizationDepartments
+!new Person('person_5_0')
+!set person_5_0.name := 'Repeated'
+!set person_5_0.age := -1
+!set person_5_0.rating := 4.8
+!set person_5_0.active := false
+!insert (department_5, person_5_0) into DepartmentStaff
+!new Employee('person_5_1')
+!set person_5_1.name := 'Repeated'
+!set person_5_1.age := 70
+!set person_5_1.rating := 4.8
+!set person_5_1.active := false
+!set person_5_1.salary := -1.0
+!insert (department_5, person_5_1) into DepartmentStaff
+!new Manager('person_5_2')
+!set person_5_2.name := 'Repeated'
+!set person_5_2.age := 70
+!set person_5_2.rating := 4.8
+!set person_5_2.active := false
+!set person_5_2.salary := 3000.0
+!set person_5_2.level := 4
+!insert (department_5, person_5_2) into DepartmentStaff
+!insert (department_5, person_5_2) into DepartmentManagement
+!new Department('department_6')
+!set department_6.code := 'D6'
+!set department_6.budget := 10000.0
+!set department_6.active := true
+!insert (organization_6, department_6) into OrganizationDepartments
+!new Person('person_6_0')
+!set person_6_0.name := 'Repeated'
+!set person_6_0.rating := 4.8
+!set person_6_0.active := false
+!insert (department_6, person_6_0) into DepartmentStaff
+!new Employee('person_6_1')
+!set person_6_1.name := 'Repeated'
+!set person_6_1.age := 70
+!set person_6_1.rating := 4.8
+!set person_6_1.active := false
+!set person_6_1.salary := -1.0
+!insert (department_6, person_6_1) into DepartmentStaff
+!new Manager('person_6_2')
+!set person_6_2.name := 'Repeated'
+!set person_6_2.age := 70
+!set person_6_2.rating := 4.8
+!set person_6_2.active := false
+!set person_6_2.salary := 3000.0
+!set person_6_2.level := 0
+!insert (department_6, person_6_2) into DepartmentStaff
+!insert (department_6, person_6_2) into DepartmentManagement
+!new Department('department_7')
+!set department_7.code := 'D7'
+!set department_7.budget := 10000.0
+!set department_7.active := true
+!insert (organization_7, department_7) into OrganizationDepartments
+!new Person('person_7_0')
+!set person_7_0.name := 'Repeated'
+!set person_7_0.age := -1
+!set person_7_0.rating := 4.8
+!set person_7_0.active := false
+!insert (department_7, person_7_0) into DepartmentStaff
+!new Employee('person_7_1')
+!set person_7_1.name := 'Repeated'
+!set person_7_1.age := 70
+!set person_7_1.rating := 4.8
+!set person_7_1.active := false
+!set person_7_1.salary := -1.0
+!insert (department_7, person_7_1) into DepartmentStaff
+!new Manager('person_7_2')
+!set person_7_2.name := 'Repeated'
+!set person_7_2.age := 70
+!set person_7_2.rating := 4.8
+!set person_7_2.active := false
+!set person_7_2.salary := 3000.0
+!set person_7_2.level := 4
+!insert (department_7, person_7_2) into DepartmentStaff
+!insert (department_7, person_7_2) into DepartmentManagement
+!new Department('department_8')
+!set department_8.code := 'D8'
+!set department_8.budget := 10000.0
+!set department_8.active := true
+!insert (organization_8, department_8) into OrganizationDepartments
+!new Person('person_8_0')
+!set person_8_0.name := 'Repeated'
+!set person_8_0.age := -1
+!set person_8_0.rating := 4.8
+!set person_8_0.active := false
+!insert (department_8, person_8_0) into DepartmentStaff
+!new Employee('person_8_1')
+!set person_8_1.name := 'Repeated'
+!set person_8_1.age := 70
+!set person_8_1.rating := 4.8
+!set person_8_1.active := false
+!set person_8_1.salary := -1.0
+!insert (department_8, person_8_1) into DepartmentStaff
+!new Manager('person_8_2')
+!set person_8_2.name := 'Repeated'
+!set person_8_2.age := 70
+!set person_8_2.rating := 4.8
+!set person_8_2.active := false
+!set person_8_2.salary := 3000.0
+!set person_8_2.level := 0
+!insert (department_8, person_8_2) into DepartmentStaff
+!insert (department_8, person_8_2) into DepartmentManagement
+!new Department('department_9')
+!set department_9.code := 'D9'
+!set department_9.budget := 10000.0
+!set department_9.active := true
+!insert (organization_9, department_9) into OrganizationDepartments
+!new Person('person_9_0')
+!set person_9_0.name := 'Repeated'
+!set person_9_0.rating := 4.8
+!set person_9_0.active := false
+!insert (department_9, person_9_0) into DepartmentStaff
+!new Employee('person_9_1')
+!set person_9_1.name := 'Repeated'
+!set person_9_1.age := 70
+!set person_9_1.rating := 4.8
+!set person_9_1.active := false
+!set person_9_1.salary := -1.0
+!insert (department_9, person_9_1) into DepartmentStaff
+!new Manager('person_9_2')
+!set person_9_2.name := 'Repeated'
+!set person_9_2.age := 70
+!set person_9_2.rating := 4.8
+!set person_9_2.active := false
+!set person_9_2.salary := 3000.0
+!set person_9_2.level := 4
+!insert (department_9, person_9_2) into DepartmentStaff
+!insert (department_9, person_9_2) into DepartmentManagement
+!new Department('department_10')
+!set department_10.code := 'D10'
+!set department_10.budget := 10000.0
+!set department_10.active := true
+!insert (organization_10, department_10) into OrganizationDepartments
+!new Person('person_10_0')
+!set person_10_0.name := 'Repeated'
+!set person_10_0.age := -1
+!set person_10_0.rating := 4.8
+!set person_10_0.active := false
+!insert (department_10, person_10_0) into DepartmentStaff
+!new Employee('person_10_1')
+!set person_10_1.name := 'Repeated'
+!set person_10_1.age := 70
+!set person_10_1.rating := 4.8
+!set person_10_1.active := false
+!set person_10_1.salary := -1.0
+!insert (department_10, person_10_1) into DepartmentStaff
+!new Manager('person_10_2')
+!set person_10_2.name := 'Repeated'
+!set person_10_2.age := 70
+!set person_10_2.rating := 4.8
+!set person_10_2.active := false
+!set person_10_2.salary := 3000.0
+!set person_10_2.level := 0
+!insert (department_10, person_10_2) into DepartmentStaff
+!insert (department_10, person_10_2) into DepartmentManagement
+!new Department('department_11')
+!set department_11.code := 'D11'
+!set department_11.budget := 10000.0
+!set department_11.active := true
+!insert (organization_0, department_11) into OrganizationDepartments

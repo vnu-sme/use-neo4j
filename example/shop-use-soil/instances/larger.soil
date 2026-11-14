@@ -1,0 +1,142 @@
+-- Independent snapshot; load into a fresh USE state.
+-- Scenario: larger. Invariant violations may be intentional.
+!new Catalog('catalog_0')
+!set catalog_0.name := 'Catalog 0'
+!new Catalog('catalog_1')
+!set catalog_1.name := 'Catalog 1'
+!new Catalog('catalog_2')
+!set catalog_2.name := 'Catalog 2'
+!new Catalog('catalog_3')
+!set catalog_3.name := 'Catalog 3'
+!new Catalog('catalog_4')
+!set catalog_4.name := 'Catalog 4'
+!new Catalog('catalog_5')
+!set catalog_5.name := 'Catalog 5'
+!new Catalog('catalog_6')
+!set catalog_6.name := 'Catalog 6'
+!new Catalog('catalog_7')
+!set catalog_7.name := 'Catalog 7'
+!new Catalog('catalog_8')
+!set catalog_8.name := 'Catalog 8'
+!new Catalog('catalog_9')
+!set catalog_9.name := 'Catalog 9'
+!new Catalog('catalog_10')
+!set catalog_10.name := 'Catalog 10'
+!new Catalog('catalog_11')
+!set catalog_11.name := 'Catalog 11'
+!new Item('item_0')
+!set item_0.active := false
+!set item_0.name := ''
+!set item_0.price := 12.5
+!insert (catalog_0, item_0) into CatalogItems
+!new Item('item_1')
+!set item_1.active := true
+!set item_1.price := 12.5
+!insert (catalog_1, item_1) into CatalogItems
+!new Item('item_2')
+!set item_2.active := true
+!set item_2.name := 'Item 2'
+!set item_2.price := 12.5
+!insert (catalog_2, item_2) into CatalogItems
+!new Item('item_3')
+!set item_3.active := false
+!set item_3.name := 'Item 3'
+!set item_3.price := 12.5
+!insert (catalog_3, item_3) into CatalogItems
+!new Item('item_4')
+!set item_4.active := true
+!set item_4.name := 'Item 4'
+!set item_4.price := 12.5
+!insert (catalog_4, item_4) into CatalogItems
+!new Item('item_5')
+!set item_5.active := true
+!set item_5.name := ''
+!set item_5.price := 12.5
+!insert (catalog_5, item_5) into CatalogItems
+!new Item('item_6')
+!set item_6.active := false
+!set item_6.name := 'Item 6'
+!set item_6.price := 12.5
+!insert (catalog_6, item_6) into CatalogItems
+!new Item('item_7')
+!set item_7.active := true
+!set item_7.name := 'Item 7'
+!set item_7.price := 12.5
+!insert (catalog_7, item_7) into CatalogItems
+!new Item('item_8')
+!set item_8.active := true
+!set item_8.price := 12.5
+!insert (catalog_8, item_8) into CatalogItems
+!new Item('item_9')
+!set item_9.active := false
+!set item_9.name := 'Item 9'
+!set item_9.price := 12.5
+!insert (catalog_9, item_9) into CatalogItems
+!new Item('item_10')
+!set item_10.active := true
+!set item_10.name := ''
+!set item_10.price := 12.5
+!insert (catalog_10, item_10) into CatalogItems
+!new Item('item_11')
+!set item_11.active := true
+!set item_11.name := 'Item 11'
+!set item_11.price := 12.5
+!insert (catalog_0, item_11) into CatalogItems
+!new Item('item_12')
+!set item_12.active := false
+!set item_12.name := 'Item 12'
+!set item_12.price := 12.5
+!insert (catalog_1, item_12) into CatalogItems
+!new Item('item_13')
+!set item_13.active := true
+!set item_13.name := 'Item 13'
+!set item_13.price := 12.5
+!insert (catalog_2, item_13) into CatalogItems
+!new Item('item_14')
+!set item_14.active := true
+!set item_14.name := 'Item 14'
+!set item_14.price := 12.5
+!insert (catalog_3, item_14) into CatalogItems
+!new Item('item_15')
+!set item_15.active := false
+!set item_15.price := 12.5
+!insert (catalog_4, item_15) into CatalogItems
+!new Item('item_16')
+!set item_16.active := true
+!set item_16.name := 'Item 16'
+!set item_16.price := 12.5
+!insert (catalog_5, item_16) into CatalogItems
+!new Item('item_17')
+!set item_17.active := true
+!set item_17.name := 'Item 17'
+!set item_17.price := 12.5
+!insert (catalog_6, item_17) into CatalogItems
+!new Item('item_18')
+!set item_18.active := false
+!set item_18.name := 'Item 18'
+!set item_18.price := 12.5
+!insert (catalog_7, item_18) into CatalogItems
+!new Item('item_19')
+!set item_19.active := true
+!set item_19.name := 'Item 19'
+!set item_19.price := 12.5
+!insert (catalog_8, item_19) into CatalogItems
+!new Item('item_20')
+!set item_20.active := true
+!set item_20.name := ''
+!set item_20.price := 12.5
+!insert (catalog_9, item_20) into CatalogItems
+!new Item('item_21')
+!set item_21.active := false
+!set item_21.name := 'Item 21'
+!set item_21.price := 12.5
+!insert (catalog_10, item_21) into CatalogItems
+!new Item('item_22')
+!set item_22.active := true
+!set item_22.price := 12.5
+!insert (catalog_0, item_22) into CatalogItems
+!new Item('item_23')
+!set item_23.active := true
+!set item_23.name := 'Item 23'
+!set item_23.price := 12.5
+!insert (catalog_1, item_23) into CatalogItems

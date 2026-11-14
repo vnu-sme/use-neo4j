@@ -77,25 +77,13 @@ public final class OclType {
         return kind;
     }
 
-    public boolean isBoolean() {
-        return kind == Kind.BOOLEAN;
-    }
-
     public boolean isInteger() {
         return kind == Kind.INTEGER;
-    }
-
-    public boolean isReal() {
-        return kind == Kind.REAL;
     }
 
     /** {@code Integer or Real}: the OCL_val numeric join domain. */
     public boolean isNumeric() {
         return kind == Kind.INTEGER || kind == Kind.REAL;
-    }
-
-    public boolean isString() {
-        return kind == Kind.STRING;
     }
 
     public boolean isAtomic() {

@@ -240,10 +240,10 @@ public final class MetamodelTranslator {
 
             var declaration = withPhysicalType(mapping.relationship(
                     MetamodelMapping.RelationshipKind.BINARY_ASSOCIATION),
-                    schemaRelationshipType(association.associationKind()));
+                    MetamodelMapping.schemaRelationshipType(association.associationKind()));
             var link = withPhysicalType(mapping.relationship(
                     MetamodelMapping.RelationshipKind.BINARY_LINK),
-                    linkRelationshipType(association.associationKind()));
+                    MetamodelMapping.linkRelationshipType(association.associationKind()));
             Optional<AssociationClassBinding> associationClass = Optional.empty();
             var classifier = schema.clazz(association.key());
             if (classifier != null && classifier.isAssociationClass()) {
@@ -256,12 +256,10 @@ public final class MetamodelTranslator {
                         node,
                         mapping.associationClassParticipant(
                                 MetamodelMapping.RelationshipKind
-                                        .ASSOCIATION_CLASS_SOURCE_PARTICIPANT,
-                                association.key()),
+                                        .ASSOCIATION_CLASS_SOURCE_PARTICIPANT),
                         mapping.associationClassParticipant(
                                 MetamodelMapping.RelationshipKind
-                                        .ASSOCIATION_CLASS_TARGET_PARTICIPANT,
-                                association.key())));
+                                        .ASSOCIATION_CLASS_TARGET_PARTICIPANT)));
             }
             associations.put(association.key(), new AssociationBinding(
                     association.key(), declaration, link,
@@ -328,22 +326,6 @@ public final class MetamodelTranslator {
         return new MetamodelMapping.RelationshipBinding(binding.sourceReference(),
                 binding.projection(), physicalType, binding.sourceKind(),
                 binding.targetKind(), binding.keyKind());
-    }
-
-    private static String schemaRelationshipType(UmlAssociation.AssociationKind kind) {
-        return switch (kind) {
-            case ASSOCIATION -> GraphModel.ASSOCIATE_WITH;
-            case AGGREGATION -> GraphModel.AGGREGATES;
-            case COMPOSITION -> GraphModel.COMPOSE_OF;
-        };
-    }
-
-    private static String linkRelationshipType(UmlAssociation.AssociationKind kind) {
-        return switch (kind) {
-            case ASSOCIATION -> GraphModel.LINK_ASSOCIATE_WITH;
-            case AGGREGATION -> GraphModel.LINK_AGGREGATES;
-            case COMPOSITION -> GraphModel.LINK_COMPOSE_OF;
-        };
     }
 
     private static Result<Catalogue> failure(String code, String message) {

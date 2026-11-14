@@ -3,7 +3,6 @@ package org.uet.dse.ocl2cypher.cypher;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -29,12 +28,8 @@ import org.uet.dse.ocl2cypher.runtime.OclType;
 final class ExactBinary64Certificates {
     private static final int MAX_DOMAIN_VALUES = 100_000;
 
-    record Certificate(OclType type, Set<ExactReal> values, String rule,
-                       List<Certificate> children) {
-        Certificate {
-            values = Set.copyOf(values);
-            children = List.copyOf(children);
-        }
+    record Certificate(Set<ExactReal> values) {
+        Certificate { values = Set.copyOf(values); }
     }
 
     private final GraphModel graph;
@@ -44,11 +39,6 @@ final class ExactBinary64Certificates {
     }
 
     Optional<Certificate> certify(QNode.QExpr expression,
-            Function<CoreDeclaration, Optional<Certificate>> variables) {
-        return derive(expression, variables);
-    }
-
-    private Optional<Certificate> derive(QNode.QExpr expression,
             Function<CoreDeclaration, Optional<Certificate>> variables) {
         if (!expression.type.isNumeric()) return Optional.empty();
 
@@ -61,7 +51,7 @@ final class ExactBinary64Certificates {
             } else {
                 return Optional.empty();
             }
-            return leaf(expression.type, Set.of(value), "B64-LITERAL");
+            return certificate(expression.type, Set.of(value));
         }
         if (expression instanceof QNode.QExpr.ReadAttribute attribute) {
             return storedAttribute(attribute);
@@ -76,29 +66,27 @@ final class ExactBinary64Certificates {
 
         if (expression instanceof QNode.QExpr.Coerce coercion
                 && coercion.kind == CoreExpr.CoercionKind.INTEGER_TO_REAL) {
-            return derive(coercion.source, variables).flatMap(source ->
-                    certificate(OclType.REAL, source.values(), "B64-INTEGER-TO-REAL",
-                            List.of(source)));
+            return certify(coercion.source, variables).flatMap(source ->
+                    certificate(OclType.REAL, source.values()));
         }
         if (expression instanceof QNode.QExpr.IfExpr conditional) {
-            var thenCertificate = derive(conditional.thenExpr, variables);
-            var elseCertificate = derive(conditional.elseExpr, variables);
+            var thenCertificate = certify(conditional.thenExpr, variables);
+            var elseCertificate = certify(conditional.elseExpr, variables);
             if (thenCertificate.isEmpty() || elseCertificate.isEmpty()) {
                 return Optional.empty();
             }
             Set<ExactReal> values = new LinkedHashSet<>(thenCertificate.get().values());
             values.addAll(elseCertificate.get().values());
-            return certificate(expression.type, values, "B64-IF",
-                    List.of(thenCertificate.get(), elseCertificate.get()));
+            return certificate(expression.type, values);
         }
         if (expression instanceof QNode.QExpr.Let let) {
-            Optional<Certificate> value = derive(let.value, variables);
+            Optional<Certificate> value = certify(let.value, variables);
             Function<CoreDeclaration, Optional<Certificate>> inner = declaration ->
                     declaration == let.binder ? value : variables.apply(declaration);
-            return derive(let.body, inner);
+            return certify(let.body, inner);
         }
         if (expression instanceof QNode.QExpr.Unary unary) {
-            var child = derive(unary.operand, variables);
+            var child = certify(unary.operand, variables);
             if (child.isEmpty()) return Optional.empty();
             Set<ExactReal> values = new LinkedHashSet<>();
             for (ExactReal value : child.get().values()) {
@@ -108,8 +96,7 @@ final class ExactBinary64Certificates {
                     default -> { return Optional.empty(); }
                 }
             }
-            return certificate(expression.type, values, "B64-" + unary.operator,
-                    List.of(child.get()));
+            return certificate(expression.type, values);
         }
         if (!(expression instanceof QNode.QExpr.Binary binary)) {
             return Optional.empty();
@@ -119,8 +106,8 @@ final class ExactBinary64Certificates {
                     NUMERIC_MIN, NUMERIC_MAX, REAL_DIVIDE -> { }
             default -> { return Optional.empty(); }
         }
-        var left = derive(binary.left, variables);
-        var right = derive(binary.right, variables);
+        var left = certify(binary.left, variables);
+        var right = certify(binary.right, variables);
         if (left.isEmpty() || right.isEmpty()) return Optional.empty();
         if ((long) left.get().values().size() * right.get().values().size()
                 > MAX_DOMAIN_VALUES) {
@@ -143,8 +130,7 @@ final class ExactBinary64Certificates {
                 if (result != null) values.add(result);
             }
         }
-        return certificate(expression.type, values, "B64-" + binary.operator,
-                List.of(left.get(), right.get()));
+        return certificate(expression.type, values);
     }
 
     private Optional<Certificate> storedAttribute(QNode.QExpr.ReadAttribute attribute) {
@@ -167,22 +153,17 @@ final class ExactBinary64Certificates {
                 return Optional.empty();
             }
         }
-        return certificate(attribute.type, values, "B64-SNAPSHOT-ATTRIBUTE", List.of());
+        return certificate(attribute.type, values);
     }
 
-    private Optional<Certificate> leaf(OclType type, Set<ExactReal> values, String rule) {
-        return certificate(type, values, rule, List.of());
-    }
-
-    private Optional<Certificate> certificate(OclType type, Set<ExactReal> values,
-            String rule, List<Certificate> children) {
+    private Optional<Certificate> certificate(OclType type, Set<ExactReal> values) {
         if (values.size() > MAX_DOMAIN_VALUES) return Optional.empty();
         if (type.equals(OclType.REAL)) {
             for (ExactReal value : values) {
                 if (!isExactlyBinary64(value)) return Optional.empty();
             }
         }
-        return Optional.of(new Certificate(type, values, rule, children));
+        return Optional.of(new Certificate(values));
     }
 
     static boolean isExactlyBinary64(ExactReal exact) {

@@ -1,0 +1,4 @@
+invariant,ids
+Book::SourceEndQualifiedLookup,book_0_1|book_10_1|book_11_1|book_1_1|book_2_1|book_3_1|book_4_1|book_5_1|book_6_1|book_7_1|book_8_1|book_9_1
+Library::HasLoan,library_11
+Library::QualifiedLookup,library_0|library_11

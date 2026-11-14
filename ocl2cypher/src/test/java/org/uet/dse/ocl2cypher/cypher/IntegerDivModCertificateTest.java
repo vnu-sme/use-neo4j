@@ -31,7 +31,8 @@ class IntegerDivModCertificateTest {
                 BigInteger expected = BigInteger.valueOf(op == CoreExpr.BinaryOp.INTEGER_DIVIDE ? a / b : a % b);
                 assertEquals(expected, certificate.lower());
                 assertEquals(expected, certificate.upper());
-                assertEquals(4, certificate.children().size());
+                assertTrue(certificate.lower().compareTo(IntegerRangeCertificates.MIN) >= 0);
+                assertTrue(certificate.upper().compareTo(IntegerRangeCertificates.MAX) <= 0);
                 var result = realize(expression);
                 assertTrue(result.isSuccess(), () -> result.diagnostics().toString());
                 String text = Serializer.cypherText(result.value());

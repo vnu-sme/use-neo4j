@@ -34,7 +34,7 @@ public final class UseEvaluationAdapter {
     /** Evaluate invariants already declared in the USE model. */
     public static Result evaluate(Path modelFile, Path soilFile) throws Exception {
         return evaluateSource(Files.readString(modelFile, StandardCharsets.UTF_8),
-                modelFile.toString(), modelFile, soilFile);
+                modelFile.toString(), soilFile);
     }
 
     /** Evaluate an external invariant file appended as a USE constraints section. */
@@ -43,11 +43,11 @@ public final class UseEvaluationAdapter {
         String source = Files.readString(modelFile, StandardCharsets.UTF_8)
                 + System.lineSeparator() + "constraints" + System.lineSeparator()
                 + Files.readString(invariantFile, StandardCharsets.UTF_8);
-        return evaluateSource(source, modelFile + "+" + invariantFile, modelFile, soilFile);
+        return evaluateSource(source, modelFile + "+" + invariantFile, soilFile);
     }
 
     private static Result evaluateSource(String source, String sourceName,
-                                         Path modelFile, Path soilFile) throws Exception {
+                                         Path soilFile) throws Exception {
         StringWriter diagnostics = new StringWriter();
         MModel model = USECompiler.compileSpecification(source, sourceName,
                 new PrintWriter(diagnostics, true), new ModelFactory());

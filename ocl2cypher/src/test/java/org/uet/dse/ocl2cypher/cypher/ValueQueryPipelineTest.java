@@ -22,7 +22,6 @@ import org.uet.dse.ocl2cypher.core.CoreUnit;
 import org.uet.dse.ocl2cypher.graph.GraphBuilder;
 import org.uet.dse.ocl2cypher.qcyp.QCypTranslator;
 import org.uet.dse.ocl2cypher.qcyp.QInterpreter;
-import org.uet.dse.ocl2cypher.qcyp.QQuery;
 import org.uet.dse.ocl2cypher.runtime.OclType;
 import org.uet.dse.ocl2cypher.runtime.OclValue;
 import org.uet.dse.ocl2cypher.source.model.SchemaModel;
@@ -268,7 +267,7 @@ class ValueQueryPipelineTest {
                 ? new CoreInterpreter.Env() : contextEnvironment(core.value(), "p");
         OclValue coreValue = CoreInterpreter.evalUnit(schema, snapshot, core.value(),
                 coreEnvironment);
-        OclValue qValue = QInterpreter.value(schema, graph, core.value(), query.value(),
+        OclValue qValue = QInterpreter.value(schema, graph, query.value(),
                 qEnvironment);
         assertEquals(expected, coreValue, request.expression() + " Core");
         assertEquals(coreValue, qValue, request.expression() + " Core/Q");

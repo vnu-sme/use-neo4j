@@ -1,12 +1,13 @@
 package org.uet.dse.ocl2cypher.core;
 
+import org.uet.dse.ocl2cypher.support.CapabilityEvidence;
+
 import java.math.BigInteger;
 import java.util.List;
 import org.uet.dse.ocl2cypher.api.FrontendCompiler;
 import org.uet.dse.ocl2cypher.api.ValueQueryRequest;
 import org.uet.dse.ocl2cypher.diagnostics.SourceSpan;
 import org.uet.dse.ocl2cypher.runtime.OclType;
-import org.uet.dse.ocl2cypher.source.model.CapabilityMatrix;
 import org.uet.dse.ocl2cypher.source.model.SchemaModel;
 import org.uet.dse.ocl2cypher.source.model.UmlAssociation;
 import org.uet.dse.ocl2cypher.source.model.UmlAttribute;
@@ -33,7 +34,7 @@ public final class CoreWellFormednessCorpus {
     public static Counts run() {
         SchemaModel schema = schema();
         int accepted = 0;
-        for (var entry : CapabilityMatrix.entries().entrySet()) {
+        for (var entry : CapabilityEvidence.entries().entrySet()) {
             if (!entry.getValue().admitted()) continue;
             requireWellFormed(schema, entry.getValue().surfaceWitness());
             accepted++;

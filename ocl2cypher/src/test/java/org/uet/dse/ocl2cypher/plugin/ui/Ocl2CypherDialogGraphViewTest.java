@@ -29,15 +29,15 @@ class Ocl2CypherDialogGraphViewTest {
         graph.addRelationship(relationship("slot", GraphModel.Projection.INSTANCE,
                 "object/homer", "slot/homer/name"));
 
-        Set<String> visible = Ocl2CypherDialog.initialSchemaNodeKeys(graph);
+        Set<String> visible = GraphCanvas.initialSchemaNodeKeys(graph);
         assertEquals(Set.of("class/Family", "class/Member"), visible);
         assertEquals(List.of("object/homer"),
-                Ocl2CypherDialog.hiddenNeighbourKeys(graph, "class/Member", visible));
+                GraphCanvas.hiddenNeighbourKeys(graph, "class/Member", visible));
 
         visible = new LinkedHashSet<>(visible);
         visible.add("object/homer");
         assertEquals(List.of("slot/homer/name"),
-                Ocl2CypherDialog.hiddenNeighbourKeys(graph, "object/homer", visible));
+                GraphCanvas.hiddenNeighbourKeys(graph, "object/homer", visible));
     }
 
     private static GraphModel.Node node(String key, GraphModel.Projection projection,

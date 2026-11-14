@@ -1,12 +1,6 @@
 package org.uet.dse.ocl2cypher.qcyp;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 import org.uet.dse.ocl2cypher.core.CoreDeclaration;
-import org.uet.dse.ocl2cypher.core.CoreExpr;
-import org.uet.dse.ocl2cypher.core.CoreUnit;
-import org.uet.dse.ocl2cypher.diagnostics.SourceSpan;
 import org.uet.dse.ocl2cypher.runtime.OclType;
 
 /**

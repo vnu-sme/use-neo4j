@@ -1,15 +1,14 @@
 package org.uet.dse.ocl2cypher.cypher;
 
-import java.math.BigDecimal;
+import static org.uet.dse.ocl2cypher.cypher.CypherArtifacts.*;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import org.uet.dse.ocl2cypher.core.CoreDeclaration;
 import org.uet.dse.ocl2cypher.cypher.CypherAst.*;
 import org.uet.dse.ocl2cypher.diagnostics.Result;
-import org.uet.dse.ocl2cypher.diagnostics.RuleId;
 import org.uet.dse.ocl2cypher.diagnostics.SourceSpan;
 import org.uet.dse.ocl2cypher.diagnostics.Stage;
 import org.uet.dse.ocl2cypher.graph.GraphModel;
@@ -19,8 +18,6 @@ import org.uet.dse.ocl2cypher.qcyp.NormQ;
 import org.uet.dse.ocl2cypher.qcyp.QNode;
 import org.uet.dse.ocl2cypher.qcyp.QQuery;
 import org.uet.dse.ocl2cypher.runtime.OclType;
-import org.uet.dse.ocl2cypher.trace.Trace;
-import org.uet.dse.ocl2cypher.trace.TraceCollector;
 
 /**
  * {@code R : Q_CYP → CypherAS}, factored as {@code R₀(Norm_Q(q))}.
@@ -41,6 +38,9 @@ import org.uet.dse.ocl2cypher.trace.TraceCollector;
 public final class Realization {
 
     private final GraphModel graph;
+    final NavigationRealization navigation;
+    final CollectionRealization collections;
+    final ScalarRealization scalars;
     private final List<QueryParameter> parameters = new ArrayList<>();
     private final FreshAliasSupply aliases = new FreshAliasSupply();
     private final IntegerRangeCertificates numericCertificates;
@@ -51,6 +51,9 @@ public final class Realization {
         this.graph = graph;
         this.numericCertificates = new IntegerRangeCertificates(graph);
         this.realCertificates = new ExactBinary64Certificates(graph);
+        this.navigation = new NavigationRealization(this, graph);
+        this.collections = new CollectionRealization(this);
+        this.scalars = new ScalarRealization(this, numericCertificates);
         // VIOLATIONS deliberately keeps the conventional root alias `self`.
         // Reserve it so no generated local can ever capture that live binding.
         this.aliases.reserve("self");
@@ -85,29 +88,6 @@ public final class Realization {
         } catch (RealizeError e) {
             return Result.failure(Stage.R, e.code, e.getMessage());
         }
-    }
-
-    public static Result<GeneratedArtifact> realize(QQuery q, GraphModel graph,
-                                                    CypherAst.Dialect dialect,
-                                                    TraceCollector traces) {
-        Result<GeneratedArtifact> result = realize(q, graph, dialect);
-        if (result.isSuccess()) {
-            String rule = q.mode() == QQuery.QueryMode.VIOLATIONS
-                    ? RuleId.R_Q_VIOLATIONS : RuleId.R_Q_VALUE_SCALAR;
-            String sourceId = q.mode() == QQuery.QueryMode.VIOLATIONS
-                    ? "q-violations:" + q.contextClassKey() + "::<anonymous>"
-                    : "q-value-query";
-            // Named invariants are not retained by QQuery. Match the exact T_G
-            // target whenever possible through the collector's latest target.
-            if (q.mode() == QQuery.QueryMode.VIOLATIONS) {
-                sourceId = traces.traces().stream()
-                        .filter(t -> t.stage() == Trace.Stage.T_G)
-                        .reduce((a, b) -> b).map(Trace::targetId).orElse(sourceId);
-            }
-            traces.record(Trace.Stage.R, sourceId,
-                    "cypher-artifact:" + q.mode().name().toLowerCase(), rule);
-        }
-        return result;
     }
 
     private static SourceSpan querySpan(QQuery q) {
@@ -157,17 +137,17 @@ public final class Realization {
                     List.of(new RelPattern(null, GraphModel.OBJECT_INSTANCE_OF,
                                     RelDirection.OUTGOING, List.of()),
                             new RelPattern(null, GraphModel.EXTENDS, RelDirection.OUTGOING,
-                                    List.of(), 0, inheritanceBound())))));
+                                    List.of(), 0, navigation.inheritanceBound())))));
             clauses.add(new MatchClause(typing, null));
             OclType selfType = OclType.clazz(q.contextClassKey());
-            ctx.bindNode(q.selfVariable(), taggedObject(selfAlias, selfType), selfType,
+            ctx.bindNode(q.selfVariable(), taggedObject(selfAlias, selfType),
                     selfAlias);
         }
         CypherExpr result;
         if (q.expressionBody() != null) {
             result = realizeExpr(q.expressionBody(), ctx);
         } else {
-            MaterializedPlan materialized = materializePlan(q.planBody(), ctx);
+            MaterializedPlan materialized = collections.materializePlan(q.planBody(), ctx);
             result = bindOnce("valuePlan", materialized.value(), plan ->
                     CypherArtifacts.collectionTag(q.resultType(),
                             new PropertyAccess(plan, CypherArtifacts.OCL_ITEMS),
@@ -216,12 +196,12 @@ public final class Realization {
                 List.of(new RelPattern(null, GraphModel.OBJECT_INSTANCE_OF,
                         RelDirection.OUTGOING, List.of()),
                         new RelPattern(null, GraphModel.EXTENDS, RelDirection.OUTGOING,
-                                List.of(), 0, inheritanceBound())))));
+                                List.of(), 0, navigation.inheritanceBound())))));
         MatchClause scan = new MatchClause(typing, null);
 
         Ctx ctx = new Ctx();
         OclType selfType = OclType.clazz(q.contextClassKey());
-        ctx.bindNode(q.selfVariable(), taggedObject(selfAlias, selfType), selfType,
+        ctx.bindNode(q.selfVariable(), taggedObject(selfAlias, selfType),
                 selfAlias);
         CypherExpr body = realizeExpr(q.expressionBody(), ctx);
         String bodyAlias = fresh("body");
@@ -253,11 +233,44 @@ public final class Realization {
 
     // ---- R_E : QExpr → CypherExpr ---------------------------------------
 
-    private CypherExpr realizeExpr(QNode.QExpr e, Ctx ctx) {
+    CypherExpr realizeExpr(QNode.QExpr e, Ctx ctx) {
         return CypherAst.withSpan(realizeExprUnspanned(e, ctx), e.span);
     }
 
     private CypherExpr realizeExprUnspanned(QNode.QExpr e, Ctx ctx) {
+        requireNumericDomain(e, ctx);
+        return switch (e) {
+            case QNode.QExpr.Constant c -> CypherArtifacts.taggedScalar(c.type, scalars.literal(c));
+            case QNode.QExpr.Bottom value -> CypherArtifacts.bottomLiteral(value.type);
+            case QNode.QExpr.Parameter parameter -> realizeParameter(parameter);
+            case QNode.QExpr.Variable variable -> {
+                var binding = ctx.lookup(variable.declaration);
+                if (binding == null) throw new RealizeError("R_SCOPE",
+                        "unbound variable " + variable.declaration.name());
+                yield binding.value;
+            }
+            case QNode.QExpr.ReadAttribute attribute -> navigation.realizeAttribute(attribute, ctx);
+            case QNode.QExpr.Binary binary -> scalars.realizeBinary(binary, ctx);
+            case QNode.QExpr.Unary unary -> scalars.realizeUnary(unary, ctx);
+            case QNode.QExpr.Materialize materialize -> collections.realizeMaterialize(materialize, ctx);
+            case QNode.QExpr.Exists3 exists -> collections.realizeExists(exists, ctx);
+            case QNode.QExpr.ForAll3 forAll -> collections.realizeForAll(forAll, ctx);
+            case QNode.QExpr.IfExpr conditional -> realizeIf(conditional, ctx);
+            case QNode.QExpr.CollectionLiteral collection -> realizeCollectionLiteral(collection, ctx);
+            case QNode.QExpr.Let let -> realizeLet(let, ctx);
+            case QNode.QExpr.Coerce coercion -> realizeCoerce(coercion, ctx);
+            case QNode.QExpr.NavigateOne navigationExpr -> navigation.realizeNavigateOne(navigationExpr, ctx);
+            case QNode.QExpr.TypeTest test -> navigation.realizeTypeTest(test, ctx);
+            case QNode.QExpr.TypeCast cast -> navigation.realizeTypeCast(cast, ctx);
+            case QNode.QExpr.IncludesFamily includes -> collections.realizeIncludes(includes, ctx);
+            case QNode.QExpr.CountFamily count -> collections.realizeCount(count, ctx);
+            case QNode.QExpr.SetAlgebra algebra -> collections.realizeSetAlgebra(algebra, ctx);
+            default -> throw new RealizeError("R_UNCOVERED_CONSTRUCTOR",
+                    "no R rule for " + e.getClass().getSimpleName());
+        };
+    }
+
+    private void requireNumericDomain(QNode.QExpr e, Ctx ctx) {
         if (e.type.isCollection() && e.type.elementType().isNumeric()
                 && !(e instanceof QNode.QExpr.Bottom)
                 && !(e instanceof QNode.QExpr.CollectionLiteral)
@@ -272,96 +285,25 @@ public final class Realization {
                     && numericCertificates.certify(e, ctx::integerCertificate).isEmpty()) {
                 throw numericCapability(e.getClass().getSimpleName() + " : " + e.type);
             }
+            // Public Real parameters are validated by the execution adapter.
             if (e.type.equals(OclType.REAL)
-                    && realCertificates.certify(e, ctx::exactCertificate).isEmpty()) {
-                if (e.type.equals(org.uet.dse.ocl2cypher.runtime.OclType.REAL)) {
-                    if (e instanceof QNode.QExpr.Parameter) {
-                        // The execution adapter validates the runtime value against the
-                        // exact-binary64 public parameter domain before query execution.
-                    } else {
-                        throw new RealizeError(org.uet.dse.ocl2cypher.diagnostics.RuleId.R_REAL_EXACT_UNSUPPORTED,
-                                "Real expression requires an exact realization certificate: "
-                                        + e.getClass().getSimpleName());
-                    }
-                }
+                    && realCertificates.certify(e, ctx::exactCertificate).isEmpty()
+                    && !(e instanceof QNode.QExpr.Parameter)) {
+                throw new RealizeError(org.uet.dse.ocl2cypher.diagnostics.RuleId.R_REAL_EXACT_UNSUPPORTED,
+                        "Real expression requires an exact realization certificate: "
+                                + e.getClass().getSimpleName());
             }
         }
-        if (e instanceof QNode.QExpr.Constant c) {
-            return CypherArtifacts.taggedScalar(c.type, literal(c));
+    }
+
+    private CypherExpr realizeCollectionLiteral(QNode.QExpr.CollectionLiteral collection, Ctx ctx) {
+        var elements = new ArrayList<CypherExpr>();
+        for (var element : collection.elements) elements.add(realizeExpr(element, ctx));
+        CypherExpr items = new ListExpr(elements);
+        if (collection.collectionKind == org.uet.dse.ocl2cypher.core.CoreExpr.CollectionKind.SET) {
+            items = scalars.distinctAtomicItems(items);
         }
-        if (e instanceof QNode.QExpr.Bottom b) {
-            return CypherArtifacts.bottomLiteral(b.type);
-        }
-        if (e instanceof QNode.QExpr.Parameter p) {
-            return realizeParameter(p);
-        }
-        if (e instanceof QNode.QExpr.Variable v) {
-            Binding b = ctx.lookup(v.declaration);
-            if (b == null) {
-                throw new RealizeError("R_SCOPE",
-                        "unbound variable " + v.declaration.name());
-            }
-            return b.value;
-        }
-        if (e instanceof QNode.QExpr.ReadAttribute ar) {
-            return realizeAttribute(ar, ctx);
-        }
-        if (e instanceof QNode.QExpr.Binary b) {
-            return realizeBinary(b, ctx);
-        }
-        if (e instanceof QNode.QExpr.Unary u) {
-            return realizeUnary(u, ctx);
-        }
-        if (e instanceof QNode.QExpr.Materialize mat) {
-            return realizeMaterialize(mat, ctx);
-        }
-        if (e instanceof QNode.QExpr.Exists3 ex) {
-            return realizeExists(ex, ctx);
-        }
-        if (e instanceof QNode.QExpr.ForAll3 fa) {
-            return realizeForAll(fa, ctx);
-        }
-        if (e instanceof QNode.QExpr.IfExpr iff) {
-            return realizeIf(iff, ctx);
-        }
-        if (e instanceof QNode.QExpr.CollectionLiteral cl) {
-            List<CypherExpr> els = new ArrayList<>();
-            for (QNode.QExpr el : cl.elements) {
-                els.add(realizeExpr(el, ctx));
-            }
-            CypherExpr items = new ListExpr(els);
-            if (cl.collectionKind
-                    == org.uet.dse.ocl2cypher.core.CoreExpr.CollectionKind.SET) {
-                items = distinctAtomicItems(items);
-            }
-            return CypherArtifacts.collectionTag(cl.type, items);
-        }
-        if (e instanceof QNode.QExpr.Let let) {
-            return realizeLet(let, ctx);
-        }
-        if (e instanceof QNode.QExpr.Coerce co) {
-            return realizeCoerce(co, ctx);
-        }
-        if (e instanceof QNode.QExpr.NavigateOne nav) {
-            return realizeNavigateOne(nav, ctx);
-        }
-        if (e instanceof QNode.QExpr.TypeTest tt) {
-            return realizeTypeTest(tt, ctx);
-        }
-        if (e instanceof QNode.QExpr.TypeCast tc) {
-            return realizeTypeCast(tc, ctx);
-        }
-        if (e instanceof QNode.QExpr.IncludesFamily inc) {
-            return realizeIncludes(inc, ctx);
-        }
-        if (e instanceof QNode.QExpr.CountFamily cf) {
-            return realizeCount(cf, ctx);
-        }
-        if (e instanceof QNode.QExpr.SetAlgebra sa) {
-            return realizeSetAlgebra(sa, ctx);
-        }
-        throw new RealizeError("R_UNCOVERED_CONSTRUCTOR",
-                "no R rule for " + e.getClass().getSimpleName());
+        return CypherArtifacts.collectionTag(collection.type, items);
     }
 
     /** R-E-PARAMETER: intern a public declaration and convert its wire payload. */
@@ -413,12 +355,12 @@ public final class Realization {
                 realCertificates.certify(let.value, ctx::exactCertificate);
         Ctx inner = ctx.child();
         if (uses == 1) {
-            inner.bind(let.binder, v, let.value.type,
+            inner.bind(let.binder, v,
                     integerCertificate, exactCertificate);
             return realizeExpr(let.body, inner);
         }
         String alias = fresh("letValue");
-        inner.bind(let.binder, new VariableExpr(alias), let.value.type,
+        inner.bind(let.binder, new VariableExpr(alias),
                 integerCertificate, exactCertificate);
         CypherExpr body = realizeExpr(let.body, inner);
         return bindOnce(alias, v, body);
@@ -470,504 +412,18 @@ public final class Realization {
     }
 
     /** To-one navigation: exactly one matching target, else typed bottom. */
-    private CypherExpr realizeNavigateOne(QNode.QExpr.NavigateOne nav, Ctx ctx) {
-        if (nav.associationClass) {
-            return realizeAssociationClassOne(nav, ctx);
-        }
-        if (nav.viaAssociationClass) {
-            return realizeParticipantThroughAssociationClassOne(nav, ctx);
-        }
-        CypherExpr src = realizeExpr(nav.source, ctx);
-        Optional<String> boundSourceAlias = ctx.nodeAlias(nav.source);
-        return bindOnce("navigationSource", src, sourceValue ->
-                bindQualifiersOnce(nav.qualifiers, ctx, qualifierValues -> {
-        String roleParam = fresh("__oclRole");
-        addParam(roleParam, "Physical:Role", QueryParameter.Origin.GENERATED, nav.roleName);
-        String o = fresh("o");
-        String t = fresh("t");
-        NodePattern sourceNode = boundSourceAlias
-                .map(alias -> new NodePattern(alias, List.of(), List.of()))
-                .orElseGet(() -> new NodePattern(o, List.of("Object"),
-                        withModel(new PropertyMapEntry("use_id", payload(sourceValue)))));
-        Pattern navP = new Pattern(List.of(new PathPattern(
-                List.of(sourceNode, new NodePattern(t, List.of("Object"), modelProperty())),
-                List.of(new RelPattern(fresh("rel"), binaryLinkType(nav.associationKey),
-                        nav.reverse ? RelDirection.INCOMING : RelDirection.OUTGOING,
-                        navigationProperties(roleParam, nav.associationKey, nav.reverse,
-                                qualifierValues))))));
-        CypherQuery sub = new CypherQuery(List.of(
-                new MatchClause(navP, null),
-                new ReturnClause(false, List.of(new ProjectionItem(
-                        new PropertyAccess(new VariableExpr(t), "use_id"), null)))),
-                true);
-        CypherExpr xs = new CollectSubquery(sub);
-        return bindOnce("navigationMatches", xs, matches -> {
-        CypherExpr sizeIsOne = new BinaryExpr(BinaryOp.EQUAL,
-                new FunctionCall("size", false, List.of(matches)),
-                new IntegerLiteral(java.math.BigInteger.ONE));
-        CypherExpr target = CypherArtifacts.taggedScalar(nav.type,
-                new FunctionCall("head", false, List.of(matches)));
-        return new CaseExpr(List.of(
-                new WhenThen(or(isBottom(sourceValue), qualifierBottom(qualifierValues)),
-                        CypherArtifacts.bottomLiteral(nav.type)),
-                new WhenThen(sizeIsOne, target)),
-                CypherArtifacts.bottomLiteral(nav.type));
-        });
-        }));
-    }
-
-    private CypherExpr realizeAssociationClassOne(QNode.QExpr.NavigateOne nav, Ctx ctx) {
-        CypherExpr src = realizeExpr(nav.source, ctx);
-        String roleParam = fresh("__oclRole");
-        addParam(roleParam, "Physical:Role", QueryParameter.Origin.GENERATED, nav.roleName);
-        return bindOnce("associationSource", src, source ->
-                bindQualifiersOnce(nav.qualifiers, ctx, qualifierValues -> {
-        String participant = fresh("participant");
-        String occurrence = fresh("associationClass");
-        Pattern pattern = new Pattern(List.of(new PathPattern(
-                List.of(new NodePattern(participant, List.of("Object"),
-                                withModel(new PropertyMapEntry("use_id", payload(source)))),
-                        new NodePattern(occurrence, List.of("AssociationClassObject"),
-                                modelProperty())),
-                List.of(new RelPattern(fresh("participantRel"),
-                        nav.reverse
-                                ? GraphModel.associationClassTargetParticipant(nav.associationKey)
-                                : GraphModel.associationClassSourceParticipant(nav.associationKey),
-                        RelDirection.INCOMING,
-                        associationClassProperties(roleParam, nav.associationKey,
-                                nav.reverse, qualifierValues))))));
-        CypherQuery sub = new CypherQuery(List.of(
-                new MatchClause(pattern, null),
-                new ReturnClause(false, List.of(new ProjectionItem(
-                        new PropertyAccess(new VariableExpr(occurrence), "use_id"), null)))),
-                true);
-        CypherExpr matches = new CollectSubquery(sub);
-        return bindOnce("associationMatches", matches, matchValues -> {
-            CypherExpr exactlyOne = new BinaryExpr(BinaryOp.EQUAL,
-                    new FunctionCall("size", false, List.of(matchValues)),
-                    new IntegerLiteral(java.math.BigInteger.ONE));
-            CypherExpr target = CypherArtifacts.taggedScalar(nav.type,
-                    new FunctionCall("head", false, List.of(matchValues)));
-            return new CaseExpr(List.of(
-                    new WhenThen(or(isBottom(source),
-                            qualifierBottom(qualifierValues)),
-                            CypherArtifacts.bottomLiteral(nav.type)),
-                    new WhenThen(exactlyOne, target)),
-                    CypherArtifacts.bottomLiteral(nav.type));
-        });
-        }));
-    }
-
-    private List<PropertyMapEntry> associationClassProperties(String roleParam,
-                                                               String associationKey,
-                                                               boolean receiverIsTarget,
-                                                               List<CypherExpr> qualifiers) {
-        List<PropertyMapEntry> properties = new ArrayList<>();
-        properties.add(new PropertyMapEntry(
-                Uml2GraphEncodingContract.Property.ASSOCIATION_KEY,
-                new StringLiteral(associationKey)));
-        properties.add(new PropertyMapEntry("modelKey",
-                modelKeyExpr()));
-        properties.add(new PropertyMapEntry(receiverIsTarget
-                        ? Uml2GraphEncodingContract.Property.TARGET_ROLE
-                        : Uml2GraphEncodingContract.Property.SOURCE_ROLE,
-                new ParameterExpr(roleParam)));
-        for (int i = 0; i < qualifiers.size(); i++) {
-            CypherExpr qualifier = qualifiers.get(i);
-            properties.add(new PropertyMapEntry(qualifierPrefix(receiverIsTarget) + i,
-                    new FunctionCall("toString", false, List.of(payload(qualifier)))));
-        }
-        return properties;
-    }
-
-    private CypherExpr realizeParticipantThroughAssociationClassOne(
-            QNode.QExpr.NavigateOne nav, Ctx ctx) {
-        CypherExpr src = realizeExpr(nav.source, ctx);
-        String roleParam = fresh("__oclRole");
-        addParam(roleParam, "Physical:Role", QueryParameter.Origin.GENERATED, nav.roleName);
-        return bindOnce("associationSource", src, sourceValue ->
-                bindQualifiersOnce(nav.qualifiers, ctx, qualifierValues -> {
-        String source = fresh("participant");
-        String occurrence = fresh("associationClass");
-        String target = fresh("target");
-        Pattern pattern = associationClassParticipantPath(source, occurrence, target,
-                sourceValue, roleParam, nav.associationKey, nav.reverse, qualifierValues);
-        CypherQuery sub = new CypherQuery(List.of(
-                new MatchClause(pattern, null),
-                new ReturnClause(false, List.of(new ProjectionItem(
-                        new PropertyAccess(new VariableExpr(target), "use_id"), null)))), true);
-        CypherExpr matches = new CollectSubquery(sub);
-        return bindOnce("associationMatches", matches, matchValues -> {
-            CypherExpr exactlyOne = new BinaryExpr(BinaryOp.EQUAL,
-                    new FunctionCall("size", false, List.of(matchValues)),
-                    new IntegerLiteral(java.math.BigInteger.ONE));
-            return new CaseExpr(List.of(
-                    new WhenThen(or(isBottom(sourceValue),
-                            qualifierBottom(qualifierValues)),
-                            CypherArtifacts.bottomLiteral(nav.type)),
-                    new WhenThen(exactlyOne, CypherArtifacts.taggedScalar(nav.type,
-                            new FunctionCall("head", false, List.of(matchValues))))),
-                    CypherArtifacts.bottomLiteral(nav.type));
-        });
-        }));
-    }
-
-    private Pattern associationClassParticipantPath(String source, String occurrence,
-                                                    String target, CypherExpr src,
-                                                    String roleParam, String associationKey,
-                                                    boolean reverse,
-                                                    List<CypherExpr> qualifiers) {
-        String sourceType = reverse
-                ? GraphModel.associationClassTargetParticipant(associationKey)
-                : GraphModel.associationClassSourceParticipant(associationKey);
-        String targetType = reverse
-                ? GraphModel.associationClassSourceParticipant(associationKey)
-                : GraphModel.associationClassTargetParticipant(associationKey);
-        List<PropertyMapEntry> sourceProperties = associationClassEdgeProperties(
-                associationKey, null, null, reverse, qualifiers);
-        List<PropertyMapEntry> targetProperties = associationClassEdgeProperties(
-                associationKey, reverse
-                        ? Uml2GraphEncodingContract.Property.SOURCE_ROLE
-                        : Uml2GraphEncodingContract.Property.TARGET_ROLE,
-                roleParam, reverse,
-                qualifiers);
-        return new Pattern(List.of(new PathPattern(
-                List.of(new NodePattern(source, List.of("Object"),
-                                withModel(new PropertyMapEntry("use_id", payload(src)))),
-                        new NodePattern(occurrence, List.of("AssociationClassObject"),
-                                modelProperty()),
-                        new NodePattern(target, List.of("Object"), modelProperty())),
-                List.of(new RelPattern(fresh("sourceParticipant"), sourceType,
-                                RelDirection.INCOMING, sourceProperties),
-                        new RelPattern(fresh("targetParticipant"), targetType,
-                                RelDirection.OUTGOING, targetProperties)))));
-    }
-
-    private List<PropertyMapEntry> associationClassEdgeProperties(
-            String associationKey, String roleProperty, String roleParam,
-            boolean reverse, List<CypherExpr> qualifiers) {
-        List<PropertyMapEntry> properties = new ArrayList<>();
-        properties.add(new PropertyMapEntry(
-                Uml2GraphEncodingContract.Property.ASSOCIATION_KEY,
-                new StringLiteral(associationKey)));
-        properties.add(new PropertyMapEntry("modelKey", modelKeyExpr()));
-        if (roleProperty != null) {
-            properties.add(new PropertyMapEntry(roleProperty, new ParameterExpr(roleParam)));
-        }
-        for (int i = 0; i < qualifiers.size(); i++) {
-            CypherExpr qualifier = qualifiers.get(i);
-            properties.add(new PropertyMapEntry(qualifierPrefix(reverse) + i,
-                    new FunctionCall("toString", false, List.of(payload(qualifier)))));
-        }
-        return properties;
-    }
-
-    private List<PropertyMapEntry> navigationProperties(String roleParam,
-                                                         String associationKey,
-                                                         boolean reverse,
-                                                         List<CypherExpr> qualifiers) {
-        List<PropertyMapEntry> props = new ArrayList<>();
-        props.add(new PropertyMapEntry(Uml2GraphEncodingContract.Property.ASSOCIATION_KEY,
-                new StringLiteral(associationKey)));
-        props.add(new PropertyMapEntry("modelKey", modelKeyExpr()));
-        props.add(new PropertyMapEntry(reverse
-                        ? Uml2GraphEncodingContract.Property.SOURCE_ROLE
-                        : Uml2GraphEncodingContract.Property.TARGET_ROLE,
-                new ParameterExpr(roleParam)));
-        for (int i = 0; i < qualifiers.size(); i++) {
-            CypherExpr q = qualifiers.get(i);
-            props.add(new PropertyMapEntry(qualifierPrefix(reverse) + i,
-                    new FunctionCall("toString", false, List.of(payload(q)))));
-        }
-        return props;
-    }
-
-    private static String qualifierPrefix(boolean reverse) {
-        return reverse ? "sourceQualifier::" : "targetQualifier::";
-    }
-
-    private String binaryLinkType(String associationKey) {
-        Optional<String> instanceType = graph.relationships().stream()
-                .filter(relationship -> associationKey.equals(
-                        relationship.properties().get(
-                                Uml2GraphEncodingContract.Property.ASSOCIATION_KEY)))
-                .map(GraphModel.Relationship::physicalType)
-                .filter(type -> GraphModel.LINK_ASSOCIATE_WITH.equals(type)
-                        || GraphModel.LINK_AGGREGATES.equals(type)
-                        || GraphModel.LINK_COMPOSE_OF.equals(type))
-                .findFirst();
-        if (instanceType.isPresent()) return instanceType.orElseThrow();
-        Optional<String> schemaType = graph.relationships().stream()
-                .filter(relationship -> associationKey.equals(
-                        relationship.properties().get(
-                                Uml2GraphEncodingContract.Property.ASSOCIATION_KEY)))
-                .map(GraphModel.Relationship::physicalType)
-                .filter(type -> GraphModel.ASSOCIATE_WITH.equals(type)
-                        || GraphModel.AGGREGATES.equals(type)
-                        || GraphModel.COMPOSE_OF.equals(type))
-                .findFirst()
-                .map(type -> GraphModel.COMPOSE_OF.equals(type)
-                        ? GraphModel.LINK_COMPOSE_OF
-                        : GraphModel.AGGREGATES.equals(type)
-                                ? GraphModel.LINK_AGGREGATES
-                                : GraphModel.LINK_ASSOCIATE_WITH);
-        return schemaType.orElseThrow(() -> new RealizeError("R_OBSERVER_CONTRACT",
-                "no binary-link representation binding for association key "
-                        + associationKey));
-    }
-
-    private CypherExpr qualifierBottom(List<CypherExpr> qualifiers) {
-        CypherExpr result = new BooleanLiteral(false);
-        for (CypherExpr q : qualifiers) {
-            result = new BinaryExpr(BinaryOp.OR, result,
-                    isBottom(q));
-        }
-        return result;
-    }
 
     /** Realize every qualifier once, then expose only its bound reference. */
-    private CypherExpr bindQualifiersOnce(List<QNode.QExpr> qualifiers, Ctx ctx,
-            java.util.function.Function<List<CypherExpr>, CypherExpr> body) {
-        return bindQualifierAt(qualifiers, ctx, 0, List.of(), body);
-    }
-
-    private CypherExpr bindQualifierAt(List<QNode.QExpr> qualifiers, Ctx ctx, int index,
-            List<CypherExpr> realized,
-            java.util.function.Function<List<CypherExpr>, CypherExpr> body) {
-        if (index == qualifiers.size()) {
-            return body.apply(realized);
-        }
-        CypherExpr value = realizeExpr(qualifiers.get(index), ctx);
-        return bindOnce("navigationQualifier", value, reference -> {
-            List<CypherExpr> next = new ArrayList<>(realized);
-            next.add(reference);
-            return bindQualifierAt(qualifiers, ctx, index + 1, List.copyOf(next), body);
-        });
-    }
-
-    /**
-     * oclIsTypeOf/oclIsKindOf: a typed bottom is tested using its carried class
-     * type; defined objects use the graph's direct/conformance observers.
-     */
-    private CypherExpr realizeTypeTest(QNode.QExpr.TypeTest tt, Ctx ctx) {
-        CypherExpr src = realizeExpr(tt.source, ctx);
-        String ckParam = fresh("__oclTestClass");
-        addParam(ckParam, "Physical:ClassKey", QueryParameter.Origin.GENERATED, tt.targetClassKey);
-        return bindOnce("typeTestSource", src, source -> {
-        String o = fresh("o");
-        String c = fresh("c");
-        // exact: direct ObjectInstanceOf; conformance: chain via Extends* (variable length
-        // is outside the profile, so we express conformance as a bounded EXISTS over the
-        // schema closure the graph already materialized as direct Extends edges + self).
-        boolean exact = tt.testKind == org.uet.dse.ocl2cypher.core.CoreExpr.TypeTestKind.EXACT_TYPE;
-        Pattern typing = new Pattern(List.of(new PathPattern(
-                 List.of(new NodePattern(o, List.of("Object"),
-                                withModel(new PropertyMapEntry("use_id", payload(source)))),
-                        new NodePattern(c, List.of("UmlClass"),
-                                List.of(new PropertyMapEntry("modelKey", modelKeyExpr()),
-                                        new PropertyMapEntry("classKey",
-                                        new ParameterExpr(ckParam))))),
-                List.of(new RelPattern(null, GraphModel.OBJECT_INSTANCE_OF,
-                        RelDirection.OUTGOING, List.of())))));
-        // matchesExact = EXISTS { direct typing to that class }
-        CypherExpr matches = existsMatch(typing, o);
-        // conformance: also accept a strict superclass reached by Extends+;
-        // direct self-conformance is already covered by the first EXISTS.
-        // Variable-length is only permitted here because the schema Extends graph is finite and
-        // acyclic (WF); the serializer emits it as a bounded pattern.
-        CypherExpr result = matches;
-        if (!exact) {
-            result = new BinaryExpr(BinaryOp.OR, matches, conformanceExists(source, ckParam));
-        }
-        CypherExpr bottomMatch = bottomTypeTest(tt, source);
-        return new CaseExpr(List.of(
-                new WhenThen(isBottom(source),
-                        CypherArtifacts.taggedScalar(OclType.BOOLEAN, bottomMatch))),
-                CypherArtifacts.taggedScalar(OclType.BOOLEAN, result));
-        });
-    }
-
-    private CypherExpr bottomTypeTest(QNode.QExpr.TypeTest tt, CypherExpr src) {
-        CypherExpr carriedType = new PropertyAccess(src, CypherArtifacts.OCL_TYPE);
-        if (tt.testKind == org.uet.dse.ocl2cypher.core.CoreExpr.TypeTestKind.EXACT_TYPE) {
-            return new BinaryExpr(BinaryOp.EQUAL, carriedType,
-                    new StringLiteral(CypherArtifacts.typeTag(OclType.clazz(tt.targetClassKey))));
-        }
-        List<CypherExpr> acceptedTypes = new ArrayList<>();
-        for (GraphModel.Node target : graph.nodes()) {
-            if ("UML_CLASS".equals(target.observationRole())
-                    && tt.targetClassKey.equals(target.properties().get("classKey"))) {
-                for (String key : graph.subclassClosure(target.stableKey())) {
-                    String name = graph.node(key).properties().get("classKey");
-                    acceptedTypes.add(new StringLiteral(CypherArtifacts.typeTag(OclType.clazz(name))));
-                }
-            }
-        }
-        return new BinaryExpr(BinaryOp.IN, carriedType, new ListExpr(acceptedTypes));
-    }
-
-    private CypherExpr conformanceExists(CypherExpr src, String ckParam) {
-        String o = fresh("o");
-        String d = fresh("d");
-        String sup = fresh("sup");
-        // (o)-[:ObjectInstanceOf]->(d)-[:Extends+]->(sup {classKey:$target})
-        Pattern p = new Pattern(List.of(new PathPattern(
-                List.of(new NodePattern(o, List.of("Object"),
-                                withModel(new PropertyMapEntry("use_id", payload(src)))),
-                        new NodePattern(d, List.of("UmlClass"), modelProperty()),
-                        new NodePattern(sup, List.of("UmlClass"),
-                                List.of(new PropertyMapEntry("modelKey", modelKeyExpr()),
-                                        new PropertyMapEntry("classKey",
-                                        new ParameterExpr(ckParam))))),
-                List.of(new RelPattern(null, GraphModel.OBJECT_INSTANCE_OF,
-                                RelDirection.OUTGOING, List.of()),
-                        new RelPattern(null, GraphModel.EXTENDS,
-                                RelDirection.OUTGOING, List.of(), 1,
-                                Math.max(1, inheritanceBound()))))));
-        return existsMatch(p, o);
-    }
 
     /** Direct dynamic-class match used by exact tests and reflexive casts. */
-    private CypherExpr directTypeExists(CypherExpr src, String ckParam) {
-        String o = fresh("o");
-        String c = fresh("c");
-        Pattern p = new Pattern(List.of(new PathPattern(
-                List.of(new NodePattern(o, List.of("Object"),
-                                withModel(new PropertyMapEntry("use_id", payload(src)))),
-                        new NodePattern(c, List.of("UmlClass"),
-                                List.of(new PropertyMapEntry("modelKey",
-                                                modelKeyExpr()),
-                                        new PropertyMapEntry("classKey",
-                                                new ParameterExpr(ckParam))))),
-                List.of(new RelPattern(null, GraphModel.OBJECT_INSTANCE_OF,
-                        RelDirection.OUTGOING, List.of())))));
-        return existsMatch(p, o);
-    }
-
-    private CypherExpr existsMatch(Pattern pattern, String projectedVariable) {
-        return new ExistsSubquery(new CypherQuery(
-                List.of(new MatchClause(pattern, null),
-                        new ReturnClause(false, List.of(new ProjectionItem(
-                                new VariableExpr(projectedVariable), null)))),
-                true));
-    }
-
-    private int inheritanceBound() {
-        int classes = 0;
-        for (GraphModel.Node n : graph.nodes()) {
-            if ("UML_CLASS".equals(n.observationRole())) {
-                classes++;
-            }
-        }
-        return Math.max(0, classes);
-    }
 
     /** oclAsType: bottom or non-conforming → typed bottom; else re-tag identity. */
-    private CypherExpr realizeTypeCast(QNode.QExpr.TypeCast tc, Ctx ctx) {
-        CypherExpr src = realizeExpr(tc.source, ctx);
-        String ckParam = fresh("__oclCastClass");
-        addParam(ckParam, "Physical:ClassKey", QueryParameter.Origin.GENERATED, tc.targetClassKey);
-        return bindOnce("typeCastSource", src, source -> {
-        CypherExpr conforms = new BinaryExpr(BinaryOp.OR,
-                directTypeExists(source, ckParam), conformanceExists(source, ckParam));
-        return new CaseExpr(List.of(
-                new WhenThen(isBottom(source), CypherArtifacts.bottomLiteral(tc.type)),
-                new WhenThen(conforms, CypherArtifacts.taggedScalar(tc.type, payload(source)))),
-                CypherArtifacts.bottomLiteral(tc.type));
-        });
-    }
 
     /** includes/excludes/includesAll/excludesAll over a tagged collection. */
-    private CypherExpr realizeIncludes(QNode.QExpr.IncludesFamily inc, Ctx ctx) {
-        CypherExpr src = realizeExpr(inc.source, ctx);
-        CypherExpr el = realizeExpr(inc.element, ctx);
-        boolean exclude = switch (inc.includesKind) {
-            case INCLUDES -> false;
-            case EXCLUDES -> true;
-            case INCLUDES_ALL, EXCLUDES_ALL -> inc.includesKind == QNode.QKind.EXCLUDES_ALL;
-            default -> throw new RealizeError("R_UNCOVERED_CONSTRUCTOR",
-                    "not an includes-family constructor: " + inc.includesKind);
-        };
-        return bindPair("membershipSource", src, "membershipElement", el,
-                (source, element) -> inc.includesKind == QNode.QKind.INCLUDES
-                        || inc.includesKind == QNode.QKind.EXCLUDES
-                        ? realizeMembership(source, element, exclude)
-                        : realizeMembershipAll(source, element, exclude));
-    }
 
     /** Canonical includes/excludes body shared by legacy and Binary Q nodes. */
-    private CypherExpr realizeMembership(CypherExpr src, CypherExpr el, boolean exclude) {
-        CypherExpr items = new PropertyAccess(src, CypherArtifacts.OCL_ITEMS);
-        String x = fresh("x");
-        CypherExpr memberEq = atomicTaggedEqual(new VariableExpr(x), el);
-        CypherExpr anyMember = new QuantifiedPredicateExpression(
-                QuantifierKind.ANY, x, items, memberEq);
-        CypherExpr value = exclude ? new UnaryExpr(UnaryOp.NOT, anyMember) : anyMember;
-        return new CaseExpr(List.of(
-                new WhenThen(isBottom(src), CypherArtifacts.bottomLiteral(OclType.BOOLEAN))),
-                CypherArtifacts.taggedScalar(OclType.BOOLEAN, value));
-    }
 
     /** size/count/sum over a tagged collection; whole-bottom propagates. */
-    private CypherExpr realizeCount(QNode.QExpr.CountFamily cf, Ctx ctx) {
-        if (cf.countKind == QNode.QKind.SUM) {
-            return realizeUnary(new QNode.QExpr.Unary(cf.span,
-                    org.uet.dse.ocl2cypher.core.CoreExpr.UnaryOp.COLLECTION_SUM,
-                    cf.source, cf.type), ctx);
-        }
-        CypherExpr src = realizeExpr(cf.source, ctx);
-        if (cf.countKind == QNode.QKind.COUNT) {
-            CypherExpr element = realizeExpr(cf.element, ctx);
-            return bindPair("countSource", src, "countElement", element,
-                    (source, item) -> collectionCount(
-                            new QNode.QExpr.Binary(cf.span,
-                                    org.uet.dse.ocl2cypher.core.CoreExpr.BinaryOp.COLLECTION_COUNT,
-                                    cf.source, cf.element, cf.type), source, item));
-        }
-        return bindOnce("countSource", src, source -> {
-        CypherExpr items = new PropertyAccess(source, CypherArtifacts.OCL_ITEMS);
-        return switch (cf.countKind) {
-            case SIZE -> new CaseExpr(List.of(
-                    new WhenThen(isBottom(source), CypherArtifacts.bottomLiteral(OclType.INTEGER))),
-                    CypherArtifacts.taggedScalar(OclType.INTEGER,
-                            new FunctionCall("size", false, List.of(items))));
-            case IS_EMPTY -> new CaseExpr(List.of(
-                    new WhenThen(isBottom(source), CypherArtifacts.bottomLiteral(OclType.BOOLEAN))),
-                    CypherArtifacts.taggedScalar(OclType.BOOLEAN,
-                            new BinaryExpr(BinaryOp.EQUAL,
-                                    new FunctionCall("size", false, List.of(items)),
-                                    new IntegerLiteral(java.math.BigInteger.ZERO))));
-            case NOT_EMPTY -> new CaseExpr(List.of(
-                    new WhenThen(isBottom(source), CypherArtifacts.bottomLiteral(OclType.BOOLEAN))),
-                    CypherArtifacts.taggedScalar(OclType.BOOLEAN,
-                            new BinaryExpr(BinaryOp.GREATER_THAN,
-                                    new FunctionCall("size", false, List.of(items)),
-                                    new IntegerLiteral(java.math.BigInteger.ZERO))));
-            default -> throw new RealizeError("R_UNCOVERED_CONSTRUCTOR",
-                    "not a count-family constructor: " + cf.countKind);
-        };
-        });
-    }
-
-    private CypherExpr realizeSetAlgebra(QNode.QExpr.SetAlgebra sa, Ctx ctx) {
-        CypherExpr left = realizeExpr(sa.left, ctx);
-        CypherExpr right = realizeExpr(sa.right, ctx);
-        boolean union = sa.operator
-                == org.uet.dse.ocl2cypher.core.CoreExpr.BinaryOp.SET_UNION;
-        if (!union && sa.operator
-                != org.uet.dse.ocl2cypher.core.CoreExpr.BinaryOp.SET_INTERSECTION) {
-            throw new RealizeError("R_UNCOVERED_CONSTRUCTOR",
-                    "not a set-algebra constructor: " + sa.operator);
-        }
-        // Reuse the canonical Binary realization after evaluating both operands;
-        // this keeps direct QExpr.SetAlgebra construction semantically identical
-        // to the normalized path used by the translator.
-        return bindPair("setLeft", left, "setRight", right,
-                (leftValue, rightValue) -> realizeSetBinary(
-                        new QNode.QExpr.Binary(sa.span, sa.operator,
-                                sa.left, sa.right, sa.type),
-                        leftValue, rightValue, union));
-    }
 
     private CypherExpr realizeIf(QNode.QExpr.IfExpr iff, Ctx ctx) {
         CypherExpr c = realizeExpr(iff.condition, ctx);
@@ -982,882 +438,35 @@ public final class Realization {
                 f));
     }
 
-    private CypherExpr realizeAttribute(QNode.QExpr.ReadAttribute ar, Ctx ctx) {
-        if (ar.type.equals(OclType.INTEGER)) {
-            requireStoredIntegerInt64(ar);
-        }
-        CypherExpr src = realizeExpr(ar.source, ctx);
-        Optional<String> boundSourceAlias = ctx.nodeAlias(ar.source);
-        String akParam = fresh("__oclAttr");
-        addParam(akParam, "Physical:AttributeKey", QueryParameter.Origin.GENERATED,
-                ar.ownerClassKey + "::" + ar.attributeName);
-        return bindOnce("attributeSource", src, source -> {
-        String o = fresh("o");
-        String s = fresh("s");
-        // Slot path: (o:Object {use_id: src.value})-[:ObjectHasAttribute]->
-        //            (s:AttributeValue {attributeKey: $ak}).  Collect the
-        // tagged storage carrier, not only s.value: a defined String equal to
-        // the old __BOTTOM__ sentinel must remain distinguishable from bottom.
-        NodePattern sourceNode = boundSourceAlias
-                .map(alias -> new NodePattern(alias, List.of(), List.of()))
-                .orElseGet(() -> new NodePattern(o, List.of("Object"),
-                        withModel(new PropertyMapEntry("use_id", payload(source)))));
-        Pattern slotPattern = new Pattern(List.of(new PathPattern(
-                List.of(sourceNode, new NodePattern(s, List.of("AttributeValue"),
-                                List.of(new PropertyMapEntry("modelKey", modelKeyExpr()),
-                                        new PropertyMapEntry("attributeKey",
-                                        new ParameterExpr(akParam))))),
-                List.of(new RelPattern(null, GraphModel.OBJECT_HAS_ATTRIBUTE,
-                        RelDirection.OUTGOING, List.of())))));
-        CypherQuery sub = new CypherQuery(List.of(
-                new MatchClause(slotPattern, null),
-                new ReturnClause(false, List.of(new ProjectionItem(
-                        new MapExpr(List.of(
-                                new MapEntry("state", new PropertyAccess(
-                                        new VariableExpr(s), GraphValueCodec.VALUE_STATE)),
-                                new MapEntry("type", new PropertyAccess(
-                                        new VariableExpr(s), GraphValueCodec.VALUE_TYPE)),
-                                new MapEntry("codec", new PropertyAccess(
-                                        new VariableExpr(s), GraphValueCodec.CODEC_ID)),
-                                new MapEntry("payload", new PropertyAccess(
-                                        new VariableExpr(s), GraphValueCodec.PAYLOAD)))), null)))),
-                true);
-        CypherExpr xs = new CollectSubquery(sub);
-        return bindOnce("attributeSlots", xs, slotList -> {
-        // CASE WHEN IsBottom(src) THEN bottom
-        //      WHEN size(xs)=1 THEN Defined(decode(head(xs)))
-        //      ELSE bottom END   (missing / multiplicity-corrupt → bottom)
-        CypherExpr sizeIsOne = new BinaryExpr(BinaryOp.EQUAL,
-                new FunctionCall("size", false, List.of(slotList)),
-                new IntegerLiteral(java.math.BigInteger.ONE));
-        CypherExpr stored = new FunctionCall("head", false, List.of(slotList));
-        return bindOnce("attributeSlot", stored, storedValue -> {
-        CypherExpr storedIsDefined = new BinaryExpr(BinaryOp.EQUAL,
-                new PropertyAccess(storedValue, "state"),
-                new StringLiteral(GraphValueCodec.DEFINED));
-        CypherExpr storedHasExpectedType = new BinaryExpr(BinaryOp.EQUAL,
-                new PropertyAccess(storedValue, "type"), new StringLiteral(ar.type.toString()));
-        CypherExpr storedHasExpectedCodec = new BinaryExpr(BinaryOp.EQUAL,
-                new PropertyAccess(storedValue, "codec"),
-                new StringLiteral(GraphValueCodec.codecId(ar.type)));
-        CypherExpr exactlyOneDefined = new BinaryExpr(BinaryOp.AND, sizeIsOne,
-                new BinaryExpr(BinaryOp.AND, storedIsDefined,
-                        new BinaryExpr(BinaryOp.AND, storedHasExpectedType,
-                                storedHasExpectedCodec)));
-        CypherExpr decoded = decodeScalar(ar.type,
-                new PropertyAccess(storedValue, "payload"));
-        return new CaseExpr(List.of(
-                new WhenThen(isBottom(source), CypherArtifacts.bottomLiteral(ar.type)),
-                new WhenThen(exactlyOneDefined,
-                        CypherArtifacts.taggedScalar(ar.type, decoded))),
-                CypherArtifacts.bottomLiteral(ar.type));
-        });
-        });
-        });
-    }
-
-    /**
-     * Plan→Expr bridge. For the Slice-B case the plan is a filtered/collected
-     * navigation; the materialized value is the tagged collection of the
-     * plan's element tags. When the plan source is bottom the whole-collection
-     * bottom is kept, not an empty collection.
-     */
-    private CypherExpr realizeMaterialize(QNode.QExpr.Materialize mat, Ctx ctx) {
-        MaterializedPlan mp = materializePlan(mat.plan, ctx);
-        // Items are already tagged element maps.
-        return bindOnce("materializedPlan", mp.value(), plan -> {
-            CypherExpr bottom = new PropertyAccess(plan, CypherArtifacts.OCL_BOTTOM);
-            CypherExpr items = new PropertyAccess(plan, CypherArtifacts.OCL_ITEMS);
-            return new CaseExpr(List.of(
-                    new WhenThen(bottom, CypherArtifacts.bottomLiteral(mat.type))),
-                    CypherArtifacts.collectionTag(mat.type, items));
-        });
-    }
-
-    /**
-     * exists₃: {@code CASE WHEN anyBottom AND noTrue THEN ⊥ WHEN anyTrue THEN T
-     * ELSE F END}. A predicate-bottom only makes the whole result bottom when no
-     * occurrence is already true (Kleene OR), so a single true still wins.
-     */
-    private CypherExpr realizeExists(QNode.QExpr.Exists3 ex, Ctx ctx) {
-        FoldedPredicates folded = foldPlanPredicates(ex.source, ex.iterator,
-                ex.predicate, ctx);
-        return bindOnce("existsFold", folded.value(), fold -> {
-            CypherExpr bottom = new PropertyAccess(fold, CypherArtifacts.OCL_BOTTOM);
-            CypherExpr predicates = new PropertyAccess(fold, "predicates");
-            return bindOnce("existsPredicates", predicates, preds -> {
-                CypherExpr anyTrue = anyPredValue(preds, true);
-                CypherExpr anyBottom = anyPredBottom(preds);
-                return new CaseExpr(List.of(
-                        new WhenThen(bottom,
-                                CypherArtifacts.bottomLiteral(OclType.BOOLEAN)),
-                        new WhenThen(anyTrue,
-                                CypherArtifacts.taggedScalar(OclType.BOOLEAN,
-                                        new BooleanLiteral(true))),
-                        new WhenThen(anyBottom,
-                                CypherArtifacts.bottomLiteral(OclType.BOOLEAN))),
-                        CypherArtifacts.taggedScalar(OclType.BOOLEAN,
-                                new BooleanLiteral(false)));
-            });
-        });
-    }
-
-    /**
-     * forAll₃: {@code CASE WHEN anyFalse THEN F WHEN anyBottom THEN ⊥ ELSE T END}.
-     * A single false wins (Kleene AND); a bottom makes it bottom only if no
-     * occurrence is already false.
-     */
-    private CypherExpr realizeForAll(QNode.QExpr.ForAll3 fa, Ctx ctx) {
-        FoldedPredicates folded = foldPlanPredicates(fa.source, fa.iterator,
-                fa.predicate, ctx);
-        return bindOnce("forAllFold", folded.value(), fold -> {
-            CypherExpr bottom = new PropertyAccess(fold, CypherArtifacts.OCL_BOTTOM);
-            CypherExpr predicates = new PropertyAccess(fold, "predicates");
-            return bindOnce("forAllPredicates", predicates, preds -> {
-                CypherExpr anyFalse = anyPredValue(preds, false);
-                CypherExpr anyBottom = anyPredBottom(preds);
-                return new CaseExpr(List.of(
-                        new WhenThen(bottom,
-                                CypherArtifacts.bottomLiteral(OclType.BOOLEAN)),
-                        new WhenThen(anyFalse,
-                                CypherArtifacts.taggedScalar(OclType.BOOLEAN,
-                                        new BooleanLiteral(false))),
-                        new WhenThen(anyBottom,
-                                CypherArtifacts.bottomLiteral(OclType.BOOLEAN))),
-                        CypherArtifacts.taggedScalar(OclType.BOOLEAN,
-                                new BooleanLiteral(true)));
-            });
-        });
-    }
-
     // ---- R_P : QPlan → occurrence list of tagged element maps ------------
 
     /** A plan is one carrier so its items and whole-bottom flag share evaluation. */
-    private record MaterializedPlan(CypherExpr value) {
-        CypherExpr items() {
-            return new PropertyAccess(value, CypherArtifacts.OCL_ITEMS);
-        }
+    record MaterializedPlan(CypherExpr value) {
 
-        CypherExpr bottomGuard() {
-            return new PropertyAccess(value, CypherArtifacts.OCL_BOTTOM);
-        }
-    }
-
-    private MaterializedPlan planValue(CypherExpr items, CypherExpr bottomGuard) {
-        return new MaterializedPlan(new MapExpr(List.of(
-                new MapEntry(CypherArtifacts.OCL_ITEMS, items),
-                new MapEntry(CypherArtifacts.OCL_BOTTOM, bottomGuard))));
-    }
-
-    private MaterializedPlan bindPlanOnce(String base, MaterializedPlan plan,
-            java.util.function.BiFunction<CypherExpr, CypherExpr, MaterializedPlan> body) {
-        String alias = fresh(base);
-        CypherExpr reference = new VariableExpr(alias);
-        CypherExpr items = new PropertyAccess(reference, CypherArtifacts.OCL_ITEMS);
-        CypherExpr bottom = new PropertyAccess(reference, CypherArtifacts.OCL_BOTTOM);
-        MaterializedPlan transformed = body.apply(items, bottom);
-        return new MaterializedPlan(bindOnce(alias, plan.value(), transformed.value()));
-    }
-
-    private MaterializedPlan materializePlan(QNode.QPlan plan, Ctx ctx) {
-        if (plan instanceof QNode.QPlan.FromCollection fc) {
-            CypherExpr source = realizeExpr(fc.collection, ctx);
-            return new MaterializedPlan(bindOnce("collectionSource", source, value ->
-                    planValue(new PropertyAccess(value, CypherArtifacts.OCL_ITEMS),
-                            isBottom(value)).value()));
-        }
-        if (plan instanceof QNode.QPlan.NavigateMany nav) {
-            if (nav.associationClass) {
-                return materializeAssociationClassPlan(nav, ctx);
-            }
-            if (nav.viaAssociationClass) {
-                return materializeParticipantThroughAssociationClassPlan(nav, ctx);
-            }
-            CypherExpr src = realizeExpr(nav.source, ctx);
-            Optional<String> boundSourceAlias = ctx.nodeAlias(nav.source);
-            String roleParam = fresh("__oclRole");
-            addParam(roleParam, "Physical:Role", QueryParameter.Origin.GENERATED, nav.roleName);
-            CypherExpr value = bindOnce("navigationSource", src, source ->
-                    bindQualifiersOnce(nav.qualifiers, ctx, qualifierValues -> {
-            String o = fresh("o");
-            String t = fresh("t");
-            NodePattern sourceNode = boundSourceAlias
-                    .map(alias -> new NodePattern(alias, List.of(), List.of()))
-                    .orElseGet(() -> new NodePattern(o, List.of("Object"),
-                            withModel(new PropertyMapEntry("use_id", payload(source)))));
-            Pattern navP = new Pattern(List.of(new PathPattern(
-                    List.of(sourceNode,
-                            new NodePattern(t, List.of("Object"), modelProperty())),
-                    List.of(new RelPattern(fresh("rel"), binaryLinkType(nav.associationKey),
-                             nav.reverse ? RelDirection.INCOMING : RelDirection.OUTGOING,
-                             navigationProperties(roleParam, nav.associationKey, nav.reverse,
-                                    qualifierValues))))));
-            CypherQuery sub = new CypherQuery(List.of(
-                    new MatchClause(navP, null),
-                    new ReturnClause(nav.type.kind() == OclType.Kind.SET,
-                            List.of(new ProjectionItem(taggedObject(t, nav.elementType),
-                                    null)))),
-                    true);
-            return planValue(new CollectSubquery(sub),
-                    or(isBottom(source), qualifierBottom(qualifierValues))).value();
-            }));
-            return new MaterializedPlan(value);
-        }
-        if (plan instanceof QNode.QPlan.Filter flt) {
-            MaterializedPlan inner = materializePlan(flt.source, ctx);
-            String x = fresh("x");
-            Ctx filtered = ctx.child();
-            filtered.bind(flt.iterator, new VariableExpr(x),
-                    flt.source.type.elementType());
-            // pred is a tagged Boolean₃ map expressed over the element alias x,
-            // It is bound inside the comprehension and evaluated once per item.
-            CypherExpr pred = realizeExpr(flt.predicate, filtered);
-            // USE defaults an undefined filter predicate to false per
-            // occurrence: select drops it and reject keeps it. Only a bottom
-            // source collection makes the resulting plan whole-bottom.
-            return bindPlanOnce("filterInputPlan", inner, (innerItems, innerBottom) -> {
-                CypherExpr evaluatedEntry = bindOnce("filterPredicate", pred, predicate ->
-                        new MapExpr(List.of(
-                                new MapEntry("item", new VariableExpr(x)),
-                                new MapEntry("predicate", predicate))));
-                CypherExpr evaluated = new ListComprehension(x, innerItems, null,
-                        evaluatedEntry);
-                return new MaterializedPlan(bindOnce("filterRows", evaluated, rows -> {
-                    String rowName = fresh("filterRow");
-                    CypherExpr row = new VariableExpr(rowName);
-                    CypherExpr predicate = new PropertyAccess(row, "predicate");
-                    CypherExpr predicateTrue = new BinaryExpr(BinaryOp.AND,
-                            new BinaryExpr(BinaryOp.EQUAL,
-                                    new PropertyAccess(predicate,
-                                            CypherArtifacts.OCL_BOTTOM),
-                                    new BooleanLiteral(false)),
-                            new BinaryExpr(BinaryOp.EQUAL,
-                                    new PropertyAccess(predicate,
-                                            CypherArtifacts.OCL_VALUE),
-                                    new BooleanLiteral(true)));
-                    CypherExpr keep = flt.isSelect
-                            ? predicateTrue
-                            : new BinaryExpr(BinaryOp.OR,
-                                    new BinaryExpr(BinaryOp.EQUAL,
-                                            new PropertyAccess(predicate,
-                                                    CypherArtifacts.OCL_BOTTOM),
-                                            new BooleanLiteral(true)),
-                                    new BinaryExpr(BinaryOp.EQUAL,
-                                            new PropertyAccess(predicate,
-                                                    CypherArtifacts.OCL_VALUE),
-                                            new BooleanLiteral(false)));
-                    CypherExpr filteredItems = new ListComprehension(rowName, rows,
-                            keep, new PropertyAccess(row, "item"));
-                    return planValue(filteredItems, innerBottom).value();
-                }));
-            });
-        }
-        if (plan instanceof QNode.QPlan.Collect collect) {
-            MaterializedPlan inner = materializePlan(collect.source, ctx);
-            String x = fresh("x");
-            Ctx collected = ctx.child();
-            collected.bind(collect.iterator, new VariableExpr(x),
-                    collect.source.type.elementType());
-            // collect always yields a Bag.  A bottom predicate result is kept
-            // as an element of that Bag; only a bottom source makes the whole
-            // collection bottom.
-            CypherExpr body = realizeExpr(collect.body, collected);
-            return bindPlanOnce("collectInputPlan", inner, (innerItems, innerBottom) ->
-                    planValue(new ListComprehension(x, innerItems, null, body),
-                            innerBottom));
-        }
-        if (plan instanceof QNode.QPlan.ScanClass scan) {
-            String ck = fresh("__oclClass");
-            addParam(ck, "Physical:ClassKey", QueryParameter.Origin.GENERATED,
-                    scan.classKey);
-            String o = fresh("o");
-            String direct = fresh("directClass");
-            String c = fresh("c");
-            Pattern scanP = new Pattern(List.of(new PathPattern(
-                    List.of(new NodePattern(o, List.of("Object"), modelProperty()),
-                            new NodePattern(direct, List.of("UmlClass"), modelProperty()),
-                            new NodePattern(c, List.of("UmlClass"),
-                                    List.of(new PropertyMapEntry("modelKey", modelKeyExpr()),
-                                            new PropertyMapEntry("classKey",
-                                            new ParameterExpr(ck))))),
-                    List.of(new RelPattern(null, GraphModel.OBJECT_INSTANCE_OF,
-                            RelDirection.OUTGOING, List.of()),
-                            new RelPattern(null, GraphModel.EXTENDS, RelDirection.OUTGOING,
-                                    List.of(), 0, inheritanceBound())))));
-            CypherQuery sub = new CypherQuery(List.of(
-                    new MatchClause(scanP, null),
-                    new ReturnClause(true, List.of(new ProjectionItem(
-                            taggedObject(o, OclType.clazz(scan.classKey)), null)))),
-                    true);
-            return planValue(new CollectSubquery(sub), new BooleanLiteral(false));
-        }
-        if (plan instanceof QNode.QPlan.Distinct distinct) {
-            MaterializedPlan inner = materializePlan(distinct.source, ctx);
-            return bindPlanOnce("distinctInputPlan", inner, (innerItems, innerBottom) ->
-                    planValue(distinctAtomicItems(innerItems), innerBottom));
-        }
-        if (plan instanceof QNode.QPlan.PlanLet let) {
-            int uses = referenceCount(let.body, let.binder);
-            if (uses == 0) {
-                return materializePlan(let.body, ctx);
-            }
-            CypherExpr value = realizeExpr(let.value, ctx);
-            Ctx bodyCtx = ctx.child();
-            if (uses == 1) {
-                bodyCtx.bind(let.binder, value, let.value.type);
-                return materializePlan(let.body, bodyCtx);
-            }
-            String alias = fresh("planLetValue");
-            bodyCtx.bind(let.binder, new VariableExpr(alias), let.value.type);
-            MaterializedPlan body = materializePlan(let.body, bodyCtx);
-            return new MaterializedPlan(bindOnce(alias, value, body.value()));
-        }
-        throw new RealizeError("R_UNCOVERED_CONSTRUCTOR",
-                "materialize of plan " + plan.getClass().getSimpleName() + " is future work");
-    }
-
-    private MaterializedPlan materializeAssociationClassPlan(QNode.QPlan.NavigateMany nav,
-                                                              Ctx ctx) {
-        CypherExpr src = realizeExpr(nav.source, ctx);
-        String roleParam = fresh("__oclRole");
-        addParam(roleParam, "Physical:Role", QueryParameter.Origin.GENERATED, nav.roleName);
-        CypherExpr value = bindOnce("associationSource", src, source ->
-                bindQualifiersOnce(nav.qualifiers, ctx, qualifierValues -> {
-        String participant = fresh("participant");
-        String occurrence = fresh("associationClass");
-        Pattern pattern = new Pattern(List.of(new PathPattern(
-                List.of(new NodePattern(participant, List.of("Object"),
-                                withModel(new PropertyMapEntry("use_id", payload(source)))),
-                        new NodePattern(occurrence, List.of("AssociationClassObject"),
-                                modelProperty())),
-                List.of(new RelPattern(fresh("participantRel"),
-                        nav.reverse
-                                ? GraphModel.associationClassTargetParticipant(nav.associationKey)
-                                : GraphModel.associationClassSourceParticipant(nav.associationKey),
-                        RelDirection.INCOMING,
-                        associationClassProperties(roleParam, nav.associationKey,
-                                nav.reverse, qualifierValues))))));
-        CypherQuery sub = new CypherQuery(List.of(
-                new MatchClause(pattern, null),
-                new ReturnClause(nav.type.kind() == OclType.Kind.SET,
-                        List.of(new ProjectionItem(
-                                taggedObject(occurrence, nav.elementType), null)))),
-                true);
-        return planValue(new CollectSubquery(sub),
-                or(isBottom(source), qualifierBottom(qualifierValues))).value();
-        }));
-        return new MaterializedPlan(value);
-    }
-
-    private MaterializedPlan materializeParticipantThroughAssociationClassPlan(
-            QNode.QPlan.NavigateMany nav, Ctx ctx) {
-        CypherExpr src = realizeExpr(nav.source, ctx);
-        String roleParam = fresh("__oclRole");
-        addParam(roleParam, "Physical:Role", QueryParameter.Origin.GENERATED, nav.roleName);
-        CypherExpr value = bindOnce("associationSource", src, sourceValue ->
-                bindQualifiersOnce(nav.qualifiers, ctx, qualifierValues -> {
-        String source = fresh("participant");
-        String occurrence = fresh("associationClass");
-        String target = fresh("target");
-        Pattern pattern = associationClassParticipantPath(source, occurrence, target,
-                sourceValue, roleParam, nav.associationKey, nav.reverse, qualifierValues);
-        CypherQuery sub = new CypherQuery(List.of(
-                new MatchClause(pattern, null),
-                new ReturnClause(nav.type.kind() == OclType.Kind.SET,
-                        List.of(new ProjectionItem(taggedObject(target, nav.elementType), null)))),
-                true);
-        return planValue(new CollectSubquery(sub),
-                or(isBottom(sourceValue), qualifierBottom(qualifierValues))).value();
-        }));
-        return new MaterializedPlan(value);
     }
 
     /** Predicate tags and source-bottom guard used by exists/forAll folds. */
-    private record FoldedPredicates(CypherExpr value) {
-    }
-
-    private FoldedPredicates foldPlanPredicates(QNode.QPlan plan,
-                                                org.uet.dse.ocl2cypher.core.CoreDeclaration binder,
-                                                QNode.QExpr predicate, Ctx ctx) {
-        MaterializedPlan mp = materializePlan(plan, ctx);
-        String x = fresh("x");
-        Ctx sub = ctx.child();
-        sub.bind(binder, new VariableExpr(x), plan.type.elementType());
-        CypherExpr pred = realizeExpr(predicate, sub);
-        return new FoldedPredicates(bindOnce("foldInputPlan", mp.value(), planValue ->
-                new MapExpr(List.of(
-                        new MapEntry("predicates", new ListComprehension(x,
-                                new PropertyAccess(planValue, CypherArtifacts.OCL_ITEMS),
-                                null, pred)),
-                        new MapEntry(CypherArtifacts.OCL_BOTTOM,
-                                new PropertyAccess(planValue,
-                                        CypherArtifacts.OCL_BOTTOM))))));
+    record FoldedPredicates(CypherExpr value) {
     }
 
     // ---- predicate-list quantifiers -------------------------------------
 
-    /**
-     * {@code any(p IN preds WHERE p.__oclBottom = true)} — the tagged predicate
-     * elements are already Boolean₃ maps, so "some predicate is bottom" is a
-     * single quantified check over the list, not native null testing.
-     */
-    private CypherExpr anyPredBottom(CypherExpr preds) {
-        String p = fresh("p");
-        CypherExpr cond = new BinaryExpr(BinaryOp.EQUAL,
-                new PropertyAccess(new VariableExpr(p), CypherArtifacts.OCL_BOTTOM),
-                new BooleanLiteral(true));
-        return new QuantifiedPredicateExpression(QuantifierKind.ANY, p, preds, cond);
-    }
-
     /** {@code any(p IN preds WHERE p.__oclBottom = false AND p.__oclValue = <value>)}. */
-    private CypherExpr anyPredValue(CypherExpr preds, boolean value) {
-        String p = fresh("p");
-        CypherExpr defined = new BinaryExpr(BinaryOp.EQUAL,
-                new PropertyAccess(new VariableExpr(p), CypherArtifacts.OCL_BOTTOM),
-                new BooleanLiteral(false));
-        CypherExpr valueEq = new BinaryExpr(BinaryOp.EQUAL,
-                new PropertyAccess(new VariableExpr(p), CypherArtifacts.OCL_VALUE),
-                new BooleanLiteral(value));
-        CypherExpr cond = new BinaryExpr(BinaryOp.AND, defined, valueEq);
-        return new QuantifiedPredicateExpression(QuantifierKind.ANY, p, preds, cond);
-    }
 
     // ---- binary/unary ----------------------------------------------------
 
-    private CypherExpr realizeBinary(QNode.QExpr.Binary b, Ctx ctx) {
-        CypherExpr l = realizeExpr(b.left, ctx);
-        CypherExpr r = realizeExpr(b.right, ctx);
-        return bindPair("leftOperand", l, "rightOperand", r, (left, right) -> switch (b.operator) {
-            case GREATER_THAN, GREATER_THAN_OR_EQUAL, LESS_THAN, LESS_THAN_OR_EQUAL ->
-                    strictCompare(b, left, right);
-            case VALUE_EQUAL -> totalEqual(left, right, b.left.type, false);
-            case VALUE_NOT_EQUAL -> totalEqual(left, right, b.left.type, true);
-            case NUMERIC_ADD, NUMERIC_SUBTRACT, NUMERIC_MULTIPLY -> arithmetic(b, left, right);
-            case REAL_DIVIDE, INTEGER_DIVIDE, INTEGER_MOD -> numericDivision(b, left, right, ctx);
-            case NUMERIC_MAX, NUMERIC_MIN -> numericExtremum(b, left, right);
-            case COLLECTION_COUNT -> collectionCount(b, left, right);
-            case COLLECTION_INCLUDES -> realizeMembership(left, right, false);
-            case COLLECTION_EXCLUDES -> realizeMembership(left, right, true);
-            case COLLECTION_INCLUDES_ALL -> realizeMembershipAll(left, right, false);
-            case COLLECTION_EXCLUDES_ALL -> realizeMembershipAll(left, right, true);
-            case SET_UNION -> realizeSetBinary(b, left, right, true);
-            case SET_INTERSECTION -> realizeSetBinary(b, left, right, false);
-            case BOOLEAN_AND, BOOLEAN_OR, BOOLEAN_XOR, BOOLEAN_IMPLIES -> boolean3(b, left, right);
-            default -> throw new RealizeError("R_UNCOVERED_CONSTRUCTOR",
-                    "binary " + b.operator + " is future work");
-        });
-    }
-
-    private CypherExpr arithmetic(QNode.QExpr.Binary b, CypherExpr l, CypherExpr r) {
-        CypherExpr anyBottom = new BinaryExpr(BinaryOp.OR, isBottom(l), isBottom(r));
-        BinaryOp op = switch (b.operator) {
-            case NUMERIC_ADD -> BinaryOp.ADD;
-            case NUMERIC_SUBTRACT -> BinaryOp.SUBTRACT;
-            default -> BinaryOp.MULTIPLY;
-        };
-        return new CaseExpr(List.of(
-                new WhenThen(anyBottom, CypherArtifacts.bottomLiteral(b.type))),
-                CypherArtifacts.taggedScalar(b.type, new BinaryExpr(op, payload(l), payload(r))));
-    }
-
-    private CypherExpr numericDivision(QNode.QExpr.Binary b, CypherExpr l, CypherExpr r,
-                                       Ctx ctx) {
-        if (b.operator == org.uet.dse.ocl2cypher.core.CoreExpr.BinaryOp.INTEGER_DIVIDE
-                || b.operator == org.uet.dse.ocl2cypher.core.CoreExpr.BinaryOp.INTEGER_MOD) {
-            var certificate = numericCertificates.certify(b, ctx::integerCertificate).orElseThrow(
-                    () -> numericCapability("uncertified integer div/mod"));
-            // Preserve the compact constant form for closed expressions.  A
-            // snapshot-domain certificate also permits native dynamic div/mod.
-            if (certificate.lower().equals(certificate.upper())) {
-                return new CaseExpr(List.of(new WhenThen(or(isBottom(l), isBottom(r)),
-                        CypherArtifacts.bottomLiteral(b.type))),
-                        CypherArtifacts.taggedScalar(b.type,
-                                new IntegerLiteral(certificate.lower())));
-            }
-        }
-        CypherExpr denominatorZero = new BinaryExpr(BinaryOp.EQUAL, payload(r),
-                b.operator == org.uet.dse.ocl2cypher.core.CoreExpr.BinaryOp.REAL_DIVIDE
-                        ? new FloatLiteral(java.math.BigDecimal.ZERO)
-                        : new IntegerLiteral(java.math.BigInteger.ZERO));
-        CypherExpr invalid = new BinaryExpr(BinaryOp.OR,
-                new BinaryExpr(BinaryOp.OR, isBottom(l), isBottom(r)), denominatorZero);
-        BinaryOp op = switch (b.operator) {
-            case REAL_DIVIDE, INTEGER_DIVIDE -> BinaryOp.DIVIDE;
-            case INTEGER_MOD -> BinaryOp.MODULO;
-            default -> throw new IllegalStateException("not a division operator");
-        };
-        CypherExpr quotient = new BinaryExpr(op, payload(l), payload(r));
-        if (b.operator == org.uet.dse.ocl2cypher.core.CoreExpr.BinaryOp.INTEGER_DIVIDE) {
-            quotient = new FunctionCall("toInteger", false, List.of(quotient));
-        }
-        return new CaseExpr(List.of(
-                new WhenThen(invalid, CypherArtifacts.bottomLiteral(b.type))),
-                CypherArtifacts.taggedScalar(b.type,
-                        quotient));
-    }
-
-    private CypherExpr numericExtremum(QNode.QExpr.Binary b, CypherExpr l, CypherExpr r) {
-        CypherExpr invalid = new BinaryExpr(BinaryOp.OR, isBottom(l), isBottom(r));
-        boolean max = b.operator == org.uet.dse.ocl2cypher.core.CoreExpr.BinaryOp.NUMERIC_MAX;
-        CypherExpr chooseLeft = new BinaryExpr(max ? BinaryOp.GREATER_THAN_OR_EQUAL
-                : BinaryOp.LESS_THAN_OR_EQUAL, payload(l), payload(r));
-        CypherExpr chosen = new CaseExpr(List.of(
-                new WhenThen(chooseLeft, payload(l))), payload(r));
-        return new CaseExpr(List.of(new WhenThen(invalid,
-                        CypherArtifacts.bottomLiteral(b.type))),
-                CypherArtifacts.taggedScalar(b.type, chosen));
-    }
-
-    private CypherExpr collectionCount(QNode.QExpr.Binary b, CypherExpr source,
-                                       CypherExpr element) {
-        CypherExpr items = new PropertyAccess(source, CypherArtifacts.OCL_ITEMS);
-        String x = fresh("countItem");
-        CypherExpr keep = atomicTaggedEqual(new VariableExpr(x), element);
-        CypherExpr count = new FunctionCall("size", false,
-                List.of(new ListComprehension(x, items, keep, null)));
-        return new CaseExpr(List.of(new WhenThen(isBottom(source),
-                        CypherArtifacts.bottomLiteral(b.type))),
-                CypherArtifacts.taggedScalar(b.type, count));
-    }
-
     /** includesAll/excludesAll quantify over support, not Bag multiplicity. */
-    private CypherExpr realizeMembershipAll(CypherExpr left, CypherExpr right,
-                                            boolean excludeAll) {
-        CypherExpr leftItems = new PropertyAccess(left, CypherArtifacts.OCL_ITEMS);
-        CypherExpr rightItems = new PropertyAccess(right, CypherArtifacts.OCL_ITEMS);
-        String sought = fresh("membershipItem");
-        CypherExpr contained = containsAtomic(leftItems, new VariableExpr(sought));
-        CypherExpr predicate = excludeAll ? new UnaryExpr(UnaryOp.NOT, contained) : contained;
-        CypherExpr quantified = new QuantifiedPredicateExpression(QuantifierKind.ALL,
-                sought, rightItems, predicate);
-        CypherExpr anyBottom = new BinaryExpr(BinaryOp.OR, isBottom(left), isBottom(right));
-        return new CaseExpr(List.of(
-                new WhenThen(anyBottom, CypherArtifacts.bottomLiteral(OclType.BOOLEAN))),
-                CypherArtifacts.taggedScalar(OclType.BOOLEAN, quantified));
-    }
 
     /** Set union/intersection with typed equality and strict whole-bottom propagation. */
-    private CypherExpr realizeSetBinary(QNode.QExpr.Binary operation, CypherExpr left,
-                                        CypherExpr right, boolean union) {
-        CypherExpr leftItems = new PropertyAccess(left, CypherArtifacts.OCL_ITEMS);
-        CypherExpr rightItems = new PropertyAccess(right, CypherArtifacts.OCL_ITEMS);
-        CypherExpr items;
-        if (union) {
-            items = distinctAtomicItems(new BinaryExpr(BinaryOp.LIST_CONCAT,
-                    leftItems, rightItems));
-        } else {
-            String member = fresh("intersectionItem");
-            CypherExpr filtered = new ListComprehension(member, leftItems,
-                    containsAtomic(rightItems, new VariableExpr(member)), null);
-            items = distinctAtomicItems(filtered);
-        }
-        CypherExpr wholeBottom = new BinaryExpr(BinaryOp.OR,
-                isBottom(left), isBottom(right));
-        return CypherArtifacts.collectionTag(operation.type, items, wholeBottom);
-    }
-
-    private CypherExpr strictCompare(QNode.QExpr.Binary b, CypherExpr l, CypherExpr r) {
-        CypherExpr anyBottom = new BinaryExpr(BinaryOp.OR, isBottom(l), isBottom(r));
-        BinaryOp op = switch (b.operator) {
-            case GREATER_THAN -> BinaryOp.GREATER_THAN;
-            case GREATER_THAN_OR_EQUAL -> BinaryOp.GREATER_THAN_OR_EQUAL;
-            case LESS_THAN -> BinaryOp.LESS_THAN;
-            default -> BinaryOp.LESS_THAN_OR_EQUAL;
-        };
-        CypherExpr cmp = new BinaryExpr(op, payload(l), payload(r));
-        return new CaseExpr(List.of(
-                new WhenThen(anyBottom, CypherArtifacts.bottomLiteral(OclType.BOOLEAN))),
-                CypherArtifacts.taggedScalar(OclType.BOOLEAN, cmp));
-    }
-
-    private CypherExpr totalEqual(CypherExpr l, CypherExpr r, OclType operandType,
-                                  boolean negate) {
-        CypherExpr bothBottom = new BinaryExpr(BinaryOp.AND, isBottom(l), isBottom(r));
-        CypherExpr oneBottom = new BinaryExpr(BinaryOp.XOR, isBottom(l), isBottom(r));
-        CypherExpr payloadEq = operandType.isCollection()
-                ? collectionPayloadEqual(l, r, operandType)
-                : atomicTaggedEqual(l, r);
-        CypherExpr defined = negate ? new UnaryExpr(UnaryOp.NOT, payloadEq) : payloadEq;
-        CypherExpr trueTag = CypherArtifacts.taggedScalar(OclType.BOOLEAN,
-                new BooleanLiteral(!negate));
-        CypherExpr falseTag = CypherArtifacts.taggedScalar(OclType.BOOLEAN,
-                new BooleanLiteral(negate));
-        return new CaseExpr(List.of(
-                new WhenThen(bothBottom, trueTag),
-                new WhenThen(oneBottom, falseTag)),
-                CypherArtifacts.taggedScalar(OclType.BOOLEAN, defined));
-    }
 
     /** Extensional Set equality and multiplicity-aware Bag equality. */
-    private CypherExpr collectionPayloadEqual(CypherExpr left, CypherExpr right,
-                                               OclType collectionType) {
-        CypherExpr leftItems = new PropertyAccess(left, CypherArtifacts.OCL_ITEMS);
-        CypherExpr rightItems = new PropertyAccess(right, CypherArtifacts.OCL_ITEMS);
-        if (collectionType.kind() == OclType.Kind.SET) {
-            String x = fresh("leftMember");
-            String y = fresh("rightMember");
-            CypherExpr leftSubset = new QuantifiedPredicateExpression(QuantifierKind.ALL,
-                    x, leftItems, containsAtomic(rightItems, new VariableExpr(x)));
-            CypherExpr rightSubset = new QuantifiedPredicateExpression(QuantifierKind.ALL,
-                    y, rightItems, containsAtomic(leftItems, new VariableExpr(y)));
-            return new BinaryExpr(BinaryOp.AND, leftSubset, rightSubset);
-        }
-
-        CypherExpr sameSize = new BinaryExpr(BinaryOp.EQUAL,
-                new FunctionCall("size", false, List.of(leftItems)),
-                new FunctionCall("size", false, List.of(rightItems)));
-        String x = fresh("bagMember");
-        CypherExpr sameMultiplicity = new BinaryExpr(BinaryOp.EQUAL,
-                countAtomic(leftItems, new VariableExpr(x)),
-                countAtomic(rightItems, new VariableExpr(x)));
-        CypherExpr allMultiplicitiesEqual = new QuantifiedPredicateExpression(
-                QuantifierKind.ALL, x, leftItems, sameMultiplicity);
-        return new BinaryExpr(BinaryOp.AND, sameSize, allMultiplicitiesEqual);
-    }
-
-    private CypherExpr containsAtomic(CypherExpr items, CypherExpr sought) {
-        String candidate = fresh("candidate");
-        return new QuantifiedPredicateExpression(QuantifierKind.ANY, candidate, items,
-                atomicTaggedEqual(new VariableExpr(candidate), sought));
-    }
-
-    private CypherExpr countAtomic(CypherExpr items, CypherExpr sought) {
-        String candidate = fresh("candidate");
-        CypherExpr matches = new ListComprehension(candidate, items,
-                atomicTaggedEqual(new VariableExpr(candidate), sought), null);
-        return new FunctionCall("size", false, List.of(matches));
-    }
 
     /** Native Boolean equality for two tagged atomic values. */
-    private CypherExpr atomicTaggedEqual(CypherExpr left, CypherExpr right) {
-        CypherExpr sameType = new BinaryExpr(BinaryOp.EQUAL,
-                new PropertyAccess(left, CypherArtifacts.OCL_TYPE),
-                new PropertyAccess(right, CypherArtifacts.OCL_TYPE));
-        CypherExpr bothBottom = new BinaryExpr(BinaryOp.AND, isBottom(left), isBottom(right));
-        CypherExpr bothDefined = new BinaryExpr(BinaryOp.AND,
-                new UnaryExpr(UnaryOp.NOT, isBottom(left)),
-                new UnaryExpr(UnaryOp.NOT, isBottom(right)));
-        CypherExpr samePayload = new BinaryExpr(BinaryOp.EQUAL, payload(left), payload(right));
-        CypherExpr sameValueState = new BinaryExpr(BinaryOp.OR, bothBottom,
-                new BinaryExpr(BinaryOp.AND, bothDefined, samePayload));
-        return new BinaryExpr(BinaryOp.AND, sameType, sameValueState);
-    }
-
-    /**
-     * Native grouping deduplication for the fixed-shape tagged atomic carrier.
-     * Neo4j DISTINCT groups equal maps, including equal null payloads; the
-     * explicit type and bottom fields therefore implement the same total typed
-     * equality as {@link #atomicTaggedEqual}. Set order is unobservable, while
-     * Bag paths do not call this helper and retain every occurrence.
-     */
-    private CypherExpr distinctAtomicItems(CypherExpr items) {
-        String x = fresh("distinctItem");
-        CypherQuery distinct = new CypherQuery(List.of(
-                new UnwindClause(items, x),
-                new ReturnClause(true, List.of(new ProjectionItem(
-                        new VariableExpr(x), null)))), true);
-        return new CollectSubquery(distinct);
-    }
-
-    private CypherExpr boolean3(QNode.QExpr.Binary b, CypherExpr l, CypherExpr r) {
-        return switch (b.operator) {
-            case BOOLEAN_AND -> {
-                // Kleene AND: false dominates, then true dominates, then bottom
-                CypherExpr lFalse = new BinaryExpr(BinaryOp.AND,
-                        new UnaryExpr(UnaryOp.NOT, isBottom(l)),
-                        new BinaryExpr(BinaryOp.EQUAL, payload(l),
-                                new BooleanLiteral(false)));
-                CypherExpr rFalse = new BinaryExpr(BinaryOp.AND,
-                        new UnaryExpr(UnaryOp.NOT, isBottom(r)),
-                        new BinaryExpr(BinaryOp.EQUAL, payload(r),
-                                new BooleanLiteral(false)));
-                CypherExpr anyFalse = new BinaryExpr(BinaryOp.OR, lFalse, rFalse);
-                CypherExpr anyB = new BinaryExpr(BinaryOp.OR, isBottom(l), isBottom(r));
-                yield new CaseExpr(List.of(
-                        new WhenThen(anyFalse, CypherArtifacts.taggedScalar(OclType.BOOLEAN,
-                                new BooleanLiteral(false))),
-                        new WhenThen(anyB, CypherArtifacts.bottomLiteral(OclType.BOOLEAN))),
-                        CypherArtifacts.taggedScalar(OclType.BOOLEAN,
-                                new BinaryExpr(BinaryOp.AND, payload(l), payload(r))));
-            }
-            case BOOLEAN_OR -> {
-                CypherExpr lTrue = new BinaryExpr(BinaryOp.AND,
-                        new UnaryExpr(UnaryOp.NOT, isBottom(l)),
-                        new BinaryExpr(BinaryOp.EQUAL, payload(l), new BooleanLiteral(true)));
-                CypherExpr rTrue = new BinaryExpr(BinaryOp.AND,
-                        new UnaryExpr(UnaryOp.NOT, isBottom(r)),
-                        new BinaryExpr(BinaryOp.EQUAL, payload(r), new BooleanLiteral(true)));
-                CypherExpr anyTrue = new BinaryExpr(BinaryOp.OR, lTrue, rTrue);
-                CypherExpr bothB = new BinaryExpr(BinaryOp.AND, isBottom(l), isBottom(r));
-                yield new CaseExpr(List.of(
-                        new WhenThen(anyTrue, CypherArtifacts.taggedScalar(OclType.BOOLEAN,
-                                new BooleanLiteral(true))),
-                        new WhenThen(bothB, CypherArtifacts.bottomLiteral(OclType.BOOLEAN)),
-                        new WhenThen(new BinaryExpr(BinaryOp.OR, isBottom(l), isBottom(r)),
-                                CypherArtifacts.bottomLiteral(OclType.BOOLEAN))),
-                        CypherArtifacts.taggedScalar(OclType.BOOLEAN,
-                                new BinaryExpr(BinaryOp.OR, payload(l), payload(r))));
-            }
-            case BOOLEAN_XOR -> {
-                // xor bottom => bottom (XOR_B table)
-                CypherExpr anyB = new BinaryExpr(BinaryOp.OR, isBottom(l), isBottom(r));
-                CypherExpr pxor = new BinaryExpr(BinaryOp.XOR, payload(l), payload(r));
-                yield new CaseExpr(List.of(
-                        new WhenThen(anyB, CypherArtifacts.bottomLiteral(OclType.BOOLEAN))),
-                        CypherArtifacts.taggedScalar(OclType.BOOLEAN, pxor));
-            }
-            case BOOLEAN_IMPLIES -> {
-                // implies = not l or r (Kleene)
-                CypherExpr lb = isBottom(l);
-                CypherExpr rb = isBottom(r);
-                CypherExpr lTrue = new BinaryExpr(BinaryOp.AND,
-                        new UnaryExpr(UnaryOp.NOT, isBottom(l)),
-                        new BinaryExpr(BinaryOp.EQUAL, payload(l), new BooleanLiteral(true)));
-                CypherExpr rFalse = new BinaryExpr(BinaryOp.AND,
-                        new UnaryExpr(UnaryOp.NOT, isBottom(r)),
-                        new BinaryExpr(BinaryOp.EQUAL, payload(r), new BooleanLiteral(false)));
-                CypherExpr lFalse = new BinaryExpr(BinaryOp.AND,
-                        new UnaryExpr(UnaryOp.NOT, lb),
-                        new BinaryExpr(BinaryOp.EQUAL, payload(l), new BooleanLiteral(false)));
-                CypherExpr lBottomRTrue = new BinaryExpr(BinaryOp.AND, lb,
-                        new BinaryExpr(BinaryOp.AND, new UnaryExpr(UnaryOp.NOT, rb),
-                                new BinaryExpr(BinaryOp.EQUAL, payload(r), new BooleanLiteral(true))));
-                CypherExpr lBottomRFalse = new BinaryExpr(BinaryOp.AND, lb, rFalse);
-                CypherExpr rTrue = new BinaryExpr(BinaryOp.AND,
-                        new UnaryExpr(UnaryOp.NOT, rb),
-                        new BinaryExpr(BinaryOp.EQUAL, payload(r), new BooleanLiteral(true)));
-                yield new CaseExpr(List.of(
-                        // false implies anything = true; true implies true = true — fall through
-                        new WhenThen(lFalse,
-                                CypherArtifacts.taggedScalar(OclType.BOOLEAN, new BooleanLiteral(true))),
-                        new WhenThen(lBottomRTrue,
-                                CypherArtifacts.taggedScalar(OclType.BOOLEAN, new BooleanLiteral(true))),
-                        new WhenThen(lBottomRFalse,
-                                CypherArtifacts.bottomLiteral(OclType.BOOLEAN)),
-                        new WhenThen(lTrue,
-                                new CaseExpr(List.of(
-                                        new WhenThen(rFalse,
-                                                CypherArtifacts.taggedScalar(OclType.BOOLEAN, new BooleanLiteral(false))),
-                                        new WhenThen(rTrue,
-                                                CypherArtifacts.taggedScalar(OclType.BOOLEAN, new BooleanLiteral(true)))),
-                                        CypherArtifacts.bottomLiteral(OclType.BOOLEAN))),
-                        new WhenThen(rb, CypherArtifacts.bottomLiteral(OclType.BOOLEAN))),
-                        CypherArtifacts.taggedScalar(OclType.BOOLEAN, new BooleanLiteral(true)));
-            }
-            default -> throw new RealizeError("R_UNCOVERED_CONSTRUCTOR",
-                    "Boolean3 connective " + b.operator + " is future work");
-        };
-    }
-
-    private CypherExpr realizeUnary(QNode.QExpr.Unary u, Ctx ctx) {
-        CypherExpr realizedOperand = realizeExpr(u.operand, ctx);
-        return bindOnce("unaryOperand", realizedOperand, op -> switch (u.operator) {
-            case OCL_IS_UNDEFINED -> CypherArtifacts.taggedScalar(
-                    OclType.BOOLEAN, isBottom(op));
-            case COLLECTION_SIZE -> {
-                CypherExpr items = new PropertyAccess(op, CypherArtifacts.OCL_ITEMS);
-                CypherExpr sz = new FunctionCall("size", false, List.of(items));
-                yield new CaseExpr(List.of(
-                        new WhenThen(isBottom(op), CypherArtifacts.bottomLiteral(OclType.INTEGER))),
-                        CypherArtifacts.taggedScalar(OclType.INTEGER, sz));
-            }
-            case COLLECTION_IS_EMPTY, COLLECTION_NOT_EMPTY -> {
-                CypherExpr items = new PropertyAccess(op, CypherArtifacts.OCL_ITEMS);
-                CypherExpr szEq0 = new BinaryExpr(BinaryOp.EQUAL,
-                        new FunctionCall("size", false, List.of(items)),
-                        new IntegerLiteral(java.math.BigInteger.ZERO));
-                CypherExpr cond = u.operator == org.uet.dse.ocl2cypher.core.CoreExpr.UnaryOp.COLLECTION_IS_EMPTY
-                        ? szEq0
-                        : new BinaryExpr(BinaryOp.GREATER_THAN,
-                                new FunctionCall("size", false, List.of(items)),
-                                new IntegerLiteral(java.math.BigInteger.ZERO));
-                yield new CaseExpr(List.of(
-                        new WhenThen(isBottom(op), CypherArtifacts.bottomLiteral(OclType.BOOLEAN))),
-                        CypherArtifacts.taggedScalar(OclType.BOOLEAN, cond));
-            }
-            case COLLECTION_SUM -> {
-                // sum of Items(op); each item is a tagged numeric map
-                CypherExpr items = new PropertyAccess(op, CypherArtifacts.OCL_ITEMS);
-                String x = fresh("sumItem");
-                String acc = fresh("sumAcc");
-                CypherExpr anyBottom = new QuantifiedPredicateExpression(
-                        QuantifierKind.ANY, x, items,
-                        new BinaryExpr(BinaryOp.EQUAL,
-                                new PropertyAccess(new VariableExpr(x),
-                                        CypherArtifacts.OCL_BOTTOM),
-                                new BooleanLiteral(true)));
-                CypherExpr initial = u.type.equals(OclType.REAL)
-                        ? new FloatLiteral(java.math.BigDecimal.ZERO)
-                        : new IntegerLiteral(java.math.BigInteger.ZERO);
-                CypherExpr step = new BinaryExpr(BinaryOp.ADD,
-                        new VariableExpr(acc),
-                        new PropertyAccess(new VariableExpr(x), CypherArtifacts.OCL_VALUE));
-                CypherExpr sum = new ReduceExpr(acc, initial, x, items, step);
-                yield new CaseExpr(List.of(
-                        new WhenThen(new BinaryExpr(BinaryOp.OR, isBottom(op), anyBottom),
-                                CypherArtifacts.bottomLiteral(u.type))),
-                        CypherArtifacts.taggedScalar(u.type, sum));
-            }
-            case BOOLEAN_NOT -> {
-                CypherExpr payload = payload(op);
-                CypherExpr neg = new UnaryExpr(UnaryOp.NOT, payload);
-                yield new CaseExpr(List.of(
-                        new WhenThen(isBottom(op), CypherArtifacts.bottomLiteral(OclType.BOOLEAN))),
-                        CypherArtifacts.taggedScalar(OclType.BOOLEAN, neg));
-            }
-            case NUMERIC_NEGATE -> new CaseExpr(List.of(
-                    new WhenThen(isBottom(op), CypherArtifacts.bottomLiteral(u.type))),
-                    CypherArtifacts.taggedScalar(u.type,
-                            new UnaryExpr(UnaryOp.NEGATE, payload(op))));
-            case NUMERIC_ABS -> new CaseExpr(List.of(
-                    new WhenThen(isBottom(op), CypherArtifacts.bottomLiteral(u.type))),
-                    CypherArtifacts.taggedScalar(u.type,
-                            new FunctionCall("abs", false, List.of(payload(op)))));
-            case REAL_FLOOR -> {
-                CypherExpr floored = new FunctionCall("toInteger", false, List.of(
-                        new FunctionCall("floor", false, List.of(payload(op)))));
-                yield new CaseExpr(List.of(
-                        new WhenThen(isBottom(op),
-                                CypherArtifacts.bottomLiteral(OclType.INTEGER))),
-                        CypherArtifacts.taggedScalar(OclType.INTEGER, floored));
-            }
-            case REAL_ROUND -> {
-                CypherExpr shifted = new BinaryExpr(BinaryOp.ADD, payload(op),
-                        new FloatLiteral(new java.math.BigDecimal("0.5")));
-                CypherExpr rounded = new FunctionCall("toInteger", false, List.of(
-                        new FunctionCall("floor", false, List.of(shifted))));
-                yield new CaseExpr(List.of(
-                        new WhenThen(isBottom(op),
-                                CypherArtifacts.bottomLiteral(OclType.INTEGER))),
-                        CypherArtifacts.taggedScalar(OclType.INTEGER, rounded));
-            }
-            default -> throw new RealizeError("R_UNCOVERED_CONSTRUCTOR",
-                    "unary " + u.operator + " is future work");
-        });
-    }
 
     // ---- helpers ---------------------------------------------------------
 
-    private CypherExpr decodeScalar(OclType t, CypherExpr stored) {
-        // Codec ocl-integer-decimal-v1 stores BigInteger.toString() as decimal text.
-        // The attribute-specific certificate checks all concrete payloads before
-        // Cypher toInteger() is allowed to parse them into signed INT64.
-        if (t.equals(OclType.INTEGER)) {
-            return new FunctionCall("toInteger", false, List.of(stored));
-        }
-        // This branch is reachable only after the snapshot-bound binary64
-        // certificate succeeds; finite-decimal storage alone is insufficient.
-        if (t.equals(OclType.REAL)) {
-            return new FunctionCall("toFloat", false, List.of(stored));
-        }
-        if (t.equals(OclType.BOOLEAN)) {
-            return new BinaryExpr(BinaryOp.EQUAL, stored, new StringLiteral("true"));
-        }
-        return stored;
-    }
-
     /** Discharge the stored-decimal premise for the concrete attribute read. */
-    private void requireStoredIntegerInt64(QNode.QExpr.ReadAttribute attribute) {
+    void requireStoredIntegerInt64(QNode.QExpr.ReadAttribute attribute) {
         String attributeKey = attribute.ownerClassKey + "::" + attribute.attributeName;
         for (GraphModel.Node node : graph.nodes()) {
             if (!"ATTRIBUTE_VALUE".equals(node.observationRole())
@@ -1881,29 +490,12 @@ public final class Realization {
         }
     }
 
-    private static RealizeError numericCapability(String operation) {
+    static RealizeError numericCapability(String operation) {
         return new RealizeError("R_NUMERIC_CAPABILITY",
                 "No exact native range/precision certificate for " + operation);
     }
 
-    private CypherExpr taggedObject(String alias, OclType type) {
-        return new MapExpr(List.of(
-                new MapEntry(CypherArtifacts.OCL_BOTTOM, new BooleanLiteral(false)),
-                new MapEntry(CypherArtifacts.OCL_TYPE,
-                        new StringLiteral(CypherArtifacts.typeTag(type))),
-                new MapEntry(CypherArtifacts.OCL_VALUE,
-                        new PropertyAccess(new VariableExpr(alias), "use_id"))));
-    }
-
-    private CypherExpr isBottom(CypherExpr e) {
-        return new BinaryExpr(BinaryOp.EQUAL,
-                new PropertyAccess(e, CypherArtifacts.OCL_BOTTOM), new BooleanLiteral(true));
-    }
-
     /** Build a Boolean OR expression without relying on host-language null semantics. */
-    private CypherExpr or(CypherExpr left, CypherExpr right) {
-        return new BinaryExpr(BinaryOp.OR, left, right);
-    }
 
     /** Count declaration-identity uses, saturated at two for the let policy. */
     private static int referenceCount(QNode.QExpr expression, CoreDeclaration declaration) {
@@ -1977,7 +569,7 @@ public final class Realization {
                 + expression.getClass().getSimpleName());
     }
 
-    private static int referenceCount(QNode.QPlan plan, CoreDeclaration declaration) {
+    static int referenceCount(QNode.QPlan plan, CoreDeclaration declaration) {
         if (plan instanceof QNode.QPlan.FromCollection from) {
             return referenceCount(from.collection, declaration);
         }
@@ -2031,12 +623,12 @@ public final class Realization {
      * {@code head([x IN [value] | body])}.  The value occurs exactly once in
      * the serialized query; repeated observations in the body read {@code x}.
      */
-    private CypherExpr bindOnce(String alias, CypherExpr value, CypherExpr body) {
+    CypherExpr bindOnce(String alias, CypherExpr value, CypherExpr body) {
         return new FunctionCall("head", false, List.of(
                 new ListComprehension(alias, new ListExpr(List.of(value)), null, body)));
     }
 
-    private CypherExpr bindOnce(String base, CypherExpr value,
+    CypherExpr bindOnce(String base, CypherExpr value,
                                 java.util.function.Function<CypherExpr, CypherExpr> body) {
         CypherExpr unwrapped = value instanceof LocatedExpr located
                 ? located.expression() : value;
@@ -2050,7 +642,7 @@ public final class Realization {
         return bindOnce(alias, value, body.apply(new VariableExpr(alias)));
     }
 
-    private CypherExpr bindPair(String leftBase, CypherExpr left,
+    CypherExpr bindPair(String leftBase, CypherExpr left,
                                 String rightBase, CypherExpr right,
                                 java.util.function.BiFunction<CypherExpr, CypherExpr,
                                         CypherExpr> body) {
@@ -2059,7 +651,7 @@ public final class Realization {
     }
 
     /** One generated parameter replaces every repeated model-key literal. */
-    private CypherExpr modelKeyExpr() {
+    CypherExpr modelKeyExpr() {
         if (modelKeyParameter == null) {
             modelKeyParameter = "__oclModelKey";
             addParam(modelKeyParameter, "Physical:ModelKey",
@@ -2068,12 +660,12 @@ public final class Realization {
         return new ParameterExpr(modelKeyParameter);
     }
 
-    private List<PropertyMapEntry> modelProperty() {
+    List<PropertyMapEntry> modelProperty() {
         return List.of(new PropertyMapEntry(
                 Uml2GraphEncodingContract.Property.MODEL_KEY, modelKeyExpr()));
     }
 
-    private List<PropertyMapEntry> withModel(PropertyMapEntry extra) {
+    List<PropertyMapEntry> withModel(PropertyMapEntry extra) {
         List<PropertyMapEntry> properties = new ArrayList<>();
         properties.add(new PropertyMapEntry(
                 Uml2GraphEncodingContract.Property.MODEL_KEY, modelKeyExpr()));
@@ -2081,54 +673,7 @@ public final class Realization {
         return properties;
     }
 
-
-    private CypherExpr payload(CypherExpr e) {
-        return new PropertyAccess(e, CypherArtifacts.OCL_VALUE);
-    }
-
-    private CypherExpr literal(QNode.QExpr.Constant c) {
-        Object v = c.literalValue;
-        return switch (c.type.kind()) {
-            case BOOLEAN -> {
-                if (!(v instanceof Boolean value)) {
-                    throw uncoveredConstant(c);
-                }
-                yield new BooleanLiteral(value);
-            }
-            case INTEGER -> {
-                if (!(v instanceof java.math.BigInteger value)) {
-                    throw uncoveredConstant(c);
-                }
-                yield new IntegerLiteral(value);
-            }
-            case REAL -> {
-                if (!(v instanceof java.math.BigDecimal value)) {
-                    throw uncoveredConstant(c);
-                }
-                yield new FloatLiteral(value);
-            }
-            case STRING -> {
-                if (!(v instanceof String value)) {
-                    throw uncoveredConstant(c);
-                }
-                yield new StringLiteral(value);
-            }
-            case CLASS -> {
-                if (!(v instanceof String stableId) || stableId.isEmpty()) {
-                    throw uncoveredConstant(c);
-                }
-                yield new StringLiteral(stableId);
-            }
-            case SET, BAG -> throw uncoveredConstant(c);
-        };
-    }
-
-    private RealizeError uncoveredConstant(QNode.QExpr.Constant constant) {
-        return new RealizeError("R_UNCOVERED_CONSTRUCTOR",
-                "constant carrier does not match " + constant.type);
-    }
-
-    private void addParam(String name, String tag, QueryParameter.Origin origin, String value) {
+    void addParam(String name, String tag, QueryParameter.Origin origin, String value) {
         for (QueryParameter p : parameters) {
             if (p.name().equals(name)) {
                 if (!p.logicalTypeTag().equals(tag) || p.origin() != origin
@@ -2148,68 +693,62 @@ public final class Realization {
                 .toList();
     }
 
-    private String fresh(String base) {
+    String fresh(String base) {
         return aliases.fresh(base);
     }
 
     /** Scope of tagged values keyed by declaration identity, never surface name. */
-    private static final class Binding {
+    static final class Binding {
         final CypherExpr value;
-        final OclType type;
         final Optional<IntegerRangeCertificates.Certificate> integerCertificate;
         final Optional<ExactBinary64Certificates.Certificate> exactCertificate;
         final Optional<String> nodeAlias;
 
-        Binding(CypherExpr value, OclType type) {
-            this(value, type, Optional.empty(), Optional.empty(), Optional.empty());
-        }
-
-        Binding(CypherExpr value, OclType type,
+        Binding(CypherExpr value,
                 Optional<IntegerRangeCertificates.Certificate> integerCertificate,
                 Optional<ExactBinary64Certificates.Certificate> exactCertificate) {
-            this(value, type, integerCertificate, exactCertificate, Optional.empty());
+            this(value, integerCertificate, exactCertificate, Optional.empty());
         }
 
-        Binding(CypherExpr value, OclType type,
+        Binding(CypherExpr value,
                 Optional<IntegerRangeCertificates.Certificate> integerCertificate,
                 Optional<ExactBinary64Certificates.Certificate> exactCertificate,
                 Optional<String> nodeAlias) {
             this.value = value;
-            this.type = type;
             this.integerCertificate = integerCertificate;
             this.exactCertificate = exactCertificate;
             this.nodeAlias = nodeAlias;
         }
     }
 
-    private static final class Ctx {
+    static final class Ctx {
         private final java.util.Map<org.uet.dse.ocl2cypher.core.CoreDeclaration, Binding> scope
                 = new java.util.IdentityHashMap<>();
 
         void bind(org.uet.dse.ocl2cypher.core.CoreDeclaration declaration,
-                  CypherExpr value, OclType type) {
-            bind(declaration, value, type, Optional.empty(), Optional.empty());
+                  CypherExpr value) {
+            bind(declaration, value, Optional.empty(), Optional.empty());
         }
 
         void bind(org.uet.dse.ocl2cypher.core.CoreDeclaration declaration,
-                  CypherExpr value, OclType type,
+                  CypherExpr value,
                   Optional<IntegerRangeCertificates.Certificate> integerCertificate,
                   Optional<ExactBinary64Certificates.Certificate> exactCertificate) {
             if (scope.containsKey(declaration)) {
                 throw new RealizeError("R_SCOPE",
                         "declaration identity is already live: " + declaration.name());
             }
-            scope.put(declaration, new Binding(value, type,
+            scope.put(declaration, new Binding(value,
                     integerCertificate, exactCertificate));
         }
 
         void bindNode(org.uet.dse.ocl2cypher.core.CoreDeclaration declaration,
-                      CypherExpr value, OclType type, String nodeAlias) {
+                      CypherExpr value, String nodeAlias) {
             if (scope.containsKey(declaration)) {
                 throw new RealizeError("R_SCOPE",
                         "declaration identity is already live: " + declaration.name());
             }
-            scope.put(declaration, new Binding(value, type, Optional.empty(),
+            scope.put(declaration, new Binding(value, Optional.empty(),
                     Optional.empty(), Optional.of(nodeAlias)));
         }
 
@@ -2229,7 +768,6 @@ public final class Realization {
             return binding == null ? Optional.empty() : binding.exactCertificate;
         }
 
-
         Optional<String> nodeAlias(QNode.QExpr expression) {
             if (!(expression instanceof QNode.QExpr.Variable variable)) {
                 return Optional.empty();
@@ -2245,7 +783,7 @@ public final class Realization {
         }
     }
 
-    private static final class RealizeError extends RuntimeException {
+    static final class RealizeError extends RuntimeException {
         final String code;
 
         RealizeError(String code, String msg) {

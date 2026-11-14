@@ -3,12 +3,8 @@ package org.uet.dse.ocl2cypher.frontend;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.Test;
-import org.uet.dse.ocl2cypher.frontend.antlr.OCLParser;
-import org.uet.dse.ocl2cypher.frontend.antlr.OCLLexer;
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.ParseTree;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**

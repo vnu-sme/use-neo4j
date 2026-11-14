@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.uet.dse.ocl2cypher.runtime.OclType;
+import org.uet.dse.ocl2cypher.source.model.UmlAssociation.AssociationKind;
 
 /**
  * The closed M2 witness {@code rules(T_MM)} for the supported UMLMM profile.
@@ -205,6 +206,22 @@ public final class MetamodelMapping {
         return new MetamodelMapping(nodes, relationships, properties);
     }
 
+    static String schemaRelationshipType(AssociationKind kind) {
+        return switch (kind) {
+            case ASSOCIATION -> GraphModel.ASSOCIATE_WITH;
+            case AGGREGATION -> GraphModel.AGGREGATES;
+            case COMPOSITION -> GraphModel.COMPOSE_OF;
+        };
+    }
+
+    static String linkRelationshipType(AssociationKind kind) {
+        return switch (kind) {
+            case ASSOCIATION -> GraphModel.LINK_ASSOCIATE_WITH;
+            case AGGREGATION -> GraphModel.LINK_AGGREGATES;
+            case COMPOSITION -> GraphModel.LINK_COMPOSE_OF;
+        };
+    }
+
     public NodeBinding node(NodeKind kind) {
         return required(nodes, kind, "node");
     }
@@ -213,15 +230,14 @@ public final class MetamodelMapping {
         return required(relationships, kind, "relationship");
     }
 
-    /** Instantiate one parameterized association-class participant template. */
-    public RelationshipBinding associationClassParticipant(
-            RelationshipKind kind, String associationKey) {
+    /** Instantiate an association-class participant template with its physical type. */
+    public RelationshipBinding associationClassParticipant(RelationshipKind kind) {
         RelationshipBinding template = relationship(kind);
         String physicalType = switch (kind) {
             case ASSOCIATION_CLASS_SOURCE_PARTICIPANT ->
-                    GraphModel.associationClassSourceParticipant(associationKey);
+                    GraphModel.ASSOCIATION_CLASS_SOURCE_PARTICIPANT;
             case ASSOCIATION_CLASS_TARGET_PARTICIPANT ->
-                    GraphModel.associationClassTargetParticipant(associationKey);
+                    GraphModel.ASSOCIATION_CLASS_TARGET_PARTICIPANT;
             default -> throw new IllegalArgumentException(
                     "not an association-class participant template: " + kind);
         };

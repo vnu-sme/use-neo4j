@@ -1,0 +1,456 @@
+-- Independent snapshot; load into a fresh USE state.
+-- Scenario: larger. Invariant violations may be intentional.
+!new Ward('ward_0')
+!set ward_0.name := 'Ward 0'
+!new Doctor('doctor_0')
+!set doctor_0.name := 'Doctor 0'
+!set doctor_0.age := 45
+!set doctor_0.active := true
+!set doctor_0.license := 'D0'
+!set doctor_0.specialty := 'general'
+!new Nurse('nurse_0')
+!set nurse_0.name := 'Nurse 0'
+!set nurse_0.age := 30
+!set nurse_0.active := true
+!set nurse_0.license := 'N0'
+!set nurse_0.grade := 3
+!insert (doctor_0, ward_0) into Staffing
+!insert (nurse_0, ward_0) into Staffing
+!new Patient('patient_0_0')
+!set patient_0_0.name := ''
+!set patient_0_0.age := 17
+!set patient_0_0.active := true
+!set patient_0_0.code := ''
+!set patient_0_0.temperature := 41.0
+!set patient_0_0.weight := -1.0
+!insert (patient_0_0, ward_0) into Admission
+!insert (patient_0_0, doctor_0) into Treatment
+!insert (patient_0_0, nurse_0) into Care
+!new Encounter('encounter_0_0')
+!set encounter_0_0.closed := true
+!insert (patient_0_0, encounter_0_0) into PatientEncounter
+!insert (encounter_0_0, doctor_0) into EncounterDoctor
+!new Patient('patient_0_1')
+!set patient_0_1.code := 'P0_1'
+!insert (patient_0_1, nurse_0) into Care
+!new Encounter('encounter_0_1')
+!insert (patient_0_1, encounter_0_1) into PatientEncounter
+!insert (encounter_0_1, doctor_0) into EncounterDoctor
+!new Ward('ward_1')
+!set ward_1.name := 'Ward 1'
+!new Doctor('doctor_1')
+!set doctor_1.name := 'Doctor 1'
+!set doctor_1.age := 45
+!set doctor_1.active := true
+!set doctor_1.license := 'D1'
+!set doctor_1.specialty := 'general'
+!new Nurse('nurse_1')
+!set nurse_1.name := 'Nurse 1'
+!set nurse_1.age := 30
+!set nurse_1.active := true
+!set nurse_1.license := 'N1'
+!set nurse_1.grade := 3
+!insert (doctor_1, ward_1) into Staffing
+!insert (nurse_1, ward_1) into Staffing
+!new Patient('patient_1_0')
+!set patient_1_0.name := ''
+!set patient_1_0.age := 17
+!set patient_1_0.active := true
+!set patient_1_0.code := ''
+!set patient_1_0.temperature := 41.0
+!set patient_1_0.weight := -1.0
+!insert (patient_1_0, ward_1) into Admission
+!insert (patient_1_0, doctor_1) into Treatment
+!insert (patient_1_0, nurse_1) into Care
+!new Encounter('encounter_1_0')
+!set encounter_1_0.closed := true
+!insert (patient_1_0, encounter_1_0) into PatientEncounter
+!insert (encounter_1_0, doctor_1) into EncounterDoctor
+!new Patient('patient_1_1')
+!set patient_1_1.name := 'Patient 1/1'
+!set patient_1_1.age := 17
+!set patient_1_1.active := true
+!set patient_1_1.code := 'P1_1'
+!set patient_1_1.temperature := 37.0
+!set patient_1_1.weight := 70.5
+!insert (patient_1_1, nurse_1) into Care
+!new Encounter('encounter_1_1')
+!set encounter_1_1.closed := true
+!insert (patient_1_1, encounter_1_1) into PatientEncounter
+!insert (encounter_1_1, doctor_1) into EncounterDoctor
+!new Ward('ward_2')
+!set ward_2.name := 'Ward 2'
+!new Doctor('doctor_2')
+!set doctor_2.name := 'Doctor 2'
+!set doctor_2.age := 45
+!set doctor_2.active := true
+!set doctor_2.license := 'D2'
+!set doctor_2.specialty := 'general'
+!new Nurse('nurse_2')
+!set nurse_2.name := 'Nurse 2'
+!set nurse_2.age := 30
+!set nurse_2.active := true
+!set nurse_2.license := 'N2'
+!set nurse_2.grade := 3
+!insert (doctor_2, ward_2) into Staffing
+!insert (nurse_2, ward_2) into Staffing
+!new Patient('patient_2_0')
+!set patient_2_0.name := ''
+!set patient_2_0.age := 17
+!set patient_2_0.active := true
+!set patient_2_0.code := ''
+!set patient_2_0.temperature := 41.0
+!set patient_2_0.weight := -1.0
+!insert (patient_2_0, ward_2) into Admission
+!insert (patient_2_0, doctor_2) into Treatment
+!insert (patient_2_0, nurse_2) into Care
+!new Encounter('encounter_2_0')
+!set encounter_2_0.closed := true
+!insert (patient_2_0, encounter_2_0) into PatientEncounter
+!insert (encounter_2_0, doctor_2) into EncounterDoctor
+!new Patient('patient_2_1')
+!set patient_2_1.name := 'Patient 2/1'
+!set patient_2_1.age := 17
+!set patient_2_1.active := true
+!set patient_2_1.code := 'P2_1'
+!set patient_2_1.temperature := 37.0
+!set patient_2_1.weight := 70.5
+!insert (patient_2_1, nurse_2) into Care
+!new Encounter('encounter_2_1')
+!set encounter_2_1.closed := true
+!insert (patient_2_1, encounter_2_1) into PatientEncounter
+!insert (encounter_2_1, doctor_2) into EncounterDoctor
+!new Ward('ward_3')
+!set ward_3.name := 'Ward 3'
+!new Doctor('doctor_3')
+!set doctor_3.name := 'Doctor 3'
+!set doctor_3.age := 45
+!set doctor_3.active := true
+!set doctor_3.license := 'D3'
+!set doctor_3.specialty := 'general'
+!new Nurse('nurse_3')
+!set nurse_3.name := 'Nurse 3'
+!set nurse_3.age := 30
+!set nurse_3.active := true
+!set nurse_3.license := 'N3'
+!set nurse_3.grade := 3
+!insert (doctor_3, ward_3) into Staffing
+!insert (nurse_3, ward_3) into Staffing
+!new Patient('patient_3_0')
+!set patient_3_0.name := ''
+!set patient_3_0.age := 17
+!set patient_3_0.active := true
+!set patient_3_0.code := ''
+!set patient_3_0.temperature := 41.0
+!set patient_3_0.weight := -1.0
+!insert (patient_3_0, ward_3) into Admission
+!insert (patient_3_0, doctor_3) into Treatment
+!insert (patient_3_0, nurse_3) into Care
+!new Encounter('encounter_3_0')
+!set encounter_3_0.closed := true
+!insert (patient_3_0, encounter_3_0) into PatientEncounter
+!insert (encounter_3_0, doctor_3) into EncounterDoctor
+!new Patient('patient_3_1')
+!set patient_3_1.code := 'P3_1'
+!insert (patient_3_1, nurse_3) into Care
+!new Encounter('encounter_3_1')
+!insert (patient_3_1, encounter_3_1) into PatientEncounter
+!insert (encounter_3_1, doctor_3) into EncounterDoctor
+!new Ward('ward_4')
+!set ward_4.name := 'Ward 4'
+!new Doctor('doctor_4')
+!set doctor_4.name := 'Doctor 4'
+!set doctor_4.age := 45
+!set doctor_4.active := true
+!set doctor_4.license := 'D4'
+!set doctor_4.specialty := 'general'
+!new Nurse('nurse_4')
+!set nurse_4.name := 'Nurse 4'
+!set nurse_4.age := 30
+!set nurse_4.active := true
+!set nurse_4.license := 'N4'
+!set nurse_4.grade := 3
+!insert (doctor_4, ward_4) into Staffing
+!insert (nurse_4, ward_4) into Staffing
+!new Patient('patient_4_0')
+!set patient_4_0.name := ''
+!set patient_4_0.age := 17
+!set patient_4_0.active := true
+!set patient_4_0.code := ''
+!set patient_4_0.temperature := 41.0
+!set patient_4_0.weight := -1.0
+!insert (patient_4_0, ward_4) into Admission
+!insert (patient_4_0, doctor_4) into Treatment
+!insert (patient_4_0, nurse_4) into Care
+!new Encounter('encounter_4_0')
+!set encounter_4_0.closed := true
+!insert (patient_4_0, encounter_4_0) into PatientEncounter
+!insert (encounter_4_0, doctor_4) into EncounterDoctor
+!new Patient('patient_4_1')
+!set patient_4_1.name := 'Patient 4/1'
+!set patient_4_1.age := 17
+!set patient_4_1.active := true
+!set patient_4_1.code := 'P4_1'
+!set patient_4_1.temperature := 37.0
+!set patient_4_1.weight := 70.5
+!insert (patient_4_1, nurse_4) into Care
+!new Encounter('encounter_4_1')
+!set encounter_4_1.closed := true
+!insert (patient_4_1, encounter_4_1) into PatientEncounter
+!insert (encounter_4_1, doctor_4) into EncounterDoctor
+!new Ward('ward_5')
+!set ward_5.name := 'Ward 5'
+!new Doctor('doctor_5')
+!set doctor_5.name := 'Doctor 5'
+!set doctor_5.age := 45
+!set doctor_5.active := true
+!set doctor_5.license := 'D5'
+!set doctor_5.specialty := 'general'
+!new Nurse('nurse_5')
+!set nurse_5.name := 'Nurse 5'
+!set nurse_5.age := 30
+!set nurse_5.active := true
+!set nurse_5.license := 'N5'
+!set nurse_5.grade := 3
+!insert (doctor_5, ward_5) into Staffing
+!insert (nurse_5, ward_5) into Staffing
+!new Patient('patient_5_0')
+!set patient_5_0.name := ''
+!set patient_5_0.age := 17
+!set patient_5_0.active := true
+!set patient_5_0.code := ''
+!set patient_5_0.temperature := 41.0
+!set patient_5_0.weight := -1.0
+!insert (patient_5_0, ward_5) into Admission
+!insert (patient_5_0, doctor_5) into Treatment
+!insert (patient_5_0, nurse_5) into Care
+!new Encounter('encounter_5_0')
+!set encounter_5_0.closed := true
+!insert (patient_5_0, encounter_5_0) into PatientEncounter
+!insert (encounter_5_0, doctor_5) into EncounterDoctor
+!new Patient('patient_5_1')
+!set patient_5_1.name := 'Patient 5/1'
+!set patient_5_1.age := 17
+!set patient_5_1.active := true
+!set patient_5_1.code := 'P5_1'
+!set patient_5_1.temperature := 37.0
+!set patient_5_1.weight := 70.5
+!insert (patient_5_1, nurse_5) into Care
+!new Encounter('encounter_5_1')
+!set encounter_5_1.closed := true
+!insert (patient_5_1, encounter_5_1) into PatientEncounter
+!insert (encounter_5_1, doctor_5) into EncounterDoctor
+!new Ward('ward_6')
+!set ward_6.name := 'Ward 6'
+!new Doctor('doctor_6')
+!set doctor_6.name := 'Doctor 6'
+!set doctor_6.age := 45
+!set doctor_6.active := true
+!set doctor_6.license := 'D6'
+!set doctor_6.specialty := 'general'
+!new Nurse('nurse_6')
+!set nurse_6.name := 'Nurse 6'
+!set nurse_6.age := 30
+!set nurse_6.active := true
+!set nurse_6.license := 'N6'
+!set nurse_6.grade := 3
+!insert (doctor_6, ward_6) into Staffing
+!insert (nurse_6, ward_6) into Staffing
+!new Patient('patient_6_0')
+!set patient_6_0.name := ''
+!set patient_6_0.age := 17
+!set patient_6_0.active := true
+!set patient_6_0.code := ''
+!set patient_6_0.temperature := 41.0
+!set patient_6_0.weight := -1.0
+!insert (patient_6_0, ward_6) into Admission
+!insert (patient_6_0, doctor_6) into Treatment
+!insert (patient_6_0, nurse_6) into Care
+!new Encounter('encounter_6_0')
+!set encounter_6_0.closed := true
+!insert (patient_6_0, encounter_6_0) into PatientEncounter
+!insert (encounter_6_0, doctor_6) into EncounterDoctor
+!new Patient('patient_6_1')
+!set patient_6_1.code := 'P6_1'
+!insert (patient_6_1, nurse_6) into Care
+!new Encounter('encounter_6_1')
+!insert (patient_6_1, encounter_6_1) into PatientEncounter
+!insert (encounter_6_1, doctor_6) into EncounterDoctor
+!new Ward('ward_7')
+!set ward_7.name := 'Ward 7'
+!new Doctor('doctor_7')
+!set doctor_7.name := 'Doctor 7'
+!set doctor_7.age := 45
+!set doctor_7.active := true
+!set doctor_7.license := 'D7'
+!set doctor_7.specialty := 'general'
+!new Nurse('nurse_7')
+!set nurse_7.name := 'Nurse 7'
+!set nurse_7.age := 30
+!set nurse_7.active := true
+!set nurse_7.license := 'N7'
+!set nurse_7.grade := 3
+!insert (doctor_7, ward_7) into Staffing
+!insert (nurse_7, ward_7) into Staffing
+!new Patient('patient_7_0')
+!set patient_7_0.name := ''
+!set patient_7_0.age := 17
+!set patient_7_0.active := true
+!set patient_7_0.code := ''
+!set patient_7_0.temperature := 41.0
+!set patient_7_0.weight := -1.0
+!insert (patient_7_0, ward_7) into Admission
+!insert (patient_7_0, doctor_7) into Treatment
+!insert (patient_7_0, nurse_7) into Care
+!new Encounter('encounter_7_0')
+!set encounter_7_0.closed := true
+!insert (patient_7_0, encounter_7_0) into PatientEncounter
+!insert (encounter_7_0, doctor_7) into EncounterDoctor
+!new Patient('patient_7_1')
+!set patient_7_1.name := 'Patient 7/1'
+!set patient_7_1.age := 17
+!set patient_7_1.active := true
+!set patient_7_1.code := 'P7_1'
+!set patient_7_1.temperature := 37.0
+!set patient_7_1.weight := 70.5
+!insert (patient_7_1, nurse_7) into Care
+!new Encounter('encounter_7_1')
+!set encounter_7_1.closed := true
+!insert (patient_7_1, encounter_7_1) into PatientEncounter
+!insert (encounter_7_1, doctor_7) into EncounterDoctor
+!new Ward('ward_8')
+!set ward_8.name := 'Ward 8'
+!new Doctor('doctor_8')
+!set doctor_8.name := 'Doctor 8'
+!set doctor_8.age := 45
+!set doctor_8.active := true
+!set doctor_8.license := 'D8'
+!set doctor_8.specialty := 'general'
+!new Nurse('nurse_8')
+!set nurse_8.name := 'Nurse 8'
+!set nurse_8.age := 30
+!set nurse_8.active := true
+!set nurse_8.license := 'N8'
+!set nurse_8.grade := 3
+!insert (doctor_8, ward_8) into Staffing
+!insert (nurse_8, ward_8) into Staffing
+!new Patient('patient_8_0')
+!set patient_8_0.name := ''
+!set patient_8_0.age := 17
+!set patient_8_0.active := true
+!set patient_8_0.code := ''
+!set patient_8_0.temperature := 41.0
+!set patient_8_0.weight := -1.0
+!insert (patient_8_0, ward_8) into Admission
+!insert (patient_8_0, doctor_8) into Treatment
+!insert (patient_8_0, nurse_8) into Care
+!new Encounter('encounter_8_0')
+!set encounter_8_0.closed := true
+!insert (patient_8_0, encounter_8_0) into PatientEncounter
+!insert (encounter_8_0, doctor_8) into EncounterDoctor
+!new Patient('patient_8_1')
+!set patient_8_1.name := 'Patient 8/1'
+!set patient_8_1.age := 17
+!set patient_8_1.active := true
+!set patient_8_1.code := 'P8_1'
+!set patient_8_1.temperature := 37.0
+!set patient_8_1.weight := 70.5
+!insert (patient_8_1, nurse_8) into Care
+!new Encounter('encounter_8_1')
+!set encounter_8_1.closed := true
+!insert (patient_8_1, encounter_8_1) into PatientEncounter
+!insert (encounter_8_1, doctor_8) into EncounterDoctor
+!new Ward('ward_9')
+!set ward_9.name := 'Ward 9'
+!new Doctor('doctor_9')
+!set doctor_9.name := 'Doctor 9'
+!set doctor_9.age := 45
+!set doctor_9.active := true
+!set doctor_9.license := 'D9'
+!set doctor_9.specialty := 'general'
+!new Nurse('nurse_9')
+!set nurse_9.name := 'Nurse 9'
+!set nurse_9.age := 30
+!set nurse_9.active := true
+!set nurse_9.license := 'N9'
+!set nurse_9.grade := 3
+!insert (doctor_9, ward_9) into Staffing
+!insert (nurse_9, ward_9) into Staffing
+!new Patient('patient_9_0')
+!set patient_9_0.name := ''
+!set patient_9_0.age := 17
+!set patient_9_0.active := true
+!set patient_9_0.code := ''
+!set patient_9_0.temperature := 41.0
+!set patient_9_0.weight := -1.0
+!insert (patient_9_0, ward_9) into Admission
+!insert (patient_9_0, doctor_9) into Treatment
+!insert (patient_9_0, nurse_9) into Care
+!new Encounter('encounter_9_0')
+!set encounter_9_0.closed := true
+!insert (patient_9_0, encounter_9_0) into PatientEncounter
+!insert (encounter_9_0, doctor_9) into EncounterDoctor
+!new Patient('patient_9_1')
+!set patient_9_1.code := 'P9_1'
+!insert (patient_9_1, nurse_9) into Care
+!new Encounter('encounter_9_1')
+!insert (patient_9_1, encounter_9_1) into PatientEncounter
+!insert (encounter_9_1, doctor_9) into EncounterDoctor
+!new Ward('ward_10')
+!set ward_10.name := 'Ward 10'
+!new Doctor('doctor_10')
+!set doctor_10.name := 'Doctor 10'
+!set doctor_10.age := 45
+!set doctor_10.active := true
+!set doctor_10.license := 'D10'
+!set doctor_10.specialty := 'general'
+!new Nurse('nurse_10')
+!set nurse_10.name := 'Nurse 10'
+!set nurse_10.age := 30
+!set nurse_10.active := true
+!set nurse_10.license := 'N10'
+!set nurse_10.grade := 3
+!insert (doctor_10, ward_10) into Staffing
+!insert (nurse_10, ward_10) into Staffing
+!new Patient('patient_10_0')
+!set patient_10_0.name := ''
+!set patient_10_0.age := 17
+!set patient_10_0.active := true
+!set patient_10_0.code := ''
+!set patient_10_0.temperature := 41.0
+!set patient_10_0.weight := -1.0
+!insert (patient_10_0, ward_10) into Admission
+!insert (patient_10_0, doctor_10) into Treatment
+!insert (patient_10_0, nurse_10) into Care
+!new Encounter('encounter_10_0')
+!set encounter_10_0.closed := true
+!insert (patient_10_0, encounter_10_0) into PatientEncounter
+!insert (encounter_10_0, doctor_10) into EncounterDoctor
+!new Patient('patient_10_1')
+!set patient_10_1.name := 'Patient 10/1'
+!set patient_10_1.age := 17
+!set patient_10_1.active := true
+!set patient_10_1.code := 'P10_1'
+!set patient_10_1.temperature := 37.0
+!set patient_10_1.weight := 70.5
+!insert (patient_10_1, nurse_10) into Care
+!new Encounter('encounter_10_1')
+!set encounter_10_1.closed := true
+!insert (patient_10_1, encounter_10_1) into PatientEncounter
+!insert (encounter_10_1, doctor_10) into EncounterDoctor
+!new Ward('ward_11')
+!set ward_11.name := 'Empty'
+!new Doctor('doctor_11')
+!set doctor_11.name := 'Doctor 11'
+!set doctor_11.age := 45
+!set doctor_11.active := true
+!set doctor_11.license := 'D11'
+!set doctor_11.specialty := 'general'
+!new Nurse('nurse_11')
+!set nurse_11.name := 'Nurse 11'
+!set nurse_11.age := 30
+!set nurse_11.active := true
+!set nurse_11.license := 'N11'
+!set nurse_11.grade := 3
+!insert (doctor_11, ward_11) into Staffing
+!insert (nurse_11, ward_11) into Staffing

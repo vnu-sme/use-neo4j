@@ -1,0 +1,9 @@
+invariant,ids
+Book::TitleNotBlank,book_1|book_10|book_11|book_2|book_4|book_5|book_7|book_8
+Branch::HasMembers,branch_11
+Branch::ManagerIsEmployee,branch_0|branch_1|branch_10|branch_11|branch_2|branch_3|branch_4|branch_5|branch_6|branch_7|branch_8|branch_9
+Loan::LoanBookOfferedByBranch,loan_0|loan_1|loan_10|loan_11|loan_2|loan_3|loan_4|loan_5|loan_6|loan_7|loan_8|loan_9
+Loan::LoanCustomerIsAdult,loan_0|loan_1|loan_10|loan_11|loan_2|loan_3|loan_4|loan_5|loan_6|loan_7|loan_8|loan_9
+Loan::OverdueFeeNonNegative,loan_0|loan_1|loan_10|loan_11|loan_2|loan_3|loan_4|loan_5|loan_6|loan_7|loan_8|loan_9
+Member::AdultMember,member_0|member_1|member_10|member_11|member_2|member_3|member_4|member_5|member_6|member_7|member_8|member_9
+Member::MemberNameDefined,

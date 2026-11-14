@@ -1,13 +1,10 @@
 package org.uet.dse.ocl2cypher.api;
 
 import org.uet.dse.ocl2cypher.diagnostics.Result;
-import org.uet.dse.ocl2cypher.diagnostics.RuleId;
 import org.uet.dse.ocl2cypher.diagnostics.Stage;
 import org.uet.dse.ocl2cypher.frontend.OmgFrontend;
 import org.uet.dse.ocl2cypher.source.model.SchemaModel;
 import org.uet.dse.ocl2cypher.source.omg.OmgAs;
-import org.uet.dse.ocl2cypher.trace.Trace;
-import org.uet.dse.ocl2cypher.trace.TraceCollector;
 
 /**
  * Single-call frontend facade so that callers never choose between
@@ -26,23 +23,6 @@ public final class FrontendCompiler {
         } catch (RuntimeException e) {
             return Result.failure(Stage.E_SM, "E_PARSE", e.getMessage());
         }
-    }
-
-    public static Result<java.util.List<OmgAs.OmgDocument>> compile(
-            String source, SchemaModel sm, TraceCollector traces) {
-        Result<java.util.List<OmgAs.OmgDocument>> result = compile(source, sm);
-        if (result.isSuccess()) {
-            for (OmgAs.OmgDocument document : result.value()) {
-                String documentId = "omg-document:" + document.contextClassKey;
-                traces.record(Trace.Stage.E_SM, document.span, documentId, RuleId.E_DOC);
-                for (OmgAs.Constraint constraint : document.constraints) {
-                    String name = constraint.name == null ? "<anonymous>" : constraint.name;
-                    traces.record(Trace.Stage.E_SM, constraint.specification.span,
-                            documentId + ":constraint:" + name, RuleId.E_CONTEXT);
-                }
-            }
-        }
-        return result;
     }
 
     /** Compile an independent value expression, optionally bound to a context object. */
@@ -67,13 +47,4 @@ public final class FrontendCompiler {
         }
     }
 
-    public static Result<OmgAs.ExpressionInOcl> compileValueQuery(
-            ValueQueryRequest request, SchemaModel sm, TraceCollector traces) {
-        Result<OmgAs.ExpressionInOcl> result = compileValueQuery(request, sm);
-        if (result.isSuccess()) {
-            traces.record(Trace.Stage.E_SM, result.value().span,
-                    "omg-value-query", RuleId.E_DOC);
-        }
-        return result;
-    }
 }

@@ -11,24 +11,13 @@ import java.util.Objects;
  * matches {@code ResolvedClass} in Typed-Core-OCL-IR.emf, where declaration
  * identity — not the surface name — decides equality.
  */
-public final class UmlClass {
+public record UmlClass(String key, String qualifiedName, boolean isAbstract,
+                       boolean isAssociationClass, List<String> directSuperclassKeys) {
 
-    private final String key;
-    private final String qualifiedName;
-    private final boolean isAbstract;
-    private final boolean associationClass;
-    private final List<String> directSuperclassKeys;
-
-    public UmlClass(String key,
-                    String qualifiedName,
-                    boolean isAbstract,
-                    boolean associationClass,
-                    List<String> directSuperclassKeys) {
-        this.key = Objects.requireNonNull(key, "class key");
-        this.qualifiedName = Objects.requireNonNull(qualifiedName, "qualified name");
-        this.isAbstract = isAbstract;
-        this.associationClass = associationClass;
-        this.directSuperclassKeys = List.copyOf(
+    public UmlClass {
+        Objects.requireNonNull(key, "class key");
+        Objects.requireNonNull(qualifiedName, "qualified name");
+        directSuperclassKeys = List.copyOf(
                 Objects.requireNonNull(directSuperclassKeys, "superclasses"));
     }
 
@@ -38,26 +27,6 @@ public final class UmlClass {
 
     public static UmlClass of(String name, String... superKeys) {
         return new UmlClass(name, name, false, false, List.of(superKeys));
-    }
-
-    public String key() {
-        return key;
-    }
-
-    public String qualifiedName() {
-        return qualifiedName;
-    }
-
-    public boolean isAbstract() {
-        return isAbstract;
-    }
-
-    public boolean isAssociationClass() {
-        return associationClass;
-    }
-
-    public List<String> directSuperclassKeys() {
-        return directSuperclassKeys;
     }
 
     @Override

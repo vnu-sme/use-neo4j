@@ -475,6 +475,17 @@ public final class Uml2GraphEncodingContract {
                 Relationship.ASSOCIATION_CLASS_TARGET_PARTICIPANT).contains(type);
     }
 
+    static String simpleClassLabel(String qualifiedName) {
+        String label = qualifiedName;
+        for (String separator : List.of("::", "/", "#", ".")) {
+            int index = label.lastIndexOf(separator);
+            if (index >= 0 && index + separator.length() < label.length()) {
+                label = label.substring(index + separator.length());
+            }
+        }
+        return label.isBlank() ? "Object" : label;
+    }
+
     private static Result<Witness> failure(String code, String message) {
         return Result.failure(Stage.F_G, code, message);
     }

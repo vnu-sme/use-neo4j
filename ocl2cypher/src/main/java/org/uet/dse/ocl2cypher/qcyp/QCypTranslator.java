@@ -8,11 +8,8 @@ import org.uet.dse.ocl2cypher.core.CoreInvariant;
 import org.uet.dse.ocl2cypher.core.CoreQuery;
 import org.uet.dse.ocl2cypher.core.CoreUnit;
 import org.uet.dse.ocl2cypher.diagnostics.Result;
-import org.uet.dse.ocl2cypher.diagnostics.RuleId;
 import org.uet.dse.ocl2cypher.diagnostics.Stage;
 import org.uet.dse.ocl2cypher.runtime.OclType;
-import org.uet.dse.ocl2cypher.trace.Trace;
-import org.uet.dse.ocl2cypher.trace.TraceCollector;
 
 /**
  * {@code T_G}: typed Core OCL_IR to Q_CYP.
@@ -31,32 +28,9 @@ public final class QCypTranslator {
         return translate(invariant, QQuery.QueryMode.VIOLATIONS);
     }
 
-    public static Result<QQuery> translate(CoreInvariant invariant, TraceCollector traces) {
-        Result<QQuery> result = translate(invariant);
-        if (result.isSuccess()) {
-            String name = invariant.invariantName() == null
-                    ? "<anonymous>" : invariant.invariantName();
-            traces.record(Trace.Stage.T_G,
-                    "core-invariant:" + invariant.contextClassKey() + "::" + name,
-                    "q-violations:" + invariant.contextClassKey() + "::" + name,
-                    RuleId.T_Q_VIOLATIONS);
-        }
-        return result;
-    }
-
     /** Translate an independent query only to its tagged VALUE query. */
     public static Result<QQuery> translate(CoreQuery query) {
         return translate(query, QQuery.QueryMode.VALUE);
-    }
-
-    public static Result<QQuery> translate(CoreQuery query, TraceCollector traces) {
-        Result<QQuery> result = translate(query);
-        if (result.isSuccess()) {
-            String rule = result.value().planBody() == null
-                    ? RuleId.T_Q_VALUE_EXPR : RuleId.T_Q_VALUE_PLAN;
-            traces.record(Trace.Stage.T_G, "core-value-query", "q-value-query", rule);
-        }
-        return result;
     }
 
     private static Result<QQuery> translate(CoreUnit unit, QQuery.QueryMode mode) {
@@ -163,7 +137,7 @@ public final class QCypTranslator {
             if (acn.kind == CoreExpr.NavKind.TO_ONE) {
                 QNode.QExpr src = transE(acn.source);
                 return new QNode.QExpr.NavigateOne(acn.span, src, acn.associationClassKey,
-                        acn.navigationSource, quals2(acn.qualifiers), acn.type(),
+                        acn.navigationSource, quals(acn.qualifiers), acn.type(),
                         acn.receiverIsTarget, true);
             }
             return new QNode.QExpr.Materialize(acn.span, planForAcNavigation(acn));
@@ -303,7 +277,7 @@ public final class QCypTranslator {
 
     private static QNode.QPlan planForAcNavigation(CoreExpr.AssociationClassNavigation acn) {
         QNode.QExpr src = transE(acn.source);
-        List<QNode.QExpr> quals = quals2(acn.qualifiers);
+        List<QNode.QExpr> quals = quals(acn.qualifiers);
         return new QNode.QPlan.NavigateMany(acn.span, src, acn.associationClassKey,
                 acn.navigationSource, quals, acn.type(), acn.receiverIsTarget, true);
     }
@@ -314,10 +288,6 @@ public final class QCypTranslator {
             r.add(transE(x));
         }
         return List.copyOf(r);
-    }
-
-    private static List<QNode.QExpr> quals2(List<CoreExpr> xs) {
-        return quals(xs);
     }
 
     private static QQuery failure(String code, String msg) {

@@ -50,7 +50,7 @@ class R1ParameterContractTest {
         Neo4jCypherParserGate.assertParses(text);
 
         Map<String, Object> wire = scalar(false, "Integer", "42");
-        Map<String, Object> physical = Neo4jExecutionAdapter.buildParamMap(
+        Map<String, Object> physical = Neo4jValueCodec.buildParamMap(
                 realized.value(), Map.of("limit", wire));
         assertSame(wire, physical.get("limit"));
 
@@ -64,17 +64,17 @@ class R1ParameterContractTest {
     void malformedRawUnknownAndUncertifiedNumericInputsAreRejected() {
         var integerArtifact = artifactWithPublic("p", "Integer");
         assertThrows(IllegalArgumentException.class,
-                () -> Neo4jExecutionAdapter.buildParamMap(integerArtifact, Map.of("p", 1L)));
+                () -> Neo4jValueCodec.buildParamMap(integerArtifact, Map.of("p", 1L)));
         assertThrows(IllegalArgumentException.class,
-                () -> Neo4jExecutionAdapter.buildParamMap(integerArtifact,
+                () -> Neo4jValueCodec.buildParamMap(integerArtifact,
                         Map.of("p", scalar(false, "Integer", "01"))));
         assertThrows(IllegalArgumentException.class,
-                () -> Neo4jExecutionAdapter.buildParamMap(integerArtifact,
+                () -> Neo4jValueCodec.buildParamMap(integerArtifact,
                         Map.of("p", scalar(false, "Integer", "9223372036854775808"))));
 
         var unknown = artifactWithPublic("p", "Mystery");
         assertThrows(IllegalArgumentException.class,
-                () -> Neo4jExecutionAdapter.buildParamMap(unknown,
+                () -> Neo4jValueCodec.buildParamMap(unknown,
                         Map.of("p", scalar(false, "Mystery", "x"))));
 
         var unknownGenerated = new CypherAst.GeneratedArtifact(
@@ -82,13 +82,13 @@ class R1ParameterContractTest {
                 List.of(new CypherAst.QueryParameter("__oclMystery", "Mystery",
                         CypherAst.QueryParameter.Origin.GENERATED, "x")));
         assertThrows(IllegalArgumentException.class,
-                () -> Neo4jExecutionAdapter.buildParamMap(unknownGenerated, Map.of()));
+                () -> Neo4jValueCodec.buildParamMap(unknownGenerated, Map.of()));
 
         var realArtifact = artifactWithPublic("p", "Real");
         assertThrows(IllegalArgumentException.class,
-                () -> Neo4jExecutionAdapter.buildParamMap(realArtifact,
+                () -> Neo4jValueCodec.buildParamMap(realArtifact,
                         Map.of("p", scalar(false, "Real", "0.1"))));
-        assertDoesNotThrow(() -> Neo4jExecutionAdapter.buildParamMap(realArtifact,
+        assertDoesNotThrow(() -> Neo4jValueCodec.buildParamMap(realArtifact,
                 Map.of("p", scalar(false, "Real", "0.5"))));
     }
 
@@ -104,10 +104,10 @@ class R1ParameterContractTest {
                         "result", "String", false, null), List.of(modelKey));
         assertEquals(CypherAst.QueryParameter.Origin.GENERATED, modelKey.origin());
         assertEquals("experiment-model", modelKey.canonicalValue());
-        assertEquals("experiment-model", Neo4jExecutionAdapter.buildParamMap(
+        assertEquals("experiment-model", Neo4jValueCodec.buildParamMap(
                 artifact, Map.of()).get(modelKey.name()));
         assertThrows(IllegalArgumentException.class,
-                () -> Neo4jExecutionAdapter.buildParamMap(artifact,
+                () -> Neo4jValueCodec.buildParamMap(artifact,
                         Map.of(modelKey.name(), "caller-model")));
     }
 
@@ -118,13 +118,13 @@ class R1ParameterContractTest {
         Map<String, Object> one = scalar(false, "Integer", "1");
         Map<String, Object> integerBottom = scalar(true, "Integer", null);
 
-        OclValue empty = Neo4jExecutionAdapter.decodePublicParameter(
+        OclValue empty = Neo4jValueCodec.decodePublicParameter(
                 collection(false, "SET", "Integer", List.of()), setType, null);
-        OclValue elementBottom = Neo4jExecutionAdapter.decodePublicParameter(
+        OclValue elementBottom = Neo4jValueCodec.decodePublicParameter(
                 collection(false, "SET", "Integer", List.of(integerBottom)), setType, null);
-        OclValue wholeBottom = Neo4jExecutionAdapter.decodePublicParameter(
+        OclValue wholeBottom = Neo4jValueCodec.decodePublicParameter(
                 collection(true, "SET", "Set<Integer>", List.of()), setType, null);
-        OclValue bag = Neo4jExecutionAdapter.decodePublicParameter(
+        OclValue bag = Neo4jValueCodec.decodePublicParameter(
                 collection(false, "BAG", "Integer", List.of(one, one)), bagType, null);
 
         assertEquals(0, ((OclValue.SetValue) empty).size());
@@ -132,7 +132,7 @@ class R1ParameterContractTest {
         assertTrue(wholeBottom.isBottom());
         assertEquals(2, ((OclValue.BagValue) bag).size());
         assertThrows(IllegalArgumentException.class,
-                () -> Neo4jExecutionAdapter.decodePublicParameter(
+                () -> Neo4jValueCodec.decodePublicParameter(
                         collection(false, "SET", "Integer", List.of(one, one)), setType, null));
 
         var parameter = new QNode.QExpr.Parameter(S,
@@ -152,11 +152,11 @@ class R1ParameterContractTest {
         OclType person = OclType.clazz("Person");
         Map<String, Object> value = scalar(false, "Class:Person", "p1");
         assertEquals(new OclValue.ObjectValue(person, "p1"),
-                Neo4jExecutionAdapter.decodePublicParameter(value, person, graph));
+                Neo4jValueCodec.decodePublicParameter(value, person, graph));
         assertThrows(IllegalArgumentException.class,
-                () -> Neo4jExecutionAdapter.decodePublicParameter(value, person, null));
+                () -> Neo4jValueCodec.decodePublicParameter(value, person, null));
         assertThrows(IllegalArgumentException.class,
-                () -> Neo4jExecutionAdapter.decodePublicParameter(
+                () -> Neo4jValueCodec.decodePublicParameter(
                         scalar(false, "Class:Person", "missing"), person, graph));
     }
 

@@ -1,5 +1,6 @@
 [CmdletBinding()]
 param(
+    [switch]$AllSnapshots,
     [switch]$EnableNeo4j,
     [switch]$ConfirmDisposableDatabase,
     [string]$EnvFile = '',
@@ -15,6 +16,26 @@ if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
     $OutputRoot = (Resolve-Path -LiteralPath $OutputRoot).Path
 }
 $runDir = Join-Path $OutputRoot $runId
+$expectedComparisons = 135
+$expectedRejections = 6
+$expectedExclusions = 1
+$expectedSnapshots = 8
+$expectedInvariantEvaluations = 142
+$expectedSourceOnly = 0
+$profiles = @{shop=2; advanced=3; company=26; comprehensive=30; medical=36; carrental=25; families=10; persons=10}
+if ($AllSnapshots) {
+    $instances = @(Import-Csv -LiteralPath (Join-Path $root 'example/snapshot-manifest.tsv') -Delimiter "`t")
+    foreach ($instance in $instances) {
+        if ($instance.scope -eq 'USE_ONLY') { $expectedSourceOnly++; continue }
+        if ($instance.scope -ne 'PIPELINE') { throw "Unknown snapshot scope: $($instance.scope)" }
+        $profiles[$instance.profile] = [int]$instance.invariants
+        $expectedSnapshots++
+        $expectedInvariantEvaluations += [int]$instance.invariants
+        $expectedRejections += [int]$instance.rejections
+        $expectedExclusions += [int]$instance.exclusions
+        $expectedComparisons += [int]$instance.invariants - [int]$instance.rejections - [int]$instance.exclusions
+    }
+}
 $connectionKeys = @('NEO4J_URI', 'NEO4J_DB', 'NEO4J_USER', 'NEO4J_PASSWORD')
 $savedConnections = @{}
 foreach ($key in $connectionKeys) {
@@ -110,14 +131,19 @@ try {
         workingTreeDirty = ($dirty.Count -gt 0)
         startedUtc = [DateTime]::UtcNow.ToString('o')
         liveNeo4j = [bool]$EnableNeo4j
-        corpusSubjects = 8
-        invariantDefinitions = 142
-        expectedAdmittedComparisons = 135
-        expectedInvariantRejections = 6
+        baselineSubjects = 8
+        corpusSubjects = $profiles.Count
+        invariantDefinitions = ($profiles.Values | Measure-Object -Sum).Sum
+        allSnapshots = [bool]$AllSnapshots
+        pipelineSnapshots = $expectedSnapshots
+        invariantSnapshotEvaluations = $expectedInvariantEvaluations
+        sourceOnlySnapshots = $expectedSourceOnly
+        expectedAdmittedComparisons = $expectedComparisons
+        expectedInvariantRejections = $expectedRejections
         excludedOutOfScope = @('company/Company::UniqueEmployeeNames')
         expectedInputBoundaryRejections = 3
         oracle = 'official USE evaluator exact stable-ID sets'
-        target = $(if ($EnableNeo4j) { 'Q interpreter and live Neo4j Cypher 5' } else { 'Q interpreter; Neo4j not run' })
+        target = $(if ($EnableNeo4j) { 'Core, Q interpreter and live Neo4j Cypher 5' } else { 'Core and Q interpreter; Neo4j not run' })
     } | ConvertTo-Json -Depth 5 |
         Set-Content -LiteralPath (Join-Path $runDir 'manifest.json') -Encoding UTF8
 
@@ -133,6 +159,7 @@ try {
         $(if ($EnableNeo4j) { 'true' } else { 'false' }), 'Process')
     $reports = Join-Path $runDir 'surefire'
     & mvn -pl ocl2cypher '-Dtest=ExampleCorpusExperimentIT' `
+        "-Docl2cypher.allSnapshots=$($AllSnapshots.IsPresent.ToString().ToLowerInvariant())" `
         "-Docl2cypher.experimentRunId=$runId" `
         "-Docl2cypher.experimentOutput=$runDir" `
         "-Docl2cypher.testReportsDirectory=$reports" test
@@ -144,14 +171,18 @@ try {
     if (-not (Test-Path -LiteralPath $summaryPath)) { throw 'Experiment produced no summary.json' }
     $summary = Get-Content -Raw -LiteralPath $summaryPath | ConvertFrom-Json
     if ($summary.status -ne 'PASS' -or
-        $summary.localUseQComparisonsPassed -ne 135 -or
-        $summary.expectedInvariantRejectionsPassed -ne 6 -or
-        $summary.excludedOutOfScope -ne 1 -or
+        $summary.subjects -ne $expectedSnapshots -or
+        $summary.expectedInvariantEvaluations -ne $expectedInvariantEvaluations -or
+        $summary.sourceOnlySnapshots -ne $expectedSourceOnly -or
+        $summary.localUseQComparisonsPassed -ne $expectedComparisons -or
+        $summary.localUseCoreQComparisonsPassed -ne $expectedComparisons -or
+        $summary.expectedInvariantRejectionsPassed -ne $expectedRejections -or
+        $summary.excludedOutOfScope -ne $expectedExclusions -or
         $summary.reviewedCsvMismatches -ne 2 -or
-        $summary.boundaryRejectionsPassed -ne 9) {
+        $summary.boundaryRejectionsPassed -ne ($expectedRejections + 3)) {
         throw "Unexpected local evidence counts in $summaryPath"
     }
-    $expectedLive = if ($EnableNeo4j) { 135 } else { 0 }
+    $expectedLive = if ($EnableNeo4j) { $expectedComparisons } else { 0 }
     if ($summary.liveUseNeo4jComparisonsPassed -ne $expectedLive) {
         throw "Expected $expectedLive live comparisons, found $($summary.liveUseNeo4jComparisonsPassed)"
     }

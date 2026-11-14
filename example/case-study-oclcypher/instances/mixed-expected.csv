@@ -1,0 +1,9 @@
+invariant,ids
+Book::TitleNotBlank,book_1|book_2
+Branch::HasMembers,branch_2
+Branch::ManagerIsEmployee,branch_0|branch_1|branch_2
+Loan::LoanBookOfferedByBranch,loan_0|loan_1|loan_2
+Loan::LoanCustomerIsAdult,loan_0|loan_1|loan_2
+Loan::OverdueFeeNonNegative,loan_0|loan_1|loan_2
+Member::AdultMember,member_0|member_1|member_2
+Member::MemberNameDefined,

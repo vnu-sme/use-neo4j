@@ -18,10 +18,7 @@ final class IntegerRangeCertificates {
     static final BigInteger MIN = BigInteger.valueOf(Long.MIN_VALUE);
     static final BigInteger MAX = BigInteger.valueOf(Long.MAX_VALUE);
 
-    record Certificate(BigInteger lower, BigInteger upper, String rule,
-                       List<Certificate> children) {
-        Certificate { children = List.copyOf(children); }
-    }
+    record Certificate(BigInteger lower, BigInteger upper) { }
 
     private final GraphModel graph;
 
@@ -37,12 +34,7 @@ final class IntegerRangeCertificates {
         return certify(expression, ignored -> Optional.empty());
     }
 
-    Optional<Certificate> certify(QNode.QExpr expression,
-            Function<CoreDeclaration, Optional<Certificate>> variables) {
-        return derive(expression, variables);
-    }
-
-    private Optional<Certificate> derive(QNode.QExpr e,
+    Optional<Certificate> certify(QNode.QExpr e,
             Function<CoreDeclaration, Optional<Certificate>> variables) {
         if (!e.type.isInteger()) return Optional.empty();
         if (e instanceof QNode.QExpr.Unary u
@@ -51,42 +43,40 @@ final class IntegerRangeCertificates {
         if (e instanceof QNode.QExpr.CountFamily c && c.countKind == QNode.QKind.SUM)
             return sum(c.source, variables);
         if (e instanceof QNode.QExpr.Constant c && c.literalValue instanceof BigInteger n) {
-            return bounded(n, n, "I64-LITERAL", List.of());
+            return bounded(n, n);
         }
         if (e instanceof QNode.QExpr.Unary u
                 && u.operator == org.uet.dse.ocl2cypher.core.CoreExpr.UnaryOp.NUMERIC_ABS) {
-            return derive(u.operand, variables).flatMap(child -> {
+            return certify(u.operand, variables).flatMap(child -> {
                 BigInteger lo = child.lower.signum() >= 0 ? child.lower
                         : child.upper.signum() <= 0 ? child.upper.negate() : BigInteger.ZERO;
                 BigInteger hi = child.lower.abs().max(child.upper.abs());
-                return bounded(lo, hi, "I64-ABS", List.of(child));
+                return bounded(lo, hi);
             });
         }
         if (e instanceof QNode.QExpr.Unary u
                 && u.operator == org.uet.dse.ocl2cypher.core.CoreExpr.UnaryOp.NUMERIC_NEGATE) {
-            return derive(u.operand, variables).flatMap(child -> bounded(
-                    child.upper.negate(), child.lower.negate(),
-                    "I64-NEGATE", List.of(child)));
+            return certify(u.operand, variables).flatMap(child -> bounded(
+                    child.upper.negate(), child.lower.negate()));
         }
         if (e instanceof QNode.QExpr.Unary u
                 && u.operator == org.uet.dse.ocl2cypher.core.CoreExpr.UnaryOp.COLLECTION_SIZE) {
             // Collection size is always a non-negative integer bounded by Neo4j graph cardinality.
-            return bounded(BigInteger.ZERO, MAX, "I64-COLLECTION-SIZE", List.of());
+            return bounded(BigInteger.ZERO, MAX);
         }
         if (e instanceof QNode.QExpr.IfExpr ifExpr && ifExpr.type.equals(org.uet.dse.ocl2cypher.runtime.OclType.INTEGER)) {
-            var thenCert = derive(ifExpr.thenExpr, variables);
-            var elseCert = derive(ifExpr.elseExpr, variables);
+            var thenCert = certify(ifExpr.thenExpr, variables);
+            var elseCert = certify(ifExpr.elseExpr, variables);
             if (thenCert.isPresent() && elseCert.isPresent()) {
                 var t = thenCert.get(); var el = elseCert.get();
-                return bounded(t.lower.min(el.lower), t.upper.max(el.upper),
-                        "I64-IF-EXPR", List.of(t, el));
+                return bounded(t.lower.min(el.lower), t.upper.max(el.upper));
             }
         }
         if (e instanceof QNode.QExpr.Let let) {
-            Optional<Certificate> value = derive(let.value, variables);
+            Optional<Certificate> value = certify(let.value, variables);
             Function<CoreDeclaration, Optional<Certificate>> inner = declaration ->
                     declaration == let.binder ? value : variables.apply(declaration);
-            return derive(let.body, inner);
+            return certify(let.body, inner);
         }
         if (e instanceof QNode.QExpr.ReadAttribute attribute) {
             return storedAttribute(attribute);
@@ -94,10 +84,10 @@ final class IntegerRangeCertificates {
         if (e instanceof QNode.QExpr.Variable variable) {
             Optional<Certificate> bound = variables.apply(variable.declaration);
             if (bound.isPresent()) return bound;
-            return bounded(MIN, MAX, "I64-VARIABLE", List.of());
+            return bounded(MIN, MAX);
         }
         if (e instanceof QNode.QExpr.Parameter) {
-            return bounded(MIN, MAX, "I64-PARAMETER", List.of());
+            return bounded(MIN, MAX);
         }
         if (!(e instanceof QNode.QExpr.Binary b)) return Optional.empty();
         // Unsupported operators never acquire a certificate merely from a type.
@@ -106,8 +96,8 @@ final class IntegerRangeCertificates {
                  INTEGER_DIVIDE, INTEGER_MOD -> { }
             default -> { return Optional.empty(); }
         }
-        var left = derive(b.left, variables);
-        var right = derive(b.right, variables);
+        var left = certify(b.left, variables);
+        var right = certify(b.right, variables);
         if (left.isEmpty() || right.isEmpty()) return Optional.empty();
         var l = left.get(); var r = right.get();
         BigInteger lo, hi;
@@ -127,15 +117,14 @@ final class IntegerRangeCertificates {
             }
             default -> throw new IllegalStateException("checked above");
         }
-        return bounded(lo, hi, "I64-" + b.operator, List.of(l, r));
+        return bounded(lo, hi);
     }
 
-    private static Optional<Certificate> bounded(BigInteger lo, BigInteger hi,
-                                                 String rule, List<Certificate> children) {
+    private static Optional<Certificate> bounded(BigInteger lo, BigInteger hi) {
         if (lo.compareTo(MIN) < 0 || hi.compareTo(MAX) > 0 || lo.compareTo(hi) > 0) {
             return Optional.empty();
         }
-        return Optional.of(new Certificate(lo, hi, rule, children));
+        return Optional.of(new Certificate(lo, hi));
     }
 
     private Optional<Certificate> sum(QNode.QExpr source,
@@ -148,29 +137,28 @@ final class IntegerRangeCertificates {
                 org.uet.dse.ocl2cypher.runtime.OclType.INTEGER)
                 : org.uet.dse.ocl2cypher.runtime.OclType.bag(org.uet.dse.ocl2cypher.runtime.OclType.INTEGER)))
             return Optional.empty();
-        var children = new java.util.ArrayList<Certificate>();
         var seen = new java.util.HashSet<BigInteger>();
         BigInteger acc = BigInteger.ZERO;
-        children.add(bounded(acc, acc, "I64-SUM-INITIAL", List.of()).orElseThrow());
+
         for (QNode.QExpr element : literal.elements) {
-            var child = derive(element, variables);
+            var child = certify(element, variables);
             // Bottom has no numeric interval: do not invent a zero witness.
             if (child.isEmpty() || !child.get().lower.equals(child.get().upper)) return Optional.empty();
-            children.add(child.get()); // even duplicate Set expressions must certify
+
             BigInteger value = child.get().lower;
             if (set && !seen.add(value)) continue;
             acc = acc.add(value);
-            var prefix = bounded(acc, acc, "I64-SUM-PREFIX", List.of(child.get()));
+            var prefix = bounded(acc, acc);
             if (prefix.isEmpty()) return Optional.empty();
-            children.add(prefix.get());
+
         }
-        return bounded(acc, acc, set ? "I64-SET-SUM" : "I64-BAG-SUM", children);
+        return bounded(acc, acc);
     }
 
     /** Exact minimum/maximum over the finite snapshot carrier for one slot. */
     private Optional<Certificate> storedAttribute(QNode.QExpr.ReadAttribute attribute) {
         if (graph == null) {
-            return bounded(MIN, MAX, "I64-STORED-DECIMAL", List.of());
+            return bounded(MIN, MAX);
         }
         String attributeKey = attribute.ownerClassKey + "::" + attribute.attributeName;
         BigInteger lower = null;
@@ -198,10 +186,9 @@ final class IntegerRangeCertificates {
         // No defined slot means every evaluation is bottom.  [0,0] is a
         // vacuous safe payload interval and does not turn bottom into zero.
         if (lower == null) {
-            return bounded(BigInteger.ZERO, BigInteger.ZERO,
-                    "I64-SNAPSHOT-NO-DEFINED-VALUE", List.of());
+            return bounded(BigInteger.ZERO, BigInteger.ZERO);
         }
-        return bounded(lower, upper, "I64-SNAPSHOT-ATTRIBUTE", List.of());
+        return bounded(lower, upper);
     }
 
     private Optional<Certificate> divideOrModulo(
@@ -224,21 +211,17 @@ final class IntegerRangeCertificates {
                 quotientHi = quotientHi == null ? q : quotientHi.max(q);
             }
         }
-        var quotient = bounded(quotientLo, quotientHi,
-                "I64-DIV-QUOTIENT", List.of(dividend, divisor));
+        var quotient = bounded(quotientLo, quotientHi);
         if (quotient.isEmpty()) return Optional.empty(); // includes MIN/-1
         if (operator == org.uet.dse.ocl2cypher.core.CoreExpr.BinaryOp.INTEGER_DIVIDE) {
             if (dividend.lower.equals(dividend.upper)
                     && divisor.lower.equals(divisor.upper)) {
                 BigInteger productValue = divisor.lower.multiply(quotientLo);
-                var product = bounded(productValue, productValue,
-                        "I64-DIV-PRODUCT", List.of(divisor, quotient.get()));
+                var product = bounded(productValue, productValue);
                 if (product.isEmpty()) return Optional.empty();
-                return bounded(quotientLo, quotientHi, "I64-EXACT-" + operator,
-                        List.of(dividend, divisor, quotient.get(), product.get()));
+                return bounded(quotientLo, quotientHi);
             }
-            return bounded(quotientLo, quotientHi, "I64-RANGE-" + operator,
-                    List.of(dividend, divisor, quotient.get()));
+            return bounded(quotientLo, quotientHi);
         }
 
         BigInteger maxAbsDivisor = divisor.lower.abs().max(divisor.upper.abs());
@@ -250,15 +233,12 @@ final class IntegerRangeCertificates {
         if (dividend.lower.equals(dividend.upper)
                 && divisor.lower.equals(divisor.upper)) {
             BigInteger productValue = divisor.lower.multiply(quotientLo);
-            var product = bounded(productValue, productValue,
-                    "I64-DIV-PRODUCT", List.of(divisor, quotient.get()));
+            var product = bounded(productValue, productValue);
             if (product.isEmpty()) return Optional.empty();
             BigInteger exact = dividend.lower.remainder(divisor.lower);
-            return bounded(exact, exact, "I64-EXACT-" + operator,
-                    List.of(dividend, divisor, quotient.get(), product.get()));
+            return bounded(exact, exact);
         }
-        return bounded(remainderLo, remainderHi, "I64-RANGE-" + operator,
-                List.of(dividend, divisor, quotient.get()));
+        return bounded(remainderLo, remainderHi);
     }
 
     private static List<BigInteger> candidates(BigInteger lower, BigInteger upper) {

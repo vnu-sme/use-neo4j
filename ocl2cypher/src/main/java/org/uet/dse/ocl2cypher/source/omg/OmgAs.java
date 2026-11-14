@@ -431,14 +431,12 @@ public final class OmgAs {
     public static final class OmgDocument {
         public final SourceSpan span;
         public final String contextClassKey;
-        public final String contextVariableName;
         public final List<Constraint> constraints;
 
         public OmgDocument(SourceSpan span, String contextClassKey,
-                           String contextVariableName, List<Constraint> constraints) {
+                           List<Constraint> constraints) {
             this.span = Objects.requireNonNull(span);
             this.contextClassKey = Objects.requireNonNull(contextClassKey);
-            this.contextVariableName = Objects.requireNonNull(contextVariableName);
             this.constraints = List.copyOf(constraints);
         }
     }

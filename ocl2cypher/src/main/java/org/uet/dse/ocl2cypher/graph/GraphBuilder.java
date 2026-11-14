@@ -186,7 +186,7 @@ public final class GraphBuilder {
             }
             var objectNode = catalogue.clazz(obj.dynamicClassKey).objectNode();
             List<String> objectLabels = new ArrayList<>(objectNode.labels());
-            String dynamicClassLabel = simpleClassLabel(dynamicClass.qualifiedName());
+            String dynamicClassLabel = Uml2GraphEncodingContract.simpleClassLabel(dynamicClass.qualifiedName());
             if (!objectLabels.contains(dynamicClassLabel)) {
                 objectLabels.add(dynamicClassLabel);
             }
@@ -368,29 +368,13 @@ public final class GraphBuilder {
                         linkProps));
             }
         }
-        Result<Uml2GraphEncodingContract.Witness> contract =
-                Uml2GraphEncodingContract.validate(g);
-        if (contract.isFailure()) {
-            return Result.failure(contract.primaryDiagnostic());
-        }
-
+        // ValidRepChecker also checks the encoding contract.
         Result<ValidRepChecker.Witness> valid = ValidRepChecker.check(sm, sn, g);
         if (valid.isFailure()) {
             return Result.failure(valid.primaryDiagnostic());
         }
         return Result.success(new GraphBuildArtifact(
                 g, valid.value().objectCorrespondence(), catalogue));
-    }
-
-    private static String qualifierPayload(
-            org.uet.dse.ocl2cypher.runtime.OclType declared,
-            org.uet.dse.ocl2cypher.runtime.OclValue value) {
-        GraphValueCodec.EncodedValue encoded = GraphValueCodec.encode(declared, value);
-        if (!GraphValueCodec.DEFINED.equals(encoded.state())) {
-            throw new GraphValueCodec.CodecException("G_CODEC_QUALIFIER_BOTTOM",
-                    "qualifiers must be defined scalar values");
-        }
-        return encoded.payload();
     }
 
     private static String canonicalLinkTuple(
@@ -488,7 +472,7 @@ public final class GraphBuilder {
                                 + associationName + "." + declaration.name());
             }
             GraphValueCodec.validateObjectReference(declaration.declaredType(), value, sm, sn);
-            payloads.add(qualifierPayload(declaration.declaredType(), value));
+            payloads.add(GraphValueCodec.qualifierPayload(declaration.declaredType(), value));
         }
     }
 
@@ -497,17 +481,6 @@ public final class GraphBuilder {
         Map<String, String> positioned = new LinkedHashMap<>(properties);
         positioned.put("endPosition", endPosition);
         return Map.copyOf(positioned);
-    }
-
-    private static String simpleClassLabel(String qualifiedName) {
-        String label = qualifiedName;
-        for (String separator : List.of("::", "/", "#", ".")) {
-            int index = label.lastIndexOf(separator);
-            if (index >= 0 && index + separator.length() < label.length()) {
-                label = label.substring(index + separator.length());
-            }
-        }
-        return label.isBlank() ? "Object" : label;
     }
 
     /**

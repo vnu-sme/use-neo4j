@@ -1,5 +1,7 @@
 package org.uet.dse.ocl2cypher;
 
+import org.uet.dse.ocl2cypher.support.CapabilityEvidence;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -12,7 +14,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
-import org.uet.dse.ocl2cypher.source.model.CapabilityMatrix;
 import org.uet.dse.ocl2cypher.source.omg.OclOperation;
 
 /** Machine-enforced parts of docs/evidence/baseline-2026-09-06.md. */
@@ -34,10 +35,12 @@ class BaselineManifestTest {
             assertEquals(artifact.getValue(), sha256(path), artifact.getKey());
         }
 
-        assertEquals(OclOperation.values().length, CapabilityMatrix.entries().size());
+        assertEquals(OclOperation.values().length, CapabilityEvidence.entries().size());
         for (OclOperation operation : OclOperation.values()) {
-            CapabilityMatrix.Capability capability = CapabilityMatrix.capability(operation);
+            CapabilityEvidence.Capability capability = CapabilityEvidence.capability(operation);
             assertNotNull(capability, operation.name());
+            assertEquals(capability.admitted(),
+                    org.uet.dse.ocl2cypher.source.model.CapabilityMatrix.isAdmitted(operation), operation.name());
             if (capability.admitted()) {
                 assertNotNull(capability.surfaceWitness(), capability.testId());
             } else {

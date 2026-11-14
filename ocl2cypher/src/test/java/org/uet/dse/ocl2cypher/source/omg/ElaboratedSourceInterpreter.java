@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import org.uet.dse.ocl2cypher.runtime.Boolean3;
 import org.uet.dse.ocl2cypher.runtime.OclOps;
@@ -141,7 +140,7 @@ public final class ElaboratedSourceInterpreter {
                     + property.navigationSource);
         }
         List<OclValue> qualifiers = evalQualifiers(schema, snapshot, env,
-                property.qualifier, property.type);
+                property.qualifier);
         if (qualifiers == null) return new OclValue.BottomValue(property.type);
         List<String> targets = snapshot.linkTargets(schema, navigation.roleName(), stableId,
                 navigation.reverse(), qualifiers);
@@ -154,7 +153,7 @@ public final class ElaboratedSourceInterpreter {
         OclValue receiver = eval(schema, snapshot, env, navigation.source);
         if (receiver.isBottom()) return new OclValue.BottomValue(navigation.type);
         List<OclValue> qualifiers = evalQualifiers(schema, snapshot, env,
-                navigation.qualifier, navigation.type);
+                navigation.qualifier);
         if (qualifiers == null) return new OclValue.BottomValue(navigation.type);
         List<String> objects = snapshot.associationClassObjects(schema,
                 navigation.referredAssociationClass,
@@ -164,8 +163,7 @@ public final class ElaboratedSourceInterpreter {
 
     private static List<OclValue> evalQualifiers(SchemaModel schema, Snapshot snapshot,
                                                  Env env,
-                                                 List<OmgAs.OclExpression> expressions,
-                                                 OclType resultType) {
+                                                 List<OmgAs.OclExpression> expressions) {
         List<OclValue> values = new ArrayList<>();
         for (OmgAs.OclExpression expression : expressions) {
             OclValue value = eval(schema, snapshot, env, expression);
@@ -248,7 +246,7 @@ public final class ElaboratedSourceInterpreter {
             case NUMERIC_ABS -> OclOps.abs(operand, resultType);
             case REAL_FLOOR -> OclOps.floor(operand);
             case REAL_ROUND -> OclOps.round(operand);
-            case COLLECTION_SIZE -> OclOps.size(operand, operand.type());
+            case COLLECTION_SIZE -> OclOps.size(operand);
             case COLLECTION_IS_EMPTY -> OclOps.isEmpty(operand);
             case COLLECTION_NOT_EMPTY -> OclOps.notEmpty(operand);
             case COLLECTION_SUM -> OclOps.sum(operand, resultType);
@@ -278,7 +276,7 @@ public final class ElaboratedSourceInterpreter {
             case BOOLEAN_OR -> OclOps.boolOr(left, right);
             case BOOLEAN_XOR -> OclOps.boolXor(left, right);
             case BOOLEAN_IMPLIES -> OclOps.boolImplies(left, right);
-            case COLLECTION_COUNT -> OclOps.count(left, right, left.type());
+            case COLLECTION_COUNT -> OclOps.count(left, right);
             case COLLECTION_INCLUDES -> OclOps.includes(left, right);
             case COLLECTION_EXCLUDES -> OclOps.excludes(left, right);
             case COLLECTION_INCLUDES_ALL -> OclOps.includesAll(left, right);

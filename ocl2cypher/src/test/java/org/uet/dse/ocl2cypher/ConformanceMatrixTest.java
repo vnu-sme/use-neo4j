@@ -7,7 +7,6 @@ import org.uet.dse.ocl2cypher.conformance.PropertyFixtures;
 import org.uet.dse.ocl2cypher.graph.GraphBuilder;
 import org.uet.dse.ocl2cypher.qcyp.QCypTranslator;
 import org.uet.dse.ocl2cypher.qcyp.QInterpreter;
-import org.uet.dse.ocl2cypher.qcyp.QQuery;
 
 import static org.junit.jupiter.api.Assertions.*;
 

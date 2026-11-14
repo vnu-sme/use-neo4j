@@ -5,6 +5,26 @@ Phần thực nghiệm này tách khỏi unit test. Đơn vị phân tích là m
 Maven wall time và các cột thời gian một lần chạy chỉ là metadata kiểm toán,
 không được dùng để tuyên bố latency, throughput hoặc scalability.
 
+== Bộ nhiều snapshot
+
+Bộ nền bên dưới được giữ nguyên để so sánh với bằng chứng cũ. Dùng
+`scripts/Run-ExampleCorpusExperiment.ps1 -AllSnapshots` để chạy thêm manifest
+`example/snapshot-manifest.tsv`: 27 snapshot thuộc pipeline trên 9 metamodel
+USE và 6 snapshot USE-only trên hai bản metamodel mở rộng. Chi tiết dữ liệu
+và đường dẫn nằm trong `example/INSTANCES.md`.
+
+Chế độ này chạy 35 snapshot pipeline (8 nền + 27 mới), với 592 lượt
+`invariant × snapshot`: 564 lượt USE–Core–Q khớp ID, 24 lượt từ chối có chủ đích
+và 4 lượt loại khỏi phạm vi. Sáu snapshot USE-only có thêm 108 lượt invariant,
+không tính vào agreement của compiler. Tham số `-EnableNeo4j` tiếp tục là lựa
+chọn riêng; kết quả local không được trình bày là kết quả Neo4j.
+
+Mỗi query đã sinh được lưu cùng `.ids.tsv` cho USE/Core/Q. CSV kỳ vọng mới
+được sinh từ evaluator USE và kiểm tra lại trong mỗi lần chạy. Không sửa hai
+CSV nền đang lệch USE; chúng tiếp tục được ghi là hai mismatch lịch sử,
+không được dùng làm oracle của query đích. Các snapshot mới không có mismatch
+CSV. Thời gian một lần chạy vẫn chỉ là metadata kiểm toán.
+
 == Câu hỏi đánh giá
 
 1. **RQ1 — semantic agreement:** USE evaluator và Q interpreter trên graph chuẩn

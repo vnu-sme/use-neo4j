@@ -1,0 +1,108 @@
+-- Independent snapshot; load into a fresh USE state.
+-- Scenario: larger. Invariant violations may be intentional.
+!new Library('library_0')
+!new Book('book_0_0')
+!insert (library_0{'A'}, book_0_0) into Catalog
+!insert (library_0, book_0_0{'X'}) into Ownership
+!new Loan('loan_0') between (library_0, book_0_0)
+!set loan_0.note := 'Snapshot loan'
+!new Book('book_0_1')
+!insert (library_0{'A'}, book_0_1) into Catalog
+!insert (library_0, book_0_1{'Y'}) into Ownership
+!new Library('library_1')
+!new Book('book_1_0')
+!insert (library_1{'A'}, book_1_0) into Catalog
+!insert (library_1, book_1_0{'X'}) into Ownership
+!new Loan('loan_1') between (library_1, book_1_0)
+!set loan_1.note := 'Snapshot loan'
+!new Book('book_1_1')
+!insert (library_1{'B'}, book_1_1) into Catalog
+!insert (library_1, book_1_1{'Y'}) into Ownership
+!new Library('library_2')
+!new Book('book_2_0')
+!insert (library_2{'A'}, book_2_0) into Catalog
+!insert (library_2, book_2_0{'X'}) into Ownership
+!new Loan('loan_2') between (library_2, book_2_0)
+!set loan_2.note := 'Snapshot loan'
+!new Book('book_2_1')
+!insert (library_2{'B'}, book_2_1) into Catalog
+!insert (library_2, book_2_1{'Y'}) into Ownership
+!new Library('library_3')
+!new Book('book_3_0')
+!insert (library_3{'A'}, book_3_0) into Catalog
+!insert (library_3, book_3_0{'X'}) into Ownership
+!new Loan('loan_3') between (library_3, book_3_0)
+!set loan_3.note := 'Snapshot loan'
+!new Book('book_3_1')
+!insert (library_3{'B'}, book_3_1) into Catalog
+!insert (library_3, book_3_1{'Y'}) into Ownership
+!new Library('library_4')
+!new Book('book_4_0')
+!insert (library_4{'A'}, book_4_0) into Catalog
+!insert (library_4, book_4_0{'X'}) into Ownership
+!new Loan('loan_4') between (library_4, book_4_0)
+!set loan_4.note := 'Snapshot loan'
+!new Book('book_4_1')
+!insert (library_4{'B'}, book_4_1) into Catalog
+!insert (library_4, book_4_1{'Y'}) into Ownership
+!new Library('library_5')
+!new Book('book_5_0')
+!insert (library_5{'A'}, book_5_0) into Catalog
+!insert (library_5, book_5_0{'X'}) into Ownership
+!new Loan('loan_5') between (library_5, book_5_0)
+!set loan_5.note := 'Snapshot loan'
+!new Book('book_5_1')
+!insert (library_5{'B'}, book_5_1) into Catalog
+!insert (library_5, book_5_1{'Y'}) into Ownership
+!new Library('library_6')
+!new Book('book_6_0')
+!insert (library_6{'A'}, book_6_0) into Catalog
+!insert (library_6, book_6_0{'X'}) into Ownership
+!new Loan('loan_6') between (library_6, book_6_0)
+!set loan_6.note := 'Snapshot loan'
+!new Book('book_6_1')
+!insert (library_6{'B'}, book_6_1) into Catalog
+!insert (library_6, book_6_1{'Y'}) into Ownership
+!new Library('library_7')
+!new Book('book_7_0')
+!insert (library_7{'A'}, book_7_0) into Catalog
+!insert (library_7, book_7_0{'X'}) into Ownership
+!new Loan('loan_7') between (library_7, book_7_0)
+!set loan_7.note := 'Snapshot loan'
+!new Book('book_7_1')
+!insert (library_7{'B'}, book_7_1) into Catalog
+!insert (library_7, book_7_1{'Y'}) into Ownership
+!new Library('library_8')
+!new Book('book_8_0')
+!insert (library_8{'A'}, book_8_0) into Catalog
+!insert (library_8, book_8_0{'X'}) into Ownership
+!new Loan('loan_8') between (library_8, book_8_0)
+!set loan_8.note := 'Snapshot loan'
+!new Book('book_8_1')
+!insert (library_8{'B'}, book_8_1) into Catalog
+!insert (library_8, book_8_1{'Y'}) into Ownership
+!new Library('library_9')
+!new Book('book_9_0')
+!insert (library_9{'A'}, book_9_0) into Catalog
+!insert (library_9, book_9_0{'X'}) into Ownership
+!new Loan('loan_9') between (library_9, book_9_0)
+!set loan_9.note := 'Snapshot loan'
+!new Book('book_9_1')
+!insert (library_9{'B'}, book_9_1) into Catalog
+!insert (library_9, book_9_1{'Y'}) into Ownership
+!new Library('library_10')
+!new Book('book_10_0')
+!insert (library_10{'A'}, book_10_0) into Catalog
+!insert (library_10, book_10_0{'X'}) into Ownership
+!new Loan('loan_10') between (library_10, book_10_0)
+!set loan_10.note := 'Snapshot loan'
+!new Book('book_10_1')
+!insert (library_10{'B'}, book_10_1) into Catalog
+!insert (library_10, book_10_1{'Y'}) into Ownership
+!new Library('library_11')
+!new Book('book_11_0')
+!insert (library_11{'B'}, book_11_0) into Catalog
+!insert (library_11, book_11_0{'X'}) into Ownership
+!new Book('book_11_1')
+!insert (library_11{'B'}, book_11_1) into Catalog
+!insert (library_11, book_11_1{'Y'}) into Ownership

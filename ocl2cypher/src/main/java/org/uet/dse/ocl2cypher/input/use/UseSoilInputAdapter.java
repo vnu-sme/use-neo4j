@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -77,23 +78,34 @@ public final class UseSoilInputAdapter {
     private static final Pattern OPERATION_CONTEXT = Pattern.compile(
             "(?m)^\\s*context\\s+[A-Za-z_]\\w*\\s*::");
     private static final Pattern CONSTRAINT_DECLARATION = Pattern.compile(
-            "^(?:context|inv|pre|post)\\b.*", Pattern.CASE_INSENSITIVE);
+            "^(?:constraints|context|inv|pre|post)\\b.*", Pattern.CASE_INSENSITIVE);
 
     private UseSoilInputAdapter() {
     }
 
     public static Result<ModelInputBundle> load(Path usePath, Path soilPath) {
+        return load(usePath, soilPath, null);
+    }
+
+    public static Result<ModelInputBundle> load(Path usePath, Path soilPath, Path oclPath) {
         Objects.requireNonNull(usePath, "USE path");
         Objects.requireNonNull(soilPath, "SOIL path");
         Path useFile = usePath.toAbsolutePath().normalize();
         Path soilFile = soilPath.toAbsolutePath().normalize();
+        Path oclFile = oclPath == null ? null : oclPath.toAbsolutePath().normalize();
         try {
-            requireReadable(useFile, "USE schema");
-            requireReadable(soilFile, "SOIL snapshot");
+            requireReadable(useFile, "USE schema", ".use");
+            requireReadable(soilFile, "SOIL snapshot", ".soil");
+            String source = Files.readString(useFile, StandardCharsets.UTF_8);
+            if (oclFile != null) {
+                requireReadable(oclFile, "OCL constraints", ".ocl");
+                source += System.lineSeparator() + "constraints" + System.lineSeparator()
+                        + Files.readString(oclFile, StandardCharsets.UTF_8);
+            }
 
-            MModel useModel = compileUse(useFile);
+            MModel useModel = compileUse(useFile, source);
             SchemaModel schema = projectSchema(useFile, useModel);
-            List<SourceInvariant> invariants = projectInvariants(useFile, useModel);
+            List<SourceInvariant> invariants = projectInvariants(useFile, source.lines().toList(), useModel);
 
             MSystem system = new MSystem(useModel);
             replaySoil(system, soilFile);
@@ -114,8 +126,7 @@ public final class UseSoilInputAdapter {
         }
     }
 
-    private static MModel compileUse(Path path) throws IOException {
-        String source = Files.readString(path, StandardCharsets.UTF_8);
+    private static MModel compileUse(Path path, String source) {
         if (OPERATION_CONTEXT.matcher(source).find()) {
             throw profile(path, "operation contexts and pre/postconditions are outside "
                     + "the executable invariant profile");
@@ -244,9 +255,7 @@ public final class UseSoilInputAdapter {
         return new Bounds(range.getLower(), range.getUpper());
     }
 
-    private static List<SourceInvariant> projectInvariants(Path path, MModel model)
-            throws IOException {
-        List<String> sourceLines = Files.readAllLines(path, StandardCharsets.UTF_8);
+    private static List<SourceInvariant> projectInvariants(Path path, List<String> sourceLines, MModel model) {
         List<SourceInvariant> result = new ArrayList<>();
         for (MClassInvariant invariant : model.classInvariants().stream()
                 .sorted(Comparator.comparing(MClassInvariant::qualifiedName)).toList()) {
@@ -561,7 +570,11 @@ public final class UseSoilInputAdapter {
                 + " : " + value.type());
     }
 
-    private static void requireReadable(Path path, String label) throws IOException {
+    private static void requireReadable(Path path, String label, String extension) throws IOException {
+        if (path.getFileName() == null
+                || !path.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(extension)) {
+            throw new InputException(label + " must be a " + extension + " file: " + path);
+        }
         if (!Files.isRegularFile(path) || !Files.isReadable(path)) {
             throw new IOException(label + " is not a readable file: " + path);
         }

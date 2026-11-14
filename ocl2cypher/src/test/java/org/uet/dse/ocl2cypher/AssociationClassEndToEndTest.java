@@ -82,8 +82,8 @@ class AssociationClassEndToEndTest {
             String objectKey = org.uet.dse.ocl2cypher.graph.GraphKey.object(
                     "parallel-ac", objectId);
             for (String type : List.of(
-                    GraphModel.associationClassSourceParticipant("Prescription"),
-                    GraphModel.associationClassTargetParticipant("Prescription"))) {
+                    GraphModel.ASSOCIATION_CLASS_SOURCE_PARTICIPANT,
+                    GraphModel.ASSOCIATION_CLASS_TARGET_PARTICIPANT)) {
                 assertEquals(
                         left.value().graph().outgoing(objectKey, type).get(0).stableKey(),
                         right.value().graph().outgoing(objectKey, type).get(0).stableKey(),
@@ -206,9 +206,9 @@ class AssociationClassEndToEndTest {
         assertTrue(graph.nodes().stream().noneMatch(node ->
                 "ASSOCIATION_DECLARATION".equals(node.observationRole())));
         assertEquals(1, graph.outgoing(rx1Key,
-                GraphModel.associationClassSourceParticipant("Prescription")).size());
+                GraphModel.ASSOCIATION_CLASS_SOURCE_PARTICIPANT).size());
         assertEquals(1, graph.outgoing(rx1Key,
-                GraphModel.associationClassTargetParticipant("Prescription")).size());
+                GraphModel.ASSOCIATION_CLASS_TARGET_PARTICIPANT).size());
 
         var translated = QCypTranslator.translate(lowered.value());
         assertTrue(translated.isSuccess(), () -> "translation: " + translated.diagnostics());

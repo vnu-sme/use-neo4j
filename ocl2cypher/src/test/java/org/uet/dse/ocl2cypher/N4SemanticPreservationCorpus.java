@@ -1,5 +1,7 @@
 package org.uet.dse.ocl2cypher;
 
+import org.uet.dse.ocl2cypher.support.CapabilityEvidence;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +12,6 @@ import org.uet.dse.ocl2cypher.core.CoreLowering;
 import org.uet.dse.ocl2cypher.runtime.Boolean3;
 import org.uet.dse.ocl2cypher.runtime.OclType;
 import org.uet.dse.ocl2cypher.runtime.OclValue;
-import org.uet.dse.ocl2cypher.source.model.CapabilityMatrix;
 import org.uet.dse.ocl2cypher.source.model.QualifierValue;
 import org.uet.dse.ocl2cypher.source.model.SchemaModel;
 import org.uet.dse.ocl2cypher.source.model.Snapshot;
@@ -75,9 +76,9 @@ public final class N4SemanticPreservationCorpus {
 
     static List<String> expressions() {
         List<String> expressions = new ArrayList<>();
-        CapabilityMatrix.entries().values().stream()
-                .filter(CapabilityMatrix.Capability::admitted)
-                .map(CapabilityMatrix.Capability::surfaceWitness)
+        CapabilityEvidence.entries().values().stream()
+                .filter(CapabilityEvidence.Capability::admitted)
+                .map(CapabilityEvidence.Capability::surfaceWitness)
                 .forEach(expressions::add);
         expressions.addAll(List.of(
                 "self.age",

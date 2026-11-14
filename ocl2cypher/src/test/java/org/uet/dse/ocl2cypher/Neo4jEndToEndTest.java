@@ -13,7 +13,6 @@ import org.uet.dse.ocl2cypher.execution.Neo4jExecutionAdapter;
 import org.uet.dse.ocl2cypher.execution.Neo4jExecutionAdapter.ExecutionRequest;
 import org.uet.dse.ocl2cypher.graph.GraphBuilder;
 import org.uet.dse.ocl2cypher.qcyp.QCypTranslator;
-import org.uet.dse.ocl2cypher.qcyp.QQuery;
 import org.uet.dse.ocl2cypher.runtime.OclType;
 import org.uet.dse.ocl2cypher.runtime.OclValue;
 import org.uet.dse.ocl2cypher.source.omg.OmgAs;

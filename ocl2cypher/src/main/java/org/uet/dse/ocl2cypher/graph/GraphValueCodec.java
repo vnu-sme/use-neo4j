@@ -118,6 +118,14 @@ public final class GraphValueCodec {
         return new EncodedValue(codec, declared.toString(), DEFINED, payload);
     }
 
+    static String qualifierPayload(OclType declared, OclValue value) {
+        EncodedValue encoded = encode(declared, value);
+        if (!DEFINED.equals(encoded.state())) {
+            throw error("G_CODEC_QUALIFIER_BOTTOM", "qualifiers must be defined scalar values");
+        }
+        return encoded.payload();
+    }
+
     public static OclValue decode(OclType declared, Map<String, String> properties) {
         Objects.requireNonNull(declared, "declared type");
         Objects.requireNonNull(properties, "slot properties");

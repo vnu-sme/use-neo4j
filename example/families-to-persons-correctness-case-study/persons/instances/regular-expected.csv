@@ -1,0 +1,11 @@
+invariant,ids
+Person::ConcreteGender,
+Person::Named,
+Person::Registered,
+Person::StableSelfMembership,
+PersonRegister::ContainsAllPersons,
+PersonRegister::CoveredByGender,
+PersonRegister::HasFemale,
+PersonRegister::HasMale,
+PersonRegister::NoBlankNames,
+PersonRegister::UniqueNames,

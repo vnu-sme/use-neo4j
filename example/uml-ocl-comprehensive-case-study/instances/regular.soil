@@ -1,0 +1,60 @@
+-- Independent snapshot; load into a fresh USE state.
+-- Scenario: regular. Invariant violations may be intentional.
+!new Organization('organization_0')
+!set organization_0.name := 'Organization 0'
+!new Organization('organization_1')
+!set organization_1.name := 'Organization 1'
+!new Department('department_0')
+!set department_0.code := 'D0'
+!set department_0.budget := 10000.0
+!set department_0.active := true
+!insert (organization_0, department_0) into OrganizationDepartments
+!new Person('person_0_0')
+!set person_0_0.name := 'Person 0/0'
+!set person_0_0.age := 18
+!set person_0_0.rating := 4.8
+!set person_0_0.active := false
+!insert (department_0, person_0_0) into DepartmentStaff
+!new Employee('person_0_1')
+!set person_0_1.name := 'Person 0/1'
+!set person_0_1.age := 28
+!set person_0_1.rating := 4.8
+!set person_0_1.active := false
+!set person_0_1.salary := 3000.0
+!insert (department_0, person_0_1) into DepartmentStaff
+!new Manager('person_0_2')
+!set person_0_2.name := 'Person 0/2'
+!set person_0_2.age := 38
+!set person_0_2.rating := 4.8
+!set person_0_2.active := false
+!set person_0_2.salary := 3000.0
+!set person_0_2.level := 4
+!insert (department_0, person_0_2) into DepartmentStaff
+!insert (department_0, person_0_2) into DepartmentManagement
+!new Department('department_1')
+!set department_1.code := 'D1'
+!set department_1.budget := 10000.0
+!set department_1.active := true
+!insert (organization_1, department_1) into OrganizationDepartments
+!new Person('person_1_0')
+!set person_1_0.name := 'Person 1/0'
+!set person_1_0.age := 18
+!set person_1_0.rating := 4.8
+!set person_1_0.active := false
+!insert (department_1, person_1_0) into DepartmentStaff
+!new Employee('person_1_1')
+!set person_1_1.name := 'Person 1/1'
+!set person_1_1.age := 28
+!set person_1_1.rating := 4.8
+!set person_1_1.active := false
+!set person_1_1.salary := 3000.0
+!insert (department_1, person_1_1) into DepartmentStaff
+!new Manager('person_1_2')
+!set person_1_2.name := 'Person 1/2'
+!set person_1_2.age := 38
+!set person_1_2.rating := 4.8
+!set person_1_2.active := false
+!set person_1_2.salary := 3000.0
+!set person_1_2.level := 4
+!insert (department_1, person_1_2) into DepartmentStaff
+!insert (department_1, person_1_2) into DepartmentManagement

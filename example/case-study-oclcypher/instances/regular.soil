@@ -1,0 +1,36 @@
+-- Independent snapshot; load into a fresh USE state.
+-- Scenario: regular. Invariant violations may be intentional.
+!new Branch('branch_0')
+!set branch_0.name := 'Branch 0'
+!set branch_0.location := 'Hanoi'
+!new StaffMember('member_0')
+!set member_0.name := 'Member 0'
+!set member_0.age := 35
+!new Book('book_0')
+!set book_0.title := 'Book 0'
+!new Loan('loan_0')
+!set loan_0.fee := 0
+!new Branch('branch_1')
+!set branch_1.name := 'Branch 1'
+!set branch_1.location := 'Hanoi'
+!new StaffMember('member_1')
+!set member_1.name := 'Member 1'
+!set member_1.age := 35
+!new Book('book_1')
+!set book_1.title := 'Book 1'
+!new Loan('loan_1')
+!set loan_1.fee := 0
+!insert (branch_0, member_0) into BranchMember
+!insert (branch_0, member_0) into BranchStaff
+!insert (member_0, branch_0) into Manages
+!insert (branch_0, book_0) into BranchBook
+!insert (loan_0, member_0) into LoanMember
+!insert (loan_0, book_0) into LoanBook
+!insert (loan_0, branch_0) into LoanBranch
+!insert (branch_1, member_1) into BranchMember
+!insert (branch_1, member_1) into BranchStaff
+!insert (member_1, branch_1) into Manages
+!insert (branch_1, book_1) into BranchBook
+!insert (loan_1, member_1) into LoanMember
+!insert (loan_1, book_1) into LoanBook
+!insert (loan_1, branch_1) into LoanBranch

@@ -1,6 +1,5 @@
 package org.uet.dse.ocl2cypher.source.model;
 
-import java.util.List;
 import java.util.Objects;
 
 /** A qualifier value that participates in qualified navigation. */

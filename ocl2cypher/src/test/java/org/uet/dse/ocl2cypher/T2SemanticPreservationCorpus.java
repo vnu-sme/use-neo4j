@@ -58,7 +58,7 @@ public final class T2SemanticPreservationCorpus {
 
                 CoreInterpreter.Env qEnvironment = new CoreInterpreter.Env();
                 qEnvironment.bind(core.value().selfVariable(), self);
-                OclValue qValue = QInterpreter.value(schema, graph, core.value(),
+                OclValue qValue = QInterpreter.value(schema, graph,
                         translated.value(), qEnvironment);
 
                 require(coreValue.equals(qValue), expression + " on " + identity

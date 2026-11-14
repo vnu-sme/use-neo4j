@@ -1,8 +1,6 @@
 package org.uet.dse.ocl2cypher.core;
 
-import java.util.List;
 import java.util.Objects;
-import org.uet.dse.ocl2cypher.runtime.OclType;
 
 /**
  * A typed invariant/query unit with one context and one body.

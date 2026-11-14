@@ -7,11 +7,9 @@ import org.uet.dse.ocl2cypher.cypher.Realization;
 import org.uet.dse.ocl2cypher.cypher.Serializer;
 import org.uet.dse.ocl2cypher.graph.GraphBuilder;
 import org.uet.dse.ocl2cypher.qcyp.QCypTranslator;
-import org.uet.dse.ocl2cypher.qcyp.QQuery;
 import org.uet.dse.ocl2cypher.qcyp.QInterpreter;
 import org.uet.dse.ocl2cypher.api.CoreOracle;
 import org.uet.dse.ocl2cypher.diagnostics.Result;
-import org.uet.dse.ocl2cypher.diagnostics.Stage;
 import org.uet.dse.ocl2cypher.runtime.OclType;
 import org.uet.dse.ocl2cypher.runtime.OclValue;
 import org.uet.dse.ocl2cypher.source.omg.OmgAs;
@@ -38,13 +36,6 @@ class SliceBCToCypherTest {
         var r = realizeResult(ocl, sm, sn);
         assertTrue(r.isSuccess(), () -> "realize: " + r.diagnostics() + " ocl=`" + ocl + "`");
         return r.value();
-    }
-
-    private void expectNumericRejection(String ocl, SchemaModel sm, Snapshot sn) {
-        var r = realizeResult(ocl, sm, sn);
-        assertTrue(r.isFailure(), "expected numeric rejection: " + ocl);
-        assertEquals(Stage.R, r.primaryDiagnostic().stage());
-        assertEquals("R_NUMERIC_CAPABILITY", r.primaryDiagnostic().code());
     }
 
     private Result<CypherAst.GeneratedArtifact> realizeResult(String ocl, SchemaModel sm, Snapshot sn) {

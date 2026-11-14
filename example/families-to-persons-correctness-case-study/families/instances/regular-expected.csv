@@ -1,0 +1,11 @@
+invariant,ids
+Family::AtLeastThreeMembers,
+Family::FlandersHasTwoSons,
+Family::HasFather,
+Family::HasMother,
+Family::MembersNamed,
+Family::Named,
+Family::SimpsonFather,
+Family::UniqueMemberNames,
+FamilyMember::Named,
+FamilyRegister::ExactlyTwoFamilies,

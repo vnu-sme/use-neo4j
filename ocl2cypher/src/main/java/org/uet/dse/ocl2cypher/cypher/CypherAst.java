@@ -73,15 +73,8 @@ public final class CypherAst {
 
     // ---- query + clauses -------------------------------------------------
 
-    /** Common, semantics-free source-location view for target AST nodes. */
-    public interface Spanned {
-        default SourceSpan span() {
-            return SourceSpan.UNKNOWN;
-        }
-    }
-
     public record CypherQuery(List<CypherClause> clauses, boolean requiresFinalReturn,
-                              SourceSpan span) implements Spanned {
+                              SourceSpan span) {
         public CypherQuery(List<CypherClause> clauses, boolean requiresFinalReturn) {
             this(clauses, requiresFinalReturn, SourceSpan.UNKNOWN);
         }
@@ -92,7 +85,7 @@ public final class CypherAst {
         }
     }
 
-    public sealed interface CypherClause extends Spanned
+    public sealed interface CypherClause
             permits MatchClause, WithClause, UnwindClause, ReturnClause {
     }
 
@@ -164,7 +157,7 @@ public final class CypherAst {
 
     // ---- expressions -----------------------------------------------------
 
-    public sealed interface CypherExpr extends Spanned
+    public sealed interface CypherExpr
             permits VariableExpr, ParameterExpr, NullLiteral, BooleanLiteral, IntegerLiteral,
                     FloatLiteral, StringLiteral, ListExpr, MapExpr, PropertyAccess,
                     UnaryExpr, BinaryExpr, FunctionCall, CaseExpr, ListComprehension,

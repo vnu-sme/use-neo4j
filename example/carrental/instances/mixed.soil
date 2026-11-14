@@ -1,0 +1,77 @@
+-- Independent USE-only snapshot; outside compiler input profile.
+-- Branch objects
+!new Branch('copy_0_branch')
+!set copy_0_branch.location := 'Bremen'
+-- Car objects
+!new Car('copy_0_car1')
+!new Car('copy_0_car2')
+!new Car('copy_0_car3')
+!new Car('copy_0_car4')
+!set copy_0_car1.id := 'Red car'
+!set copy_0_car2.id := 'Blue car'
+!set copy_0_car3.id := 'Silver car'
+!set copy_0_car4.id := 'Red car'
+!insert (copy_0_branch, copy_0_car1) into Fleet
+!insert (copy_0_branch, copy_0_car2) into Fleet
+!insert (copy_0_branch, copy_0_car3) into Fleet
+!insert (copy_0_branch, copy_0_car4) into Fleet
+-- CarGroup objects
+!new CarGroup('copy_0_cargroup1')
+!new CarGroup('copy_0_cargroup2')
+!new CarGroup('copy_0_cargroup3')
+!set copy_0_cargroup1.kind := 'compact'
+!set copy_0_cargroup2.kind := 'intermediate'
+!set copy_0_cargroup3.kind := 'luxury'
+-- Offers links
+!insert (copy_0_branch, copy_0_cargroup1) into Offers
+!insert (copy_0_branch, copy_0_cargroup2) into Offers
+!insert (copy_0_branch, copy_0_cargroup3) into Offers
+-- Quality
+!insert(copy_0_cargroup1, copy_0_cargroup2) into Quality
+!insert(copy_0_cargroup2, copy_0_cargroup3) into Quality
+-- Classification
+!insert(copy_0_cargroup1, copy_0_car1) into Classification
+!insert(copy_0_cargroup1, copy_0_car2) into Classification
+!insert(copy_0_cargroup2, copy_0_car3) into Classification
+!insert(copy_0_cargroup3, copy_0_car4) into Classification
+-- Customer objects
+!new Customer('copy_0_customer1')
+!set copy_0_customer1.firstname := 'Frank'
+!set copy_0_customer1.lastname := 'Black'
+!set copy_0_customer1.age := 16
+!set copy_0_customer1.address := 'Hamburg'
+-- Employee (copy_0_manager) objects
+!new Employee('copy_0_manager')
+!set copy_0_manager.firstname := 'Joe'
+!set copy_0_manager.lastname := 'White'
+!set copy_0_manager.age := 48
+!set copy_0_manager.isMarried := true
+!set copy_0_manager.email := Set{'joe@copy_0_branch.com'}
+!set copy_0_manager.salary := 4000.0
+!insert(copy_0_manager, copy_0_branch) into Management
+!insert(copy_0_manager, copy_0_branch) into Employment
+-- Employee objects
+!new Employee('copy_0_emp1')
+!set copy_0_emp1.firstname := 'Jack'
+!set copy_0_emp1.lastname := 'Green'
+!set copy_0_emp1.age := 28
+!set copy_0_emp1.isMarried := false
+!set copy_0_emp1.email := Set{'jack@copy_0_branch.com'}
+!set copy_0_emp1.salary := -1.0
+!insert(copy_0_emp1, copy_0_branch) into Employment
+-- Rental objects
+!new Rental('copy_0_rental1')
+!insert (copy_0_rental1, copy_0_branch) into Provider
+!insert (copy_0_rental1, copy_0_customer1) into Booking
+!insert (copy_0_rental1, copy_0_cargroup1) into Reservation
+!new Rental('copy_0_rental2')
+!insert (copy_0_rental2, copy_0_branch) into Provider
+!insert (copy_0_rental2, copy_0_customer1) into Booking
+!insert (copy_0_rental2, copy_0_cargroup1) into Reservation
+!insert (copy_0_rental2, copy_0_car2) into Assignment
+-- ServiceDepot objects
+!new ServiceDepot('copy_0_servicedepot1')
+-- Check objects
+!new Check('copy_0_check1')
+!set copy_0_check1.description := 'Brakes'
+!insert (copy_0_servicedepot1, copy_0_check1, copy_0_car1) into Maintenance

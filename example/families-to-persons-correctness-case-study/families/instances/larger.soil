@@ -1,0 +1,163 @@
+-- Independent snapshot; load into a fresh USE state.
+-- Scenario: larger. Invariant violations may be intentional.
+!new FamilyRegister('register_0')
+!new FamilyRegister('register_1')
+!new FamilyRegister('register_2')
+!new FamilyRegister('register_3')
+!new FamilyRegister('register_4')
+!new FamilyRegister('register_5')
+!new Family('family_0')
+!insert (register_0, family_0) into FamilyRegistration
+!new FamilyMember('member_0_0')
+!set member_0_0.name := 'Repeated'
+!insert (family_0, member_0_0) into Father
+!new FamilyMember('member_0_2')
+!set member_0_2.name := 'Repeated'
+!insert (family_0, member_0_2) into Sons
+!new FamilyMember('member_0_3')
+!insert (family_0, member_0_3) into Sons
+!new Family('family_1')
+!set family_1.name := 'Flanders'
+!insert (register_1, family_1) into FamilyRegistration
+!new FamilyMember('member_1_0')
+!set member_1_0.name := 'Repeated'
+!insert (family_1, member_1_0) into Father
+!new FamilyMember('member_1_1')
+!set member_1_1.name := 'Mother 1'
+!insert (family_1, member_1_1) into Mother
+!new FamilyMember('member_1_2')
+!set member_1_2.name := 'Repeated'
+!insert (family_1, member_1_2) into Sons
+!new FamilyMember('member_1_3')
+!set member_1_3.name := 'Son 1/1'
+!insert (family_1, member_1_3) into Sons
+!new Family('family_2')
+!set family_2.name := 'Family 2'
+!insert (register_2, family_2) into FamilyRegistration
+!new FamilyMember('member_2_0')
+!set member_2_0.name := 'Repeated'
+!insert (family_2, member_2_0) into Father
+!new FamilyMember('member_2_2')
+!set member_2_2.name := 'Repeated'
+!insert (family_2, member_2_2) into Sons
+!new FamilyMember('member_2_3')
+!set member_2_3.name := 'Son 2/1'
+!insert (family_2, member_2_3) into Sons
+!new Family('family_3')
+!set family_3.name := 'Family 3'
+!insert (register_3, family_3) into FamilyRegistration
+!new FamilyMember('member_3_0')
+!set member_3_0.name := 'Repeated'
+!insert (family_3, member_3_0) into Father
+!new FamilyMember('member_3_1')
+!set member_3_1.name := 'Mother 3'
+!insert (family_3, member_3_1) into Mother
+!new FamilyMember('member_3_2')
+!set member_3_2.name := 'Repeated'
+!insert (family_3, member_3_2) into Sons
+!new FamilyMember('member_3_3')
+!insert (family_3, member_3_3) into Sons
+!new Family('family_4')
+!insert (register_4, family_4) into FamilyRegistration
+!new FamilyMember('member_4_0')
+!set member_4_0.name := 'Repeated'
+!insert (family_4, member_4_0) into Father
+!new FamilyMember('member_4_2')
+!set member_4_2.name := 'Repeated'
+!insert (family_4, member_4_2) into Sons
+!new FamilyMember('member_4_3')
+!set member_4_3.name := 'Son 4/1'
+!insert (family_4, member_4_3) into Sons
+!new Family('family_5')
+!set family_5.name := 'Family 5'
+!insert (register_5, family_5) into FamilyRegistration
+!new FamilyMember('member_5_0')
+!set member_5_0.name := 'Repeated'
+!insert (family_5, member_5_0) into Father
+!new FamilyMember('member_5_1')
+!set member_5_1.name := 'Mother 5'
+!insert (family_5, member_5_1) into Mother
+!new FamilyMember('member_5_2')
+!set member_5_2.name := 'Repeated'
+!insert (family_5, member_5_2) into Sons
+!new FamilyMember('member_5_3')
+!set member_5_3.name := 'Son 5/1'
+!insert (family_5, member_5_3) into Sons
+!new Family('family_6')
+!set family_6.name := 'Family 6'
+!insert (register_0, family_6) into FamilyRegistration
+!new FamilyMember('member_6_0')
+!set member_6_0.name := 'Repeated'
+!insert (family_6, member_6_0) into Father
+!new FamilyMember('member_6_2')
+!set member_6_2.name := 'Repeated'
+!insert (family_6, member_6_2) into Sons
+!new FamilyMember('member_6_3')
+!insert (family_6, member_6_3) into Sons
+!new Family('family_7')
+!set family_7.name := 'Family 7'
+!insert (register_1, family_7) into FamilyRegistration
+!new FamilyMember('member_7_0')
+!set member_7_0.name := 'Repeated'
+!insert (family_7, member_7_0) into Father
+!new FamilyMember('member_7_1')
+!set member_7_1.name := 'Mother 7'
+!insert (family_7, member_7_1) into Mother
+!new FamilyMember('member_7_2')
+!set member_7_2.name := 'Repeated'
+!insert (family_7, member_7_2) into Sons
+!new FamilyMember('member_7_3')
+!set member_7_3.name := 'Son 7/1'
+!insert (family_7, member_7_3) into Sons
+!new Family('family_8')
+!insert (register_2, family_8) into FamilyRegistration
+!new FamilyMember('member_8_0')
+!set member_8_0.name := 'Repeated'
+!insert (family_8, member_8_0) into Father
+!new FamilyMember('member_8_2')
+!set member_8_2.name := 'Repeated'
+!insert (family_8, member_8_2) into Sons
+!new FamilyMember('member_8_3')
+!set member_8_3.name := 'Son 8/1'
+!insert (family_8, member_8_3) into Sons
+!new Family('family_9')
+!set family_9.name := 'Family 9'
+!insert (register_3, family_9) into FamilyRegistration
+!new FamilyMember('member_9_0')
+!set member_9_0.name := 'Repeated'
+!insert (family_9, member_9_0) into Father
+!new FamilyMember('member_9_1')
+!set member_9_1.name := 'Mother 9'
+!insert (family_9, member_9_1) into Mother
+!new FamilyMember('member_9_2')
+!set member_9_2.name := 'Repeated'
+!insert (family_9, member_9_2) into Sons
+!new FamilyMember('member_9_3')
+!insert (family_9, member_9_3) into Sons
+!new Family('family_10')
+!set family_10.name := 'Family 10'
+!insert (register_4, family_10) into FamilyRegistration
+!new FamilyMember('member_10_0')
+!set member_10_0.name := 'Repeated'
+!insert (family_10, member_10_0) into Father
+!new FamilyMember('member_10_2')
+!set member_10_2.name := 'Repeated'
+!insert (family_10, member_10_2) into Sons
+!new FamilyMember('member_10_3')
+!set member_10_3.name := 'Son 10/1'
+!insert (family_10, member_10_3) into Sons
+!new Family('family_11')
+!set family_11.name := 'Family 11'
+!insert (register_5, family_11) into FamilyRegistration
+!new FamilyMember('member_11_0')
+!set member_11_0.name := 'Repeated'
+!insert (family_11, member_11_0) into Father
+!new FamilyMember('member_11_1')
+!set member_11_1.name := 'Mother 11'
+!insert (family_11, member_11_1) into Mother
+!new FamilyMember('member_11_2')
+!set member_11_2.name := 'Repeated'
+!insert (family_11, member_11_2) into Sons
+!new FamilyMember('member_11_3')
+!set member_11_3.name := 'Son 11/1'
+!insert (family_11, member_11_3) into Sons

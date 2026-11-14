@@ -1,5 +1,7 @@
 package org.uet.dse.ocl2cypher.plugin.ui;
 
+import static org.uet.dse.ocl2cypher.plugin.ui.WorkbenchStyle.*;
+
 import org.neo4j.driver.*;
 import org.tzi.use.gui.main.MainWindow;
 import org.uet.dse.ocl2cypher.cypher.CypherAst;
@@ -13,7 +15,6 @@ import org.uet.dse.ocl2cypher.graph.GraphModel;
 import org.uet.dse.ocl2cypher.input.*;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -21,8 +22,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.geom.*;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -37,19 +36,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /** Dark, three-column OCL2Cypher workbench embedded in USE. */
 public class Ocl2CypherDialog extends JDialog {
-    private static final Color WINDOW = new Color(24, 25, 30);
-    private static final Color SURFACE = new Color(38, 40, 47);
-    private static final Color SURFACE_2 = new Color(31, 33, 39);
-    private static final Color EDITOR = new Color(27, 29, 33);
-    private static final Color BORDER = new Color(57, 60, 69);
-    private static final Color TEXT = new Color(230, 232, 237);
-    private static final Color MUTED = new Color(151, 155, 166);
-    private static final Color ACCENT = new Color(59, 139, 199);
-    private static final Color OK = new Color(83, 181, 112);
-    private static final Color ERROR = new Color(224, 91, 91);
-    private static final Border FIELD_BORDER = BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(BORDER), BorderFactory.createEmptyBorder(4, 7, 4, 7));
-
     private final JTextField uri = field(Neo4jExecutionAdapter.DEFAULT_URI);
     private final JTextField database = field(Neo4jExecutionAdapter.DEFAULT_DATABASE);
     private final JTextField user = field(Neo4jExecutionAdapter.DEFAULT_USER);
@@ -58,6 +44,7 @@ public class Ocl2CypherDialog extends JDialog {
     private final JButton connect = button("Connect", true);
     private final JTextField usePath = field("");
     private final JTextField soilPath = field("");
+    private final JTextField oclPath = field("");
     private final JTextField invariantName = field("");
     private final JPanel invariantRows = panel(new GridBagLayout(), SURFACE);
 
@@ -81,7 +68,7 @@ public class Ocl2CypherDialog extends JDialog {
     private final TableRowSorter<DefaultTableModel> resultSorter = new TableRowSorter<>(resultModel);
 
     private final AtomicReference<ConnectedDriver> driverRef = new AtomicReference<>();
-    private final AtomicReference<ModelInputBundle> inputRef = new AtomicReference<>();
+    private final AtomicReference<LoadPreparation> inputRef = new AtomicReference<>();
     private final AtomicReference<GraphBuilder.GraphBuildArtifact> graphRef = new AtomicReference<>();
     private final AtomicReference<CypherAst.GeneratedArtifact> artifactRef = new AtomicReference<>();
     private final AtomicReference<Serializer.Serialized> serializedRef = new AtomicReference<>();
@@ -181,8 +168,9 @@ public class Ocl2CypherDialog extends JDialog {
         GridBagConstraints g = formGbc();
         addRow(content, g, 0, "USE File", usePath, browse(usePath, "use"));
         addRow(content, g, 1, "SOIL File", soilPath, browse(soilPath, "soil"));
+        addRow(content, g, 2, "OCL File (optional)", oclPath, browse(oclPath, "ocl"));
         JButton loadFiles = button("Load Graph into Neo4j", true); loadFiles.addActionListener(e -> loadFiles());
-        g.gridx = 0; g.gridy = 2; g.gridwidth = 3; g.insets = new Insets(7, 0, 0, 0); content.add(loadFiles, g);
+        g.gridx = 0; g.gridy = 3; g.gridwidth = 3; g.insets = new Insets(7, 0, 0, 0); content.add(loadFiles, g);
         return card("Input Files", null, content);
     }
 
@@ -286,14 +274,14 @@ public class Ocl2CypherDialog extends JDialog {
             load.setEnabled(true);
             execute.setEnabled(false);
             status("Connection established. Load the USE/SOIL snapshot into Neo4j next.");
-        } catch (Exception ex) { connectionStatus.setText("Failed to connect"); connectionStatus.setForeground(ERROR); status("Connection failed: " + message(ex)); }
+        } catch (Exception ex) { connectionStatus.setText("Failed to connect"); connectionStatus.setForeground(ERROR_COLOR); status("Connection failed: " + message(ex)); }
         finally { busy(false); }
     }
 
     private void disconnect() {
         ConnectedDriver c = driverRef.getAndSet(null); if (c != null) c.driver().close();
         materializedRef.set(null);
-        connect.setText("Connect"); connectionStatus.setText("Not connected"); connectionStatus.setForeground(ERROR);
+        connect.setText("Connect"); connectionStatus.setText("Not connected"); connectionStatus.setForeground(ERROR_COLOR);
         load.setEnabled(false);
         execute.setEnabled(false);
         status("Disconnected from Neo4j. Reconnect and load the snapshot before executing Cypher.");
@@ -307,6 +295,7 @@ public class Ocl2CypherDialog extends JDialog {
 
         Path modelPath = Path.of(usePath.getText().trim());
         Path snapshotPath = Path.of(soilPath.getText().trim());
+        Path constraintsPath = oclPath.getText().isBlank() ? null : Path.of(oclPath.getText().trim());
         clearLoaded();
         load.setEnabled(false);
         busy(true);
@@ -314,13 +303,13 @@ public class Ocl2CypherDialog extends JDialog {
 
         new SwingWorker<LoadPreparation, String>() {
             @Override protected LoadPreparation doInBackground() {
-                Result<ModelInputBundle> loaded = UseSoilInput.load(modelPath, snapshotPath);
+                Result<ModelInputBundle> loaded = UseSoilInput.load(modelPath, snapshotPath, constraintsPath);
                 if (loaded.isFailure()) throw new WorkflowException("Load failed:\n" + diagnostics(loaded));
                 publish("Building the canonical graph …");
                 Result<GraphBuilder.GraphBuildArtifact> built = GraphBuilder.build(
                         loaded.value().schema(), loaded.value().snapshot());
                 if (built.isFailure()) throw new WorkflowException("Graph build failed:\n" + diagnostics(built));
-                return new LoadPreparation(loaded.value(), built.value());
+                return new LoadPreparation(loaded.value(), built.value(), constraintsPath);
             }
 
             @Override protected void process(List<String> messages) {
@@ -362,7 +351,7 @@ public class Ocl2CypherDialog extends JDialog {
             @Override protected void done() {
                 try {
                     GraphLoadOutcome outcome = get();
-                    inputRef.set(prepared.input());
+                    inputRef.set(prepared);
                     graphRef.set(prepared.graph());
                     materializedRef.set(new MaterializedGraph(connection, graphModel));
                     graph.setGraph(graphModel);
@@ -403,7 +392,8 @@ public class Ocl2CypherDialog extends JDialog {
 
     private void compileSelected(boolean showTranslation) {
         if (queryRunning.get()) { status("A query is still running. Wait before compiling another invariant."); return; }
-        ModelInputBundle input = inputRef.get();
+        LoadPreparation prepared = inputRef.get();
+        ModelInputBundle input = prepared == null ? null : prepared.input();
         if (input == null) { warn("Load files first."); return; }
         String name = invariantName.getText().trim();
         if (name.isEmpty() || input.invariants().stream().noneMatch(i -> i.name().equals(name))) { warn("Choose an invariant from the loaded list."); return; }
@@ -429,7 +419,8 @@ public class Ocl2CypherDialog extends JDialog {
 
     private void executeQuery() {
         Serializer.Serialized serialized = serializedRef.get(); GraphBuilder.GraphBuildArtifact built = graphRef.get(); ConnectedDriver c = driverRef.get();
-        if (serialized == null || built == null) { warn("Compile and translate OCL first."); return; }
+        LoadPreparation prepared = inputRef.get();
+        if (serialized == null || built == null || prepared == null) { warn("Compile and translate OCL first."); return; }
         if (c == null) { warn("Connect to Neo4j first."); return; }
         if (!isMaterialized(c, built.graph())) {
             execute.setEnabled(false);
@@ -439,8 +430,9 @@ public class Ocl2CypherDialog extends JDialog {
         if (!queryRunning.compareAndSet(false, true)) { status("A query is already running."); return; }
 
         CypherAst.GeneratedArtifact artifact = artifactRef.get();
-        Path modelPath = Path.of(usePath.getText().trim());
-        Path snapshotPath = Path.of(soilPath.getText().trim());
+        Path modelPath = prepared.input().schemaPath();
+        Path snapshotPath = prepared.input().snapshotPath();
+        Path constraintsPath = prepared.oclPath();
         String selectedInvariant = invariantName.getText().trim();
         execute.setEnabled(false);
         busy(true);
@@ -474,7 +466,9 @@ public class Ocl2CypherDialog extends JDialog {
                         UseEvaluationAdapter.Result useResult = useEvaluationRef.get();
                         if (useResult == null) {
                             long useStart = System.nanoTime();
-                            useResult = UseEvaluationAdapter.evaluate(modelPath, snapshotPath);
+                            useResult = constraintsPath == null
+                                    ? UseEvaluationAdapter.evaluate(modelPath, snapshotPath)
+                                    : UseEvaluationAdapter.evaluate(modelPath, constraintsPath, snapshotPath);
                             useMillis = elapsedMillis(useStart);
                             useEvaluationRef.compareAndSet(null, useResult);
                         }
@@ -564,7 +558,9 @@ public class Ocl2CypherDialog extends JDialog {
     }
 
     private void addInvariantByName() {
-        String name = invariantName.getText().trim(); ModelInputBundle input = inputRef.get();
+        String name = invariantName.getText().trim();
+        LoadPreparation prepared = inputRef.get();
+        ModelInputBundle input = prepared == null ? null : prepared.input();
         if (input == null || input.invariants().stream().noneMatch(i -> i.name().equals(name))) { warn("The invariant name is not present in the loaded USE model."); return; }
         GridBagConstraints g = new GridBagConstraints(); g.gridx = 0; g.gridy = Math.max(0, invariantRows.getComponentCount() - 1); g.weightx = 1; g.fill = GridBagConstraints.HORIZONTAL;
         invariantRows.add(invariantRow(name, true), g, g.gridy); invariantRows.revalidate(); invariantRows.repaint();
@@ -626,40 +622,17 @@ public class Ocl2CypherDialog extends JDialog {
     }
 
     private JButton browse(JTextField target, String extension) {
-        JButton b = button("Browse", false); b.addActionListener(e -> { JFileChooser chooser = new JFileChooser(); chooser.setFileFilter(new FileNameExtensionFilter(extension + " files", extension)); if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) target.setText(chooser.getSelectedFile().getAbsolutePath()); }); return b;
+        JButton b = button("Browse", false); b.addActionListener(e -> { JFileChooser chooser = new JFileChooser(); chooser.setAcceptAllFileFilterUsed(false); chooser.setFileFilter(new FileNameExtensionFilter(extension + " files", extension)); if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) target.setText(chooser.getSelectedFile().getAbsolutePath()); }); return b;
     }
 
-    private static JPanel card(String title, JComponent tools, JComponent content) {
-        JPanel card = panel(new BorderLayout(), SURFACE); card.setBorder(BorderFactory.createLineBorder(BORDER));
-        JPanel head = panel(new BorderLayout(), SURFACE); head.setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 5));
-        JLabel label = new JLabel(title); label.setForeground(TEXT); label.setFont(label.getFont().deriveFont(13f)); head.add(label, BorderLayout.WEST); if (tools != null) head.add(tools, BorderLayout.EAST);
-        JPanel body = panel(new BorderLayout(), SURFACE); body.setBorder(BorderFactory.createEmptyBorder(0, 7, 7, 7)); body.add(content);
-        card.add(head, BorderLayout.NORTH); card.add(body); return card;
-    }
-
-    private static JPanel panel(LayoutManager layout, Color color) { JPanel p = new JPanel(layout); p.setBackground(color); p.setForeground(TEXT); return p; }
-    private static JTextField field(String value) { JTextField f = new JTextField(value); styleField(f); return f; }
-    private static JPasswordField passwordField() { JPasswordField f = new JPasswordField(); styleField(f); return f; }
-    private static void styleField(JTextField f) { f.setBackground(EDITOR); f.setForeground(TEXT); f.setCaretColor(TEXT); f.setSelectionColor(ACCENT); f.setBorder(FIELD_BORDER); }
-    private static JTextArea area(boolean editable, Color color) { JTextArea a = new JTextArea(); a.setEditable(editable); a.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12)); a.setBackground(EDITOR); a.setForeground(color); a.setCaretColor(TEXT); a.setSelectionColor(ACCENT); a.setBorder(BorderFactory.createEmptyBorder(6, 7, 6, 7)); return a; }
-    private static JButton button(String text, boolean primary) { JButton b = new JButton(text); b.setFocusPainted(false); b.setForeground(TEXT); b.setBackground(primary ? ACCENT : new Color(57, 59, 67)); b.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(primary ? ACCENT.brighter() : BORDER), BorderFactory.createEmptyBorder(5, 10, 5, 10))); return b; }
-    private static JButton tiny(String text, boolean primary) { JButton b = button(text, primary); b.setFont(b.getFont().deriveFont(10f)); b.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(BORDER), BorderFactory.createEmptyBorder(2, 5, 2, 5))); return b; }
-    private static JButton icon(String text, String tooltip) { JButton b = button(text, false); b.setToolTipText(tooltip); b.setPreferredSize(new Dimension(27, 25)); b.setBorder(BorderFactory.createLineBorder(BORDER)); return b; }
-    private static JButton nav(String text, boolean active) { JButton b = new JButton(text); b.setFocusPainted(false); b.setContentAreaFilled(false); b.setForeground(active ? TEXT : MUTED); b.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 0, active ? 2 : 0, 0, ACCENT), BorderFactory.createEmptyBorder(10, 16, active ? 8 : 10, 16))); return b; }
-    private static JLabel smallLabel(String text) { JLabel l = new JLabel(text); l.setForeground(MUTED); l.setFont(l.getFont().deriveFont(11f)); return l; }
-    private static JPanel labelled(String label, JComponent field) { JPanel p = panel(new BorderLayout(0, 3), SURFACE); p.add(smallLabel(label), BorderLayout.NORTH); p.add(field); return p; }
-    private static GridBagConstraints formGbc() { GridBagConstraints g = new GridBagConstraints(); g.fill = GridBagConstraints.HORIZONTAL; g.anchor = GridBagConstraints.WEST; g.insets = new Insets(3, 0, 3, 5); return g; }
-    private static void addRow(JPanel p, GridBagConstraints g, int row, String label, JComponent field, JComponent extra) { g.gridy = row; g.gridwidth = 1; g.gridx = 0; g.weightx = 0; p.add(smallLabel(label), g); g.gridx = 1; g.weightx = 1; p.add(field, g); g.gridx = 2; g.weightx = 0; p.add(extra, g); }
-    private static JScrollPane scroll(Component content) { JScrollPane p = new JScrollPane(content); p.setBorder(BorderFactory.createLineBorder(BORDER)); p.getViewport().setBackground(EDITOR); p.getVerticalScrollBar().setUnitIncrement(14); return p; }
-    private static JSplitPane split(int orientation, Component a, Component b, double weight) { JSplitPane p = new JSplitPane(orientation, a, b); p.setResizeWeight(weight); p.setDividerSize(6); p.setContinuousLayout(true); p.setBorder(null); p.setBackground(WINDOW); return p; }
-    private static void styleTable(JTable t) { t.setBackground(EDITOR); t.setForeground(TEXT); t.setSelectionBackground(new Color(48, 83, 110)); t.setGridColor(BORDER); t.setRowHeight(24); t.setShowVerticalLines(false); t.getTableHeader().setBackground(SURFACE_2); t.getTableHeader().setForeground(TEXT); }
     private static String message(Throwable t) { return t.getMessage() == null || t.getMessage().isBlank() ? t.getClass().getSimpleName() : t.getMessage(); }
     private void warn(String text) { JOptionPane.showMessageDialog(this, text, "OCL2Cypher", JOptionPane.WARNING_MESSAGE); }
     private static Set<String> difference(Set<String> left, Set<String> right) { Set<String> out = new TreeSet<>(left); out.removeAll(right); return out; }
 
     @Override public void dispose() { ConnectedDriver c = driverRef.getAndSet(null); if (c != null) c.driver().close(); super.dispose(); }
     private record LoadPreparation(ModelInputBundle input,
-                                   GraphBuilder.GraphBuildArtifact graph) { }
+                                   GraphBuilder.GraphBuildArtifact graph,
+                                   Path oclPath) { }
     private record ConnectedDriver(Driver driver, String database) { private ConnectedDriver { Objects.requireNonNull(driver); Objects.requireNonNull(database); } }
     private record MaterializedGraph(ConnectedDriver connection, GraphModel graph) { }
     private record GraphLoadOutcome(long elapsedMillis, boolean changed) { }
@@ -685,466 +658,4 @@ public class Ocl2CypherDialog extends JDialog {
         }
     }
 
-    private static final class LineNumbers extends JComponent {
-        private final JTextArea text;
-        LineNumbers(JTextArea text) { this.text = text; setFont(text.getFont()); setForeground(MUTED); setBackground(SURFACE_2); setOpaque(true); setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6)); text.getDocument().addDocumentListener(new DocumentListener() { public void insertUpdate(DocumentEvent e) { refresh(); } public void removeUpdate(DocumentEvent e) { refresh(); } public void changedUpdate(DocumentEvent e) { refresh(); } private void refresh() { revalidate(); repaint(); } }); }
-        @Override public Dimension getPreferredSize() { FontMetrics f = getFontMetrics(getFont()); return new Dimension(12 + Math.max(2, String.valueOf(text.getLineCount()).length()) * f.charWidth('0'), text.getPreferredSize().height); }
-        @Override protected void paintComponent(Graphics graphics) { super.paintComponent(graphics); Graphics2D g = (Graphics2D) graphics.create(); g.setColor(getForeground()); g.setFont(getFont()); FontMetrics f = g.getFontMetrics(); int y = 6 + f.getAscent(); for (int i = 0; i < text.getLineCount(); i++) { String n = String.valueOf(i + 1); g.drawString(n, getWidth() - 6 - f.stringWidth(n), y + i * f.getHeight()); } g.dispose(); }
-    }
-
-    static Set<String> initialSchemaNodeKeys(GraphModel model) {
-        Set<String> keys = new LinkedHashSet<>();
-        if (model == null) return keys;
-        model.nodes().stream()
-                .filter(node -> node.projection() == GraphModel.Projection.SCHEMA)
-                .map(GraphModel.Node::stableKey)
-                .sorted()
-                .forEach(keys::add);
-        return keys;
-    }
-
-    static List<String> hiddenNeighbourKeys(GraphModel model, String nodeKey,
-                                             Set<String> visibleNodeKeys) {
-        if (model == null || nodeKey == null || visibleNodeKeys == null) return List.of();
-        Set<String> neighbours = new TreeSet<>();
-        for (GraphModel.Relationship relationship : model.relationships()) {
-            if (relationship.sourceKey().equals(nodeKey)) {
-                neighbours.add(relationship.targetKey());
-            }
-            if (relationship.targetKey().equals(nodeKey)) {
-                neighbours.add(relationship.sourceKey());
-            }
-        }
-        neighbours.removeAll(visibleNodeKeys);
-        return List.copyOf(neighbours);
-    }
-
-    private static final class GraphCanvas extends JPanel {
-        private static final double NODE_RADIUS = 14;
-        private static final Color[] COLORS = {
-                new Color(92, 190, 137), new Color(234, 129, 94),
-                new Color(104, 172, 215), new Color(199, 118, 190),
-                new Color(225, 190, 91), new Color(124, 196, 190)
-        };
-
-        private final Map<String, Point2D.Double> nodePositions = new LinkedHashMap<>();
-        private final Set<String> visibleNodeKeys = new LinkedHashSet<>();
-        private final Set<String> expandedNodeKeys = new LinkedHashSet<>();
-        private GraphModel model;
-        private double zoom = 1;
-        private double panX;
-        private double panY;
-        private String selectedNode;
-        private String draggedNode;
-        private GraphModel.Relationship draggedEdge;
-        private Point2D.Double dragOffset;
-        private Point2D.Double lastWorldPoint;
-        private Point panOrigin;
-        private Point pressOrigin;
-        private boolean dragMoved;
-        private boolean legend = true;
-
-        GraphCanvas() {
-            setBackground(EDITOR);
-            setToolTipText("Click a node to expand its neighbours; drag to move or pan");
-            ToolTipManager.sharedInstance().registerComponent(this);
-            MouseAdapter mouse = new MouseAdapter() {
-                @Override public void mousePressed(MouseEvent event) {
-                    pressOrigin = event.getPoint();
-                    dragMoved = false;
-                    Point2D.Double world = screenToWorld(event.getPoint());
-                    draggedNode = findNode(world);
-                    if (draggedNode != null) {
-                        selectedNode = draggedNode;
-                        Point2D.Double node = nodePositions.get(draggedNode);
-                        dragOffset = new Point2D.Double(node.x - world.x, node.y - world.y);
-                        setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
-                        return;
-                    }
-                    draggedEdge = findEdge(world);
-                    if (draggedEdge != null) {
-                        lastWorldPoint = world;
-                        setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
-                        return;
-                    }
-                    panOrigin = event.getPoint();
-                    setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                }
-
-                @Override public void mouseReleased(MouseEvent event) {
-                    String clickedNode = draggedNode;
-                    boolean expand = clickedNode != null && !dragMoved
-                            && SwingUtilities.isLeftMouseButton(event);
-                    draggedNode = null;
-                    draggedEdge = null;
-                    dragOffset = null;
-                    lastWorldPoint = null;
-                    panOrigin = null;
-                    pressOrigin = null;
-                    if (expand) expandNode(clickedNode);
-                    updateCursor(event.getPoint());
-                }
-
-                @Override public void mouseDragged(MouseEvent event) {
-                    if (pressOrigin != null && pressOrigin.distance(event.getPoint()) > 3) {
-                        dragMoved = true;
-                    }
-                    if (draggedNode != null) {
-                        Point2D.Double world = screenToWorld(event.getPoint());
-                        nodePositions.put(draggedNode, new Point2D.Double(
-                                world.x + dragOffset.x, world.y + dragOffset.y));
-                        repaint();
-                        return;
-                    }
-                    if (draggedEdge != null) {
-                        Point2D.Double world = screenToWorld(event.getPoint());
-                        double dx = world.x - lastWorldPoint.x;
-                        double dy = world.y - lastWorldPoint.y;
-                        moveNode(draggedEdge.sourceKey(), dx, dy);
-                        if (!draggedEdge.sourceKey().equals(draggedEdge.targetKey())) {
-                            moveNode(draggedEdge.targetKey(), dx, dy);
-                        }
-                        lastWorldPoint = world;
-                        repaint();
-                        return;
-                    }
-                    if (panOrigin != null) {
-                        panX += event.getX() - panOrigin.x;
-                        panY += event.getY() - panOrigin.y;
-                        panOrigin = event.getPoint();
-                        repaint();
-                    }
-                }
-
-                @Override public void mouseMoved(MouseEvent event) {
-                    updateCursor(event.getPoint());
-                }
-
-                @Override public void mouseWheelMoved(java.awt.event.MouseWheelEvent event) {
-                    zoomAt(event.getPoint(), Math.pow(1.08, -event.getPreciseWheelRotation()));
-                }
-            };
-            addMouseListener(mouse);
-            addMouseMotionListener(mouse);
-            addMouseWheelListener(mouse);
-        }
-
-        void setGraph(GraphModel graph) {
-            model = graph;
-            resetToSchema();
-        }
-
-        void resetToSchema() {
-            visibleNodeKeys.clear();
-            expandedNodeKeys.clear();
-            nodePositions.clear();
-            selectedNode = null;
-            if (model != null) {
-                visibleNodeKeys.addAll(initialSchemaNodeKeys(model));
-                initializeLayout();
-            }
-            SwingUtilities.invokeLater(this::fit);
-            repaint();
-        }
-
-        void zoomBy(double factor) {
-            zoomAt(new Point(getWidth() / 2, getHeight() / 2), factor);
-        }
-
-        private void zoomAt(Point anchor, double factor) {
-            double oldZoom = zoom;
-            double newZoom = Math.max(.25, Math.min(4.0, oldZoom * factor));
-            if (newZoom == oldZoom) return;
-            Point2D.Double world = screenToWorld(anchor);
-            zoom = newZoom;
-            panX = anchor.x - getWidth() / 2.0 - world.x * zoom;
-            panY = anchor.y - getHeight() / 2.0 - world.y * zoom;
-            repaint();
-        }
-
-        void fit() {
-            if (nodePositions.isEmpty() || getWidth() <= 1 || getHeight() <= 1) {
-                zoom = 1;
-                panX = panY = 0;
-                repaint();
-                return;
-            }
-            double minX = Double.POSITIVE_INFINITY, minY = Double.POSITIVE_INFINITY;
-            double maxX = Double.NEGATIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY;
-            for (Point2D.Double point : nodePositions.values()) {
-                minX = Math.min(minX, point.x); minY = Math.min(minY, point.y);
-                maxX = Math.max(maxX, point.x); maxY = Math.max(maxY, point.y);
-            }
-            double graphWidth = Math.max(1, maxX - minX + NODE_RADIUS * 4);
-            double graphHeight = Math.max(1, maxY - minY + NODE_RADIUS * 4);
-            zoom = Math.max(.25, Math.min(3.0,
-                    Math.min((getWidth() - 70.0) / graphWidth,
-                            (getHeight() - 70.0) / graphHeight)));
-            panX = -((minX + maxX) / 2.0) * zoom;
-            panY = -((minY + maxY) / 2.0) * zoom;
-            repaint();
-        }
-
-        void toggleLegend() {
-            legend = !legend;
-            repaint();
-        }
-
-        @Override public String getToolTipText(MouseEvent event) {
-            Point2D.Double world = screenToWorld(event.getPoint());
-            String nodeKey = findNode(world);
-            if (nodeKey != null && model != null) {
-                GraphModel.Node node = model.node(nodeKey);
-                return node == null ? nodeKey : nodeLabel(node) + " — " + node.projection()
-                        + " — " + node.stableKey();
-            }
-            GraphModel.Relationship edge = findEdge(world);
-            if (edge != null) return edge.physicalType() + ": " + edge.sourceKey()
-                    + " → " + edge.targetKey();
-            return "Click a node to expand its neighbours; drag to move or pan; wheel to zoom";
-        }
-
-        @Override protected void paintComponent(Graphics graphics) {
-            super.paintComponent(graphics);
-            Graphics2D g = (Graphics2D) graphics.create();
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                    RenderingHints.VALUE_ANTIALIAS_ON);
-            if (model == null || nodePositions.isEmpty()) {
-                String text = model == null
-                        ? "Load a USE/SOIL snapshot to preview its property graph"
-                        : "This model has no schema nodes to display";
-                g.setColor(MUTED);
-                FontMetrics metrics = g.getFontMetrics();
-                g.drawString(text, (getWidth() - metrics.stringWidth(text)) / 2,
-                        Math.max(30, getHeight() / 2));
-                g.dispose();
-                return;
-            }
-
-            AffineTransform old = g.getTransform();
-            g.translate(getWidth() / 2.0 + panX, getHeight() / 2.0 + panY);
-            g.scale(zoom, zoom);
-            paintEdges(g);
-            paintNodes(g);
-            g.setTransform(old);
-            if (legend) paintLegend(g);
-            g.dispose();
-        }
-
-        private void paintEdges(Graphics2D g) {
-            boolean labelsVisible = zoom >= .65 && visibleRelationshipCount() <= 80;
-            for (GraphModel.Relationship edge : model.relationships()) {
-                Point2D.Double source = nodePositions.get(edge.sourceKey());
-                Point2D.Double target = nodePositions.get(edge.targetKey());
-                if (source == null || target == null) continue;
-                boolean selected = edge == draggedEdge;
-                g.setColor(selected ? ACCENT.brighter() : new Color(119, 124, 134, 165));
-                g.setStroke(new BasicStroke((float) ((selected ? 2.2 : 1.0) / zoom)));
-                drawArrow(g, source, target);
-                if (labelsVisible) paintEdgeLabel(g, edge, source, target);
-            }
-        }
-
-        private void paintNodes(Graphics2D g) {
-            List<GraphModel.Node> nodes = new ArrayList<>(model.nodes());
-            nodes.sort(Comparator.comparing(GraphModel.Node::stableKey));
-            for (GraphModel.Node node : nodes) {
-                Point2D.Double point = nodePositions.get(node.stableKey());
-                if (point == null) continue;
-                Color color = COLORS[node.projection().ordinal() % COLORS.length];
-                Shape circle = new Ellipse2D.Double(point.x - NODE_RADIUS,
-                        point.y - NODE_RADIUS, NODE_RADIUS * 2, NODE_RADIUS * 2);
-                g.setColor(new Color(0, 0, 0, 90));
-                g.fill(new Ellipse2D.Double(point.x - NODE_RADIUS + 2,
-                        point.y - NODE_RADIUS + 3, NODE_RADIUS * 2, NODE_RADIUS * 2));
-                g.setColor(color);
-                g.fill(circle);
-                boolean selected = node.stableKey().equals(selectedNode)
-                        || node.stableKey().equals(draggedNode);
-                g.setColor(selected ? Color.WHITE : color.brighter());
-                g.setStroke(new BasicStroke((float) ((selected
-                        ? 2.3 : 1.0) / zoom)));
-                g.draw(circle);
-                String label = nodeLabel(node);
-                if (label.length() > 15) label = label.substring(0, 14) + "…";
-                g.setFont(g.getFont().deriveFont((float) (9 / Math.max(.65, zoom))));
-                g.setColor(TEXT);
-                FontMetrics metrics = g.getFontMetrics();
-                g.drawString(label, (float) (point.x - metrics.stringWidth(label) / 2.0),
-                        (float) (point.y + NODE_RADIUS + 12 / zoom));
-            }
-        }
-
-        private void expandNode(String nodeKey) {
-            if (model == null || nodeKey == null || !visibleNodeKeys.contains(nodeKey)) return;
-            selectedNode = nodeKey;
-            if (!expandedNodeKeys.add(nodeKey)) {
-                repaint();
-                return;
-            }
-
-            List<String> neighbours = hiddenNeighbourKeys(model, nodeKey, visibleNodeKeys);
-            Point2D.Double centre = nodePositions.getOrDefault(nodeKey,
-                    new Point2D.Double(0, 0));
-            int index = 0;
-            int total = neighbours.size();
-            for (String neighbour : neighbours) {
-                if (!hasNode(neighbour)) continue;
-                visibleNodeKeys.add(neighbour);
-                nodePositions.put(neighbour,
-                        expansionPosition(centre, index++, Math.max(1, total)));
-            }
-            SwingUtilities.invokeLater(this::fit);
-            repaint();
-        }
-
-        private boolean hasNode(String stableKey) {
-            return model.nodes().stream().anyMatch(node -> node.stableKey().equals(stableKey));
-        }
-
-        private Point2D.Double expansionPosition(Point2D.Double centre, int index, int total) {
-            int ring = index / 8;
-            int ringIndex = index % 8;
-            int ringCount = Math.min(8, total - ring * 8);
-            double angle = -Math.PI / 2 + Math.PI * 2 * ringIndex / Math.max(1, ringCount);
-            double radius = 72 + ring * 54;
-            Point2D.Double candidate = new Point2D.Double();
-            for (int attempt = 0; attempt < 6; attempt++) {
-                candidate.setLocation(centre.x + Math.cos(angle) * radius,
-                        centre.y + Math.sin(angle) * radius);
-                boolean overlaps = false;
-                for (Point2D.Double point : nodePositions.values()) {
-                    if (point.distance(candidate) < NODE_RADIUS * 3.1) {
-                        overlaps = true;
-                        break;
-                    }
-                }
-                if (!overlaps) break;
-                radius += 30;
-            }
-            return candidate;
-        }
-
-        private long visibleRelationshipCount() {
-            return model.relationships().stream()
-                    .filter(edge -> visibleNodeKeys.contains(edge.sourceKey())
-                            && visibleNodeKeys.contains(edge.targetKey()))
-                    .count();
-        }
-
-        private void initializeLayout() {
-            List<GraphModel.Node> nodes = model.nodes().stream()
-                    .filter(node -> visibleNodeKeys.contains(node.stableKey()))
-                    .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
-            nodes.sort(Comparator.comparing(GraphModel.Node::stableKey));
-            int count = Math.max(1, nodes.size());
-            double baseRadius = Math.max(90, Math.sqrt(count) * 34);
-            for (int i = 0; i < nodes.size(); i++) {
-                double angle = -Math.PI / 2 + Math.PI * 2 * i / count;
-                double ring = baseRadius * (.72 + .28 * ((i % 3) / 2.0));
-                nodePositions.put(nodes.get(i).stableKey(), new Point2D.Double(
-                        Math.cos(angle) * ring, Math.sin(angle) * ring * .72));
-            }
-        }
-
-        private Point2D.Double screenToWorld(Point point) {
-            return new Point2D.Double(
-                    (point.x - getWidth() / 2.0 - panX) / zoom,
-                    (point.y - getHeight() / 2.0 - panY) / zoom);
-        }
-
-        private String findNode(Point2D point) {
-            String nearest = null;
-            double nearestDistance = NODE_RADIUS + 4 / zoom;
-            for (Map.Entry<String, Point2D.Double> entry : nodePositions.entrySet()) {
-                double distance = entry.getValue().distance(point);
-                if (distance <= nearestDistance) {
-                    nearest = entry.getKey();
-                    nearestDistance = distance;
-                }
-            }
-            return nearest;
-        }
-
-        private GraphModel.Relationship findEdge(Point2D point) {
-            if (model == null) return null;
-            GraphModel.Relationship nearest = null;
-            double nearestDistance = 7 / zoom;
-            for (GraphModel.Relationship edge : model.relationships()) {
-                Point2D.Double source = nodePositions.get(edge.sourceKey());
-                Point2D.Double target = nodePositions.get(edge.targetKey());
-                if (source == null || target == null) continue;
-                double distance = Line2D.ptSegDist(source.x, source.y, target.x, target.y,
-                        point.getX(), point.getY());
-                if (distance <= nearestDistance) {
-                    nearest = edge;
-                    nearestDistance = distance;
-                }
-            }
-            return nearest;
-        }
-
-        private void moveNode(String key, double dx, double dy) {
-            Point2D.Double point = nodePositions.get(key);
-            if (point != null) point.setLocation(point.x + dx, point.y + dy);
-        }
-
-        private void updateCursor(Point point) {
-            Point2D.Double world = screenToWorld(point);
-            boolean movable = findNode(world) != null || findEdge(world) != null;
-            setCursor(Cursor.getPredefinedCursor(movable
-                    ? Cursor.MOVE_CURSOR : Cursor.DEFAULT_CURSOR));
-        }
-
-        private static void drawArrow(Graphics2D g, Point2D.Double source,
-                                      Point2D.Double target) {
-            g.draw(new Line2D.Double(source, target));
-            double angle = Math.atan2(target.y - source.y, target.x - source.x);
-            double tipX = target.x - Math.cos(angle) * NODE_RADIUS;
-            double tipY = target.y - Math.sin(angle) * NODE_RADIUS;
-            Path2D arrow = new Path2D.Double();
-            arrow.moveTo(tipX, tipY);
-            arrow.lineTo(tipX - Math.cos(angle - .48) * 7,
-                    tipY - Math.sin(angle - .48) * 7);
-            arrow.lineTo(tipX - Math.cos(angle + .48) * 7,
-                    tipY - Math.sin(angle + .48) * 7);
-            arrow.closePath();
-            g.fill(arrow);
-        }
-
-        private static void paintEdgeLabel(Graphics2D g, GraphModel.Relationship edge,
-                                           Point2D.Double source, Point2D.Double target) {
-            String label = edge.physicalType();
-            if (label.length() > 18) label = label.substring(0, 17) + "…";
-            float x = (float) ((source.x + target.x) / 2.0);
-            float y = (float) ((source.y + target.y) / 2.0 - 3);
-            g.setFont(g.getFont().deriveFont(7.5f));
-            g.setColor(MUTED);
-            g.drawString(label, x, y);
-        }
-
-        private static String nodeLabel(GraphModel.Node node) {
-            return Neo4jExecutionAdapter.displayLabel(node);
-        }
-
-        private void paintLegend(Graphics2D g) {
-            int x = Math.max(6, getWidth() - 137), y = 7;
-            g.setColor(new Color(25, 27, 31, 220));
-            g.fillRoundRect(x, y, 130, 91, 5, 5);
-            g.setColor(TEXT);
-            g.setFont(g.getFont().deriveFont(Font.BOLD, 9f));
-            g.drawString("Projection", x + 7, y + 13);
-            GraphModel.Projection[] projections = GraphModel.Projection.values();
-            g.setFont(g.getFont().deriveFont(8f));
-            for (int i = 0; i < projections.length; i++) {
-                g.setColor(COLORS[i]);
-                g.fillOval(x + 8, y + 20 + i * 10, 7, 7);
-                g.setColor(MUTED);
-                g.drawString(projections[i].name(), x + 20, y + 27 + i * 10);
-            }
-            g.drawString("Click node = expand", x + 7, y + 70);
-            g.drawString("Visible " + visibleNodeKeys.size() + "/" + model.nodes().size(),
-                    x + 7, y + 82);
-        }
-    }
 }

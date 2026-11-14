@@ -17,7 +17,6 @@ import org.uet.dse.ocl2cypher.cypher.CypherAstWellFormednessValidator;
 import org.uet.dse.ocl2cypher.cypher.Realization;
 import org.uet.dse.ocl2cypher.cypher.Serializer;
 import org.uet.dse.ocl2cypher.diagnostics.SourceSpan;
-import org.uet.dse.ocl2cypher.diagnostics.Stage;
 import org.uet.dse.ocl2cypher.graph.GraphBuilder;
 import org.uet.dse.ocl2cypher.qcyp.QCypTranslator;
 import org.uet.dse.ocl2cypher.qcyp.QQuery;
@@ -73,23 +72,6 @@ class CypherSerializationTest {
         var r = Realization.realize(q.value(), g.value().graph(), CypherAst.Dialect.CYPHER_5);
         assertTrue(r.isSuccess(), () -> "realize: " + r.diagnostics());
         return r.value();
-    }
-
-    private static void expectNumericRejection(String ocl) {
-        var schema = personSchema();
-        var fe = org.uet.dse.ocl2cypher.api.FrontendCompiler.compile(ocl, schema);
-        assertTrue(fe.isSuccess(), () -> fe.diagnostics().toString());
-        var doc = fe.value().get(0);
-        var low = CoreLowering.lower(schema, doc, doc.constraints.get(0));
-        assertTrue(low.isSuccess(), () -> low.diagnostics().toString());
-        var g = GraphBuilder.build(schema, personSnapshot());
-        assertTrue(g.isSuccess(), () -> g.diagnostics().toString());
-        var q = QCypTranslator.translate(low.value());
-        assertTrue(q.isSuccess(), () -> q.diagnostics().toString());
-        var r = Realization.realize(q.value(), g.value().graph(), CypherAst.Dialect.CYPHER_5);
-        assertFalse(r.isSuccess());
-        assertEquals("R_NUMERIC_CAPABILITY", r.primaryDiagnostic().code());
-        assertEquals(Stage.R, r.primaryDiagnostic().stage());
     }
 
     @Test

@@ -1,0 +1,295 @@
+-- Independent snapshot; load into a fresh USE state.
+-- Scenario: larger. Invariant violations may be intentional.
+!new Company('company_0')
+!set company_0.name := 'Company 0'
+!set company_0.active := true
+!set company_0.revenue := 1000.0
+!new Manager('manager_0')
+!set manager_0.name := 'Manager 0'
+!set manager_0.age := 70
+!set manager_0.rating := 4.8
+!set manager_0.active := false
+!set manager_0.salary := 5000.0
+!set manager_0.level := 1
+!insert (company_0, manager_0) into Employment
+!new Employee('employee_0_0')
+!set employee_0_0.name := 'Repeated'
+!set employee_0_0.age := -1
+!set employee_0_0.rating := 4.8
+!set employee_0_0.active := true
+!set employee_0_0.salary := -100.0
+!insert (company_0, employee_0_0) into Employment
+!new Employee('employee_0_1')
+!set employee_0_1.rating := 4.8
+!set employee_0_1.active := true
+!set employee_0_1.salary := 2000.0
+!insert (company_0, employee_0_1) into Employment
+!new Company('company_1')
+!set company_1.name := 'Company 1'
+!set company_1.active := true
+!set company_1.revenue := 1000.0
+!new Manager('manager_1')
+!set manager_1.name := 'Manager 1'
+!set manager_1.age := 40
+!set manager_1.rating := 4.8
+!set manager_1.active := false
+!set manager_1.salary := 5000.0
+!set manager_1.level := 4
+!insert (company_1, manager_1) into Employment
+!insert (company_1, manager_1) into CompanyManagement
+!new Employee('employee_1_0')
+!set employee_1_0.name := 'Repeated'
+!set employee_1_0.age := 17
+!set employee_1_0.rating := 4.8
+!set employee_1_0.active := true
+!set employee_1_0.salary := -100.0
+!insert (company_1, employee_1_0) into Employment
+!new Employee('employee_1_1')
+!set employee_1_1.name := 'Repeated'
+!set employee_1_1.age := 30
+!set employee_1_1.rating := 4.8
+!set employee_1_1.active := true
+!set employee_1_1.salary := 2000.0
+!insert (company_1, employee_1_1) into Employment
+!new Company('company_2')
+!set company_2.name := 'Company 2'
+!set company_2.active := true
+!set company_2.revenue := 1000.0
+!new Manager('manager_2')
+!set manager_2.name := 'Manager 2'
+!set manager_2.age := 70
+!set manager_2.rating := 4.8
+!set manager_2.active := false
+!set manager_2.salary := 5000.0
+!set manager_2.level := 1
+!insert (company_2, manager_2) into Employment
+!insert (company_2, manager_2) into CompanyManagement
+!new Employee('employee_2_0')
+!set employee_2_0.name := 'Repeated'
+!set employee_2_0.age := 17
+!set employee_2_0.rating := 4.8
+!set employee_2_0.active := true
+!set employee_2_0.salary := -100.0
+!insert (company_2, employee_2_0) into Employment
+!new Employee('employee_2_1')
+!set employee_2_1.name := 'Repeated'
+!set employee_2_1.age := 30
+!set employee_2_1.rating := 4.8
+!set employee_2_1.active := true
+!set employee_2_1.salary := 2000.0
+!insert (company_2, employee_2_1) into Employment
+!new Company('company_3')
+!set company_3.name := 'Company 3'
+!set company_3.active := true
+!set company_3.revenue := 1000.0
+!new Manager('manager_3')
+!set manager_3.name := 'Manager 3'
+!set manager_3.age := 40
+!set manager_3.rating := 4.8
+!set manager_3.active := false
+!set manager_3.salary := 5000.0
+!set manager_3.level := 4
+!insert (company_3, manager_3) into Employment
+!insert (company_3, manager_3) into CompanyManagement
+!new Employee('employee_3_0')
+!set employee_3_0.name := 'Repeated'
+!set employee_3_0.age := -1
+!set employee_3_0.rating := 4.8
+!set employee_3_0.active := true
+!set employee_3_0.salary := -100.0
+!insert (company_3, employee_3_0) into Employment
+!new Employee('employee_3_1')
+!set employee_3_1.name := 'Repeated'
+!set employee_3_1.rating := 4.8
+!set employee_3_1.active := true
+!set employee_3_1.salary := 2000.0
+!insert (company_3, employee_3_1) into Employment
+!new Company('company_4')
+!set company_4.name := 'Company 4'
+!set company_4.active := true
+!set company_4.revenue := 1000.0
+!new Manager('manager_4')
+!set manager_4.name := 'Manager 4'
+!set manager_4.age := 70
+!set manager_4.rating := 4.8
+!set manager_4.active := false
+!set manager_4.salary := 5000.0
+!set manager_4.level := 1
+!insert (company_4, manager_4) into Employment
+!insert (company_4, manager_4) into CompanyManagement
+!new Employee('employee_4_0')
+!set employee_4_0.name := 'Repeated'
+!set employee_4_0.age := 17
+!set employee_4_0.rating := 4.8
+!set employee_4_0.active := true
+!set employee_4_0.salary := -100.0
+!insert (company_4, employee_4_0) into Employment
+!new Employee('employee_4_1')
+!set employee_4_1.age := 30
+!set employee_4_1.rating := 4.8
+!set employee_4_1.active := true
+!set employee_4_1.salary := 2000.0
+!insert (company_4, employee_4_1) into Employment
+!new Company('company_5')
+!set company_5.name := 'Company 5'
+!set company_5.active := true
+!set company_5.revenue := 1000.0
+!new Manager('manager_5')
+!set manager_5.name := 'Manager 5'
+!set manager_5.age := 40
+!set manager_5.rating := 4.8
+!set manager_5.active := false
+!set manager_5.salary := 5000.0
+!set manager_5.level := 4
+!insert (company_5, manager_5) into Employment
+!insert (company_5, manager_5) into CompanyManagement
+!new Employee('employee_5_0')
+!set employee_5_0.name := 'Repeated'
+!set employee_5_0.age := 17
+!set employee_5_0.rating := 4.8
+!set employee_5_0.active := true
+!set employee_5_0.salary := -100.0
+!insert (company_5, employee_5_0) into Employment
+!new Employee('employee_5_1')
+!set employee_5_1.name := 'Repeated'
+!set employee_5_1.age := 30
+!set employee_5_1.rating := 4.8
+!set employee_5_1.active := true
+!set employee_5_1.salary := 2000.0
+!insert (company_5, employee_5_1) into Employment
+!new Company('company_6')
+!set company_6.name := 'Company 6'
+!set company_6.active := true
+!set company_6.revenue := 1000.0
+!new Manager('manager_6')
+!set manager_6.name := 'Manager 6'
+!set manager_6.age := 70
+!set manager_6.rating := 4.8
+!set manager_6.active := false
+!set manager_6.salary := 5000.0
+!set manager_6.level := 1
+!insert (company_6, manager_6) into Employment
+!insert (company_6, manager_6) into CompanyManagement
+!new Employee('employee_6_0')
+!set employee_6_0.name := 'Repeated'
+!set employee_6_0.age := -1
+!set employee_6_0.rating := 4.8
+!set employee_6_0.active := true
+!set employee_6_0.salary := -100.0
+!insert (company_6, employee_6_0) into Employment
+!new Employee('employee_6_1')
+!set employee_6_1.name := 'Repeated'
+!set employee_6_1.rating := 4.8
+!set employee_6_1.active := true
+!set employee_6_1.salary := 2000.0
+!insert (company_6, employee_6_1) into Employment
+!new Company('company_7')
+!set company_7.name := 'Company 7'
+!set company_7.active := true
+!set company_7.revenue := 1000.0
+!new Manager('manager_7')
+!set manager_7.name := 'Manager 7'
+!set manager_7.age := 40
+!set manager_7.rating := 4.8
+!set manager_7.active := false
+!set manager_7.salary := 5000.0
+!set manager_7.level := 4
+!insert (company_7, manager_7) into Employment
+!insert (company_7, manager_7) into CompanyManagement
+!new Employee('employee_7_0')
+!set employee_7_0.name := 'Repeated'
+!set employee_7_0.age := 17
+!set employee_7_0.rating := 4.8
+!set employee_7_0.active := true
+!set employee_7_0.salary := -100.0
+!insert (company_7, employee_7_0) into Employment
+!new Employee('employee_7_1')
+!set employee_7_1.name := 'Repeated'
+!set employee_7_1.age := 30
+!set employee_7_1.rating := 4.8
+!set employee_7_1.active := true
+!set employee_7_1.salary := 2000.0
+!insert (company_7, employee_7_1) into Employment
+!new Company('company_8')
+!set company_8.name := 'Company 8'
+!set company_8.active := true
+!set company_8.revenue := 1000.0
+!new Manager('manager_8')
+!set manager_8.name := 'Manager 8'
+!set manager_8.age := 70
+!set manager_8.rating := 4.8
+!set manager_8.active := false
+!set manager_8.salary := 5000.0
+!set manager_8.level := 1
+!insert (company_8, manager_8) into Employment
+!insert (company_8, manager_8) into CompanyManagement
+!new Employee('employee_8_0')
+!set employee_8_0.name := 'Repeated'
+!set employee_8_0.age := 17
+!set employee_8_0.rating := 4.8
+!set employee_8_0.active := true
+!set employee_8_0.salary := -100.0
+!insert (company_8, employee_8_0) into Employment
+!new Employee('employee_8_1')
+!set employee_8_1.age := 30
+!set employee_8_1.rating := 4.8
+!set employee_8_1.active := true
+!set employee_8_1.salary := 2000.0
+!insert (company_8, employee_8_1) into Employment
+!new Company('company_9')
+!set company_9.name := 'Company 9'
+!set company_9.active := true
+!set company_9.revenue := 1000.0
+!new Manager('manager_9')
+!set manager_9.name := 'Manager 9'
+!set manager_9.age := 40
+!set manager_9.rating := 4.8
+!set manager_9.active := false
+!set manager_9.salary := 5000.0
+!set manager_9.level := 4
+!insert (company_9, manager_9) into Employment
+!insert (company_9, manager_9) into CompanyManagement
+!new Employee('employee_9_0')
+!set employee_9_0.name := 'Repeated'
+!set employee_9_0.age := -1
+!set employee_9_0.rating := 4.8
+!set employee_9_0.active := true
+!set employee_9_0.salary := -100.0
+!insert (company_9, employee_9_0) into Employment
+!new Employee('employee_9_1')
+!set employee_9_1.name := 'Repeated'
+!set employee_9_1.rating := 4.8
+!set employee_9_1.active := true
+!set employee_9_1.salary := 2000.0
+!insert (company_9, employee_9_1) into Employment
+!new Company('company_10')
+!set company_10.name := 'Company 10'
+!set company_10.active := true
+!set company_10.revenue := 1000.0
+!new Manager('manager_10')
+!set manager_10.name := 'Manager 10'
+!set manager_10.age := 70
+!set manager_10.rating := 4.8
+!set manager_10.active := false
+!set manager_10.salary := 5000.0
+!set manager_10.level := 1
+!insert (company_10, manager_10) into Employment
+!insert (company_10, manager_10) into CompanyManagement
+!new Employee('employee_10_0')
+!set employee_10_0.name := 'Repeated'
+!set employee_10_0.age := 17
+!set employee_10_0.rating := 4.8
+!set employee_10_0.active := true
+!set employee_10_0.salary := -100.0
+!insert (company_10, employee_10_0) into Employment
+!new Employee('employee_10_1')
+!set employee_10_1.name := 'Repeated'
+!set employee_10_1.age := 30
+!set employee_10_1.rating := 4.8
+!set employee_10_1.active := true
+!set employee_10_1.salary := 2000.0
+!insert (company_10, employee_10_1) into Employment
+!new Company('company_11')
+!set company_11.name := 'Company 11'
+!set company_11.active := true
+!set company_11.revenue := 1000.0

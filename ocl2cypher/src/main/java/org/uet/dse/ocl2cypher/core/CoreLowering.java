@@ -10,8 +10,6 @@ import org.uet.dse.ocl2cypher.source.model.SchemaModel;
 import org.uet.dse.ocl2cypher.source.model.Admission;
 import org.uet.dse.ocl2cypher.source.omg.OmgAs;
 import org.uet.dse.ocl2cypher.source.omg.OclOperation;
-import org.uet.dse.ocl2cypher.trace.Trace;
-import org.uet.dse.ocl2cypher.trace.TraceCollector;
 
 /**
  * {@code N_SM}: resolved, typed OMG OCL AS to {@link CoreExpr}.
@@ -66,21 +64,6 @@ public final class CoreLowering {
         }
     }
 
-    public static Result<CoreInvariant> lower(SchemaModel sm,
-                                              OmgAs.OmgDocument document,
-                                              OmgAs.Constraint invariant,
-                                              TraceCollector traces) {
-        Result<CoreInvariant> result = lower(sm, document, invariant);
-        if (result.isSuccess()) {
-            String name = invariant.name == null ? "<anonymous>" : invariant.name;
-            traces.record(Trace.Stage.N_SM,
-                    "omg-document:" + document.contextClassKey + ":constraint:" + name,
-                    "core-invariant:" + document.contextClassKey + "::" + name,
-                    RuleId.N_INVARIANT);
-        }
-        return result;
-    }
-
     /** Lower a public OMG {@code ExpressionInOcl} value query directly by declaration identity. */
     public static Result<CoreQuery> lowerValueQuery(SchemaModel sm,
                                                     OmgAs.ExpressionInOcl query) {
@@ -106,17 +89,6 @@ public final class CoreLowering {
         } catch (CoreLowerError error) {
             return Result.failure(error.diagnostic());
         }
-    }
-
-    public static Result<CoreQuery> lowerValueQuery(SchemaModel sm,
-                                                    OmgAs.ExpressionInOcl query,
-                                                    TraceCollector traces) {
-        Result<CoreQuery> result = lowerValueQuery(sm, query);
-        if (result.isSuccess()) {
-            traces.record(Trace.Stage.N_SM, "omg-value-query", "core-value-query",
-                    RuleId.N_INVARIANT);
-        }
-        return result;
     }
 
     private static CoreExpr lowerOmg(OmgContext context, OmgAs.OclExpression node) {

@@ -9,7 +9,6 @@ import org.uet.dse.ocl2cypher.runtime.*; import org.uet.dse.ocl2cypher.source.mo
 public final class DifferentialN4CorpusCheck {
   static final SourceSpan S=SourceSpan.UNKNOWN; static int n;
   static void eq(OclValue a,OclValue b){if(!a.equals(b))throw new AssertionError(a+" != "+b);n++;}
-  static QNode.QExpr q(QNode.QExpr x){return x;}
   public static void main(String[] z){
     var sm=SchemaModel.builder("d").build(); var sn=Snapshot.builder().build(); var g=new GraphModel("d"); var ce=new CoreInterpreter.Env();
     var one=new CoreExpr.LiteralInteger(S,BigInteger.ONE); var two=new CoreExpr.LiteralInteger(S,BigInteger.TWO);

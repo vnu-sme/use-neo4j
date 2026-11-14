@@ -128,7 +128,7 @@ class R3CarrierRoundTripTest {
     }
 
     private static OclValue decode(CypherAst.CypherExpr encoded, OclType type) {
-        return Neo4jExecutionAdapter.decodeTagged(eval(encoded), type);
+        return Neo4jValueCodec.decodeTagged(eval(encoded), type);
     }
 
     private static CypherAst.CypherExpr encode(OclValue value) {

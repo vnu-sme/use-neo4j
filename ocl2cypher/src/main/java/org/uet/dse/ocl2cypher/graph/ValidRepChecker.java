@@ -1,5 +1,7 @@
 package org.uet.dse.ocl2cypher.graph;
 
+import static org.uet.dse.ocl2cypher.graph.RepositorySchemaValidator.*;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -41,22 +43,7 @@ public final class ValidRepChecker {
             if (!sm.modelKey().equals(g.modelKey())) {
                 return failure("VALIDREP_MODEL_KEY", "schema and graph modelKey differ");
             }
-            for (GraphModel.Node n : g.nodes()) {
-                if (!g.modelKey().equals(n.modelKey())
-                        || !g.modelKey().equals(n.properties().get(
-                                Uml2GraphEncodingContract.Property.MODEL_KEY))) {
-                    return failure("VALIDREP_MODEL_SCOPE", "node outside model scope: " + n.stableKey());
-                }
-            }
-            for (GraphModel.Relationship r : g.relationships()) {
-                if (!g.modelKey().equals(r.modelKey())
-                        || !g.modelKey().equals(r.properties().get(
-                                Uml2GraphEncodingContract.Property.MODEL_KEY))) {
-                    return failure("VALIDREP_MODEL_SCOPE",
-                            "relationship outside model scope: " + r.stableKey());
-                }
-            }
-
+            // The encoding contract above already checks every element's model scope.
             Result<Witness> repositoryAndSchema = checkRepositoryAndSchema(sm, g);
             if (repositoryAndSchema.isFailure()) {
                 return repositoryAndSchema;
@@ -90,7 +77,7 @@ public final class ValidRepChecker {
                         || !o.stableId().equals(n.properties().get(
                                 Uml2GraphEncodingContract.Property.USE_ID))
                         || !n.labels().contains("Object")
-                        || !n.labels().contains(simpleClassLabel(
+                        || !n.labels().contains(Uml2GraphEncodingContract.simpleClassLabel(
                                 sm.clazz(o.dynamicClassKey()).qualifiedName()))) {
                     return failure("VALIDREP_IDENTITY", "identity mismatch for " + o.stableId());
                 }
@@ -149,294 +136,12 @@ public final class ValidRepChecker {
         }
     }
 
-    /**
-     * Check the complete repository/schema projection used by generated Cypher.
-     * This is deliberately structural: Q's in-memory interpreter can consult
-     * {@link SchemaModel}, whereas the target query follows {@code Extends},
-     * {@code HasAttribute}, and declaration nodes in the materialized graph.
-     * Omitting these checks would allow a graph to witness ValidRep while the
-     * two evaluators observe different schemas.
-     */
-    private static Result<Witness> checkRepositoryAndSchema(
-            SchemaModel sm, GraphModel g) {
-        MetamodelMapping mapping = MetamodelMapping.canonical();
-        GraphModel.Node root = node(g, GraphKey.model(g.modelKey()));
-        var rootBinding = mapping.node(MetamodelMapping.NodeKind.MODEL);
-        if (root.projection() != rootBinding.projection()
-                || !rootBinding.observationRole().equals(root.observationRole())
-                || !root.labels().containsAll(rootBinding.labels())
-                || !GraphModel.ENCODING_PROFILE.equals(
-                        root.properties().get("encodingProfile"))
-                || !GraphModel.ENCODING_VERSION.equals(
-                        root.properties().get("encodingVersion"))) {
-            return failure("VALIDREP_MODEL_ROOT", "model root differs from profile "
-                    + GraphModel.ENCODING_VERSION);
-        }
-        long rootCount = g.nodes().stream()
-                .filter(n -> rootBinding.observationRole().equals(n.observationRole()))
-                .count();
-        if (rootCount != 1) {
-            return failure("VALIDREP_MODEL_ROOT", "graph must contain exactly one model root");
-        }
-
-        int generalizationCount = 0;
-        var classBinding = mapping.node(MetamodelMapping.NodeKind.CLASS);
-        for (var classifier : sm.classes()) {
-            GraphModel.Node declaration = node(g,
-                    GraphKey.clazz(g.modelKey(), classifier.key()));
-            if (declaration.projection() != classBinding.projection()
-                    || !classBinding.observationRole().equals(
-                            declaration.observationRole())
-                    || !declaration.labels().containsAll(classBinding.labels())
-                    || !classifier.key().equals(
-                            declaration.properties().get("classKey"))
-                    || !classifier.qualifiedName().equals(
-                            declaration.properties().get("qualifiedName"))
-                    || !String.valueOf(classifier.isAbstract()).equals(
-                            declaration.properties().get("isAbstract"))
-                    || !String.valueOf(classifier.isAssociationClass()).equals(
-                            declaration.properties().get("isAssociationClass"))) {
-                return failure("VALIDREP_CLASS_DECLARATION",
-                        "class declaration differs: " + classifier.key());
-            }
-            for (String superclass : classifier.directSuperclassKeys()) {
-                generalizationCount++;
-                GraphModel.Relationship edge = relationship(g,
-                        GraphKey.of(g.modelKey(), GraphKey.Kind.GENERALIZATION,
-                                classifier.key(), superclass));
-                if (!GraphModel.EXTENDS.equals(edge.physicalType())
-                        || edge.projection() != GraphModel.Projection.SCHEMA
-                        || !GraphKey.clazz(g.modelKey(), classifier.key())
-                                .equals(edge.sourceKey())
-                        || !GraphKey.clazz(g.modelKey(), superclass)
-                                .equals(edge.targetKey())) {
-                    return failure("VALIDREP_GENERALIZATION",
-                            "generalization differs: " + classifier.key()
-                                    + " -> " + superclass);
-                }
-            }
-        }
-        long actualClasses = g.nodes().stream()
-                .filter(n -> classBinding.observationRole().equals(n.observationRole()))
-                .count();
-        if (actualClasses != sm.classes().size()) {
-            return failure("VALIDREP_CLASS_DECLARATION",
-                    "source and graph class counts differ");
-        }
-        long actualGeneralizations = g.relationships().stream()
-                .filter(r -> GraphModel.EXTENDS.equals(r.physicalType())).count();
-        if (actualGeneralizations != generalizationCount) {
-            return failure("VALIDREP_GENERALIZATION",
-                    "source and graph generalization counts differ");
-        }
-
-        var attributeBinding = mapping.node(MetamodelMapping.NodeKind.ATTRIBUTE);
-        for (UmlAttribute attribute : sm.attributes()) {
-            GraphModel.Node declaration = node(g,
-                    GraphKey.attribute(g.modelKey(), attribute.key()));
-            if (declaration.projection() != attributeBinding.projection()
-                    || !attributeBinding.observationRole().equals(
-                            declaration.observationRole())
-                    || !declaration.labels().containsAll(attributeBinding.labels())
-                    || !attribute.key().equals(
-                            declaration.properties().get("attributeKey"))
-                    || !attribute.ownerClassKey().equals(
-                            declaration.properties().get("ownerClassKey"))
-                    || !attribute.name().equals(declaration.properties().get("name"))
-                    || !attribute.declaredType().toString().equals(
-                            declaration.properties().get("declaredType"))) {
-                return failure("VALIDREP_ATTRIBUTE_DECLARATION",
-                        "attribute declaration differs: " + attribute.key());
-            }
-            GraphModel.Relationship ownership = relationship(g,
-                    GraphKey.of(g.modelKey(), GraphKey.Kind.CLASS_ATTRIBUTE,
-                            attribute.ownerClassKey(), attribute.key()));
-            if (!GraphModel.HAS_ATTRIBUTE.equals(ownership.physicalType())
-                    || ownership.projection() != GraphModel.Projection.SCHEMA
-                    || !GraphKey.clazz(g.modelKey(), attribute.ownerClassKey())
-                            .equals(ownership.sourceKey())
-                    || !declaration.stableKey().equals(ownership.targetKey())) {
-                return failure("VALIDREP_ATTRIBUTE_DECLARATION",
-                        "attribute ownership differs: " + attribute.key());
-            }
-        }
-        long actualAttributes = g.nodes().stream()
-                .filter(n -> attributeBinding.observationRole().equals(n.observationRole()))
-                .count();
-        long actualOwnership = g.relationships().stream()
-                .filter(r -> GraphModel.HAS_ATTRIBUTE.equals(r.physicalType())).count();
-        if (actualAttributes != sm.attributes().size()
-                || actualOwnership != sm.attributes().size()) {
-            return failure("VALIDREP_ATTRIBUTE_DECLARATION",
-                    "source and graph attribute declaration counts differ");
-        }
-
-        return checkSchemaAssociations(sm, g);
-    }
-
-    private static Result<Witness> checkSchemaAssociations(
-            SchemaModel sm, GraphModel g) {
-        if (g.nodes().stream().anyMatch(n ->
-                "ASSOCIATION_DECLARATION".equals(n.observationRole())
-                        || n.labels().contains("Association"))) {
-            return failure("VALIDREP_ASSOCIATION_SCHEMA",
-                    "ordinary association declarations must not be reified as nodes");
-        }
-
-        int expectedRelationships = 0;
-        for (UmlAssociation association : sm.associations()) {
-            boolean associationClass = sm.clazz(association.key()) != null
-                    && sm.clazz(association.key()).isAssociationClass();
-            if (associationClass) {
-                expectedRelationships += 2;
-                GraphModel.Relationship source = relationship(g,
-                        GraphKey.of(g.modelKey(), GraphKey.Kind.ASSOCIATION_END,
-                                association.key(), "source"));
-                GraphModel.Relationship target = relationship(g,
-                        GraphKey.of(g.modelKey(), GraphKey.Kind.ASSOCIATION_END,
-                                association.key(), "target"));
-                String classKey = GraphKey.clazz(g.modelKey(), association.key());
-                if (!GraphModel.ASSOCIATION_CLASS_SCHEMA_SOURCE.equals(source.physicalType())
-                        || !GraphKey.clazz(g.modelKey(), association.sourceClassKey())
-                                .equals(source.sourceKey())
-                        || !classKey.equals(source.targetKey())
-                        || !GraphModel.ASSOCIATION_CLASS_SCHEMA_TARGET.equals(
-                                target.physicalType())
-                        || !classKey.equals(target.sourceKey())
-                        || !GraphKey.clazz(g.modelKey(), association.targetClassKey())
-                                .equals(target.targetKey())
-                        || !"source".equals(source.properties().get("endPosition"))
-                        || !"target".equals(target.properties().get("endPosition"))
-                        || !associationMetadataMatches(association, source, true)
-                        || !associationMetadataMatches(association, target, true)) {
-                    return failure("VALIDREP_ASSOCIATION_SCHEMA",
-                            "association-class schema differs: " + association.key());
-                }
-            } else {
-                expectedRelationships++;
-                GraphModel.Relationship declaration = relationship(g,
-                        GraphKey.association(g.modelKey(), association.key()));
-                if (!schemaRelationshipType(association).equals(declaration.physicalType())
-                        || !GraphKey.clazz(g.modelKey(), association.sourceClassKey())
-                                .equals(declaration.sourceKey())
-                        || !GraphKey.clazz(g.modelKey(), association.targetClassKey())
-                                .equals(declaration.targetKey())
-                        || !associationMetadataMatches(association, declaration, false)) {
-                    return failure("VALIDREP_ASSOCIATION_SCHEMA",
-                            "binary association schema differs: " + association.key());
-                }
-            }
-        }
-        long actualRelationships = g.relationships().stream().filter(r ->
-                GraphModel.ASSOCIATE_WITH.equals(r.physicalType())
-                        || GraphModel.AGGREGATES.equals(r.physicalType())
-                        || GraphModel.COMPOSE_OF.equals(r.physicalType())
-                        || GraphModel.ASSOCIATION_CLASS_SCHEMA_SOURCE.equals(r.physicalType())
-                        || GraphModel.ASSOCIATION_CLASS_SCHEMA_TARGET.equals(r.physicalType()))
-                .count();
-        if (actualRelationships != expectedRelationships) {
-            return failure("VALIDREP_ASSOCIATION_SCHEMA",
-                    "source and graph schema association counts differ");
-        }
-        return Result.success(new Witness(Map.of()));
-    }
-
-    private static GraphModel.Relationship relationship(GraphModel graph, String stableKey) {
-        return graph.relationships().stream()
-                .filter(relationship -> stableKey.equals(relationship.stableKey()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException(
-                        "missing schema relationship " + stableKey));
-    }
-
-    private static GraphModel.Node node(GraphModel graph, String stableKey) {
-        return graph.nodes().stream()
-                .filter(node -> stableKey.equals(node.stableKey()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException(
-                        "missing graph node " + stableKey));
-    }
-
-    private static boolean associationMetadataMatches(
-            UmlAssociation association, GraphModel.Relationship relationship,
-            boolean associationClass) {
-        Map<String, String> properties = relationship.properties();
-        if (!(association.key().equals(properties.get(
-                        Uml2GraphEncodingContract.Property.ASSOCIATION_KEY))
-                && association.name().equals(properties.get(
-                        Uml2GraphEncodingContract.Property.ASSOCIATION_NAME))
-                && association.sourceClassKey().equals(properties.get(
-                        Uml2GraphEncodingContract.Property.SOURCE_CLASS_KEY))
-                && association.sourceRole().equals(properties.get(
-                        Uml2GraphEncodingContract.Property.SOURCE_ROLE))
-                && String.valueOf(association.sourceLower()).equals(properties.get(
-                        Uml2GraphEncodingContract.Property.SOURCE_LOWER))
-                && String.valueOf(association.sourceUpper()).equals(properties.get(
-                        Uml2GraphEncodingContract.Property.SOURCE_UPPER))
-                && association.targetClassKey().equals(properties.get(
-                        Uml2GraphEncodingContract.Property.TARGET_CLASS_KEY))
-                && association.targetRole().equals(properties.get(
-                        Uml2GraphEncodingContract.Property.TARGET_ROLE))
-                && String.valueOf(association.targetLower()).equals(properties.get(
-                        Uml2GraphEncodingContract.Property.TARGET_LOWER))
-                && String.valueOf(association.targetUpper()).equals(properties.get(
-                        Uml2GraphEncodingContract.Property.TARGET_UPPER))
-                && String.valueOf(association.isOrdered()).equals(properties.get(
-                        Uml2GraphEncodingContract.Property.ORDERED))
-                && String.valueOf(association.isUnique()).equals(properties.get(
-                        Uml2GraphEncodingContract.Property.UNIQUE))
-                && association.associationKind().name().equals(
-                        properties.get(Uml2GraphEncodingContract.Property.ASSOCIATION_KIND))
-                && association.qualifierEnd().name().equals(properties.get(
-                        Uml2GraphEncodingContract.Property.QUALIFIER_END))
-                && String.valueOf(association.sourceEndQualifiers().size())
-                        .equals(properties.get(
-                                Uml2GraphEncodingContract.Property.SOURCE_QUALIFIER_COUNT))
-                && String.valueOf(association.targetEndQualifiers().size())
-                        .equals(properties.get(
-                                Uml2GraphEncodingContract.Property.TARGET_QUALIFIER_COUNT))
-                && String.valueOf(associationClass).equals(
-                        properties.get(Uml2GraphEncodingContract.Property.IS_ASSOCIATION_CLASS)))) {
-            return false;
-        }
-        for (int index = 0; index < association.sourceEndQualifiers().size(); index++) {
-            UmlQualifier qualifier = association.sourceEndQualifiers().get(index);
-            if (!qualifier.name().equals(properties.get(
-                    "sourceQualifier::" + index + "::name"))
-                    || !qualifier.declaredType().toString().equals(properties.get(
-                            "sourceQualifier::" + index + "::type"))) {
-                return false;
-            }
-        }
-        for (int index = 0; index < association.targetEndQualifiers().size(); index++) {
-            UmlQualifier qualifier = association.targetEndQualifiers().get(index);
-            if (!qualifier.name().equals(properties.get(
-                    "targetQualifier::" + index + "::name"))
-                    || !qualifier.declaredType().toString().equals(properties.get(
-                            "targetQualifier::" + index + "::type"))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static String simpleClassLabel(String qualifiedName) {
-        String label = qualifiedName;
-        for (String separator : List.of("::", "/", "#", ".")) {
-            int index = label.lastIndexOf(separator);
-            if (index >= 0 && index + separator.length() < label.length()) {
-                label = label.substring(index + separator.length());
-            }
-        }
-        return label.isBlank() ? "Object" : label;
-    }
-
     private static Result<Witness> checkAttributes(SchemaModel sm, Snapshot sn, GraphModel g,
                                                     Map<String, String> mu) {
         int expectedSlots = 0;
         for (Snapshot.ObjectDef o : sn.objects()) {
             for (Map.Entry<String, OclValue> slot : sn.attributeSlots(o.stableId()).entrySet()) {
-                UmlAttribute declared = nearestAttribute(sm, o.dynamicClassKey(), slot.getKey());
+                UmlAttribute declared = GraphObservation.nearestAttribute(sm, o.dynamicClassKey(), slot.getKey());
                 if (declared == null) {
                     return failure("VALIDREP_UNKNOWN_SLOT", "unknown slot " + o.stableId()
                             + "." + slot.getKey());
@@ -574,7 +279,7 @@ public final class ValidRepChecker {
             UmlAssociation assoc = associationsByKey.get(r.properties().get(
                     Uml2GraphEncodingContract.Property.ASSOCIATION_KEY));
             if (assoc == null
-                    || !linkRelationshipType(assoc).equals(r.physicalType())
+                    || !MetamodelMapping.linkRelationshipType(assoc.associationKind()).equals(r.physicalType())
                     || !r.stableKey().equals(r.properties().get(
                             Uml2GraphEncodingContract.Property.LINK_KEY))
                     || !assoc.name().equals(r.properties().get(
@@ -600,9 +305,9 @@ public final class ValidRepChecker {
             String occurrenceKey = GraphKey.object(
                     g.modelKey(), link.associationClassObjectStableId);
             List<GraphModel.Relationship> sourceEdges = g.outgoing(occurrenceKey,
-                    GraphModel.associationClassSourceParticipant(assoc.key()));
+                    GraphModel.ASSOCIATION_CLASS_SOURCE_PARTICIPANT);
             List<GraphModel.Relationship> targetEdges = g.outgoing(occurrenceKey,
-                    GraphModel.associationClassTargetParticipant(assoc.key()));
+                    GraphModel.ASSOCIATION_CLASS_TARGET_PARTICIPANT);
             if (sourceEdges.size() != 1 || targetEdges.size() != 1
                     || !GraphKey.object(g.modelKey(), link.sourceStableId)
                             .equals(sourceEdges.get(0).targetKey())
@@ -773,7 +478,7 @@ public final class ValidRepChecker {
             for (List<String> prefix : keys) {
                 for (OclValue value : declaration.finiteDomain()) {
                     List<String> key = new ArrayList<>(prefix);
-                    key.add(qualifierPayload(declaration.declaredType(), value));
+                    key.add(GraphValueCodec.qualifierPayload(declaration.declaredType(), value));
                     expanded.add(List.copyOf(key));
                 }
             }
@@ -824,22 +529,6 @@ public final class ValidRepChecker {
         return attributes;
     }
 
-    private static UmlAttribute nearestAttribute(SchemaModel sm, String classKey, String name) {
-        UmlAttribute direct = sm.attribute(classKey, name);
-        if (direct != null) {
-            return direct;
-        }
-        if (sm.clazz(classKey) != null) {
-            for (String parent : sm.clazz(classKey).directSuperclassKeys()) {
-                UmlAttribute inherited = nearestAttribute(sm, parent, name);
-                if (inherited != null) {
-                    return inherited;
-                }
-            }
-        }
-        return null;
-    }
-
     private static List<String> qualifierPayloadsForEnd(UmlAssociation association,
                                                          Snapshot.LinkDef link,
                                                          boolean sourceEnd) {
@@ -854,7 +543,7 @@ public final class ValidRepChecker {
                 throw new GraphValueCodec.CodecException("G_CODEC_CARRIER",
                         "qualifier value is not an OCL scalar");
             }
-            result.add(qualifierPayload(declarations.get(i).declaredType(), value));
+            result.add(GraphValueCodec.qualifierPayload(declarations.get(i).declaredType(), value));
         }
         return List.copyOf(result);
     }
@@ -887,7 +576,7 @@ public final class ValidRepChecker {
                                 + association.name() + "." + declaration.name());
             }
             GraphValueCodec.validateObjectReference(declaration.declaredType(), value, sm, sn);
-            payloads.add(qualifierPayload(declaration.declaredType(), value));
+            payloads.add(GraphValueCodec.qualifierPayload(declaration.declaredType(), value));
         }
         return Result.success(new Witness(Map.of()));
     }
@@ -912,33 +601,7 @@ public final class ValidRepChecker {
                 || GraphModel.LINK_COMPOSE_OF.equals(type);
     }
 
-    private static String schemaRelationshipType(UmlAssociation association) {
-        return switch (association.associationKind()) {
-            case ASSOCIATION -> GraphModel.ASSOCIATE_WITH;
-            case AGGREGATION -> GraphModel.AGGREGATES;
-            case COMPOSITION -> GraphModel.COMPOSE_OF;
-        };
-    }
-
-    private static String linkRelationshipType(UmlAssociation association) {
-        return switch (association.associationKind()) {
-            case ASSOCIATION -> GraphModel.LINK_ASSOCIATE_WITH;
-            case AGGREGATION -> GraphModel.LINK_AGGREGATES;
-            case COMPOSITION -> GraphModel.LINK_COMPOSE_OF;
-        };
-    }
-
-    private static String qualifierPayload(org.uet.dse.ocl2cypher.runtime.OclType declared,
-                                           OclValue value) {
-        GraphValueCodec.EncodedValue encoded = GraphValueCodec.encode(declared, value);
-        if (!GraphValueCodec.DEFINED.equals(encoded.state())) {
-            throw new GraphValueCodec.CodecException("G_CODEC_QUALIFIER_BOTTOM",
-                    "qualifiers must be defined scalar values");
-        }
-        return encoded.payload();
-    }
-
-    private static Result<Witness> failure(String code, String message) {
+    static Result<Witness> failure(String code, String message) {
         return Result.failure(Stage.F_G, code, message == null ? code : message);
     }
 }

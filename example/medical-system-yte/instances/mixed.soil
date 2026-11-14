@@ -1,0 +1,155 @@
+-- Independent USE-only snapshot; outside compiler input profile.
+-- Hospitals: copy_0_h2 intentionally violates PositiveBudget.
+!new Hospital('copy_0_h1')
+!new Hospital('copy_0_h2')
+!set copy_0_h1.name := 'Central Hospital'
+!set copy_0_h1.totalBudget := 500000.0
+!set copy_0_h1.location := 'Ha Noi'
+!set copy_0_h1.totalBeds := 1000
+!set copy_0_h1.availableICUs := 50
+!set copy_0_h1.rating := 4.8
+!set copy_0_h1.isPublic := true
+!set copy_0_h1.emergencyContact := '19001000'
+!set copy_0_h2.name := 'Budget Boundary Hospital'
+!set copy_0_h2.totalBudget := -1.0
+
+!new Department('copy_0_d1')
+!new Department('copy_0_d2')
+!set copy_0_d1.deptName := 'Emergency'
+!set copy_0_d2.deptName := 'Cardiology'
+!insert (copy_0_h1, copy_0_d1) into HospitalStructure
+!insert (copy_0_h2, copy_0_d2) into HospitalStructure
+
+!new Nurse('copy_0_n1')
+!set copy_0_n1.name := 'Nurse One'
+!set copy_0_n1.age := 28
+!set copy_0_n1.gender := Gender::FEMALE
+!set copy_0_n1.nurseID := 'N001'
+!set copy_0_n1.isHeadNurse := true
+!set copy_0_n1.certificationLevel := 3
+!set copy_0_n1.assignedWard := 'Emergency'
+!set copy_0_n1.onCall := true
+!set copy_0_n1.hourlyRate := 25.0
+!set copy_0_n1.lastTrainingDate := '2026-01-01'
+
+-- copy_0_dr2 intentionally has a four-room shift and no assigned nurse.
+!new Doctor('copy_0_dr1')
+!new Doctor('copy_0_dr2')
+!set copy_0_dr1.name := 'Doctor One'
+!set copy_0_dr1.age := 45
+!set copy_0_dr1.gender := Gender::MALE
+!set copy_0_dr1.doctorID := 'D001'
+!set copy_0_dr1.specialty := Specialty::EMERGENCY
+!set copy_0_dr1.consultationFee := 200.0
+!set copy_0_dr1.yearsOfExperience := 15
+!set copy_0_dr1.qualification := 'MD'
+!set copy_0_dr1.isAvailable := true
+!set copy_0_dr1.shiftSchedule := Sequence{Set{101, 102}, Set{201}, Set{101, 102}}
+!set copy_0_dr1.assignedNurses := Set{copy_0_n1}
+!set copy_0_dr1.collaborationHistory := Sequence{Set{copy_0_dr2}}
+!set copy_0_dr2.name := 'Doctor Two'
+!set copy_0_dr2.age := 50
+!set copy_0_dr2.gender := Gender::OTHER
+!set copy_0_dr2.doctorID := 'D002'
+!set copy_0_dr2.specialty := Specialty::CARDIOLOGY
+!set copy_0_dr2.consultationFee := 250.0
+!set copy_0_dr2.yearsOfExperience := 20
+!set copy_0_dr2.qualification := 'MD'
+!set copy_0_dr2.isAvailable := false
+!set copy_0_dr2.shiftSchedule := Sequence{Set{301, 302, 303, 304}}
+!set copy_0_dr2.assignedNurses := Set{}
+!set copy_0_dr2.collaborationHistory := Sequence{Set{copy_0_dr1}}
+
+!new Medication('copy_0_m1')
+!new Medication('copy_0_m2')
+!set copy_0_m1.brandName := 'Ascriptin'
+!set copy_0_m1.genericName := 'Aspirin'
+!set copy_0_m1.price := 15.5
+!set copy_0_m2.brandName := 'BoundaryDrug'
+!set copy_0_m2.genericName := 'Boundary'
+!set copy_0_m2.price := -1.0
+
+!new Disease('copy_0_dis1')
+!new Disease('copy_0_dis2')
+!set copy_0_dis1.diseaseName := 'Influenza'
+!set copy_0_dis2.diseaseName := ''
+
+-- copy_0_p2 intentionally violates the age, physician and nested-batch fixtures.
+!new Patient('copy_0_p1')
+!new Patient('copy_0_p2')
+!set copy_0_p1.name := 'Patient One'
+!set copy_0_p1.age := 30
+!set copy_0_p1.gender := Gender::FEMALE
+!set copy_0_p1.patientID := 'P001'
+!set copy_0_p1.isEmergency := true
+!set copy_0_p1.bloodType := BloodType::A_POS
+!set copy_0_p1.weight := 60.0
+!set copy_0_p1.height := 165.0
+!set copy_0_p1.symptoms := Sequence{'Fever', 'Headache'}
+!set copy_0_p1.treatmentHistory := Set{Sequence{'Admission', null, 'Blood test'}, Sequence{'Medication', 'Medication'}}
+!set copy_0_p1.allergies := Set{'Pollen'}
+!set copy_0_p1.attendingPhysicians := Set{copy_0_dr1}
+!set copy_0_p1.currentMeds := Set{copy_0_m1}
+!set copy_0_p1.prescriptionHistory := Sequence{Sequence{copy_0_m1}, Sequence{copy_0_m2, copy_0_m1}, Sequence{copy_0_m1, copy_0_m2, copy_0_m1}}
+!set copy_0_p2.name := 'Patient Two'
+!set copy_0_p2.age := -2
+!set copy_0_p2.gender := Gender::MALE
+!set copy_0_p2.patientID := 'P002'
+!set copy_0_p2.isEmergency := false
+!set copy_0_p2.bloodType := BloodType::O_NEG
+!set copy_0_p2.weight := 70.0
+!set copy_0_p2.height := 175.0
+!set copy_0_p2.symptoms := Sequence{}
+!set copy_0_p2.treatmentHistory := Set{Sequence{}}
+!set copy_0_p2.allergies := Set{}
+!set copy_0_p2.attendingPhysicians := Set{}
+!set copy_0_p2.currentMeds := Set{}
+!set copy_0_p2.prescriptionHistory := Sequence{Sequence{}}
+
+!set copy_0_dr1.patientQueue := Sequence{copy_0_p1}
+!set copy_0_dr2.patientQueue := Sequence{copy_0_p2}
+!set copy_0_h1.medicalStaff := Set{copy_0_dr1, copy_0_n1}
+!set copy_0_h2.medicalStaff := Set{copy_0_dr2}
+
+!new MedicalRecord('copy_0_mr1')
+!new MedicalRecord('copy_0_mr2')
+!insert (copy_0_p1, copy_0_mr1) into PatientRecord
+!insert (copy_0_p2, copy_0_mr2) into PatientRecord
+!new RecordEntry('copy_0_re1')
+!set copy_0_re1.entryDate := '2026-03-01'
+!set copy_0_re1.description := 'Stable'
+!insert (copy_0_mr1, copy_0_re1) into RecordEntries
+
+!new Dosage('copy_0_dosage1')
+!set copy_0_dosage1.patientNumber := 1
+!set copy_0_dosage1.adminMethod := Administration::ENTERAL
+!set copy_0_dosage1.brandName := Brand::ASCRIPTIN
+!new DosagePlan('copy_0_plan1')
+
+
+!new Hospitalization('copy_0_hosp1') between (copy_0_p1, copy_0_d1)
+!set copy_0_hosp1.admissionDate := '2026-03-01'
+!set copy_0_hosp1.roomNumber := 502
+!new Prescription('copy_0_presc1') between (copy_0_dr1, copy_0_p1)
+!set copy_0_presc1.prescriptionID := 'RX001'
+!set copy_0_presc1.dosageInstructions := 'Twice daily'
+
+!new Prescription('copy_0_presc2') between (copy_0_dr2, copy_0_p2)
+!set copy_0_presc2.prescriptionID := 'RX002'
+!set copy_0_presc2.dosageInstructions := 'Daily'
+!insert (copy_0_dr1, copy_0_p1, copy_0_d1) into Appointment
+!insert (copy_0_dr1, copy_0_p1, copy_0_d2) into Appointment
+!insert (copy_0_dr1, copy_0_p2, copy_0_d1) into Appointment
+!insert (copy_0_dr1, copy_0_p2, copy_0_d2) into Appointment
+!insert (copy_0_dr2, copy_0_p1, copy_0_d1) into Appointment
+!insert (copy_0_dr2, copy_0_p1, copy_0_d2) into Appointment
+!insert (copy_0_dr2, copy_0_p2, copy_0_d1) into Appointment
+!insert (copy_0_dr2, copy_0_p2, copy_0_d2) into Appointment
+!insert (copy_0_dr1, copy_0_p1, copy_0_dis1) into Consultation
+!insert (copy_0_dr1, copy_0_p1, copy_0_dis2) into Consultation
+!insert (copy_0_dr1, copy_0_p2, copy_0_dis1) into Consultation
+!insert (copy_0_dr1, copy_0_p2, copy_0_dis2) into Consultation
+!insert (copy_0_dr2, copy_0_p1, copy_0_dis1) into Consultation
+!insert (copy_0_dr2, copy_0_p1, copy_0_dis2) into Consultation
+!insert (copy_0_dr2, copy_0_p2, copy_0_dis1) into Consultation
+!insert (copy_0_dr2, copy_0_p2, copy_0_dis2) into Consultation

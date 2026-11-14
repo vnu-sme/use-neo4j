@@ -35,13 +35,11 @@ public final class UmlAssociation {
     private final String targetRole;
     private final int targetLower;
     private final int targetUpper;
-    private final List<String> qualifierNames;
     private final List<UmlQualifier> qualifiers;
     private final List<UmlQualifier> sourceEndQualifiers;
     private final List<UmlQualifier> targetEndQualifiers;
     private final QualifierEnd qualifierEnd;
     private final AssociationKind associationKind;
-    private final boolean toMany;
     private final boolean ordered;
     private final boolean unique;
 
@@ -67,26 +65,6 @@ public final class UmlAssociation {
                 qualifierDeclarations,
                 qualifierDeclarations.isEmpty() ? QualifierEnd.NONE : QualifierEnd.TARGET,
                 ordered, unique, AssociationKind.ASSOCIATION);
-    }
-
-    public UmlAssociation(String key,
-                          String name,
-                          String sourceClassKey,
-                          String sourceRole,
-                          int sourceLower,
-                          int sourceUpper,
-                          String targetClassKey,
-                          String targetRole,
-                          int targetLower,
-                          int targetUpper,
-                          List<?> qualifierDeclarations,
-                          QualifierEnd qualifierEnd,
-                          boolean ordered,
-                          boolean unique) {
-        this(key, name, sourceClassKey, sourceRole, sourceLower, sourceUpper,
-                targetClassKey, targetRole, targetLower, targetUpper,
-                qualifierDeclarations, qualifierEnd, ordered, unique,
-                AssociationKind.ASSOCIATION);
     }
 
     public UmlAssociation(String key,
@@ -153,14 +131,12 @@ public final class UmlAssociation {
                 sourceEndQualifiers);
         allQualifiers.addAll(targetEndQualifiers);
         this.qualifiers = List.copyOf(allQualifiers);
-        this.qualifierNames = this.qualifiers.stream().map(UmlQualifier::name).toList();
         this.qualifierEnd = sourceEndQualifiers.isEmpty()
                 ? targetEndQualifiers.isEmpty() ? QualifierEnd.NONE : QualifierEnd.TARGET
                 : targetEndQualifiers.isEmpty() ? QualifierEnd.SOURCE : QualifierEnd.BOTH;
         this.associationKind = Objects.requireNonNull(associationKind, "association kind");
         this.ordered = ordered;
         this.unique = unique;
-        this.toMany = targetUpper == -1 || targetUpper > 1;
     }
 
     private static List<UmlQualifier> typedQualifiers(List<?> declarations, String label) {
@@ -242,21 +218,12 @@ public final class UmlAssociation {
         return targetRole;
     }
 
-    /** True when navigation from the SOURCE end yields a multi-valued target. */
-    public boolean isToMany() {
-        return toMany;
-    }
-
     public boolean isOrdered() {
         return ordered;
     }
 
     public boolean isUnique() {
         return unique;
-    }
-
-    public List<String> qualifierNames() {
-        return qualifierNames;
     }
 
     public List<UmlQualifier> qualifiers() {

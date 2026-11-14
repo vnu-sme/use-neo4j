@@ -25,6 +25,7 @@ import org.neo4j.driver.GraphDatabase;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.SessionConfig;
 import org.uet.dse.ocl2cypher.cypher.CypherAst;
+import org.uet.dse.ocl2cypher.core.CoreInterpreter;
 import org.uet.dse.ocl2cypher.execution.Neo4jExecutionAdapter;
 import org.uet.dse.ocl2cypher.execution.UseEvaluationAdapter;
 import org.uet.dse.ocl2cypher.graph.GraphBuilder;
@@ -38,7 +39,7 @@ import org.uet.dse.ocl2cypher.qcyp.QInterpreter;
  *
  * <p>This is deliberately named {@code IT}: it is not part of the ordinary unit-test
  * count. Run it through {@code scripts/Run-ExampleCorpusExperiment.ps1}. The local
- * experiment compares the official USE evaluator with Q-over-the-canonical-graph.
+ * experiment compares the official USE evaluator with Core and Q-over-the-canonical-graph.
  * With explicit opt-in it additionally materializes the same graph and compares the
  * generated Cypher result on a live Neo4j database.
  */
@@ -48,7 +49,7 @@ final class ExampleCorpusExperimentIT {
     private static final Pattern MODEL_DECLARATION = Pattern.compile(
             "(?m)^(\\s*model\\s+)[A-Za-z_][A-Za-z0-9_]*\\s*$");
 
-    private static final List<Subject> SUBJECTS = List.of(
+    private static final List<Subject> BASE_SUBJECTS = List.of(
             subject("shop", "shop-use-soil/shop.use", "shop-use-soil/shop.soil",
                     null, null, 2),
             subject("advanced", "advanced-adapters/advanced.use",
@@ -101,6 +102,8 @@ final class ExampleCorpusExperimentIT {
 
     @Test
     void evaluateExampleCorpus() throws Exception {
+        List<Subject> subjects = subjects();
+        int sourceOnlySnapshots = 0;
         boolean live = Boolean.parseBoolean(env("OCL2CYPHER_EXPERIMENT_LIVE", "false"));
         String runId = System.getProperty("ocl2cypher.experimentRunId",
                 "manual-" + UUID.randomUUID().toString().replace("-", ""));
@@ -129,27 +132,37 @@ final class ExampleCorpusExperimentIT {
                 writeNeo4jEnvironment(output, session);
             }
 
-            for (Subject subject : SUBJECTS) {
+            for (Subject subject : subjects) {
                 evaluateSubject(subject, runId, live, session, output,
                         invariantRows, subjectRows, boundaryRows, failures, counters);
             }
             evaluateBoundaries(boundaryRows, failures);
+            if (Boolean.getBoolean("ocl2cypher.allSnapshots")) {
+                try {
+                    sourceOnlySnapshots = evaluateSourceOnlySnapshots(output);
+                } catch (Exception | AssertionError error) {
+                    failures.add("source-only: " + error.getMessage());
+                    throw error;
+                }
+            }
         } finally {
             if (session != null) session.close();
             if (driver != null) driver.close();
             writeReports(output, runId, live, invariantRows, subjectRows,
-                    boundaryRows, failures, counters);
+                    boundaryRows, failures, counters, subjects, sourceOnlySnapshots);
         }
 
-        int expectedAdmitted = SUBJECTS.stream().mapToInt(Subject::expectedInvariants).sum()
-                - EXPECTED_INVARIANT_REJECTIONS.size() - EXCLUDED_OUT_OF_SCOPE.size();
+        int expectedRejections = profileEntries(subjects, EXPECTED_INVARIANT_REJECTIONS.keySet());
+        int expectedExclusions = profileEntries(subjects, EXCLUDED_OUT_OF_SCOPE);
+        int expectedAdmitted = subjects.stream().mapToInt(Subject::expectedInvariants).sum()
+                - expectedRejections - expectedExclusions;
         assertEquals(expectedAdmitted,
                 counters[0], "unexpected number of successful USE/Q comparisons");
-        assertEquals(EXPECTED_INVARIANT_REJECTIONS.size(), counters[3],
+        assertEquals(expectedRejections, counters[3],
                 "unexpected number of validated invariant rejections");
         assertEquals(2, counters[4],
                 "reviewed CSV audit changed; inspect the USE oracle differences");
-        assertEquals(EXCLUDED_OUT_OF_SCOPE.size(), counters[5],
+        assertEquals(expectedExclusions, counters[5],
                 "unexpected number of out-of-scope exclusions");
         if (live) {
             assertEquals(counters[0], counters[1],
@@ -187,6 +200,10 @@ final class ExampleCorpusExperimentIT {
 
             Map<String, Set<String>> reviewed = subject.expectedCsv() == null
                     ? Map.of() : readExpected(subject.expectedCsv());
+            if (!subject.id().equals(subject.profile())
+                    && !reviewed.keySet().equals(use.violations().keySet())) {
+                throw new IllegalStateException("new snapshot oracle has missing or extra invariants");
+            }
 
             var loaded = UseSoilInput.load(prepared.useFile(), prepared.soilFile());
             if (loaded.isFailure()) {
@@ -220,7 +237,7 @@ final class ExampleCorpusExperimentIT {
                     String reviewedStatus = reviewed.isEmpty() ? "NOT_AVAILABLE"
                             : reviewed.getOrDefault(key, Set.of()).equals(useIds)
                                     ? "PASS" : "MISMATCH";
-                    String experimentKey = subject.id() + "/" + key;
+                    String experimentKey = subject.profile() + "/" + key;
                     if (EXCLUDED_OUT_OF_SCOPE.contains(experimentKey)) {
                         counters[5]++;
                         invariantRows.add(InvariantRow.excluded(subject.id(), key,
@@ -228,11 +245,16 @@ final class ExampleCorpusExperimentIT {
                                 "Outside Supported: isUnique is an implementation extension"));
                         continue;
                     }
-                    if (reviewedStatus.equals("MISMATCH")) counters[4]++;
+                    if (reviewedStatus.equals("MISMATCH")) {
+                        counters[4]++;
+                        if (!subject.id().equals(subject.profile())) {
+                            failures.add(subject.id() + "/" + key + ": new snapshot oracle mismatch");
+                        }
+                    }
                     String expectedRejection = EXPECTED_INVARIANT_REJECTIONS.get(experimentKey);
                     long compileStarted = System.nanoTime();
                     var compiled = ModelInputCompiler.compile(input, key,
-                            CypherAst.Dialect.CYPHER_5);
+                            CypherAst.Dialect.CYPHER_5, built.value());
                     long compileNanos = System.nanoTime() - compileStarted;
                     if (compiled.isFailure()) {
                         String message = compiled.primaryDiagnostic().toString();
@@ -256,15 +278,17 @@ final class ExampleCorpusExperimentIT {
                     }
                     admitted++;
 
+                    Set<String> coreIds = Set.copyOf(CoreInterpreter.violations(
+                            input.schema(), input.snapshot(), compiled.value().core()));
                     long qStarted = System.nanoTime();
                     Set<String> qIds = Set.copyOf(QInterpreter.violations(
                             input.schema(), compiled.value().graph().graph(),
                             compiled.value().core(), compiled.value().query()));
                     long qNanos = System.nanoTime() - qStarted;
-                    boolean localAgreement = useIds.equals(qIds);
+                    boolean localAgreement = useIds.equals(coreIds) && useIds.equals(qIds);
                     if (!localAgreement) {
                         failures.add(subject.id() + "/" + key
-                                + ": USE=" + useIds + ", Q=" + qIds);
+                                + ": USE=" + useIds + ", Core=" + coreIds + ", Q=" + qIds);
                     } else {
                         counters[0]++;
                     }
@@ -274,6 +298,9 @@ final class ExampleCorpusExperimentIT {
                     Files.createDirectories(queryDirectory);
                     Files.writeString(queryDirectory.resolve(fileName(key) + ".cypher"),
                             cypher, StandardCharsets.UTF_8);
+                    Files.write(queryDirectory.resolve(fileName(key) + ".ids.tsv"),
+                            List.of("engine\tids", "USE\t" + ids(useIds),
+                                    "Core\t" + ids(coreIds), "Q\t" + ids(qIds)), StandardCharsets.UTF_8);
                     counters[2]++;
 
                     String liveStatus = "NOT_RUN";
@@ -423,7 +450,8 @@ final class ExampleCorpusExperimentIT {
 
     private static void writeReports(Path output, String runId, boolean live,
             List<InvariantRow> invariantRows, List<SubjectRow> subjectRows,
-            List<BoundaryRow> boundaryRows, List<String> failures, int[] counters)
+            List<BoundaryRow> boundaryRows, List<String> failures, int[] counters,
+            List<Subject> subjects, int sourceOnlySnapshots)
             throws Exception {
         writeCsv(output.resolve("subjects.csv"), SubjectRow.header(), subjectRows);
         writeCsv(output.resolve("invariants.csv"), InvariantRow.header(), invariantRows);
@@ -434,8 +462,10 @@ final class ExampleCorpusExperimentIT {
                 + "  \"liveNeo4j\": " + live + ",\n"
                 + "  \"subjects\": " + subjectRows.size() + ",\n"
                 + "  \"expectedInvariantEvaluations\": "
-                + SUBJECTS.stream().mapToInt(Subject::expectedInvariants).sum() + ",\n"
+                + subjects.stream().mapToInt(Subject::expectedInvariants).sum() + ",\n"
+                + "  \"sourceOnlySnapshots\": " + sourceOnlySnapshots + ",\n"
                 + "  \"localUseQComparisonsPassed\": " + counters[0] + ",\n"
+                + "  \"localUseCoreQComparisonsPassed\": " + counters[0] + ",\n"
                 + "  \"liveUseNeo4jComparisonsPassed\": " + counters[1] + ",\n"
                 + "  \"generatedQueries\": " + counters[2] + ",\n"
                 + "  \"expectedInvariantRejectionsPassed\": " + counters[3] + ",\n"
@@ -469,17 +499,77 @@ final class ExampleCorpusExperimentIT {
         Files.write(path, lines, StandardCharsets.UTF_8);
     }
 
+    private static List<String[]> snapshotRows() throws Exception {
+        List<String> lines = Files.readAllLines(EXAMPLES.resolve("snapshot-manifest.tsv"),
+                StandardCharsets.UTF_8);
+        if (!lines.get(0).equals("id\tprofile\tscope\tmodel\tsoil\tocl\texpected\tinvariants\trejections\texclusions")) {
+            throw new IllegalArgumentException("unexpected snapshot manifest header");
+        }
+        List<String[]> rows = new ArrayList<>();
+        Set<String> ids = new LinkedHashSet<>();
+        for (String line : lines.subList(1, lines.size())) {
+            String[] row = line.split("\t", -1);
+            if (row.length != 10 || !row[0].matches("[A-Za-z][A-Za-z0-9_-]+") || !ids.add(row[0])
+                    || !Set.of("PIPELINE", "USE_ONLY").contains(row[2])) {
+                throw new IllegalArgumentException("invalid snapshot manifest row: " + line);
+            }
+            for (int index : new int[]{3, 4, 5, 6}) {
+                if (row[index].isEmpty() && index == 5) continue;
+                Path file = EXAMPLES.resolve(row[index]).normalize();
+                if (!file.startsWith(EXAMPLES) || !Files.isRegularFile(file)) {
+                    throw new IllegalArgumentException("snapshot file missing or outside example: " + file);
+                }
+            }
+            rows.add(row);
+        }
+        return rows;
+    }
+
+    private static List<Subject> subjects() throws Exception {
+        List<Subject> result = new ArrayList<>(BASE_SUBJECTS);
+        if (Boolean.getBoolean("ocl2cypher.allSnapshots")) {
+            for (String[] row : snapshotRows()) {
+                if (!row[2].equals("PIPELINE")) continue;
+                result.add(new Subject(row[0], row[1], EXAMPLES.resolve(row[3]),
+                        EXAMPLES.resolve(row[4]), row[5].isEmpty() ? null : EXAMPLES.resolve(row[5]),
+                        EXAMPLES.resolve(row[6]), Integer.parseInt(row[7])));
+            }
+        }
+        return result;
+    }
+
+    private static int profileEntries(List<Subject> subjects, Set<String> entries) {
+        return subjects.stream().mapToInt(subject -> (int) entries.stream()
+                .filter(key -> key.startsWith(subject.profile() + "/")).count()).sum();
+    }
+
+    private static int evaluateSourceOnlySnapshots(Path output) throws Exception {
+        List<String> results = new ArrayList<>(List.of("snapshot,invariants,objectEvaluations,status"));
+        for (String[] row : snapshotRows()) {
+            if (!row[2].equals("USE_ONLY")) continue;
+            var use = UseEvaluationAdapter.evaluate(EXAMPLES.resolve(row[3]),
+                    EXAMPLES.resolve(row[5]), EXAMPLES.resolve(row[4]));
+            assertEquals(Integer.parseInt(row[7]), use.violations().size(), row[0]);
+            assertEquals(readExpected(EXAMPLES.resolve(row[6])), use.violations(), row[0]);
+            var input = UseSoilInput.load(EXAMPLES.resolve(row[3]), EXAMPLES.resolve(row[4]));
+            assertTrue(input.isFailure(), row[0] + " must remain outside the compiler input profile");
+            assertEquals("E_USE_SOIL_INPUT", input.primaryDiagnostic().code(), row[0]);
+            results.add(csv(row[0], use.violations().size(), use.objectEvaluations(), "USE_ONLY_PASS"));
+        }
+        Files.write(output.resolve("source-only.csv"), results, StandardCharsets.UTF_8);
+        return results.size() - 1;
+    }
+
     private static Subject subject(String id, String use, String soil, String ocl,
             String expected, int invariantCount) {
-        return new Subject(id, EXAMPLES.resolve(use), EXAMPLES.resolve(soil),
+        return new Subject(id, id, EXAMPLES.resolve(use), EXAMPLES.resolve(soil),
                 ocl == null ? null : EXAMPLES.resolve(ocl),
                 expected == null ? null : EXAMPLES.resolve(expected), invariantCount);
     }
 
     private static String namespace(String subject, String runId) {
-        String suffix = (subject + runId).replaceAll("[^A-Za-z0-9]", "");
-        if (suffix.length() > 48) suffix = suffix.substring(suffix.length() - 48);
-        return "Exp" + suffix;
+        return "Exp" + UUID.nameUUIDFromBytes((subject + "\u0000" + runId)
+                .getBytes(StandardCharsets.UTF_8)).toString().replace("-", "");
     }
 
     private static String ids(Set<String> values) {
@@ -521,7 +611,7 @@ final class ExampleCorpusExperimentIT {
         String csv();
     }
 
-    private record Subject(String id, Path useFile, Path soilFile, Path oclFile,
+    private record Subject(String id, String profile, Path useFile, Path soilFile, Path oclFile,
                            Path expectedCsv, int expectedInvariants) {
     }
 

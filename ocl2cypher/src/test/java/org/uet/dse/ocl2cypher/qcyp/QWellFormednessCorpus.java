@@ -1,5 +1,7 @@
 package org.uet.dse.ocl2cypher.qcyp;
 
+import org.uet.dse.ocl2cypher.support.CapabilityEvidence;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
@@ -11,7 +13,6 @@ import org.uet.dse.ocl2cypher.core.CoreLowering;
 import org.uet.dse.ocl2cypher.core.CoreValidator;
 import org.uet.dse.ocl2cypher.diagnostics.SourceSpan;
 import org.uet.dse.ocl2cypher.runtime.OclType;
-import org.uet.dse.ocl2cypher.source.model.CapabilityMatrix;
 import org.uet.dse.ocl2cypher.source.model.SchemaModel;
 import org.uet.dse.ocl2cypher.source.model.UmlAssociation;
 import org.uet.dse.ocl2cypher.source.model.UmlAttribute;
@@ -31,7 +32,7 @@ public final class QWellFormednessCorpus {
     public static Counts run() {
         SchemaModel schema = schema();
         int translated = 0;
-        for (var entry : CapabilityMatrix.entries().entrySet()) {
+        for (var entry : CapabilityEvidence.entries().entrySet()) {
             if (!entry.getValue().admitted()) continue;
             requireTranslatedValue(schema, entry.getValue().surfaceWitness());
             translated++;

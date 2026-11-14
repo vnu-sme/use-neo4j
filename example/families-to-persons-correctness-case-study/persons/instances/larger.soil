@@ -1,0 +1,93 @@
+-- Independent snapshot; load into a fresh USE state.
+-- Scenario: larger. Invariant violations may be intentional.
+!new PersonRegister('register_0')
+!set register_0.label := 'complete'
+!new Male('person_0_0')
+!set person_0_0.name := ''
+!insert (register_0, person_0_0) into PersonRegistration
+!new Female('person_0_1')
+!insert (register_0, person_0_1) into PersonRegistration
+!new PersonRegister('register_1')
+!set register_1.label := 'partial'
+!new Male('person_1_0')
+!set person_1_0.name := 'Repeated'
+!insert (register_1, person_1_0) into PersonRegistration
+!new Female('person_1_1')
+!set person_1_1.name := 'Repeated'
+!insert (register_1, person_1_1) into PersonRegistration
+!new PersonRegister('register_2')
+!set register_2.label := 'partial'
+!new Male('person_2_0')
+!set person_2_0.name := 'Repeated'
+!insert (register_2, person_2_0) into PersonRegistration
+!new Female('person_2_1')
+!set person_2_1.name := 'Repeated'
+!insert (register_2, person_2_1) into PersonRegistration
+!new PersonRegister('register_3')
+!set register_3.label := 'partial'
+!new Male('person_3_0')
+!set person_3_0.name := 'Repeated'
+!insert (register_3, person_3_0) into PersonRegistration
+!new Female('person_3_1')
+!insert (register_3, person_3_1) into PersonRegistration
+!new PersonRegister('register_4')
+!set register_4.label := 'partial'
+!new Male('person_4_0')
+!set person_4_0.name := ''
+!insert (register_4, person_4_0) into PersonRegistration
+!new Female('person_4_1')
+!set person_4_1.name := ''
+!insert (register_4, person_4_1) into PersonRegistration
+!new PersonRegister('register_5')
+!set register_5.label := 'partial'
+!new Male('person_5_0')
+!set person_5_0.name := 'Repeated'
+!insert (register_5, person_5_0) into PersonRegistration
+!new Female('person_5_1')
+!set person_5_1.name := 'Repeated'
+!insert (register_5, person_5_1) into PersonRegistration
+!new PersonRegister('register_6')
+!set register_6.label := 'partial'
+!new Male('person_6_0')
+!set person_6_0.name := 'Repeated'
+!insert (register_6, person_6_0) into PersonRegistration
+!new Female('person_6_1')
+!insert (register_6, person_6_1) into PersonRegistration
+!new PersonRegister('register_7')
+!set register_7.label := 'partial'
+!new Male('person_7_0')
+!set person_7_0.name := 'Repeated'
+!insert (register_7, person_7_0) into PersonRegistration
+!new Female('person_7_1')
+!set person_7_1.name := 'Repeated'
+!insert (register_7, person_7_1) into PersonRegistration
+!new PersonRegister('register_8')
+!set register_8.label := 'partial'
+!new Male('person_8_0')
+!set person_8_0.name := ''
+!insert (register_8, person_8_0) into PersonRegistration
+!new Female('person_8_1')
+!set person_8_1.name := ''
+!insert (register_8, person_8_1) into PersonRegistration
+!new PersonRegister('register_9')
+!set register_9.label := 'partial'
+!new Male('person_9_0')
+!set person_9_0.name := 'Repeated'
+!insert (register_9, person_9_0) into PersonRegistration
+!new Female('person_9_1')
+!insert (register_9, person_9_1) into PersonRegistration
+!new PersonRegister('register_10')
+!set register_10.label := 'partial'
+!new Male('person_10_0')
+!set person_10_0.name := 'Repeated'
+!insert (register_10, person_10_0) into PersonRegistration
+!new Female('person_10_1')
+!set person_10_1.name := 'Repeated'
+!insert (register_10, person_10_1) into PersonRegistration
+!new PersonRegister('register_11')
+!set register_11.label := 'partial'
+!new Male('person_11_0')
+!set person_11_0.name := 'Repeated'
+!insert (register_11, person_11_0) into PersonRegistration
+!new Female('person_11_1')
+!set person_11_1.name := 'Repeated'

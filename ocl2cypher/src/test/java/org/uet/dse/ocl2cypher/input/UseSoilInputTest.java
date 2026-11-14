@@ -5,10 +5,17 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
+import java.nio.file.Files;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.uet.dse.ocl2cypher.api.FrontendCompiler;
-import org.uet.dse.ocl2cypher.execution.UseSoilNeo4jAction;
+import org.uet.dse.ocl2cypher.api.CoreOracle;
+import org.uet.dse.ocl2cypher.execution.UseEvaluationAdapter;
 import org.uet.dse.ocl2cypher.graph.GraphBuilder;
+import org.uet.dse.ocl2cypher.qcyp.QInterpreter;
 import org.uet.dse.ocl2cypher.runtime.OclValue;
 import org.uet.dse.ocl2cypher.source.model.QualifierValue;
 import org.uet.dse.ocl2cypher.source.model.UmlAssociation;
@@ -102,12 +109,14 @@ class UseSoilInputTest {
 
     @Test
     void preparesTheUseSoilGraphForNeo4jWithoutOpeningAConnection() throws Exception {
-        var prepared = UseSoilNeo4jAction.prepare(example("shop-use-soil", "shop.use"),
+        var loaded = UseSoilInput.load(example("shop-use-soil", "shop.use"),
                 example("shop-use-soil", "shop.soil"));
 
+        assertTrue(loaded.isSuccess(), () -> loaded.diagnostics().toString());
+        var prepared = GraphBuilder.build(loaded.value().schema(), loaded.value().snapshot());
         assertTrue(prepared.isSuccess(), () -> prepared.diagnostics().toString());
-        assertEquals("Shop", prepared.value().graph().graph().modelKey());
-        assertFalse(prepared.value().graph().graph().nodes().isEmpty());
+        assertEquals("Shop", prepared.value().graph().modelKey());
+        assertFalse(prepared.value().graph().nodes().isEmpty());
     }
 
     @Test
@@ -218,6 +227,94 @@ class UseSoilInputTest {
         assertTrue(loaded.isFailure());
         assertEquals("E_USE_SOIL_INPUT", loaded.primaryDiagnostic().code());
         assertTrue(loaded.primaryDiagnostic().message().contains("pre/postconditions"));
+    }
+
+    @Test
+    void loadsExternalOclAlongsideEmbeddedInvariants(@TempDir Path directory) throws Exception {
+        Path use = directory.resolve("model.use");
+        Path soil = directory.resolve("snapshot.soil");
+        Path ocl = directory.resolve("constraints.ocl");
+        Files.writeString(use, """
+                model ExternalOcl
+                class Person
+                attributes
+                  age : Integer
+                end
+                constraints
+                context Person inv Nonnegative:
+                  self.age >= 0
+                """);
+        Files.writeString(soil, """
+                !new Person('p1')
+                !set p1.age := 20
+                !new Person('p2')
+                !set p2.age := 15
+                """);
+        Files.writeString(ocl, """
+                -- Keep the source call syntax when projecting the USE model.
+                context Person inv Adult:
+                  not self.age.oclIsUndefined()
+                  and self.age >= 18
+                """);
+
+        var loaded = UseSoilInput.load(use, soil, ocl);
+        assertTrue(loaded.isSuccess(), () -> loaded.diagnostics().toString());
+        var input = loaded.value();
+        assertEquals(List.of("Adult", "Nonnegative"),
+                input.invariants().stream().map(SourceInvariant::name).toList());
+        assertEquals("self.age >= 0", input.invariants().get(1).body());
+        assertTrue(input.invariants().get(0).body().contains("oclIsUndefined()"));
+
+        var compiled = ModelInputCompiler.compile(input, "Adult",
+                org.uet.dse.ocl2cypher.cypher.CypherAst.Dialect.CYPHER_5);
+        assertTrue(compiled.isSuccess(), () -> compiled.diagnostics().toString());
+        var result = compiled.value();
+        var useIds = UseEvaluationAdapter.evaluate(use, ocl, soil).violationsFor("Adult");
+        assertEquals(Set.of("p2"), useIds);
+        assertEquals(useIds, new TreeSet<>(CoreOracle.violationsOclEq(
+                result.sourceInvariant().oclText(), input.schema(), input.snapshot())));
+        assertEquals(useIds, new TreeSet<>(QInterpreter.violations(input.schema(),
+                result.graph().graph(), result.core(), result.query())));
+        assertFalse(result.serializedCypher().cypherText().isBlank());
+    }
+
+    @Test
+    void rejectsUnsupportedExtensionsForEveryInputRole(@TempDir Path directory) throws Exception {
+        Path use = example("shop-use-soil", "shop.use");
+        Path soil = example("shop-use-soil", "shop.soil");
+        for (String extension : List.of("ecore", "uml", "xmi")) {
+            Path unsupported = directory.resolve("model." + extension);
+            Files.writeString(unsupported, "unsupported input");
+            var loaded = UseSoilInput.load(unsupported, soil);
+            assertTrue(loaded.isFailure());
+            assertEquals("E_USE_SOIL_INPUT", loaded.primaryDiagnostic().code());
+            assertTrue(loaded.primaryDiagnostic().message().contains(".use file"));
+        }
+        Path unsupported = directory.resolve("input.txt");
+        Files.writeString(unsupported, "unsupported input");
+        var snapshot = UseSoilInput.load(use, unsupported);
+        assertTrue(snapshot.isFailure());
+        assertTrue(snapshot.primaryDiagnostic().message().contains(".soil file"));
+        var constraints = UseSoilInput.load(use, soil, unsupported);
+        assertTrue(constraints.isFailure());
+        assertTrue(constraints.primaryDiagnostic().message().contains(".ocl file"));
+    }
+
+    @Test
+    void rejectsUnreadableOrMalformedExternalOcl(@TempDir Path directory) throws Exception {
+        Path use = example("shop-use-soil", "shop.use");
+        Path soil = example("shop-use-soil", "shop.soil");
+        var missing = UseSoilInput.load(use, soil, directory.resolve("missing.ocl"));
+        assertTrue(missing.isFailure());
+        assertEquals("E_USE_SOIL_INPUT", missing.primaryDiagnostic().code());
+        assertTrue(missing.primaryDiagnostic().message().contains("missing.ocl"));
+
+        Path ocl = directory.resolve("broken.ocl");
+        Files.writeString(ocl, "context Catalog inv Broken: true and");
+        var malformed = UseSoilInput.load(use, soil, ocl);
+        assertTrue(malformed.isFailure());
+        assertEquals("E_USE_SOIL_INPUT", malformed.primaryDiagnostic().code());
+        assertTrue(malformed.primaryDiagnostic().message().contains("USE specification compilation failed"));
     }
 
     private static Path example(String directory, String fileName) {

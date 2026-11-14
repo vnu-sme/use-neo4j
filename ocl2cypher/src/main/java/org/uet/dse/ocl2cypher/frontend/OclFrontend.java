@@ -1,20 +1,14 @@
 package org.uet.dse.ocl2cypher.frontend;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
+import static org.uet.dse.ocl2cypher.frontend.FrontendError.error;
+
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import org.uet.dse.ocl2cypher.diagnostics.Diagnostic;
 import org.uet.dse.ocl2cypher.diagnostics.Result;
 import org.uet.dse.ocl2cypher.diagnostics.SourceSpan;
-import org.uet.dse.ocl2cypher.diagnostics.Stage;
 import org.uet.dse.ocl2cypher.runtime.OclType;
 import org.uet.dse.ocl2cypher.source.model.SchemaModel;
-import org.uet.dse.ocl2cypher.source.model.Snapshot;
-import org.uet.dse.ocl2cypher.source.model.UmlAttribute;
 import org.uet.dse.ocl2cypher.source.omg.OmgAs;
 import org.uet.dse.ocl2cypher.source.omg.OclOperation;
 
@@ -41,30 +35,35 @@ final class OclFrontend {
             List.of("select", "reject", "exists", "forAll", "collect", "isUnique");
 
     private final SchemaModel sm;
+    private final OclTyping typing;
+    private final OclResolution resolution;
     private List<OclLexer.Tok> toks;
     private int idx;
-    private boolean requireBooleanBody = true;
 
     OclFrontend(SchemaModel sm) {
         this.sm = java.util.Objects.requireNonNull(sm, "schema model");
+        this.typing = new OclTyping(sm);
+        this.resolution = new OclResolution(sm, typing);
     }
 
     /** Public frontend product: resolved OMG-AS, never the legacy parser tree. */
     Result<List<OmgAs.OmgDocument>> elaborateOmgDocuments(String source) {
-        return elaborateInternal(source, true);
+        this.toks = new OclLexer(source).tokenize();
+        this.idx = 0;
+        List<OmgAs.OmgDocument> docs = new ArrayList<>();
+        try {
+            while (!peek().isEnd()) {
+                docs.add(parseDocumentEntry());
+            }
+            return Result.success(docs);
+        } catch (FrontendError e) {
+            return Result.failure(e.diagnostic());
+        }
     }
 
     /** Public value-query product: resolved OMG-AS with declaration identity. */
     Result<OmgAs.ExpressionInOcl> elaborateOmgValueExpression(
             String source, String contextClassKey, String contextVariableName) {
-        return elaborateValueExpression(source, contextClassKey, contextVariableName);
-    }
-
-    /** Parse one expression without wrapping it in a surface invariant. */
-    Result<OmgAs.ExpressionInOcl> elaborateValueExpression(String source,
-                                                               String contextClassKey,
-                                                               String contextVariableName) {
-        this.requireBooleanBody = false;
         this.toks = new OclLexer(source).tokenize();
         this.idx = 0;
         try {
@@ -94,31 +93,7 @@ final class OclFrontend {
         }
     }
 
-    private Result<List<OmgAs.OmgDocument>> elaborateInternal(String source,
-                                                             boolean requireBooleanBody) {
-        this.requireBooleanBody = requireBooleanBody;
-        this.toks = new OclLexer(source).tokenize();
-        this.idx = 0;
-        List<Diagnostic> diags = new ArrayList<>();
-        List<OmgAs.OmgDocument> docs = new ArrayList<>();
-        try {
-            while (!peek().isEnd()) {
-                OmgAs.OmgDocument doc = parseDocumentEntry();
-                if (doc != null) {
-                    docs.add(doc);
-                }
-            }
-            if (!diags.isEmpty()) {
-                return Result.failure(diags);
-            }
-            return Result.success(docs);
-        } catch (FrontendError e) {
-            diags.add(e.diagnostic());
-            return Result.failure(diags);
-        }
-    }
-
-    /** One {@code context} block, or a bare {@code inv} continuation of the last context. */
+    /** One classifier context, optionally enclosed in a package. */
     private OmgAs.OmgDocument parseDocumentEntry() {
         if (peek().isWord("package")) {
             // Package only scopes classifier lookup; it is not a semantic OCL package.
@@ -126,10 +101,7 @@ final class OclFrontend {
             String path = parsePathName();
             List<OmgAs.OmgDocument> inner = new ArrayList<>();
             while (!peek().isEnd() && !peek().isWord("endpackage")) {
-                OmgAs.OmgDocument d = parseDocumentEntry();
-                if (d != null) {
-                    inner.add(d);
-                }
+                inner.add(parseDocumentEntry());
             }
             expectWord("endpackage");
             if (inner.size() != 1) {
@@ -175,8 +147,7 @@ final class OclFrontend {
             }
             expectSymbol(":");
             OmgAs.OclExpression body = parseExpression(scope);
-            if (requireBooleanBody
-                    && (body.type() == null || !body.type().equals(OclType.BOOLEAN))) {
+            if (body.type() == null || !body.type().equals(OclType.BOOLEAN)) {
                 throw error("E_INVARIANT_TYPE",
                         "invariant body must be Boolean, found " + body.type(), span);
             }
@@ -187,7 +158,7 @@ final class OclFrontend {
             throw error("E_PARSE", "classifier context requires at least one invariant",
                     peek().span());
         }
-        return new OmgAs.OmgDocument(SourceSpan.UNKNOWN, classPath, contextVar, invs);
+        return new OmgAs.OmgDocument(SourceSpan.UNKNOWN, classPath, invs);
     }
 
     // ---- expression precedence chain -------------------------------------
@@ -207,48 +178,35 @@ final class OclFrontend {
             SourceSpan sp = peek().span();
             advance();
             OmgAs.OclExpression right = parseImplies(scope);
-            requireBoolean(left.type(), sp);
-            requireBoolean(right.type(), sp);
-            return binary(OclOperation.BOOLEAN_IMPLIES, left, right, OclType.BOOLEAN, sp);
+            typing.requireBoolean(left.type(), sp);
+            typing.requireBoolean(right.type(), sp);
+            return typing.binary(OclOperation.BOOLEAN_IMPLIES, left, right, OclType.BOOLEAN, sp);
         }
         return left;
     }
 
     private OmgAs.OclExpression parseXor(Scope scope) {
-        OmgAs.OclExpression left = parseOr(scope);
-        while (peek().isWord("xor")) {
-            SourceSpan sp = peek().span();
-            advance();
-            OmgAs.OclExpression right = parseOr(scope);
-            requireBoolean(left.type(), sp);
-            requireBoolean(right.type(), sp);
-            left = binary(OclOperation.BOOLEAN_XOR, left, right, OclType.BOOLEAN, sp);
-        }
-        return left;
+        return parseBooleanChain(scope, this::parseOr, "xor", OclOperation.BOOLEAN_XOR);
     }
 
     private OmgAs.OclExpression parseOr(Scope scope) {
-        OmgAs.OclExpression left = parseAnd(scope);
-        while (peek().isWord("or")) {
-            SourceSpan sp = peek().span();
-            advance();
-            OmgAs.OclExpression right = parseAnd(scope);
-            requireBoolean(left.type(), sp);
-            requireBoolean(right.type(), sp);
-            left = binary(OclOperation.BOOLEAN_OR, left, right, OclType.BOOLEAN, sp);
-        }
-        return left;
+        return parseBooleanChain(scope, this::parseAnd, "or", OclOperation.BOOLEAN_OR);
     }
 
     private OmgAs.OclExpression parseAnd(Scope scope) {
-        OmgAs.OclExpression left = parseEquality(scope);
-        while (peek().isWord("and")) {
-            SourceSpan sp = peek().span();
-            advance();
-            OmgAs.OclExpression right = parseEquality(scope);
-            requireBoolean(left.type(), sp);
-            requireBoolean(right.type(), sp);
-            left = binary(OclOperation.BOOLEAN_AND, left, right, OclType.BOOLEAN, sp);
+        return parseBooleanChain(scope, this::parseEquality, "and", OclOperation.BOOLEAN_AND);
+    }
+
+    private OmgAs.OclExpression parseBooleanChain(Scope scope,
+            java.util.function.Function<Scope, OmgAs.OclExpression> operand,
+            String token, OclOperation operation) {
+        var left = operand.apply(scope);
+        while (peek().isWord(token)) {
+            var span = advance().span();
+            var right = operand.apply(scope);
+            typing.requireBoolean(left.type(), span);
+            typing.requireBoolean(right.type(), span);
+            left = typing.binary(operation, left, right, OclType.BOOLEAN, span);
         }
         return left;
     }
@@ -260,15 +218,15 @@ final class OclFrontend {
             SourceSpan sp = peek().span();
             advance();
             OmgAs.OclExpression right = parseRelational(scope);
-            OmgAs.OclExpression[] inferred = inferEmptyCollectionPair(left, right, sp);
+            OmgAs.OclExpression[] inferred = typing.inferEmptyCollectionPair(left, right, sp);
             left = inferred[0];
             right = inferred[1];
-            OclType join = joinType(left.type(), right.type(), sp);
+            OclType join = typing.joinType(left.type(), right.type(), sp);
             if (join.isCollection()
-                    && (containsOrderedNavigation(left,
+                    && (typing.containsOrderedNavigation(left,
                                 java.util.Collections.newSetFromMap(
                                         new java.util.IdentityHashMap<>()))
-                        || containsOrderedNavigation(right,
+                        || typing.containsOrderedNavigation(right,
                                 java.util.Collections.newSetFromMap(
                                         new java.util.IdentityHashMap<>())))) {
                 throw error("E_UNSUPPORTED_ORDERED_EQUALITY",
@@ -276,8 +234,8 @@ final class OclFrontend {
                                 + "association navigation",
                         sp);
             }
-            left = binary(eq ? OclOperation.VALUE_EQUAL : OclOperation.VALUE_NOT_EQUAL,
-                    coerce(left, join, sp), coerce(right, join, sp), OclType.BOOLEAN, sp);
+            left = typing.binary(eq ? OclOperation.VALUE_EQUAL : OclOperation.VALUE_NOT_EQUAL,
+                    typing.coerce(left, join, sp), typing.coerce(right, join, sp), OclType.BOOLEAN, sp);
         }
         return left;
     }
@@ -290,16 +248,16 @@ final class OclFrontend {
             SourceSpan sp = peek().span();
             advance();
             OmgAs.OclExpression right = parseAdditive(scope);
-            requireNumeric(left.type(), sp);
-            requireNumeric(right.type(), sp);
-            OclType join = joinType(left.type(), right.type(), sp);
+            typing.requireNumeric(left.type(), sp);
+            typing.requireNumeric(right.type(), sp);
+            OclType join = typing.joinType(left.type(), right.type(), sp);
             OclOperation kind = switch (op) {
                 case "<" -> OclOperation.LESS_THAN;
                 case "<=" -> OclOperation.LESS_THAN_OR_EQUAL;
                 case ">" -> OclOperation.GREATER_THAN;
                 default -> OclOperation.GREATER_THAN_OR_EQUAL;
             };
-            left = binary(kind, coerce(left, join, sp), coerce(right, join, sp),
+            left = typing.binary(kind, typing.coerce(left, join, sp), typing.coerce(right, join, sp),
                     OclType.BOOLEAN, sp);
         }
         return left;
@@ -312,11 +270,11 @@ final class OclFrontend {
             SourceSpan sp = peek().span();
             advance();
             OmgAs.OclExpression right = parseMultiplicative(scope);
-            requireNumeric(left.type(), sp);
-            requireNumeric(right.type(), sp);
-            OclType join = joinType(left.type(), right.type(), sp);
-            left = binary(add ? OclOperation.NUMERIC_ADD : OclOperation.NUMERIC_SUBTRACT,
-                    coerce(left, join, sp), coerce(right, join, sp), join, sp);
+            typing.requireNumeric(left.type(), sp);
+            typing.requireNumeric(right.type(), sp);
+            OclType join = typing.joinType(left.type(), right.type(), sp);
+            left = typing.binary(add ? OclOperation.NUMERIC_ADD : OclOperation.NUMERIC_SUBTRACT,
+                    typing.coerce(left, join, sp), typing.coerce(right, join, sp), join, sp);
         }
         return left;
     }
@@ -342,23 +300,23 @@ final class OclFrontend {
             OmgAs.OclExpression right = parseUnary(scope);
             switch (op) {
                 case "*" -> {
-                    requireNumeric(left.type(), sp);
-                    requireNumeric(right.type(), sp);
-                    OclType join = joinType(left.type(), right.type(), sp);
-                    left = binary(OclOperation.NUMERIC_MULTIPLY,
-                            coerce(left, join, sp), coerce(right, join, sp), join, sp);
+                    typing.requireNumeric(left.type(), sp);
+                    typing.requireNumeric(right.type(), sp);
+                    OclType join = typing.joinType(left.type(), right.type(), sp);
+                    left = typing.binary(OclOperation.NUMERIC_MULTIPLY,
+                            typing.coerce(left, join, sp), typing.coerce(right, join, sp), join, sp);
                 }
                 case "/" -> {
-                    requireNumeric(left.type(), sp);
-                    requireNumeric(right.type(), sp);
-                    left = binary(OclOperation.REAL_DIVIDE,
-                            coerce(left, OclType.REAL, sp), coerce(right, OclType.REAL, sp),
+                    typing.requireNumeric(left.type(), sp);
+                    typing.requireNumeric(right.type(), sp);
+                    left = typing.binary(OclOperation.REAL_DIVIDE,
+                            typing.coerce(left, OclType.REAL, sp), typing.coerce(right, OclType.REAL, sp),
                             OclType.REAL, sp);
                 }
                 default -> {
-                    requireInteger(left.type(), sp);
-                    requireInteger(right.type(), sp);
-                    left = binary("div".equals(op)
+                    typing.requireInteger(left.type(), sp);
+                    typing.requireInteger(right.type(), sp);
+                    left = typing.binary("div".equals(op)
                                     ? OclOperation.INTEGER_DIVIDE : OclOperation.INTEGER_MOD,
                             left, right, OclType.INTEGER, sp);
                 }
@@ -374,14 +332,14 @@ final class OclFrontend {
             if (operand.type() == null || !operand.type().equals(OclType.BOOLEAN)) {
                 throw error("E_TYPE", "not requires Boolean operand", sp);
             }
-            return operation(sp, OclOperation.BOOLEAN_NOT, List.of(operand), OclType.BOOLEAN);
+            return typing.operation(sp, OclOperation.BOOLEAN_NOT, List.of(operand), OclType.BOOLEAN);
         }
         if (peek().isSymbol("-")) {
             SourceSpan sp = peek().span();
             advance();
             OmgAs.OclExpression operand = parseUnary(scope);
-            requireNumeric(operand.type(), sp);
-            return operation(sp, OclOperation.NUMERIC_NEGATE, List.of(operand), operand.type());
+            typing.requireNumeric(operand.type(), sp);
+            return typing.operation(sp, OclOperation.NUMERIC_NEGATE, List.of(operand), operand.type());
         }
         return parsePostfix(scope);
     }
@@ -421,7 +379,7 @@ final class OclFrontend {
                 }
             }
             expectSymbol("]");
-            return resolveProperty(sp, receiver, name, quals, dotCall);
+            return resolution.resolveProperty(sp, receiver, name, quals);
         }
         if (peek().isSymbol("(")) {
             advance();
@@ -434,10 +392,10 @@ final class OclFrontend {
                 }
             }
             expectSymbol(")");
-            return resolveOperation(sp, receiver, name, args, dotCall);
+            return resolution.resolveOperation(sp, receiver, name, args, dotCall);
         }
         // Bare name access: property or zero-arg operation
-        return resolveProperty(sp, receiver, name, List.of(), dotCall);
+        return resolution.resolveProperty(sp, receiver, name, List.of());
     }
 
     private OmgAs.OclExpression parseIterator(SourceSpan sp, String name,
@@ -486,7 +444,7 @@ final class OclFrontend {
         }
         if (body == null && varName != null) {
             OclType binder = declared == null ? elementType : declared;
-            if (declared != null && !conforms(elementType, declared)) {
+            if (declared != null && !typing.conforms(elementType, declared)) {
                 throw error("E_TYPE", "iterator binder type " + declared
                         + " is not compatible with element type " + elementType, sp);
             }
@@ -550,12 +508,12 @@ final class OclFrontend {
             if (c.type() == null || !c.type().equals(OclType.BOOLEAN)) {
                 throw error("E_TYPE", "if condition must be Boolean", sp);
             }
-            OmgAs.OclExpression[] inferred = inferEmptyCollectionPair(thenE, elseE, sp);
+            OmgAs.OclExpression[] inferred = typing.inferEmptyCollectionPair(thenE, elseE, sp);
             thenE = inferred[0];
             elseE = inferred[1];
-            OclType join = joinType(thenE.type(), elseE.type(), sp);
-            return new OmgAs.IfExp(sp, c, coerce(thenE, join, sp),
-                    coerce(elseE, join, sp), join);
+            OclType join = typing.joinType(thenE.type(), elseE.type(), sp);
+            return new OmgAs.IfExp(sp, c, typing.coerce(thenE, join, sp),
+                    typing.coerce(elseE, join, sp), join);
         }
         if (t.isWord("let")) {
             advance();
@@ -569,7 +527,7 @@ final class OclFrontend {
             OmgAs.OclExpression init = parseExpression(scope);
             expectWord("in");
             if (declared != null) {
-                init = coerce(init, declared, sp);
+                init = typing.coerce(init, declared, sp);
             } else if (init.type() == null) {
                 throw error("E_UNINFERRED_EMPTY_COLLECTION_TYPE",
                         "empty collection literal requires a declared let type", sp);
@@ -645,7 +603,7 @@ final class OclFrontend {
                 OmgAs.Variable self = scope.lookup("self").orElseThrow(() ->
                         error("E_RESOLUTION", "implicit operation requires self", sp));
                 OmgAs.OclExpression selfRef = new OmgAs.VariableExp(sp, self);
-                return resolveOperation(sp, selfRef, name, args, true);
+                return resolution.resolveOperation(sp, selfRef, name, args, true);
             }
             Optional<OmgAs.Variable> var = scope.lookup(name);
             if (var.isEmpty()) {
@@ -694,7 +652,7 @@ final class OclFrontend {
             if (part.type() == null) {
                 throw error("E_TYPE", "collection element is unadmitted", sp);
             }
-            join = join == null ? part.type() : joinType(join, part.type(), sp);
+            join = join == null ? part.type() : typing.joinType(join, part.type(), sp);
         }
         if (join.isCollection()) {
             throw error("E_UNSUPPORTED_NESTED_COLLECTION",
@@ -703,7 +661,7 @@ final class OclFrontend {
         List<OmgAs.CollectionLiteralPart> coercedParts = new ArrayList<>(parts.size());
         for (OmgAs.CollectionLiteralPart part : parts) {
             if (part instanceof OmgAs.CollectionItem item) {
-                OmgAs.OclExpression coerced = coerce(item.item, join, sp);
+                OmgAs.OclExpression coerced = typing.coerce(item.item, join, sp);
                 coercedParts.add(new OmgAs.CollectionItem(coerced.span(), coerced));
             } else {
                 // A range denotes Integer elements. Keep the resolved range in
@@ -718,556 +676,9 @@ final class OclFrontend {
 
     // ---- resolution helpers ----------------------------------------------
 
-    private OmgAs.OclExpression resolveProperty(SourceSpan sp, OmgAs.OclExpression receiver,
-            String name, List<OmgAs.OclExpression> qualifiers, boolean dotCall) {
-        OclType rt = receiver.type();
-        if (rt == null) {
-            throw error("E_TYPE", "receiver of '." + name + "' is unadmitted", sp);
-        }
-        if (!rt.isClass()) {
-            throw error("E_INVALID_CALL_SHAPE",
-                    "property access requires an object receiver, found " + rt, sp);
-        }
-        UmlAttribute attr = resolveAttribute(rt.className(), name, sp);
-        if (attr != null) {
-            if (!qualifiers.isEmpty()) {
-                throw error("E_ARITY", "attributes take no qualifiers", sp);
-            }
-            return new OmgAs.PropertyCallExp(sp, attr.declaredType(), receiver,
-                    List.of(), name, attr.key());
-        }
-        org.uet.dse.ocl2cypher.source.model.SchemaModel.AssociationClassNavigation acNavigation;
-        try {
-            acNavigation = sm.associationClassNavigation(rt.className(), name);
-        } catch (IllegalArgumentException ambiguous) {
-            throw error("E_RESOLUTION", ambiguous.getMessage(), sp);
-        }
-        if (acNavigation != null) {
-            var assoc = acNavigation.association();
-            validateQualifiers(sp, name, qualifiers, assoc,
-                    acNavigation.receiverIsTarget());
-            OclType element = OclType.clazz(acNavigation.associationClass().key());
-            OclType result = acNavigation.toMany()
-                    ? (acNavigation.unique() ? OclType.set(element) : OclType.bag(element))
-                    : element;
-            return new OmgAs.AssociationClassCallExp(sp, result, receiver, qualifiers,
-                    acNavigation.participantRole(), acNavigation.associationClass().key());
-        }
-        org.uet.dse.ocl2cypher.source.model.SchemaModel.Navigation navigation;
-        try {
-            navigation = sm.navigation(rt.className(), name);
-        } catch (IllegalArgumentException ambiguous) {
-            throw error("E_RESOLUTION", ambiguous.getMessage(), sp);
-        }
-        if (navigation == null) {
-            // navigation must start from one declared end
-            throw error("E_RESOLUTION", "role '" + name + "' is not navigable from " + rt, sp);
-        }
-        var assoc = navigation.association();
-        OclType target = OclType.clazz(navigation.targetClassKey());
-        OclType type = navigation.toMany()
-                ? (navigation.unique() ? OclType.set(target) : OclType.bag(target))
-                : target;
-        validateQualifiers(sp, name, qualifiers, assoc, navigation.reverse());
-        return new OmgAs.PropertyCallExp(sp, type, receiver, qualifiers, name, assoc.key());
-    }
-
-    private void validateQualifiers(SourceSpan sp, String name,
-                                    List<OmgAs.OclExpression> qualifiers,
-                                    org.uet.dse.ocl2cypher.source.model.UmlAssociation assoc,
-                                    boolean reverse) {
-        List<org.uet.dse.ocl2cypher.source.model.UmlQualifier> expected =
-                assoc.qualifiersForNavigation(reverse);
-        if (qualifiers.size() != expected.size()) {
-            throw error("E_ARITY", "role '" + name + "' expects "
-                    + expected.size() + " qualifier(s), found "
-                    + qualifiers.size(), sp);
-        }
-        for (int i = 0; i < qualifiers.size(); i++) {
-            OmgAs.OclExpression q = qualifiers.get(i);
-            if (q.type() == null || !q.type().isAtomic()) {
-                throw error("E_TYPE", "qualifiers must be scalar", sp);
-            }
-            OclType declaredQualifierType = expected.get(i).declaredType();
-            if (!q.type().equals(declaredQualifierType)) {
-                throw error("E_TYPE", "qualifier '" + expected.get(i).name()
-                        + "' requires " + declaredQualifierType + ", found " + q.type(), sp);
-            }
-        }
-    }
-
     /** Resolve once at E_SM and reject unrelated inherited declarations as ambiguous. */
-    private UmlAttribute resolveAttribute(String classKey, String attrName, SourceSpan sp) {
-        Map<String, UmlAttribute> candidates = new LinkedHashMap<>();
-        collectAttributeCandidates(classKey, attrName, new java.util.LinkedHashSet<>(), candidates);
-        if (candidates.isEmpty()) {
-            return null;
-        }
-        List<UmlAttribute> mostSpecific = new ArrayList<>(candidates.values());
-        mostSpecific.removeIf(a -> candidates.values().stream().anyMatch(b ->
-                !a.key().equals(b.key())
-                        && sm.conforms(b.ownerClassKey(), a.ownerClassKey())
-                        && !sm.conforms(a.ownerClassKey(), b.ownerClassKey())));
-        if (mostSpecific.size() != 1) {
-            throw error("E_AMBIGUOUS_PROPERTY", "attribute '" + attrName
-                    + "' is inherited from multiple unrelated declarations on " + classKey,
-                    sp);
-        }
-        return mostSpecific.get(0);
-    }
-
-    private void collectAttributeCandidates(String classKey, String attrName,
-                                            java.util.Set<String> visited,
-                                            Map<String, UmlAttribute> out) {
-        if (classKey == null || !visited.add(classKey)) {
-            return;
-        }
-        UmlAttribute own = sm.attribute(classKey, attrName);
-        if (own != null) {
-            out.putIfAbsent(own.key(), own);
-        }
-        var klass = sm.clazz(classKey);
-        if (klass != null) {
-            for (String superclass : klass.directSuperclassKeys()) {
-                collectAttributeCandidates(superclass, attrName, visited, out);
-            }
-        }
-    }
-
-    private OmgAs.OclExpression resolveOperation(SourceSpan sp,
-            OmgAs.OclExpression receiver, String name,
-            List<OmgAs.OclExpression> args, boolean dotCall) {
-        // allInstances on a classifier reference arrives via ClassRef handling
-        OclType rt = receiver == null ? null : receiver.type();
-        switch (name) {
-            case "allInstances" -> {
-                if (receiver instanceof OmgAs.TypeExp type) {
-                    return operation(sp, OclOperation.ALL_INSTANCES, List.of(type),
-                            OclType.set(OclType.clazz(type.referredType)));
-                }
-                throw error("E_INVALID_CALL_SHAPE", "allInstances applies to a classifier", sp);
-            }
-            case "oclIsTypeOf", "oclIsKindOf", "oclAsType" -> {
-                OclOperation op = switch (name) {
-                    case "oclIsTypeOf" -> OclOperation.OCL_IS_TYPE_OF;
-                    case "oclIsKindOf" -> OclOperation.OCL_IS_KIND_OF;
-                    default -> OclOperation.OCL_AS_TYPE;
-                };
-                if (args.size() != 1 || !(args.get(0) instanceof OmgAs.TypeExp ref)) {
-                    throw error("E_ARITY", name + " requires exactly one classifier operand", sp);
-                }
-                if (rt == null || !rt.isClass()) {
-                    throw error("E_TYPE", name + " receiver must be an object", sp);
-                }
-                OclType result = op.equals(OclOperation.OCL_AS_TYPE)
-                        // The source profile admits only related class operands.
-                        ? OclType.clazz(ref.referredType) : OclType.BOOLEAN;
-                if (!sm.hasClass(ref.referredType)
-                        || !(sm.conforms(rt.className(), ref.referredType)
-                            || sm.conforms(ref.referredType, rt.className()))) {
-                    throw error("E_TYPE", name + " requires related class types", sp);
-                }
-                return operation(sp, op, List.of(receiver, ref), result);
-            }
-            default -> {
-            }
-        }
-        if (args.size() == 0) {
-            OclOperation u = switch (name) {
-                case "not" -> OclOperation.BOOLEAN_NOT;
-                case "oclIsUndefined" -> OclOperation.OCL_IS_UNDEFINED;
-                case "abs" -> OclOperation.NUMERIC_ABS;
-                case "floor" -> OclOperation.REAL_FLOOR;
-                case "round" -> OclOperation.REAL_ROUND;
-                case "size" -> OclOperation.COLLECTION_SIZE;
-                case "isEmpty" -> OclOperation.COLLECTION_IS_EMPTY;
-                case "notEmpty" -> OclOperation.COLLECTION_NOT_EMPTY;
-                case "sum" -> OclOperation.COLLECTION_SUM;
-                default -> null;
-            };
-            if (u == null) {
-                throw error("E_RESOLUTION", "unsupported zero-arg operation '" + name + "'", sp);
-            }
-            if (!dotCall && requiresArrow(u) && rt != null && rt.isClass()) {
-                receiver = optionalObjectToSet(receiver, sp);
-                rt = receiver.type();
-            }
-            if (isUntypedEmptyCollection(receiver)) {
-                throw error("E_UNINFERRED_EMPTY_COLLECTION_TYPE",
-                        "empty collection literal has no element type for operation '"
-                                + name + "'", sp);
-            }
-            switch (u) {
-                case BOOLEAN_NOT -> requireBoolean(rt, sp);
-                case OCL_IS_UNDEFINED -> { /* defined for every resolved receiver type */ }
-                case NUMERIC_ABS -> requireNumeric(rt, sp);
-                case REAL_FLOOR, REAL_ROUND -> requireReal(rt, sp);
-                case COLLECTION_SIZE, COLLECTION_IS_EMPTY, COLLECTION_NOT_EMPTY ->
-                        requireCollection(rt, sp);
-                case COLLECTION_SUM -> {
-                    OclType elementType = elementOf(rt, sp);
-                    requireNumeric(elementType, sp);
-                }
-                default -> throw error("E_RESOLUTION", "unhandled op " + u, sp);
-            }
-            OclType result = switch (u) {
-                case BOOLEAN_NOT, OCL_IS_UNDEFINED -> OclType.BOOLEAN;
-                case REAL_FLOOR, REAL_ROUND -> OclType.INTEGER;
-                case NUMERIC_ABS -> rt;
-                case COLLECTION_SIZE -> OclType.INTEGER;
-                case COLLECTION_IS_EMPTY, COLLECTION_NOT_EMPTY -> OclType.BOOLEAN;
-                case COLLECTION_SUM -> elementOf(rt, sp);
-                default -> throw error("E_RESOLUTION", "unhandled op " + u, sp);
-            };
-            if (dotCall && requiresArrow(u)) {
-                throw error("E_INVALID_CALL_SHAPE",
-                        "collection operation '" + name + "' requires '->'", sp);
-            }
-            return operation(sp, u, List.of(receiver), result);
-        }
-        if (args.size() == 1) {
-            OmgAs.OclExpression arg = args.get(0);
-            OclOperation b = switch (name) {
-                case "div" -> OclOperation.INTEGER_DIVIDE;
-                case "mod" -> OclOperation.INTEGER_MOD;
-                case "max" -> OclOperation.NUMERIC_MAX;
-                case "min" -> OclOperation.NUMERIC_MIN;
-                case "count" -> OclOperation.COLLECTION_COUNT;
-                case "includes" -> OclOperation.COLLECTION_INCLUDES;
-                case "excludes" -> OclOperation.COLLECTION_EXCLUDES;
-                case "includesAll" -> OclOperation.COLLECTION_INCLUDES_ALL;
-                case "excludesAll" -> OclOperation.COLLECTION_EXCLUDES_ALL;
-                case "union" -> OclOperation.SET_UNION;
-                case "intersection" -> OclOperation.SET_INTERSECTION;
-                default -> null;
-            };
-            if (b == null) {
-                throw error("E_RESOLUTION", "unsupported operation '" + name + "'", sp);
-            }
-            if (!dotCall && isCollectionOperation(b) && rt != null && rt.isClass()) {
-                receiver = optionalObjectToSet(receiver, sp);
-                rt = receiver.type();
-            }
-            if (isUntypedEmptyCollection(receiver)) {
-                if (b == OclOperation.COLLECTION_COUNT
-                        || b == OclOperation.COLLECTION_INCLUDES
-                        || b == OclOperation.COLLECTION_EXCLUDES) {
-                    if (arg.type() == null || !arg.type().isAtomic()) {
-                        throw error("E_UNINFERRED_EMPTY_COLLECTION_TYPE",
-                                "cannot infer empty collection element type from " + arg.type(), sp);
-                    }
-                    receiver = typeEmptyCollection(receiver, collectionTypeLike(receiver,
-                            arg.type()), sp);
-                } else if (arg.type() != null && arg.type().isCollection()) {
-                    receiver = typeEmptyCollection(receiver, arg.type(), sp);
-                }
-                rt = receiver.type();
-            }
-            if (isUntypedEmptyCollection(arg) && rt != null && rt.isCollection()) {
-                arg = typeEmptyCollection(arg, rt, sp);
-            }
-            OmgAs.OclExpression effectiveReceiver = receiver;
-            OmgAs.OclExpression effectiveArg = arg;
-            switch (b) {
-                case INTEGER_DIVIDE, INTEGER_MOD -> {
-                    requireInteger(rt, sp);
-                    requireInteger(arg.type(), sp);
-                    if (!dotCall) {
-                        throw error("E_INVALID_CALL_SHAPE",
-                                "numeric operation '" + name + "' requires '.'", sp);
-                    }
-                }
-                case NUMERIC_MAX, NUMERIC_MIN -> {
-                    requireNumeric(rt, sp);
-                    requireNumeric(arg.type(), sp);
-                    OclType numericJoin = joinType(rt, arg.type(), sp);
-                    effectiveReceiver = coerce(receiver, numericJoin, sp);
-                    effectiveArg = coerce(arg, numericJoin, sp);
-                }
-                case COLLECTION_COUNT, COLLECTION_INCLUDES, COLLECTION_EXCLUDES -> {
-                    requireCollectionCall(name, rt, dotCall, sp);
-                    OclType elementJoin = joinType(rt.elementType(), arg.type(), sp);
-                    OclType targetCollection = rt.kind() == OclType.Kind.SET
-                            ? OclType.set(elementJoin) : OclType.bag(elementJoin);
-                    effectiveReceiver = coerce(receiver, targetCollection, sp);
-                    effectiveArg = coerce(arg, elementJoin, sp);
-                }
-                case COLLECTION_INCLUDES_ALL, COLLECTION_EXCLUDES_ALL -> {
-                    requireCollectionCall(name, rt, dotCall, sp);
-                    requireSameCollectionType(rt, arg.type(), name, sp);
-                }
-                case SET_UNION, SET_INTERSECTION -> {
-                    requireCollectionCall(name, rt, dotCall, sp);
-                    if (rt.kind() != OclType.Kind.SET) {
-                        throw error("E_TYPE", name + " requires a Set receiver", sp);
-                    }
-                    requireSameCollectionType(rt, arg.type(), name, sp);
-                }
-                default -> throw error("E_RESOLUTION", "unhandled op " + b, sp);
-            }
-            OclType result = switch (b) {
-                case INTEGER_DIVIDE, INTEGER_MOD -> OclType.INTEGER;
-                case NUMERIC_MAX, NUMERIC_MIN -> effectiveReceiver.type();
-                case COLLECTION_COUNT -> OclType.INTEGER;
-                case COLLECTION_INCLUDES, COLLECTION_EXCLUDES,
-                     COLLECTION_INCLUDES_ALL, COLLECTION_EXCLUDES_ALL -> OclType.BOOLEAN;
-                default -> rt; // Set algebra keeps the receiver set type
-            };
-            return operation(sp, b, List.of(effectiveReceiver, effectiveArg), result);
-        }
-        throw error("E_ARITY", "operation '" + name + "' expects 0 or 1 argument(s)", sp);
-    }
-
-    private boolean requiresArrow(OclOperation u) {
-        return switch (u) {
-            case COLLECTION_SIZE, COLLECTION_IS_EMPTY, COLLECTION_NOT_EMPTY, COLLECTION_SUM -> true;
-            default -> false;
-        };
-    }
-
-    private boolean isCollectionOperation(OclOperation operation) {
-        return switch (operation) {
-            case COLLECTION_COUNT, COLLECTION_INCLUDES, COLLECTION_EXCLUDES,
-                    COLLECTION_INCLUDES_ALL, COLLECTION_EXCLUDES_ALL,
-                    SET_UNION, SET_INTERSECTION -> true;
-            default -> false;
-        };
-    }
-
-    private OmgAs.OclExpression optionalObjectToSet(OmgAs.OclExpression receiver,
-                                                     SourceSpan span) {
-        OclType source = receiver.type();
-        return new OmgAs.CoerceExp(span, receiver, source, OclType.set(source),
-                org.uet.dse.ocl2cypher.core.CoreExpr.CoercionKind.OPTIONAL_OBJECT_TO_SET);
-    }
-
-    private OclType elementOf(OclType t, SourceSpan sp) {
-        if (t == null || !t.isCollection()) {
-            throw error("E_TYPE", "operation requires a collection receiver", sp);
-        }
-        return t.elementType();
-    }
-
-    private void requireCollection(OclType type, SourceSpan sp) {
-        if (type == null || !type.isCollection()) {
-            throw error("E_TYPE", "collection receiver required, found " + type, sp);
-        }
-    }
-
-    private void requireCollectionCall(String name, OclType receiverType,
-                                       boolean dotCall, SourceSpan sp) {
-        requireCollection(receiverType, sp);
-        if (dotCall) {
-            throw error("E_INVALID_CALL_SHAPE",
-                    "collection operation '" + name + "' requires '->'", sp);
-        }
-    }
-
-    private void requireSameCollectionType(OclType left, OclType right,
-                                           String operation, SourceSpan sp) {
-        if (right == null || !right.isCollection() || !left.equals(right)) {
-            throw error("E_TYPE", operation + " requires two collections of the same type; found "
-                    + left + " and " + right, sp);
-        }
-    }
 
     // ---- typing helpers ---------------------------------------------------
-
-    private OmgAs.OclExpression binary(OclOperation op, OmgAs.OclExpression left,
-            OmgAs.OclExpression right, OclType result, SourceSpan sp) {
-        return operation(sp, op, List.of(left, right), result);
-    }
-
-    private OmgAs.OclExpression operation(SourceSpan span, OclOperation operation,
-            List<OmgAs.OclExpression> operands, OclType result) {
-        if (operands.isEmpty()) {
-            throw new IllegalArgumentException("resolved operation requires a source");
-        }
-        return new OmgAs.OperationCallExp(span, result, operands.get(0),
-                operation.name(), operands.subList(1, operands.size()));
-    }
-
-    /**
-     * True when a collection expression depends on an ordered association end.
-     * The executable profile intentionally erases order to Set/Bag for
-     * permutation-invariant operations. Equality would make that erasure
-     * observable, so it is rejected fail-closed, including through let,
-     * iterator, operation, if, and coercion wrappers.
-     */
-    private boolean containsOrderedNavigation(OmgAs.OclExpression expression,
-                                              java.util.Set<Object> visited) {
-        if (expression == null || !visited.add(expression)) {
-            return false;
-        }
-        if (expression instanceof OmgAs.PropertyCallExp property
-                && property.type() != null && property.type().isCollection()) {
-            var association = associationByKey(property.referredProperty);
-            if (association != null && association.isOrdered()) {
-                return true;
-            }
-        }
-        if (expression instanceof OmgAs.AssociationClassCallExp navigation
-                && navigation.type() != null && navigation.type().isCollection()) {
-            var association = associationByKey(navigation.referredAssociationClass);
-            if (association != null && association.isOrdered()) {
-                return true;
-            }
-        }
-        if (expression instanceof OmgAs.VariableExp variable) {
-            return containsOrderedNavigation(variable.referredVariable.initExpression, visited);
-        }
-        if (expression instanceof OmgAs.OperationCallExp operation) {
-            if (containsOrderedNavigation(operation.source, visited)) return true;
-            for (var argument : operation.argument) {
-                if (containsOrderedNavigation(argument, visited)) return true;
-            }
-            return false;
-        }
-        if (expression instanceof OmgAs.IteratorExp iterator) {
-            return containsOrderedNavigation(iterator.source, visited)
-                    || containsOrderedNavigation(iterator.body, visited);
-        }
-        if (expression instanceof OmgAs.IfExp conditional) {
-            return containsOrderedNavigation(conditional.thenExpression, visited)
-                    || containsOrderedNavigation(conditional.elseExpression, visited);
-        }
-        if (expression instanceof OmgAs.LetExp let) {
-            // Follow the initializer only through a VariableExp that actually
-            // refers to the binder. An unused ordered initializer cannot make
-            // an otherwise independent collection result order-sensitive.
-            return containsOrderedNavigation(let.in, visited);
-        }
-        if (expression instanceof OmgAs.CoerceExp coercion) {
-            return containsOrderedNavigation(coercion.sourceExpression, visited);
-        }
-        return false;
-    }
-
-    private org.uet.dse.ocl2cypher.source.model.UmlAssociation associationByKey(
-            String key) {
-        for (var association : sm.associations()) {
-            if (association.key().equals(key)) {
-                return association;
-            }
-        }
-        return null;
-    }
-
-    private OmgAs.OclExpression coerce(OmgAs.OclExpression e, OclType to, SourceSpan sp) {
-        if (isUntypedEmptyCollection(e)) {
-            return typeEmptyCollection(e, to, sp);
-        }
-        if (e.type() != null && e.type().equals(to)) {
-            return e;
-        }
-        if (e.type() == null) {
-            throw error("E_TYPE", "unadmitted operand cannot be coerced", sp);
-        }
-        // Only Integer→Real and class upcast change the value carrier at AS level.
-        if (e.type().equals(OclType.INTEGER) && to.equals(OclType.REAL)) {
-            return new OmgAs.CoerceExp(sp, e, e.type(), to,
-                    org.uet.dse.ocl2cypher.core.CoreExpr.CoercionKind.INTEGER_TO_REAL);
-        }
-        if (e.type().isClass() && to.isClass() && conforms(e.type(), to)) {
-            return new OmgAs.CoerceExp(sp, e, e.type(), to,
-                    org.uet.dse.ocl2cypher.core.CoreExpr.CoercionKind.CLASS_UPCAST);
-        }
-        if (e.type().isCollection() && to.isCollection()
-                && e.type().kind() == to.kind()
-                && ((e.type().elementType().equals(OclType.INTEGER)
-                        && to.elementType().equals(OclType.REAL))
-                    || (e.type().elementType().isClass()
-                        && to.elementType().isClass()
-                        && conforms(e.type().elementType(), to.elementType())))) {
-            return new OmgAs.CoerceExp(sp, e, e.type(), to,
-                    org.uet.dse.ocl2cypher.core.CoreExpr.CoercionKind.COLLECTION_ELEMENT_COERCION);
-        }
-        throw error("E_TYPE", "unsupported coercion from " + e.type() + " to " + to, sp);
-    }
-
-    private OmgAs.OclExpression[] inferEmptyCollectionPair(OmgAs.OclExpression left,
-            OmgAs.OclExpression right, SourceSpan sp) {
-        if (isUntypedEmptyCollection(left) && right.type() != null) {
-            left = typeEmptyCollection(left, right.type(), sp);
-        }
-        if (isUntypedEmptyCollection(right) && left.type() != null) {
-            right = typeEmptyCollection(right, left.type(), sp);
-        }
-        if (left.type() == null || right.type() == null) {
-            throw error("E_UNINFERRED_EMPTY_COLLECTION_TYPE",
-                    "empty collection literal requires an expected collection type", sp);
-        }
-        return new OmgAs.OclExpression[]{left, right};
-    }
-
-    private boolean isUntypedEmptyCollection(OmgAs.OclExpression expression) {
-        return expression instanceof OmgAs.CollectionLiteralExp literal
-                && literal.part.isEmpty() && literal.type() == null;
-    }
-
-    private OclType collectionTypeLike(OmgAs.OclExpression untypedEmpty, OclType elementType) {
-        OmgAs.CollectionLiteralExp literal = (OmgAs.CollectionLiteralExp) untypedEmpty;
-        return literal.kind == OmgAs.OmgCollectionKind.SET
-                ? OclType.set(elementType) : OclType.bag(elementType);
-    }
-
-    private OmgAs.OclExpression typeEmptyCollection(OmgAs.OclExpression expression,
-                                                     OclType expected, SourceSpan sp) {
-        if (!isUntypedEmptyCollection(expression)) {
-            return expression;
-        }
-        OmgAs.CollectionLiteralExp literal = (OmgAs.CollectionLiteralExp) expression;
-        if (expected == null || !expected.isCollection()
-                || (literal.kind == OmgAs.OmgCollectionKind.SET
-                        && expected.kind() != OclType.Kind.SET)
-                || (literal.kind == OmgAs.OmgCollectionKind.BAG
-                        && expected.kind() != OclType.Kind.BAG)) {
-            throw error("E_TYPE", "empty " + literal.kind
-                    + " requires a matching expected collection type, found " + expected, sp);
-        }
-        return new OmgAs.CollectionLiteralExp(literal.span(), literal.kind, List.of(), expected);
-    }
-
-    private OclType joinType(OclType a, OclType b, SourceSpan sp) {
-        if (a == null || b == null) {
-            throw error("E_TYPE", "unadmitted operand in join", sp);
-        }
-        OclType j = OclType.join(a, b, sm::conforms);
-        if (j == null) {
-            throw error("E_TYPE", "no common type for " + a + " and " + b, sp);
-        }
-        return j;
-    }
-
-    private boolean conforms(OclType from, OclType to) {
-        return from.equals(to)
-                || (from.equals(OclType.INTEGER) && to.equals(OclType.REAL))
-                || (from.isClass() && to.isClass() && sm.conforms(from.className(), to.className()));
-    }
-
-    private void requireNumeric(OclType t, SourceSpan sp) {
-        if (t == null || !t.isNumeric()) {
-            throw error("E_TYPE", "numeric operand required, found " + t, sp);
-        }
-    }
-
-    private void requireBoolean(OclType t, SourceSpan sp) {
-        if (t == null || !t.equals(OclType.BOOLEAN)) {
-            throw error("E_TYPE", "Boolean operand required, found " + t, sp);
-        }
-    }
-
-    private void requireReal(OclType t, SourceSpan sp) {
-        if (t == null || !t.equals(OclType.REAL)) {
-            throw error("E_TYPE", "Real operand required, found " + t, sp);
-        }
-    }
-
-    private void requireInteger(OclType t, SourceSpan sp) {
-        if (t == null || !t.equals(OclType.INTEGER)) {
-            throw error("E_TYPE", "Integer operand required, found " + t, sp);
-        }
-    }
 
     // ---- token helpers ----------------------------------------------------
 
@@ -1349,26 +760,7 @@ final class OclFrontend {
         return OclType.clazz(path);
     }
 
-    private FrontendError error(String code, String message, SourceSpan span) {
-        return new FrontendError(Diagnostic.builder(code, Stage.E_SM, message)
-                .span(span)
-                .rule("E-F")
-                .build());
-    }
-
     /** Parser control-flow carrier; never a runtime value. */
-    private static final class FrontendError extends RuntimeException {
-        private final Diagnostic diagnostic;
-
-        FrontendError(Diagnostic diagnostic) {
-            super(diagnostic.toString(), null, false, false);
-            this.diagnostic = diagnostic;
-        }
-
-        Diagnostic diagnostic() {
-            return diagnostic;
-        }
-    }
 
     /** Lexical scope: declaration lookup is by name but each binder is fresh. */
     static final class Scope {

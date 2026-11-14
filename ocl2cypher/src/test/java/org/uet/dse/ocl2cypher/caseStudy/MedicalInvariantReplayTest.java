@@ -26,7 +26,6 @@ import org.uet.dse.ocl2cypher.cypher.CypherAst;
 import org.uet.dse.ocl2cypher.cypher.Neo4jCypherParserGate;
 import org.uet.dse.ocl2cypher.cypher.Realization;
 import org.uet.dse.ocl2cypher.cypher.Serializer;
-import org.uet.dse.ocl2cypher.execution.Neo4jExecutionAdapter;
 import org.uet.dse.ocl2cypher.graph.GraphBuilder;
 import org.uet.dse.ocl2cypher.graph.GraphModel;
 import org.uet.dse.ocl2cypher.qcyp.QCypTranslator;

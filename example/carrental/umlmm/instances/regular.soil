@@ -1,0 +1,119 @@
+-- Independent snapshot; load into a fresh USE state.
+-- Scenario: regular. Invariant violations may be intentional.
+!new CarGroup('group_0')
+!set group_0.kind := 'Group 0'
+!new CarGroup('group_1')
+!set group_1.kind := 'Group 1'
+!insert (group_0, group_1) into Quality
+!new Branch('branch_0')
+!set branch_0.location := 'City 0'
+!new Branch('branch_1')
+!set branch_1.location := 'City 1'
+!new Employee('person_0_0')
+!set person_0_0.firstname := 'Person 0/0'
+!set person_0_0.lastname := 'Family'
+!set person_0_0.age := 40
+!set person_0_0.isMarried := false
+!set person_0_0.salary := 1000.0
+!new EmailAddress('email_0_0')
+!set email_0_0.value := 'p0_0@example.org'
+!insert (person_0_0, email_0_0) into PersonEmail
+!insert (person_0_0, branch_0) into Employment
+!new Employee('person_0_1')
+!set person_0_1.firstname := 'Person 0/1'
+!set person_0_1.lastname := 'Family'
+!set person_0_1.age := 40
+!set person_0_1.isMarried := false
+!set person_0_1.salary := 2000.0
+!new EmailAddress('email_0_1')
+!set email_0_1.value := 'p0_1@example.org'
+!insert (person_0_1, email_0_1) into PersonEmail
+!insert (person_0_1, branch_0) into Employment
+!new Customer('person_0_2')
+!set person_0_2.firstname := 'Person 0/2'
+!set person_0_2.lastname := 'Family'
+!set person_0_2.age := 40
+!set person_0_2.isMarried := false
+!set person_0_2.address := 'Hanoi'
+!new EmailAddress('email_0_2')
+!set email_0_2.value := 'p0_2@example.org'
+!insert (person_0_2, email_0_2) into PersonEmail
+!insert (person_0_0, branch_0) into Management
+!insert (branch_0, group_0) into Offers
+!new Car('car_0_0')
+!set car_0_0.id := 'CAR-0-0'
+!insert (branch_0, car_0_0) into Fleet
+!insert (group_0, car_0_0) into Classification
+!new Car('car_0_1')
+!set car_0_1.id := 'CAR-0-1'
+!insert (branch_0, car_0_1) into Fleet
+!insert (group_0, car_0_1) into Classification
+!new Rental('rental_0')
+!set rental_0.fromDay := '2026-11-01'
+!set rental_0.untilDay := '2026-11-07'
+!insert (rental_0, person_0_2) into Booking
+!insert (rental_0, branch_0) into Provider
+!insert (rental_0, group_0) into Reservation
+!insert (rental_0, car_0_0) into Assignment
+!new ServiceDepot('depot_0')
+!set depot_0.location := 'Depot 0'
+!new Check('check_0')
+!set check_0.description := 'Inspection'
+!new MaintenanceRecord('maintenance_0')
+!insert (maintenance_0, depot_0) into MaintenanceDepot
+!insert (maintenance_0, check_0) into MaintenanceCheck
+!insert (maintenance_0, car_0_1) into MaintenanceCar
+!new Employee('person_1_0')
+!set person_1_0.firstname := 'Person 1/0'
+!set person_1_0.lastname := 'Family'
+!set person_1_0.age := 40
+!set person_1_0.isMarried := false
+!set person_1_0.salary := 1000.0
+!new EmailAddress('email_1_0')
+!set email_1_0.value := 'p1_0@example.org'
+!insert (person_1_0, email_1_0) into PersonEmail
+!insert (person_1_0, branch_1) into Employment
+!new Employee('person_1_1')
+!set person_1_1.firstname := 'Person 1/1'
+!set person_1_1.lastname := 'Family'
+!set person_1_1.age := 40
+!set person_1_1.isMarried := false
+!set person_1_1.salary := 2000.0
+!new EmailAddress('email_1_1')
+!set email_1_1.value := 'p1_1@example.org'
+!insert (person_1_1, email_1_1) into PersonEmail
+!insert (person_1_1, branch_1) into Employment
+!new Customer('person_1_2')
+!set person_1_2.firstname := 'Person 1/2'
+!set person_1_2.lastname := 'Family'
+!set person_1_2.age := 40
+!set person_1_2.isMarried := false
+!set person_1_2.address := 'Hanoi'
+!new EmailAddress('email_1_2')
+!set email_1_2.value := 'p1_2@example.org'
+!insert (person_1_2, email_1_2) into PersonEmail
+!insert (person_1_0, branch_1) into Management
+!insert (branch_1, group_1) into Offers
+!new Car('car_1_0')
+!set car_1_0.id := 'CAR-1-0'
+!insert (branch_1, car_1_0) into Fleet
+!insert (group_1, car_1_0) into Classification
+!new Car('car_1_1')
+!set car_1_1.id := 'CAR-1-1'
+!insert (branch_1, car_1_1) into Fleet
+!insert (group_1, car_1_1) into Classification
+!new Rental('rental_1')
+!set rental_1.fromDay := '2026-11-01'
+!set rental_1.untilDay := '2026-11-07'
+!insert (rental_1, person_1_2) into Booking
+!insert (rental_1, branch_1) into Provider
+!insert (rental_1, group_1) into Reservation
+!insert (rental_1, car_1_0) into Assignment
+!new ServiceDepot('depot_1')
+!set depot_1.location := 'Depot 1'
+!new Check('check_1')
+!set check_1.description := 'Inspection'
+!new MaintenanceRecord('maintenance_1')
+!insert (maintenance_1, depot_1) into MaintenanceDepot
+!insert (maintenance_1, check_1) into MaintenanceCheck
+!insert (maintenance_1, car_1_1) into MaintenanceCar

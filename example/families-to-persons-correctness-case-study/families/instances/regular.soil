@@ -1,0 +1,33 @@
+-- Independent snapshot; load into a fresh USE state.
+-- Scenario: regular. Invariant violations may be intentional.
+!new FamilyRegister('register_0')
+!new Family('family_0')
+!set family_0.name := 'Simpson'
+!insert (register_0, family_0) into FamilyRegistration
+!new FamilyMember('member_0_0')
+!set member_0_0.name := 'Homer'
+!insert (family_0, member_0_0) into Father
+!new FamilyMember('member_0_1')
+!set member_0_1.name := 'Mother 0'
+!insert (family_0, member_0_1) into Mother
+!new FamilyMember('member_0_2')
+!set member_0_2.name := 'Son 0/0'
+!insert (family_0, member_0_2) into Sons
+!new FamilyMember('member_0_3')
+!set member_0_3.name := 'Son 0/1'
+!insert (family_0, member_0_3) into Sons
+!new Family('family_1')
+!set family_1.name := 'Flanders'
+!insert (register_0, family_1) into FamilyRegistration
+!new FamilyMember('member_1_0')
+!set member_1_0.name := 'Father 1'
+!insert (family_1, member_1_0) into Father
+!new FamilyMember('member_1_1')
+!set member_1_1.name := 'Mother 1'
+!insert (family_1, member_1_1) into Mother
+!new FamilyMember('member_1_2')
+!set member_1_2.name := 'Son 1/0'
+!insert (family_1, member_1_2) into Sons
+!new FamilyMember('member_1_3')
+!set member_1_3.name := 'Son 1/1'
+!insert (family_1, member_1_3) into Sons

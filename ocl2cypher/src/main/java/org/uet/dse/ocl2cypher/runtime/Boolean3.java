@@ -49,11 +49,6 @@ public final class Boolean3 {
         };
     }
 
-    /** {@code |a|^ = T or F or B} for the tagged predicate projection. */
-    public static OclValue.BooleanValue.Bool3 bool3Of(OclValue v) {
-        return boolOf(v);
-    }
-
     public static OclValue and(OclValue a, OclValue b) {
         // F dominates, B is neutral against F but dominates T.
         if (boolOf(a) == OclValue.BooleanValue.Bool3.FALSE

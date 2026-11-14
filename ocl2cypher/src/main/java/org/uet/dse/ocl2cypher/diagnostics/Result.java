@@ -74,14 +74,6 @@ public sealed interface Result<T> permits Result.Success, Result.Failure {
         return (Result<U>) this;
     }
 
-    @SuppressWarnings("unchecked")
-    default <U> Result<U> map(java.util.function.Function<? super T, ? extends U> f) {
-        if (this instanceof Success<T> s) {
-            return Result.success(f.apply(s.value()));
-        }
-        return (Result<U>) this;
-    }
-
     record Success<T>(T value) implements Result<T> {
         public Success {
             Objects.requireNonNull(value, "a Success requires a payload");

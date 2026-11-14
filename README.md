@@ -40,6 +40,9 @@ OCL invariant -- Compile -- Translate -- Cypher 5
 - An existing Neo4j database, such as `neo4j` or `demo`.
 - A `.use` model and a matching `.soil` object snapshot.
 
+An optional `.ocl` file can supply additional `context ... inv ...` declarations.
+The plugin's file-input boundary accepts `.use`, `.soil`, and `.ocl`.
+
 OCL2Cypher does not start the DBMS or create a database. Start Neo4j first and
 prepare the connection information:
 
@@ -136,13 +139,16 @@ for example, `FamiliesValidation`.
 
 In **Input Files**:
 
+Use **OCL File (optional)** for invariants stored in a separate `.ocl` file.
+Leave it blank to use only the invariants embedded in the `.use` model.
+
 1. Select a `.use` file under **USE File**.
 2. Select its `.soil` file under **SOIL File**.
 3. Select **Load Graph into Neo4j** or **1. Load Graph**.
 
 ![Selecting USE and SOIL files](img/loadFile.png)
 
-The plugin parses both files, validates the snapshot, builds the canonical
+The plugin parses the selected input files, validates the snapshot, builds the canonical
 graph representation, and writes it to Neo4j. The invariant list and compile
 controls are enabled only after this step succeeds.
 

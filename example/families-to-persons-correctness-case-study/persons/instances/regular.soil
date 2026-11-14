@@ -1,0 +1,18 @@
+-- Independent snapshot; load into a fresh USE state.
+-- Scenario: regular. Invariant violations may be intentional.
+!new PersonRegister('register_0')
+!set register_0.label := 'partial'
+!new Male('person_0_0')
+!set person_0_0.name := 'Person 0/0'
+!insert (register_0, person_0_0) into PersonRegistration
+!new Female('person_0_1')
+!set person_0_1.name := 'Person 0/1'
+!insert (register_0, person_0_1) into PersonRegistration
+!new PersonRegister('register_1')
+!set register_1.label := 'partial'
+!new Male('person_1_0')
+!set person_1_0.name := 'Person 1/0'
+!insert (register_1, person_1_0) into PersonRegistration
+!new Female('person_1_1')
+!set person_1_1.name := 'Person 1/1'
+!insert (register_1, person_1_1) into PersonRegistration

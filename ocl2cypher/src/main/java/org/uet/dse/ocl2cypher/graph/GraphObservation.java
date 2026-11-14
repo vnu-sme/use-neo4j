@@ -1,7 +1,6 @@
 package org.uet.dse.ocl2cypher.graph;
 
 import java.util.*;
-import org.uet.dse.ocl2cypher.runtime.OclType;
 import org.uet.dse.ocl2cypher.runtime.OclValue;
 import org.uet.dse.ocl2cypher.source.model.SchemaModel;
 import org.uet.dse.ocl2cypher.source.model.UmlAttribute;
@@ -261,7 +260,7 @@ public final class GraphObservation {
             var binding = bindings.get(i);
             String stored = r.properties().get(binding.storageProperty());
             if (stored == null || !stored.equals(
-                    qualifierPayload(binding.declaredType(), values.get(i)))) {
+                    GraphValueCodec.qualifierPayload(binding.declaredType(), values.get(i)))) {
                 return false;
             }
         }
@@ -276,18 +275,8 @@ public final class GraphObservation {
         return result.value();
     }
 
-    private static String qualifierPayload(
-            org.uet.dse.ocl2cypher.runtime.OclType declared,
-            org.uet.dse.ocl2cypher.runtime.OclValue value) {
-        GraphValueCodec.EncodedValue encoded = GraphValueCodec.encode(declared, value);
-        if (!GraphValueCodec.DEFINED.equals(encoded.state())) {
-            throw new GraphValueCodec.CodecException("G_CODEC_QUALIFIER_BOTTOM",
-                    "qualifiers must be defined scalar values");
-        }
-        return encoded.payload();
-    }
-
-    private static UmlAttribute nearestAttribute(SchemaModel sm, String classKey, String name) {
+    /** Deterministic lookup shared by graph observation and representation checks. */
+    static UmlAttribute nearestAttribute(SchemaModel sm, String classKey, String name) {
         UmlAttribute attr = sm.attribute(classKey, name);
         if (attr != null) {
             return attr;

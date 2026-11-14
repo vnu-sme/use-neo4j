@@ -12,4 +12,9 @@ public final class UseSoilInput {
     public static Result<ModelInputBundle> load(Path usePath, Path soilPath) {
         return UseSoilInputAdapter.load(usePath, soilPath);
     }
+
+    /** Load additional invariants from an optional .ocl file. */
+    public static Result<ModelInputBundle> load(Path usePath, Path soilPath, Path oclPath) {
+        return UseSoilInputAdapter.load(usePath, soilPath, oclPath);
+    }
 }

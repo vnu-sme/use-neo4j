@@ -9,12 +9,6 @@ public record ValueQueryRequest(String expression,
                                 String contextVariableName,
                                 OclType expectedResultType) {
 
-    /** Backward-compatible form with no declared result-type contract. */
-    public ValueQueryRequest(String expression, String contextClassKey,
-                             String contextVariableName) {
-        this(expression, contextClassKey, contextVariableName, null);
-    }
-
     public ValueQueryRequest {
         Objects.requireNonNull(expression, "expression");
         if (expression.isBlank()) {

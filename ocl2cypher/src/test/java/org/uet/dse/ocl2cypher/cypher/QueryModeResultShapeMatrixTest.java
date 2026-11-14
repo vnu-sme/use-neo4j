@@ -1,6 +1,5 @@
 package org.uet.dse.ocl2cypher.cypher;
 
-import java.math.BigInteger;
 import org.junit.jupiter.api.Test;
 import org.uet.dse.ocl2cypher.api.FrontendCompiler;
 import org.uet.dse.ocl2cypher.api.ValueQueryRequest;

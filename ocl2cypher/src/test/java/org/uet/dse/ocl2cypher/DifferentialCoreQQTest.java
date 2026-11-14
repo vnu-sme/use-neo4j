@@ -1,6 +1,5 @@
 package org.uet.dse.ocl2cypher;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Set;
@@ -8,8 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.uet.dse.ocl2cypher.core.CoreInterpreter;
 import org.uet.dse.ocl2cypher.core.CoreInvariant;
 import org.uet.dse.ocl2cypher.core.CoreLowering;
-import org.uet.dse.ocl2cypher.core.CoreUnit;
-import org.uet.dse.ocl2cypher.diagnostics.Result;
 import org.uet.dse.ocl2cypher.graph.GraphBuilder;
 import org.uet.dse.ocl2cypher.graph.GraphModel;
 import org.uet.dse.ocl2cypher.qcyp.QCypTranslator;

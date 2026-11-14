@@ -55,14 +55,6 @@ public final class GraphModel {
     public static final String ASSOCIATION_CLASS_TARGET_PARTICIPANT =
             Uml2GraphEncodingContract.Relationship.ASSOCIATION_CLASS_TARGET_PARTICIPANT;
 
-    public static String associationClassSourceParticipant(String associationKey) {
-        return ASSOCIATION_CLASS_SOURCE_PARTICIPANT;
-    }
-
-    public static String associationClassTargetParticipant(String associationKey) {
-        return ASSOCIATION_CLASS_TARGET_PARTICIPANT;
-    }
-
     public record Node(String stableKey,
                        String modelKey,
                        Projection projection,

@@ -2,7 +2,7 @@ package org.uet.dse.ocl2cypher.input;
 
 import java.util.Objects;
 
-/** One named OCL invariant extracted from an Ecore classifier annotation. */
+/** One named OCL invariant extracted from a USE model or its OCL constraints file. */
 public record SourceInvariant(String contextClassKey, String name, String body) {
     public SourceInvariant {
         contextClassKey = requireText(contextClassKey, "context class key");

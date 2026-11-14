@@ -1,5 +1,7 @@
 package org.uet.dse.ocl2cypher.cypher;
 
+import org.uet.dse.ocl2cypher.support.CapabilityEvidence;
+
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Set;
@@ -20,7 +22,6 @@ import org.uet.dse.ocl2cypher.qcyp.QCypTranslator;
 import org.uet.dse.ocl2cypher.runtime.OclType;
 import org.uet.dse.ocl2cypher.runtime.OclValue;
 import org.uet.dse.ocl2cypher.source.omg.OclOperation;
-import org.uet.dse.ocl2cypher.source.model.CapabilityMatrix;
 import org.uet.dse.ocl2cypher.source.model.SchemaModel;
 import org.uet.dse.ocl2cypher.source.model.Snapshot;
 import org.uet.dse.ocl2cypher.source.model.UmlAssociation;
@@ -46,7 +47,7 @@ class CypherParserConformanceTest {
                 .object("alice", "Person")
                 .attribute("alice", "age", new OclValue.IntegerValue(BigInteger.valueOf(20)))
                 .build();
-        CapabilityMatrix.entries().entrySet().stream()
+        CapabilityEvidence.entries().entrySet().stream()
                 .filter(entry -> entry.getValue().admitted())
                 .sorted(java.util.Map.Entry.comparingByKey())
                 .forEach(entry -> {

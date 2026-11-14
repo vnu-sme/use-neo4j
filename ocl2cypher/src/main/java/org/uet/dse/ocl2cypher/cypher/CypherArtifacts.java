@@ -2,8 +2,6 @@ package org.uet.dse.ocl2cypher.cypher;
 
 import java.util.*;
 import org.uet.dse.ocl2cypher.cypher.CypherAst.*;
-import org.uet.dse.ocl2cypher.qcyp.QNode;
-import org.uet.dse.ocl2cypher.qcyp.QQuery;
 import org.uet.dse.ocl2cypher.runtime.OclType;
 
 /**
@@ -90,5 +88,21 @@ public final class CypherArtifacts {
                 new MapEntry(OCL_KIND, new StringLiteral(kind)),
                 new MapEntry(OCL_TYPE, typeTag),
                 new MapEntry(OCL_ITEMS, itemsList)));
+    }
+    static CypherExpr taggedObject(String alias, OclType type) {
+        return taggedScalar(type, new PropertyAccess(new VariableExpr(alias), "use_id"));
+    }
+
+    static CypherExpr isBottom(CypherExpr e) {
+        return new BinaryExpr(BinaryOp.EQUAL,
+                new PropertyAccess(e, CypherArtifacts.OCL_BOTTOM), new BooleanLiteral(true));
+    }
+
+    static CypherExpr or(CypherExpr left, CypherExpr right) {
+        return new BinaryExpr(BinaryOp.OR, left, right);
+    }
+
+    static CypherExpr payload(CypherExpr e) {
+        return new PropertyAccess(e, CypherArtifacts.OCL_VALUE);
     }
 }

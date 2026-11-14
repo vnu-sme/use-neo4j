@@ -1,0 +1,190 @@
+-- Independent snapshot; load into a fresh USE state.
+-- Scenario: larger. Invariant violations may be intentional.
+!new Branch('branch_0')
+!set branch_0.name := 'Branch 0'
+!set branch_0.location := 'Hanoi'
+!new StaffMember('member_0')
+!new Book('book_0')
+!new Loan('loan_0')
+!new Branch('branch_1')
+!set branch_1.name := 'Branch 1'
+!set branch_1.location := 'Hanoi'
+!new StaffMember('member_1')
+!set member_1.name := 'Member 1'
+!set member_1.age := 17
+!new Book('book_1')
+!set book_1.title := ''
+!new Loan('loan_1')
+!set loan_1.fee := -5
+!new Branch('branch_2')
+!set branch_2.name := 'Branch 2'
+!set branch_2.location := 'Hanoi'
+!new StaffMember('member_2')
+!set member_2.name := 'Member 2'
+!set member_2.age := 17
+!new Book('book_2')
+!set book_2.title := ''
+!new Loan('loan_2')
+!set loan_2.fee := -5
+!new Branch('branch_3')
+!set branch_3.name := 'Branch 3'
+!set branch_3.location := 'Hanoi'
+!new StaffMember('member_3')
+!new Book('book_3')
+!new Loan('loan_3')
+!new Branch('branch_4')
+!set branch_4.name := 'Branch 4'
+!set branch_4.location := 'Hanoi'
+!new StaffMember('member_4')
+!set member_4.name := 'Member 4'
+!set member_4.age := 17
+!new Book('book_4')
+!set book_4.title := ''
+!new Loan('loan_4')
+!set loan_4.fee := -5
+!new Branch('branch_5')
+!set branch_5.name := 'Branch 5'
+!set branch_5.location := 'Hanoi'
+!new StaffMember('member_5')
+!set member_5.name := 'Member 5'
+!set member_5.age := 17
+!new Book('book_5')
+!set book_5.title := ''
+!new Loan('loan_5')
+!set loan_5.fee := -5
+!new Branch('branch_6')
+!set branch_6.name := 'Branch 6'
+!set branch_6.location := 'Hanoi'
+!new StaffMember('member_6')
+!new Book('book_6')
+!new Loan('loan_6')
+!new Branch('branch_7')
+!set branch_7.name := 'Branch 7'
+!set branch_7.location := 'Hanoi'
+!new StaffMember('member_7')
+!set member_7.name := 'Member 7'
+!set member_7.age := 17
+!new Book('book_7')
+!set book_7.title := ''
+!new Loan('loan_7')
+!set loan_7.fee := -5
+!new Branch('branch_8')
+!set branch_8.name := 'Branch 8'
+!set branch_8.location := 'Hanoi'
+!new StaffMember('member_8')
+!set member_8.name := 'Member 8'
+!set member_8.age := 17
+!new Book('book_8')
+!set book_8.title := ''
+!new Loan('loan_8')
+!set loan_8.fee := -5
+!new Branch('branch_9')
+!set branch_9.name := 'Branch 9'
+!set branch_9.location := 'Hanoi'
+!new StaffMember('member_9')
+!new Book('book_9')
+!new Loan('loan_9')
+!new Branch('branch_10')
+!set branch_10.name := 'Branch 10'
+!set branch_10.location := 'Hanoi'
+!new StaffMember('member_10')
+!set member_10.name := 'Member 10'
+!set member_10.age := 17
+!new Book('book_10')
+!set book_10.title := ''
+!new Loan('loan_10')
+!set loan_10.fee := -5
+!new Branch('branch_11')
+!set branch_11.name := 'Branch 11'
+!set branch_11.location := 'Hanoi'
+!new StaffMember('member_11')
+!set member_11.name := 'Member 11'
+!set member_11.age := 17
+!new Book('book_11')
+!set book_11.title := ''
+!new Loan('loan_11')
+!set loan_11.fee := -5
+!insert (branch_0, member_0) into BranchMember
+!insert (branch_1, member_0) into BranchStaff
+!insert (member_0, branch_0) into Manages
+!insert (branch_0, book_0) into BranchBook
+!insert (loan_0, member_0) into LoanMember
+!insert (loan_0, book_1) into LoanBook
+!insert (loan_0, branch_0) into LoanBranch
+!insert (branch_1, member_1) into BranchMember
+!insert (branch_2, member_1) into BranchStaff
+!insert (member_1, branch_1) into Manages
+!insert (branch_1, book_1) into BranchBook
+!insert (loan_1, member_1) into LoanMember
+!insert (loan_1, book_2) into LoanBook
+!insert (loan_1, branch_1) into LoanBranch
+!insert (branch_2, member_2) into BranchMember
+!insert (branch_3, member_2) into BranchStaff
+!insert (member_2, branch_2) into Manages
+!insert (branch_2, book_2) into BranchBook
+!insert (loan_2, member_2) into LoanMember
+!insert (loan_2, book_3) into LoanBook
+!insert (loan_2, branch_2) into LoanBranch
+!insert (branch_3, member_3) into BranchMember
+!insert (branch_4, member_3) into BranchStaff
+!insert (member_3, branch_3) into Manages
+!insert (branch_3, book_3) into BranchBook
+!insert (loan_3, member_3) into LoanMember
+!insert (loan_3, book_4) into LoanBook
+!insert (loan_3, branch_3) into LoanBranch
+!insert (branch_4, member_4) into BranchMember
+!insert (branch_5, member_4) into BranchStaff
+!insert (member_4, branch_4) into Manages
+!insert (branch_4, book_4) into BranchBook
+!insert (loan_4, member_4) into LoanMember
+!insert (loan_4, book_5) into LoanBook
+!insert (loan_4, branch_4) into LoanBranch
+!insert (branch_5, member_5) into BranchMember
+!insert (branch_6, member_5) into BranchStaff
+!insert (member_5, branch_5) into Manages
+!insert (branch_5, book_5) into BranchBook
+!insert (loan_5, member_5) into LoanMember
+!insert (loan_5, book_6) into LoanBook
+!insert (loan_5, branch_5) into LoanBranch
+!insert (branch_6, member_6) into BranchMember
+!insert (branch_7, member_6) into BranchStaff
+!insert (member_6, branch_6) into Manages
+!insert (branch_6, book_6) into BranchBook
+!insert (loan_6, member_6) into LoanMember
+!insert (loan_6, book_7) into LoanBook
+!insert (loan_6, branch_6) into LoanBranch
+!insert (branch_7, member_7) into BranchMember
+!insert (branch_8, member_7) into BranchStaff
+!insert (member_7, branch_7) into Manages
+!insert (branch_7, book_7) into BranchBook
+!insert (loan_7, member_7) into LoanMember
+!insert (loan_7, book_8) into LoanBook
+!insert (loan_7, branch_7) into LoanBranch
+!insert (branch_8, member_8) into BranchMember
+!insert (branch_9, member_8) into BranchStaff
+!insert (member_8, branch_8) into Manages
+!insert (branch_8, book_8) into BranchBook
+!insert (loan_8, member_8) into LoanMember
+!insert (loan_8, book_9) into LoanBook
+!insert (loan_8, branch_8) into LoanBranch
+!insert (branch_9, member_9) into BranchMember
+!insert (branch_10, member_9) into BranchStaff
+!insert (member_9, branch_9) into Manages
+!insert (branch_9, book_9) into BranchBook
+!insert (loan_9, member_9) into LoanMember
+!insert (loan_9, book_10) into LoanBook
+!insert (loan_9, branch_9) into LoanBranch
+!insert (branch_10, member_10) into BranchMember
+!insert (branch_11, member_10) into BranchStaff
+!insert (member_10, branch_10) into Manages
+!insert (branch_10, book_10) into BranchBook
+!insert (loan_10, member_10) into LoanMember
+!insert (loan_10, book_11) into LoanBook
+!insert (loan_10, branch_10) into LoanBranch
+!insert (branch_0, member_11) into BranchMember
+!insert (branch_0, member_11) into BranchStaff
+!insert (member_11, branch_11) into Manages
+!insert (branch_11, book_11) into BranchBook
+!insert (loan_11, member_11) into LoanMember
+!insert (loan_11, book_0) into LoanBook
+!insert (loan_11, branch_11) into LoanBranch

@@ -98,7 +98,7 @@ public class NumericCapabilityGateCheck {
                             (long) x * y;
                     };
                     if (!cert.lower().equals(BigInteger.valueOf(expected))
-                            || !cert.upper().equals(cert.lower()) || cert.children().size() != 2) {
+                            || !cert.upper().equals(cert.lower())) {
                         throw new AssertionError("Invalid derived certificate");
                     }
                     rangeCases++;
